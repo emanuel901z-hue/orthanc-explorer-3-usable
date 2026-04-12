@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProviders } from "@/app/providers/AppProviders";
+import { HealthBanner } from "@/components/HealthBanner";
 import { AppLayout } from "@/app/layout/AppLayout";
 import StudyListPage from "@/features/studies/pages/StudyListPage";
 import StudyDetailPage from "@/features/studies/pages/StudyDetailPage";
@@ -14,6 +15,7 @@ import NotFound from "./pages/NotFound";
 
 const App = () => (
   <AppProviders>
+    <HealthBanner />
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<AppLayout />}>
