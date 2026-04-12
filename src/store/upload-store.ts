@@ -1,49 +1,83 @@
 // PHI classification: SESSION (may hold PHI — memory-only)
 // File names passed to addFiles() may contain patient-identifying information.
 import { create } from 'zustand';
+import { instancesApi } from '@/api/instances';
+import { auditClient } from '@/lib/audit';
+import { OrthancError } from '@/lib/errors';
 import { useJobStore } from './job-store';
+
+// Module-level registry: File objects cannot be JSON-serialized,
+// so we keep them outside Zustand persist scope.
+const fileRegistry = new Map<string, File>();
+
+/** Exposed for tests only — clears the file registry between test runs. */
+export function __resetFileRegistryForTests(): void {
+  fileRegistry.clear();
+}
+
+async function runUpload(jobId: string, file: File): Promise<void> {
+  const jobStore = useJobStore.getState();
+  jobStore.updateJob(jobId, { status: 'running', progress: 0 });
+
+  const base = {
+    action: 'instance.upload',
+    resourceType: 'instance' as const,
+    resourceId: jobId,
+    timestamp: new Date().toISOString(),
+  };
+
+  try {
+    await instancesApi.upload(file);
+    auditClient.emit({ ...base, outcome: 'success' });
+    fileRegistry.delete(jobId);
+    jobStore.updateJob(jobId, { status: 'complete', progress: 100, completedItems: 1 });
+  } catch (e) {
+    auditClient.emit({
+      ...base,
+      outcome: 'failure',
+      errorCode: e instanceof OrthancError ? e.status : undefined,
+    });
+    jobStore.updateJob(jobId, {
+      status: 'error',
+      error: e instanceof OrthancError ? e.message : 'Upload failed',
+    });
+    // Keep file in registry so retryUpload() can re-use it.
+  }
+}
 
 interface UploadState {
   addFiles: (files: File[]) => void;
+  retryUpload: (id: string) => void;
 }
 
 export const useUploadStore = create<UploadState>(() => ({
   addFiles: (files) => {
     const jobStore = useJobStore.getState();
-
-    files.forEach((f, i) => {
-      const jobId = `upload-${Date.now()}-${i}`;
+    files.forEach((file) => {
+      const jobId = `upload-${crypto.randomUUID()}`;
+      fileRegistry.set(jobId, file);
       jobStore.addJob({
         id: jobId,
         type: 'upload',
-        label: f.name,
-        description: formatSize(f.size),
+        label: file.name,
+        description: formatSize(file.size),
         progress: 0,
         status: 'pending',
-        totalItems: f.size,
+        totalItems: 1,
         completedItems: 0,
       });
-
-      // Simulate upload with delay
-      setTimeout(() => {
-        jobStore.updateJob(jobId, { status: 'running' });
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += Math.random() * 15 + 5;
-          if (progress >= 100) {
-            clearInterval(interval);
-            const success = Math.random() > 0.1;
-            jobStore.updateJob(jobId, {
-              progress: 100,
-              status: success ? 'complete' : 'error',
-              error: success ? undefined : 'Upload failed — connection timeout',
-            });
-          } else {
-            jobStore.updateJob(jobId, { progress });
-          }
-        }, 300 + Math.random() * 200);
-      }, 200 * (Math.random() + 0.5));
+      void runUpload(jobId, file);
     });
+  },
+
+  retryUpload: (id) => {
+    const file = fileRegistry.get(id);
+    if (!file) return;
+    const jobStore = useJobStore.getState();
+    const job = jobStore.jobs.find((j) => j.id === id);
+    if (!job || job.status === 'running' || job.status === 'pending') return;
+    jobStore.updateJob(id, { status: 'pending', progress: 0, error: undefined });
+    void runUpload(id, file);
   },
 }));
 
