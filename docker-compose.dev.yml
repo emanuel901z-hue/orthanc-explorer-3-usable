@@ -1,0 +1,38 @@
+services:
+  orthanc:
+    image: orthancteam/orthanc:latest-full
+    ports:
+      - "8042:8042"
+      - "4242:4242"
+    environment:
+      ORTHANC__NAME: "OE3 Dev"
+      ORTHANC__REMOTE_ACCESS_ALLOWED: "true"
+      ORTHANC__AUTHENTICATION_ENABLED: "false"
+      ORTHANC__DICOM_WEB__ENABLE: "true"
+      ORTHANC__DICOM_MODALITIES_IN_DATABASE: "true"
+      ORTHANC__ORTHANC_PEERS_IN_DATABASE: "true"
+      ORTHANC__HTTP_HEADERS: |
+        {"Access-Control-Allow-Origin": "*",
+         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+         "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Request-Id"}
+    volumes:
+      - orthanc-data:/var/lib/orthanc/db
+
+  oauth-plugin:
+    image: rhavekost/orthanc-dicomweb-oauth:latest
+    environment:
+      DICOMWEB_TARGET_URL: "http://azure-emulator:8080/v2"
+      OAUTH_TOKEN_ENDPOINT: "http://azure-emulator:8080/oauth/token"
+      OAUTH_MODE: "dev"
+    depends_on:
+      - azure-emulator
+
+  azure-emulator:
+    image: rhavekost/azure-dicom-service-emulator:latest
+    ports:
+      - "8080:8080"
+    environment:
+      EMULATOR_AUTH_REQUIRED: "false"
+
+volumes:
+  orthanc-data:
