@@ -29,4 +29,10 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ['react', 'react-dom'],
   },
+  // Cornerstone3D's dicom-image-loader uses Web Workers internally.
+  // Excluding it from pre-bundling prevents Vite from inlining the worker,
+  // which would break DICOM frame decoding in dev mode.
+  optimizeDeps: {
+    exclude: ['@cornerstonejs/dicom-image-loader'],
+  },
 }));
