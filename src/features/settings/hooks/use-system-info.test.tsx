@@ -2,7 +2,7 @@ import React from "react";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { useSystemInfo, useStats, usePlugins } from "./useSystemInfo";
+import { useSystemInfo, useStats, usePlugins } from "./use-system-info";
 import { systemApi } from "@/api/system";
 import { loadConfig, __resetConfigForTests } from "@/config/runtime";
 
