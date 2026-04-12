@@ -18,6 +18,7 @@ export type AuditEvent = {
   timestamp: string;
   errorCode?: number;
   reason?: string;
+  destinationId?: string;
 };
 
 export const auditClient = {

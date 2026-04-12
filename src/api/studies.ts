@@ -89,7 +89,7 @@ export const studiesApi = {
   sendToModality: (studyId: string, modalityId: string) =>
     orthancFetch<void>(`/modalities/${encodeURIComponent(modalityId)}/store`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
       body: JSON.stringify({ Resources: [studyId] }),
     }),
 };

@@ -21,11 +21,12 @@ export async function sendStudyAction(
   const base = makeAuditBase('study.send', 'study', studyId);
   try {
     await studiesApi.sendToModality(studyId, modalityId);
-    auditClient.emit({ ...base, outcome: 'success' });
+    auditClient.emit({ ...base, outcome: 'success', destinationId: modalityId });
   } catch (e) {
     auditClient.emit({
       ...base,
       outcome: 'failure',
+      destinationId: modalityId,
       errorCode: e instanceof OrthancError ? e.status : undefined,
     });
     throw e;

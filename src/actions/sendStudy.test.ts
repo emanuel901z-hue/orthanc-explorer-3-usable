@@ -34,6 +34,7 @@ describe('sendStudyAction', () => {
       resourceId: 'study-abc',
       outcome: 'success',
       timestamp: '2026-01-01T00:00:00.000Z',
+      destinationId: 'PACS_PRIMARY',
     });
   });
 
@@ -43,7 +44,7 @@ describe('sendStudyAction', () => {
 
     await expect(sendStudyAction('study-abc', 'PACS_PRIMARY')).rejects.toBe(err);
     expect(auditClient.emit).toHaveBeenCalledWith(
-      expect.objectContaining({ outcome: 'failure', errorCode: 503 }),
+      expect.objectContaining({ outcome: 'failure', errorCode: 503, destinationId: 'PACS_PRIMARY' }),
     );
   });
 });
