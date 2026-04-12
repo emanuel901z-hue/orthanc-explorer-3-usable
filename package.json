@@ -10,9 +10,15 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:smoke": "bash scripts/smoke.sh",
+    "test:smoke:tests-only": "npx playwright test --config playwright.smoke.config.ts",
+    "playwright:install": "npx playwright install --with-deps chromium"
   },
   "dependencies": {
+    "@cornerstonejs/core": "^4.21.2",
+    "@cornerstonejs/dicom-image-loader": "^4.21.2",
+    "@cornerstonejs/tools": "^4.21.2",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -48,6 +54,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
+    "dicom-parser": "^1.8.21",
     "embla-carousel-react": "^8.6.0",
     "i18next": "^26.0.4",
     "i18next-browser-languagedetector": "^8.2.1",
@@ -71,6 +78,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.0.0",
