@@ -28,11 +28,7 @@ export function loadConfig(): OE3Config {
 }
 
 export function getConfig(): OE3Config {
-  const hasWindowConfig =
-    typeof window !== "undefined" &&
-    (window as unknown as { __OE3_CONFIG__?: unknown }).__OE3_CONFIG__ !== undefined;
-  if (!cached || !hasWindowConfig) {
-    cached = null;
+  if (!cached) {
     throw new Error("Config not loaded. Call loadConfig() at app boot.");
   }
   return cached;

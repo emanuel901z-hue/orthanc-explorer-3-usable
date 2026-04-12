@@ -1,10 +1,15 @@
 // src/config/runtime.test.ts
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { loadConfig, getConfig, OE3ConfigSchema } from "./runtime";
+import { loadConfig, getConfig, OE3ConfigSchema, __resetConfigForTests } from "./runtime";
 
 describe("runtime config", () => {
+  beforeEach(() => {
+    __resetConfigForTests();
+  });
+
   afterEach(() => {
     delete (window as any).__OE3_CONFIG__;
+    __resetConfigForTests();
   });
 
   it("parses a valid standalone config", () => {
