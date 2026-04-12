@@ -1,19 +1,19 @@
 import { IStudyRepository } from './interfaces/study-repository.interface';
 import { DemoStudyRepository } from './mock/demo-study-repository';
+import { OrthancStudyRepository } from './orthanc-study-repository';
 
 // Singleton instances
 let studyRepo: IStudyRepository | null = null;
 
 export class RepositoryFactory {
-  private static useDemoData = true;
+  private static useDemoData = false;
 
   static createStudyRepository(): IStudyRepository {
     if (!studyRepo) {
       if (this.useDemoData) {
         studyRepo = new DemoStudyRepository();
       } else {
-        // Future: return new OrthancStudyRepository(orthancClient);
-        studyRepo = new DemoStudyRepository();
+        studyRepo = new OrthancStudyRepository();
       }
     }
     return studyRepo;
