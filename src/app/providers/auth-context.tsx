@@ -79,6 +79,25 @@ function resolvePermissions(roles: UserRole[]): Set<Permission> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const cfg = getConfig();
+  // authMode 'none' | 'basic' use the demo user path; 'oidc' | 'smart' are Phase 2
+  const user = DEMO_USER;
+
+  // All hooks must be called unconditionally (Rules of Hooks); unsupported-mode
+  // guard is placed after hooks so the component function always calls the same
+  // hooks on every render, regardless of authMode.
+  const value = useMemo<AuthContextValue>(() => {
+    const permissions = resolvePermissions(user.roles);
+    return {
+      user,
+      isAuthenticated: true,
+      permissions,
+      hasPermission: (p: Permission) => permissions.has(p),
+      hasRole: (r: UserRole) => user.roles.includes(r),
+      signOut: () => {
+        // TODO: Implement real sign-out (Phase 2 — tracks with authMode guard below)
+      },
+    };
+  }, [user]);
 
   if (cfg.authMode === 'oidc') {
     throw new Error(
@@ -93,22 +112,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       'Set authMode to "none" in public/config.js for local development.'
     );
   }
-
-  const user = DEMO_USER;
-
-  const value = useMemo<AuthContextValue>(() => {
-    const permissions = resolvePermissions(user.roles);
-    return {
-      user,
-      isAuthenticated: true,
-      permissions,
-      hasPermission: (p: Permission) => permissions.has(p),
-      hasRole: (r: UserRole) => user.roles.includes(r),
-      signOut: () => {
-        // TODO: Implement real sign-out
-      },
-    };
-  }, []);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

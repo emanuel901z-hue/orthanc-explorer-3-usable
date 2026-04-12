@@ -34,4 +34,12 @@ describe('AuthProvider', () => {
     vi.mocked(getConfig).mockReturnValue({ authMode: 'smart' } as ReturnType<typeof getConfig>);
     expect(() => render(<AuthProvider><div /></AuthProvider>)).toThrow(/SMART-on-FHIR/);
   });
+
+  it('provides demo user when authMode is basic', () => {
+    vi.mocked(getConfig).mockReturnValue({ authMode: 'basic' } as ReturnType<typeof getConfig>);
+    render(<AuthProvider><DisplayAuth /></AuthProvider>);
+    const el = screen.getByTestId('auth');
+    expect(el.textContent).toBeTruthy();
+    expect(el.textContent).not.toBe('unauthenticated');
+  });
 });
