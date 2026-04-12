@@ -24,8 +24,10 @@ import DicomTagBrowser from '@/features/studies/components/DicomTagBrowser';
 import StudyActivityLog from '@/features/studies/components/StudyActivityLog';
 import { ModifyStudyDialog } from '@/features/studies/components/ModifyStudyDialog';
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
+import { toast } from 'sonner';
 import { deleteStudyAction } from '@/actions/deleteStudy';
 import { downloadStudyAction } from '@/actions/downloadStudy';
+import { OrthancError } from '@/lib/errors';
 import type { Study as OrthancStudy } from '@/api/studies';
 
 function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
@@ -71,11 +73,19 @@ export default function StudyDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['studies'] });
       navigate('/studies');
     },
+    onError: (err) => {
+      const ref = err instanceof OrthancError ? ` (Ref: ${err.correlationId})` : '';
+      toast.error(`Failed to delete study.${ref}`);
+    },
   });
 
   const downloadMutation = useMutation({
     mutationFn: (id: string) =>
       downloadStudyAction(id, study ? `${formatPatientName(study.patientName)}.zip` : `${id}.zip`),
+    onError: (err) => {
+      const ref = err instanceof OrthancError ? ` (Ref: ${err.correlationId})` : '';
+      toast.error(`Download failed.${ref}`);
+    },
   });
 
   // Update tab label with patient name when loaded
