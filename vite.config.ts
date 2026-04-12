@@ -29,10 +29,27 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ['react', 'react-dom'],
   },
-  // Cornerstone3D's dicom-image-loader uses Web Workers internally.
-  // Excluding it from pre-bundling prevents Vite from inlining the worker,
-  // which would break DICOM frame decoding in dev mode.
   optimizeDeps: {
+    // Exclude the image loader from esbuild pre-bundling. It uses
+    //   new URL('./decodeImageFrameWorker.js', import.meta.url)
+    // which must resolve relative to the original node_modules location.
+    // Pre-bundling would move it to .vite/deps/ where the worker file doesn't exist.
     exclude: ['@cornerstonejs/dicom-image-loader'],
+    // Explicitly include the UMD codec packages so esbuild pre-bundles them
+    // and creates proper ESM default exports. The worker (served from node_modules)
+    // imports these subpaths; Vite redirects to the pre-bundled versions.
+    include: [
+      'dicom-parser',
+      '@cornerstonejs/codec-charls/decodewasmjs',
+      '@cornerstonejs/codec-libjpeg-turbo-8bit/decodewasmjs',
+      '@cornerstonejs/codec-openjpeg/decodewasmjs',
+      '@cornerstonejs/codec-openjph/wasmjs',
+    ],
+  },
+  // Cornerstone3D codec libs ship as IIFE/UMD files. Vite's default worker format
+  // is 'iife', but IIFE + code-splitting = Rollup error. Switching workers to
+  // 'es' format lets Rollup handle the dynamic imports inside the worker correctly.
+  worker: {
+    format: 'es',
   },
 }));

@@ -10,10 +10,10 @@ vi.mock('@cornerstonejs/tools', () => ({
   PanTool: class { static toolName = 'Pan'; },
   ZoomTool: class { static toolName = 'Zoom'; },
   WindowLevelTool: class { static toolName = 'WindowLevel'; },
-  StackScrollMouseWheelTool: class { static toolName = 'StackScrollMouseWheel'; },
+  StackScrollTool: class { static toolName = 'StackScrollMouseWheel'; },
 }));
 vi.mock('@cornerstonejs/dicom-image-loader', () => ({
-  default: { init: vi.fn(), configure: vi.fn() },
+  default: { init: vi.fn() },
 }));
 
 import { initCornerstone, isCornerstoneReady } from './cornerstone';
@@ -68,7 +68,7 @@ describe('initCornerstone — isolated scenarios', () => {
       PanTool: class { static toolName = 'Pan'; },
       ZoomTool: class { static toolName = 'Zoom'; },
       WindowLevelTool: class { static toolName = 'WindowLevel'; },
-      StackScrollMouseWheelTool: class { static toolName = 'StackScrollMouseWheel'; },
+      StackScrollTool: class { static toolName = 'StackScrollMouseWheel'; },
     }));
     vi.mock('@cornerstonejs/dicom-image-loader', () => ({
       default: { init: vi.fn(), configure: vi.fn() },

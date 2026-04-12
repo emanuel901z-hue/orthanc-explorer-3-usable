@@ -4,7 +4,7 @@ import {
   PanTool,
   ZoomTool,
   WindowLevelTool,
-  StackScrollMouseWheelTool,
+  StackScrollTool,
   Enums as ToolEnums,
 } from '@cornerstonejs/tools';
 import { initCornerstone } from '@/lib/cornerstone';
@@ -64,7 +64,7 @@ export function CornerstoneMultiViewport({
         tg.addTool(PanTool.toolName);
         tg.addTool(ZoomTool.toolName);
         tg.addTool(WindowLevelTool.toolName);
-        tg.addTool(StackScrollMouseWheelTool.toolName);
+        tg.addTool(StackScrollTool.toolName);
 
         // Default: left-click = W/L, middle = pan, right = zoom, wheel = scroll slices
         tg.setToolActive(WindowLevelTool.toolName, {
@@ -76,7 +76,9 @@ export function CornerstoneMultiViewport({
         tg.setToolActive(ZoomTool.toolName, {
           bindings: [{ mouseButton: MouseBindings.Secondary }],
         });
-        tg.setToolActive(StackScrollMouseWheelTool.toolName, { bindings: [] });
+        tg.setToolActive(StackScrollTool.toolName, {
+          bindings: [{ mouseButton: MouseBindings.Wheel }],
+        });
       }
 
       if (mounted) setToolGroupReady(true);

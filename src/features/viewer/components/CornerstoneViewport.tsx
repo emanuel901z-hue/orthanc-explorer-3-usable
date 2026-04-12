@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RenderingEngine, Enums, type Types } from '@cornerstonejs/core';
 import { ToolGroupManager } from '@cornerstonejs/tools';
+import cornerstoneDICOMImageLoader from '@cornerstonejs/dicom-image-loader';
 import { initCornerstone } from '@/lib/cornerstone';
 import { buildWadorsImageId } from '@/lib/cornerstoneImageIds';
 import { useSeriesInstances } from '@/features/studies/hooks/use-studies';
 import { Loader2 } from 'lucide-react';
 
-const { ViewportType } = Enums;
+const { ViewportType, Events } = Enums;
 
 export interface SeriesInfo {
   orthancSeriesId: string;
@@ -41,6 +42,7 @@ export function CornerstoneViewport({
   const viewportIdRef = useRef<string>(`vp-${crypto.randomUUID()}`);
   const [engineReady, setEngineReady] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [currentSlice, setCurrentSlice] = useState(0);
 
   // Empty string disables the query — useSeriesInstances must guard against ''
   const { data: instances, isLoading: instancesLoading } = useSeriesInstances(
@@ -81,6 +83,10 @@ export function CornerstoneViewport({
           element: divRef.current,
         };
         engine.enableElement(viewportInput);
+        // Resize so the WebGL canvas matches the element's CSS dimensions.
+        // Without this, the canvas may be 0×0 if the grid layout wasn't
+        // fully computed before enableElement ran.
+        engine.resize(true, false);
 
         const tg = ToolGroupManager.getToolGroup(toolGroupId);
         tg?.addViewport(viewportId, engineId);
@@ -91,8 +97,25 @@ export function CornerstoneViewport({
         if (mounted) setRenderError(err instanceof Error ? err.message : 'Cornerstone init failed');
       });
 
+    // STACK_NEW_IMAGE fires on the viewport element — update slice counter.
+    // Must be added directly to the element, not the global eventTarget.
+    const el = divRef.current;
+    const onNewImage = (evt: Event) => {
+      const idx = (evt as CustomEvent).detail?.imageIdIndex;
+      if (typeof idx === 'number') setCurrentSlice(idx);
+    };
+    el?.addEventListener(Events.STACK_NEW_IMAGE, onNewImage);
+
+    // Keep the WebGL canvas in sync whenever the container is resized.
+    const resizeObserver = new ResizeObserver(() => {
+      engineRef.current?.resize(true, false);
+    });
+    if (el) resizeObserver.observe(el);
+
     return () => {
       mounted = false;
+      el?.removeEventListener(Events.STACK_NEW_IMAGE, onNewImage);
+      resizeObserver.disconnect();
       const engine = engineRef.current;
       if (engine) {
         const tg = ToolGroupManager.getToolGroup(toolGroupId);
@@ -105,9 +128,11 @@ export function CornerstoneViewport({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toolGroupId]);
 
-  // Load/update stack whenever imageIds change
+  // Load/update stack whenever imageIds change.
+  // WADO-RS requires series metadata to be registered in metaDataManager
+  // before setStack is called — otherwise imagePixelModule returns undefined.
   useEffect(() => {
-    if (!engineReady || !engineRef.current || imageIds.length === 0) return;
+    if (!engineReady || !engineRef.current || imageIds.length === 0 || !seriesInfo) return;
 
     const vp = engineRef.current.getViewport(viewportIdRef.current);
     if (!vp || vp.type !== ViewportType.STACK) {
@@ -115,13 +140,53 @@ export function CornerstoneViewport({
       return;
     }
 
-    (vp as Types.IStackViewport)
-      .setStack(imageIds, 0)
-      .then(() => (vp as Types.IStackViewport).render())
+    const { studyInstanceUID, seriesInstanceUID } = seriesInfo;
+    const metadataUrl =
+      `/orthanc-proxy/dicom-web/studies/${studyInstanceUID}` +
+      `/series/${seriesInstanceUID}/metadata`;
+
+    fetch(metadataUrl, { headers: { Accept: 'application/dicom+json' } })
+      .then((r) => {
+        if (!r.ok) throw new Error(`Metadata fetch failed: ${r.status}`);
+        return r.json() as Promise<Record<string, { vr: string; Value?: unknown[] }>[]>;
+      })
+      .then((instanceMetaList) => {
+        // Register each instance's metadata so the WADO-RS loader can
+        // resolve imagePixelModule, voiLutModule, etc. before decoding.
+        instanceMetaList.forEach((meta) => {
+          const sopUIDEntry = meta['00080018'];
+          const sopUID = Array.isArray(sopUIDEntry?.Value) ? (sopUIDEntry.Value[0] as string) : null;
+          if (!sopUID) return;
+          const imageId = buildWadorsImageId({
+            studyUID: studyInstanceUID,
+            seriesUID: seriesInstanceUID,
+            instanceUID: sopUID,
+          });
+          cornerstoneDICOMImageLoader.wadors.metaDataManager.add(imageId, meta);
+        });
+      })
+      .then(() =>
+        (vp as Types.IStackViewport).setStack(imageIds, 0)
+      )
+      .then(() => {
+        vp.resetCamera();
+        (vp as Types.IStackViewport).render();
+      })
       .catch((err) => setRenderError(err instanceof Error ? err.message : 'Stack load failed'));
-  }, [imageIds, engineReady]);
+  }, [imageIds, engineReady, seriesInfo]);
 
   const isLoading = !renderError && (instancesLoading || (seriesInfo !== null && !engineReady));
+  const totalSlices = imageIds.length;
+
+  const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const idx = Number(e.target.value);
+    setCurrentSlice(idx);
+    if (!engineRef.current) return;
+    const vp = engineRef.current.getViewport(viewportIdRef.current);
+    if (vp && vp.type === ViewportType.STACK) {
+      (vp as Types.IStackViewport).setImageIdIndex(idx);
+    }
+  }, []);
 
   return (
     <div
@@ -153,6 +218,24 @@ export function CornerstoneViewport({
       {renderError && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-red-400 text-xs p-4 text-center">
           {renderError}
+        </div>
+      )}
+
+      {/* Slice slider — only shown when a series is loaded */}
+      {totalSlices > 1 && !renderError && (
+        <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-3 py-1 bg-black/50">
+          <span className="text-white/60 text-xs tabular-nums w-16 shrink-0">
+            {currentSlice + 1} / {totalSlices}
+          </span>
+          <input
+            type="range"
+            aria-label="Slice"
+            min={0}
+            max={totalSlices - 1}
+            value={currentSlice}
+            onChange={handleSliderChange}
+            className="flex-1 h-1 accent-blue-400 cursor-pointer"
+          />
         </div>
       )}
     </div>

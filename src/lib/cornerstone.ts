@@ -5,7 +5,7 @@ import {
   PanTool,
   ZoomTool,
   WindowLevelTool,
-  StackScrollMouseWheelTool,
+  StackScrollTool,
 } from '@cornerstonejs/tools';
 import cornerstoneDICOMImageLoader from '@cornerstonejs/dicom-image-loader';
 
@@ -28,13 +28,15 @@ export async function initCornerstone(): Promise<void> {
     await csInit();
     await csToolsInit();
 
+    // init() registers the wado-rs / wado-uri loaders and spins up
+    // the decode web worker (via new URL('./decodeImageFrameWorker.js', import.meta.url)).
+    // Vite bundles the worker as ES format (worker.format: 'es' in vite.config.ts).
     cornerstoneDICOMImageLoader.init();
-    cornerstoneDICOMImageLoader.configure({ useWebWorkers: true });
 
     addTool(PanTool);
     addTool(ZoomTool);
     addTool(WindowLevelTool);
-    addTool(StackScrollMouseWheelTool);
+    addTool(StackScrollTool);
 
     _ready = true;
   })().catch((err) => {
