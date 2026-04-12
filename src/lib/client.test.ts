@@ -65,6 +65,19 @@ describe("orthancFetch", () => {
     expect(healthTracker.getState().consecutiveFailures).toBeGreaterThan(0);
   });
 
+  it("returns Blob when responseType is blob", async () => {
+    const blobData = new Blob(["PNG"], { type: "image/png" });
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(blobData, { status: 200, headers: { "Content-Type": "image/png" } }),
+    );
+    const result = await orthancFetch<Blob>("/instances/x/preview", {
+      headers: { Accept: "image/png" },
+      responseType: "blob",
+    });
+    expect(result).toMatchObject({ type: "image/png" });
+    expect(typeof (result as Blob).arrayBuffer).toBe("function");
+  });
+
   it("uses empty base for same-origin plugin mode", async () => {
     (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none", features: {} };
     loadConfig();

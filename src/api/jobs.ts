@@ -9,6 +9,8 @@
 // src/api/jobs.ts
 import { orthancFetch } from "@/lib/client";
 
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
 export type Job = {
   ID: string;
   Type: string;
@@ -27,7 +29,7 @@ export const jobsApi = {
   cancel: (id: string) =>
     orthancFetch<Record<string, unknown>>(`/jobs/${id}/cancel`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: JSON_HEADERS,
       body: JSON.stringify({}),
     }),
 };

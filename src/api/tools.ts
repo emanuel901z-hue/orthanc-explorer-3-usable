@@ -7,6 +7,8 @@
 // src/api/tools.ts
 import { orthancFetch } from "@/lib/client";
 
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
 export type LookupResult = {
   ID: string;
   Path: string;
@@ -17,7 +19,7 @@ export const toolsApi = {
   lookup: (body: string | Record<string, unknown>) =>
     orthancFetch<LookupResult>("/tools/lookup", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: JSON_HEADERS,
       body: JSON.stringify(body),
     }),
 };

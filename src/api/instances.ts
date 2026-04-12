@@ -26,6 +26,7 @@ export const instancesApi = {
   getPreview: (id: string) =>
     orthancFetch<Blob>(`/instances/${id}/preview`, {
       headers: { Accept: "image/png" },
+      responseType: "blob",
     }),
 
   delete: (id: string) =>

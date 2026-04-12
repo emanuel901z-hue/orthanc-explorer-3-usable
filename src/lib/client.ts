@@ -7,7 +7,7 @@
  * - Stubs auth header injection per authMode (basic/oidc/smart filled in future phases)
  * - Tracks connection health via healthTracker on every response (success and failure)
  * - Throws OrthancError (PHI-safe) for non-2xx responses
- * - Returns undefined for 204 No Content; parses JSON for all other 2xx responses
+ * - Returns Blob when responseType "blob" is specified; parses JSON otherwise
  * - Network/unexpected errors call healthTracker.recordFailure() before re-throwing
  */
 
@@ -35,7 +35,7 @@ async function attachAuthHeaders(headers: Headers, cfg: OE3Config): Promise<void
 
 export async function orthancFetch<T>(
   path: string,
-  init: RequestInit = {},
+  init: RequestInit & { responseType?: "blob" } = {},
 ): Promise<T> {
   const cfg = getConfig();
   const correlationId = newCorrelationId();
@@ -57,8 +57,7 @@ export async function orthancFetch<T>(
       throw err;
     }
     if (res.status === 204) return undefined as T;
-    // Non-JSON 2xx bodies will throw a SyntaxError here; callers using binary
-    // endpoints (e.g., /archive) must override Accept and handle the raw Response.
+    if (init.responseType === "blob") return (await res.blob()) as T;
     return (await res.json()) as T;
   } catch (e) {
     if (!(e instanceof OrthancError)) {
