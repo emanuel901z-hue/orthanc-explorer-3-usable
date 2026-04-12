@@ -1,6 +1,7 @@
 import { IStudyRepository } from '../interfaces/study-repository.interface';
 import { Study, StudyFilters, Series, Instance, DicomModifications, AnonymizationConfig } from '@/shared/types';
 import { generateDemoStudies, generateDemoSeries, generateDemoInstances } from './demo-data-generator';
+import { logger } from '@/lib/logger';
 
 export class DemoStudyRepository implements IStudyRepository {
   private studies: Study[] = generateDemoStudies(120);
@@ -92,21 +93,27 @@ export class DemoStudyRepository implements IStudyRepository {
     return anon;
   }
 
-  async sendToModality(id: string, modalityId: string): Promise<void> {
-    console.log(`[Demo] Sending study ${id} to modality ${modalityId}`);
+  async sendToModality(id: string, _modalityId: string): Promise<void> {
+    logger.info('demo.sendToModality', { resourceId: id });
   }
 
   async addLabel(id: string, label: string): Promise<void> {
-    const study = this.studies.find(s => s.id === id);
-    if (study && !study.labels?.includes(label)) {
-      study.labels = [...(study.labels || []), label];
+    const index = this.studies.findIndex(s => s.id === id);
+    if (index !== -1 && !this.studies[index].labels?.includes(label)) {
+      this.studies[index] = {
+        ...this.studies[index],
+        labels: [...(this.studies[index].labels ?? []), label],
+      };
     }
   }
 
   async removeLabel(id: string, label: string): Promise<void> {
-    const study = this.studies.find(s => s.id === id);
-    if (study) {
-      study.labels = study.labels?.filter(l => l !== label);
+    const index = this.studies.findIndex(s => s.id === id);
+    if (index !== -1) {
+      this.studies[index] = {
+        ...this.studies[index],
+        labels: this.studies[index].labels?.filter(l => l !== label),
+      };
     }
   }
 }
