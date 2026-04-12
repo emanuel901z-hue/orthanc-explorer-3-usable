@@ -50,3 +50,12 @@ export function useInstance(instanceId: string) {
     enabled: !!instanceId,
   });
 }
+
+export function useInstancePreview(instanceId: string) {
+  return useQuery({
+    queryKey: ['instance-preview', instanceId],
+    queryFn: () => import('@/api/instances').then(({ instancesApi }) => instancesApi.getPreview(instanceId)),
+    enabled: !!instanceId,
+    staleTime: 5 * 60 * 1000,
+  });
+}

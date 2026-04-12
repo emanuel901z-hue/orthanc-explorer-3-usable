@@ -10,6 +10,7 @@ import {
   StudyFilters,
   Series,
   Instance,
+  DicomTag,
   DicomModifications,
   AnonymizationConfig,
 } from '@/shared/types';
@@ -84,16 +85,30 @@ function mapOrthancSeries(s: SeriesDetail): Series {
   };
 }
 
-function mapOrthancInstance(inst: OrthancInstance): Instance {
-  const tags = inst.MainDicomTags ?? {};
+type OrthancTagEntry = { Name?: string; Type?: string; Value?: string | null };
+
+function mapDicomTags(raw: Record<string, unknown>): DicomTag[] {
+  return Object.entries(raw).map(([tag, v]) => {
+    const entry = v as OrthancTagEntry;
+    return {
+      tag,
+      name: entry.Name ?? tag,
+      vr: entry.Type ?? '',
+      value: entry.Value ?? '',
+    };
+  });
+}
+
+function mapOrthancInstance(inst: OrthancInstance, rawTags?: Record<string, unknown>): Instance {
+  const dicomTags = inst.MainDicomTags ?? {};
   return {
     id: inst.ID,
     seriesId: inst.ParentSeries,
-    sopInstanceUID: tags['SOPInstanceUID'] ?? '',
-    sopClassUID: tags['SOPClassUID'] ?? undefined,
-    instanceNumber: parseInt(tags['InstanceNumber'] ?? '0', 10),
+    sopInstanceUID: dicomTags['SOPInstanceUID'] ?? '',
+    sopClassUID: dicomTags['SOPClassUID'] ?? undefined,
+    instanceNumber: parseInt(dicomTags['InstanceNumber'] ?? '0', 10),
     fileSize: inst.FileSize ?? 0,
-    tags: [],
+    tags: rawTags ? mapDicomTags(rawTags) : [],
   };
 }
 
@@ -158,10 +173,13 @@ export class OrthancStudyRepository implements IStudyRepository {
     return (result as unknown as OrthancInstance[]).map(mapOrthancInstance);
   }
 
-  /** Returns a single instance by Orthanc UUID. */
+  /** Returns a single instance by Orthanc UUID, including all DICOM tags. */
   async getInstanceById(instanceId: string): Promise<Instance | null> {
-    const inst = await instancesApi.get(instanceId);
-    return mapOrthancInstance(inst);
+    const [inst, rawTags] = await Promise.all([
+      instancesApi.get(instanceId),
+      instancesApi.getTags(instanceId),
+    ]);
+    return mapOrthancInstance(inst, rawTags as Record<string, unknown>);
   }
 
   /** Permanently deletes a study. Caller is responsible for audit. */

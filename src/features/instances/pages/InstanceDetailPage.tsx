@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Download, Image, HardDrive, Search, Send, Eye, Trash2, Pencil, Shield } from 'lucide-react';
@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useInstance, useStudy, useSeries } from '@/features/studies/hooks/use-studies';
+import { useInstance, useStudy, useSeries, useInstancePreview } from '@/features/studies/hooks/use-studies';
 import { formatDiskSize, formatPatientName } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
@@ -33,6 +33,14 @@ export default function InstanceDetailPage() {
   const [sendOpen, setSendOpen] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
   const { audit } = useAuditLog();
+  const { data: previewBlob } = useInstancePreview(instanceId!);
+
+  // Convert blob to object URL and revoke on cleanup
+  const previewUrl = useMemo(
+    () => (previewBlob ? URL.createObjectURL(previewBlob) : null),
+    [previewBlob],
+  );
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
 
   // Update tab label with patient name when loaded
   useTabLabel(study ? formatPatientName(study.patientName) : undefined);
@@ -183,18 +191,24 @@ export default function InstanceDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Image preview placeholder */}
+          {/* Image preview */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Preview</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="aspect-square bg-muted rounded-lg flex flex-col items-center justify-center">
-                <Image className="h-12 w-12 text-muted-foreground/40 mb-2" />
-                <p className="text-xs text-muted-foreground">
-                  Image preview available when connected to Orthanc
-                </p>
-              </div>
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt={`Instance #${instance.instanceNumber}`}
+                  className="w-full rounded-lg bg-black object-contain"
+                />
+              ) : (
+                <div className="aspect-square bg-muted rounded-lg flex flex-col items-center justify-center">
+                  <Image className="h-12 w-12 text-muted-foreground/40 mb-2" />
+                  <p className="text-xs text-muted-foreground">Loading preview…</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
