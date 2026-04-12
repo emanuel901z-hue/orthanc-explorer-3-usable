@@ -9,8 +9,10 @@ const mockXhrInstance = {
   responseText: '{"ID":"abc","Status":"Success"}',
   upload: {
     addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
   },
   addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
 };
 
 vi.stubGlobal('XMLHttpRequest', vi.fn(() => mockXhrInstance));
@@ -86,5 +88,36 @@ describe('uploadDicomWithProgress', () => {
     );
 
     expect(progressValues).toContain(50);
+  });
+
+  it('rejects with OrthancError on network error event', async () => {
+    mockXhrInstance.addEventListener.mockImplementation((event: string, fn: () => void) => {
+      if (event === 'error') fn();
+    });
+
+    await expect(
+      uploadDicomWithProgress(new File(['DICM'], 'test.dcm'), '/orthanc-proxy/instances', () => {}),
+    ).rejects.toThrow();
+  });
+
+  it('rejects with OrthancError on abort event', async () => {
+    mockXhrInstance.addEventListener.mockImplementation((event: string, fn: () => void) => {
+      if (event === 'abort') fn();
+    });
+
+    await expect(
+      uploadDicomWithProgress(new File(['DICM'], 'test.dcm'), '/orthanc-proxy/instances', () => {}),
+    ).rejects.toThrow();
+  });
+
+  it('rejects when response body is not valid JSON on 200', async () => {
+    mockXhrInstance.responseText = 'not-json';
+    mockXhrInstance.addEventListener.mockImplementation((event: string, fn: () => void) => {
+      if (event === 'load') fn();
+    });
+
+    await expect(
+      uploadDicomWithProgress(new File(['DICM'], 'test.dcm'), '/orthanc-proxy/instances', () => {}),
+    ).rejects.toThrow();
   });
 });
