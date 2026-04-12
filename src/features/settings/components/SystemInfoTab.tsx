@@ -9,7 +9,7 @@ import {
   Copy, Check, CircleDot, Info
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useSystemInfo, useStats, usePlugins } from '@/features/settings/hooks/useSystemInfo';
+import { useSystemInfo, useStats, usePlugins } from '@/features/settings/hooks/use-system-info';
 
 type VerbosityLevel = 'default' | 'verbose' | 'trace';
 

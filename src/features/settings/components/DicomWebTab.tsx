@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { useDicomWebServers } from '@/features/settings/hooks/useDicomWebServers';
+import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
 import { DicomWebServer } from '@/shared/types';
 import { toast } from 'sonner';
 

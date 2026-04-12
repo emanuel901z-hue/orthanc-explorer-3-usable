@@ -18,10 +18,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useModalities } from '@/features/settings/hooks/useModalities';
-import { useModalityConfig } from '@/features/settings/hooks/useModalityConfig';
-import { useEchoModality } from '@/features/settings/hooks/useEchoModality';
-import { useDeleteModality } from '@/features/settings/hooks/useDeleteModality';
+import { useModalities } from '@/features/settings/hooks/use-modalities';
+import { useModalityConfig } from '@/features/settings/hooks/use-modality-config';
+import { useEchoModality } from '@/features/settings/hooks/use-echo-modality';
+import { useDeleteModality } from '@/features/settings/hooks/use-delete-modality';
 import { DicomModality } from '@/shared/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';

@@ -8,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useModalities } from '@/features/settings/hooks/useModalities';
-import { useDicomWebServers } from '@/features/settings/hooks/useDicomWebServers';
+import { useModalities } from '@/features/settings/hooks/use-modalities';
+import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
 import { format } from 'date-fns';
 
 export default function RemoteSourcesPage() {

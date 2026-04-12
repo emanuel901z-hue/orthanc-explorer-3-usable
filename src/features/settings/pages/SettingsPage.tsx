@@ -19,7 +19,7 @@ import DicomWebTab from '@/features/settings/components/DicomWebTab';
 import ViewerTab from '@/features/settings/components/ViewerTab';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
 import { toast } from 'sonner';
-import { useSaveModality } from '@/features/settings/hooks/useSaveModality';
+import { useSaveModality } from '@/features/settings/hooks/use-save-modality';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useUiStore();

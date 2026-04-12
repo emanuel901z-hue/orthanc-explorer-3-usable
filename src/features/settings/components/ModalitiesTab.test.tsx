@@ -5,19 +5,19 @@ import ModalitiesTab from './ModalitiesTab';
 
 const mutateMock = vi.fn();
 
-vi.mock('@/features/settings/hooks/useModalities', () => ({
+vi.mock('@/features/settings/hooks/use-modalities', () => ({
   useModalities: vi.fn(() => ({ data: ['PACS1', 'PACS2'] })),
 }));
 
-vi.mock('@/features/settings/hooks/useModalityConfig', () => ({
+vi.mock('@/features/settings/hooks/use-modality-config', () => ({
   useModalityConfig: vi.fn(() => ({ data: undefined })),
 }));
 
-vi.mock('@/features/settings/hooks/useEchoModality', () => ({
+vi.mock('@/features/settings/hooks/use-echo-modality', () => ({
   useEchoModality: vi.fn(() => ({ mutate: mutateMock })),
 }));
 
-vi.mock('@/features/settings/hooks/useDeleteModality', () => ({
+vi.mock('@/features/settings/hooks/use-delete-modality', () => ({
   useDeleteModality: vi.fn(() => ({ mutate: vi.fn() })),
 }));
 
