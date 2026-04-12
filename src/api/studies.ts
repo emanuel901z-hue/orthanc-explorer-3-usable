@@ -1,3 +1,17 @@
+/**
+ * Typed wrappers for Orthanc study endpoints.
+ *
+ * Covered:
+ *   GET  /studies/:id            — studiesApi.get()
+ *   GET  /studies/:id/series     — studiesApi.getSeries()
+ *   POST /tools/find             — studiesApi.find()   ← PHI MUST stay in POST body, never URL
+ *   DELETE /studies/:id          — studiesApi.delete()
+ *   POST /studies/:id/anonymize  — studiesApi.anonymize()
+ *   POST /studies/:id/modify     — studiesApi.modify()
+ *
+ * PHI rule: All patient-identifying search criteria go in POST JSON bodies.
+ * Never build query-string URLs from patient data.
+ */
 // src/api/studies.ts
 import { orthancFetch } from "@/lib/client";
 
@@ -11,8 +25,8 @@ export type OrthancFindQuery = {
 
 export type Study = {
   ID: string;
-  MainDicomTags: Record<string, string>;
-  PatientMainDicomTags: Record<string, string>;
+  MainDicomTags: Record<string, string | null>;
+  PatientMainDicomTags: Record<string, string | null>;
   ParentPatient: string;
   Series: string[];
   Type: "Study";
@@ -20,7 +34,7 @@ export type Study = {
 
 export type Series = {
   ID: string;
-  MainDicomTags: Record<string, string>;
+  MainDicomTags: Record<string, string | null>;
   ParentStudy: string;
   Instances: string[];
   Type: "Series";

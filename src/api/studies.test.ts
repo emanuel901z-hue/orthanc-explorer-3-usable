@@ -19,6 +19,7 @@ describe("studiesApi", () => {
     expect((init as RequestInit).method).toBe("POST");
     expect(url).not.toContain("Doe");  // PHI must not be in URL
     expect(JSON.parse((init as RequestInit).body as string).Query.PatientName).toBe("Doe^Jane");
+    expect((init as RequestInit & { headers: Headers }).headers.get("Content-Type")).toBe("application/json");
   });
 
   it("get() hits /studies/:id", async () => {
@@ -43,5 +44,25 @@ describe("studiesApi", () => {
     );
     await studiesApi.delete("abc-123");
     expect((fetchMock.mock.calls[0][1] as RequestInit).method).toBe("DELETE");
+  });
+
+  it("anonymize() POSTs /studies/:id/anonymize", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"ID":"new-id","Path":"/studies/new-id"}', { status: 200 }),
+    );
+    await studiesApi.anonymize("abc-123", { Keep: ["PatientName"] });
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/studies/abc-123/anonymize");
+    expect((init as RequestInit).method).toBe("POST");
+  });
+
+  it("modify() POSTs /studies/:id/modify", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"ID":"mod-id","Path":"/studies/mod-id"}', { status: 200 }),
+    );
+    await studiesApi.modify("abc-123", { Replace: { PatientName: "Anonymous" } });
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/studies/abc-123/modify");
+    expect((init as RequestInit).method).toBe("POST");
   });
 });
