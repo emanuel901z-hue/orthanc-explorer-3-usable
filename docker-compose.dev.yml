@@ -34,5 +34,18 @@ services:
     environment:
       EMULATOR_AUTH_REQUIRED: "false"
 
+  seeder:
+    image: curlimages/curl:latest
+    profiles: ["seed"]
+    depends_on:
+      - orthanc
+    command: >
+      sh -c "sleep 3 &&
+             curl -s -X POST http://orthanc:8042/instances
+                  --data-binary @/seed/sample.dcm
+                  -H 'Content-Type: application/dicom'"
+    volumes:
+      - ./test-data:/seed:ro
+
 volumes:
   orthanc-data:
