@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { systemApi } from "./system";
+import { systemApi } from "@/api/system";
 import { loadConfig, __resetConfigForTests } from "@/config/runtime";
 
 describe("systemApi", () => {
