@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newCorrelationId } from "./correlation";
+import { newCorrelationId } from "@/lib/correlation";
 
 describe("newCorrelationId", () => {
   it("returns a UUIDv4-shaped string", () => {
