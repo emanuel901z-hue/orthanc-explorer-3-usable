@@ -11,15 +11,13 @@ services:
       ORTHANC__DICOM_WEB__ENABLE: "true"
       ORTHANC__DICOM_MODALITIES_IN_DATABASE: "true"
       ORTHANC__ORTHANC_PEERS_IN_DATABASE: "true"
-      ORTHANC__HTTP_HEADERS: |
-        {"Access-Control-Allow-Origin": "*",
-         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-         "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Request-Id"}
+      ORTHANC__HTTP_HEADERS: '{"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,PUT,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,Authorization,X-Request-Id"}'
     volumes:
       - orthanc-data:/var/lib/orthanc/db
 
   oauth-plugin:
     image: rhavekost/orthanc-dicomweb-oauth:latest
+    platform: linux/amd64
     environment:
       DICOMWEB_TARGET_URL: "http://azure-emulator:8080/v2"
       OAUTH_TOKEN_ENDPOINT: "http://azure-emulator:8080/oauth/token"

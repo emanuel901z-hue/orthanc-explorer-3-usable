@@ -7,9 +7,19 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 5173,
     hmr: {
       overlay: false,
+    },
+    proxy: {
+      // Proxy to local Orthanc dev stack — avoids CORS in dev mode.
+      // public/config.js sets orthancUrl: "/orthanc-proxy" so the SPA
+      // never makes a cross-origin request during development.
+      "/orthanc-proxy": {
+        target: "http://localhost:8042",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/orthanc-proxy/, ""),
+      },
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
