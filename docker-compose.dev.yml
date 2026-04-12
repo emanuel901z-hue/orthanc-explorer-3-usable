@@ -1,6 +1,34 @@
 services:
+
+  # ── Shared Postgres ────────────────────────────────────────────────────────
+  # One instance serves two databases:
+  #   orthanc       — Orthanc index (metadata, fast queries via PG plugin)
+  #   dicom_emulator — Azure DICOM Service Emulator state
+  #
+  # WARNING: dev credentials only — never use these in production.
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: orthanc
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d orthanc"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Orthanc ────────────────────────────────────────────────────────────────
+  # latest-full includes the PostgreSQL index plugin.
+  # Index lives in Postgres (fast label/metadata queries);
+  # DICOM file blobs stay on a local volume for dev simplicity.
   orthanc:
     image: orthancteam/orthanc:latest-full
+    restart: unless-stopped
     ports:
       - "8042:8042"
       - "4242:4242"
@@ -12,38 +40,91 @@ services:
       ORTHANC__DICOM_MODALITIES_IN_DATABASE: "true"
       ORTHANC__ORTHANC_PEERS_IN_DATABASE: "true"
       ORTHANC__HTTP_HEADERS: '{"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,PUT,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,Authorization,X-Request-Id"}'
+      # PostgreSQL index plugin — keeps metadata in PG, files on volume
+      ORTHANC__POSTGRESQL__HOST: "postgres"
+      ORTHANC__POSTGRESQL__PORT: "5432"
+      ORTHANC__POSTGRESQL__DATABASE: "orthanc"
+      ORTHANC__POSTGRESQL__USERNAME: "dev"
+      ORTHANC__POSTGRESQL__PASSWORD: "dev"
+      ORTHANC__POSTGRESQL__ENABLE_INDEX: "true"
+      ORTHANC__POSTGRESQL__ENABLE_STORAGE: "false"
     volumes:
       - orthanc-data:/var/lib/orthanc/db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8042/system > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
+  # ── Azure DICOM Service Emulator ───────────────────────────────────────────
+  # Stand-in for Azure Health Data Services DICOM API.
+  # Uses the shared postgres service (dicom_emulator database).
+  azure-emulator:
+    image: rhavekost/azure-dicom-service-emulator:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://dev:dev@postgres:5432/dicom_emulator"
+      DICOM_STORAGE_DIR: /data/dicom
+      EXPIRY_INTERVAL_SECONDS: 3600
+    volumes:
+      - dicom-data:/data/dicom
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── OAuth DICOMweb Plugin ──────────────────────────────────────────────────
+  # Proxies DICOMweb requests to azure-emulator with OAuth token injection.
+  # Only needed for authMode: "oidc" / "smart" testing — NOT for authMode: "none".
+  #
+  # Start with: docker compose -f docker-compose.dev.yml --profile oauth up -d
+  #
+  # TODO: the plugin's bundled orthanc.json has an example-server with empty
+  # ClientId that fails schema validation on startup. Before enabling, either:
+  #   - mount an override orthanc.json with a real ClientId (even a placeholder)
+  #   - or set the correct env var when the plugin supports ORTHANC__ overrides
+  #
+  # Runs as linux/amd64 under Rosetta (no arm64 image available yet).
   oauth-plugin:
     image: rhavekost/orthanc-dicomweb-oauth:latest
     platform: linux/amd64
+    profiles: ["oauth"]
     environment:
       DICOMWEB_TARGET_URL: "http://azure-emulator:8080/v2"
       OAUTH_TOKEN_ENDPOINT: "http://azure-emulator:8080/oauth/token"
       OAUTH_MODE: "dev"
     depends_on:
-      - azure-emulator
+      azure-emulator:
+        condition: service_healthy
 
-  azure-emulator:
-    image: rhavekost/azure-dicom-service-emulator:latest
-    ports:
-      - "8080:8080"
-    environment:
-      EMULATOR_AUTH_REQUIRED: "false"
-
+  # ── Test data seeder ───────────────────────────────────────────────────────
+  # Optional profile — loads test-data/sample.dcm into Orthanc.
+  # Run: docker compose -f docker-compose.dev.yml --profile seed up seeder
   seeder:
     image: curlimages/curl:latest
     profiles: ["seed"]
     depends_on:
-      - orthanc
+      orthanc:
+        condition: service_healthy
     command: >
-      sh -c "sleep 3 &&
-             curl -s -X POST http://orthanc:8042/instances
+      sh -c "curl -s -X POST http://orthanc:8042/instances
                   --data-binary @/seed/sample.dcm
-                  -H 'Content-Type: application/dicom'"
+                  -H 'Content-Type: application/dicom' | cat"
     volumes:
       - ./test-data:/seed:ro
 
 volumes:
+  pgdata:
   orthanc-data:
+  dicom-data:
