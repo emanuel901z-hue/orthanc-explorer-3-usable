@@ -1,3 +1,9 @@
+/**
+ * OrthancStudyRepository — IStudyRepository implementation backed by the live Orthanc API.
+ *
+ * Uses studiesApi, seriesApi, and instancesApi from @/api/* as the transport layer.
+ * All patient-identifying searches go through POST /tools/find (PHI never in URL).
+ */
 import { IStudyRepository } from './interfaces/study-repository.interface';
 import {
   Study,
@@ -13,6 +19,7 @@ import { instancesApi } from '@/api/instances';
 import type { Study as OrthancStudy } from '@/api/studies';
 import type { SeriesDetail } from '@/api/series';
 import type { Instance as OrthancInstance } from '@/api/instances';
+import { orthancFetch } from '@/lib/client';
 
 function mapOrthancStudy(s: OrthancStudy): Study {
   const tags = s.MainDicomTags ?? {};
@@ -91,6 +98,7 @@ function mapOrthancInstance(inst: OrthancInstance): Instance {
 }
 
 export class OrthancStudyRepository implements IStudyRepository {
+  /** Searches studies via POST /tools/find. Filters are sent as JSON body. */
   async findAll(filters?: StudyFilters): Promise<Study[]> {
     const query: Record<string, string> = {};
 
@@ -108,21 +116,25 @@ export class OrthancStudyRepository implements IStudyRepository {
     return results.map(mapOrthancStudy);
   }
 
+  /** Returns a single study by Orthanc UUID. */
   async findById(id: string): Promise<Study | null> {
     const study = await studiesApi.get(id);
     return mapOrthancStudy(study);
   }
 
+  /** Returns all series belonging to a study. */
   async getSeriesForStudy(studyId: string): Promise<Series[]> {
     const seriesList = await studiesApi.getSeries(studyId);
     return seriesList.map((s) => mapOrthancSeries(s as SeriesDetail));
   }
 
+  /** Returns a single series by Orthanc UUID. */
   async getSeriesById(seriesId: string): Promise<Series | null> {
     const s = await seriesApi.get(seriesId);
     return mapOrthancSeries(s);
   }
 
+  /** Returns all instances in a series, fetching details per ID. */
   async getInstancesForSeries(seriesId: string): Promise<Instance[]> {
     const instanceIds = await seriesApi.getInstances(seriesId);
     if (!Array.isArray(instanceIds)) return [];
@@ -132,20 +144,24 @@ export class OrthancStudyRepository implements IStudyRepository {
     return instances.map(mapOrthancInstance);
   }
 
+  /** Returns a single instance by Orthanc UUID. */
   async getInstanceById(instanceId: string): Promise<Instance | null> {
     const inst = await instancesApi.get(instanceId);
     return mapOrthancInstance(inst);
   }
 
+  /** Permanently deletes a study. Caller is responsible for audit. */
   async delete(id: string): Promise<void> {
     await studiesApi.delete(id);
   }
 
+  /** Modifies DICOM tags on a study. */
   async modify(id: string, modifications: DicomModifications): Promise<Study> {
     await studiesApi.modify(id, { Replace: modifications });
     return this.findById(id) as Promise<Study>;
   }
 
+  /** Returns an anonymized copy of the study. */
   async anonymize(id: string, config: AnonymizationConfig): Promise<Study> {
     const body: Record<string, unknown> = {};
     if (config.keepStudyDescription) {
@@ -165,22 +181,25 @@ export class OrthancStudyRepository implements IStudyRepository {
     return this.findById(result.ID) as Promise<Study>;
   }
 
+  /** Sends a study to a DICOM modality via /modalities/{name}/store. */
   async sendToModality(id: string, modalityId: string): Promise<void> {
-    await fetch(`/modalities/${modalityId}/store`, {
+    await orthancFetch<unknown>(`/modalities/${modalityId}/store`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ Resources: [id] }),
     });
   }
 
+  /** Adds a label to a study. */
   async addLabel(id: string, label: string): Promise<void> {
-    await fetch(`/studies/${id}/labels/${encodeURIComponent(label)}`, {
+    await orthancFetch<unknown>(`/studies/${id}/labels/${encodeURIComponent(label)}`, {
       method: 'PUT',
     });
   }
 
+  /** Removes a label from a study. */
   async removeLabel(id: string, label: string): Promise<void> {
-    await fetch(`/studies/${id}/labels/${encodeURIComponent(label)}`, {
+    await orthancFetch<unknown>(`/studies/${id}/labels/${encodeURIComponent(label)}`, {
       method: 'DELETE',
     });
   }
