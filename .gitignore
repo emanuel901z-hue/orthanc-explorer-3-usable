@@ -116,6 +116,8 @@ pnpm-lock.yaml
 # Local docker volumes and seeded DICOM data (no real PHI allowed)
 test-data/*.dcm
 test-data/*.DCM
+test-data/*.zip
+test-data/*.ZIP
 !test-data/README.md
 orthanc-data/
 
