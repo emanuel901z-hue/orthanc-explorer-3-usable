@@ -21,11 +21,18 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
 
   # ── Orthanc ────────────────────────────────────────────────────────────────
-  # latest-full includes the PostgreSQL index plugin.
-  # Index lives in Postgres (fast label/metadata queries);
-  # DICOM file blobs stay on a local volume for dev simplicity.
+  # latest-full ships all plugins in plugins-available/ but only activates a
+  # small default set in plugins/. We explicitly add the viewer .so paths so
+  # Stone, OHIF, VolView, and Authorization are loaded without pulling in every
+  # other plugin (Azure Blob, MySQL, ODBC, etc.).
+  # Index lives in Postgres; DICOM file blobs stay on a local volume.
   orthanc:
     image: orthancteam/orthanc:latest-full
     restart: unless-stopped
@@ -36,11 +43,18 @@ services:
       ORTHANC__NAME: "OE3 Dev"
       ORTHANC__REMOTE_ACCESS_ALLOWED: "true"
       ORTHANC__AUTHENTICATION_ENABLED: "false"
-      ORTHANC__DICOM_WEB__ENABLE: "true"
       ORTHANC__DICOM_MODALITIES_IN_DATABASE: "true"
       ORTHANC__ORTHANC_PEERS_IN_DATABASE: "true"
       ORTHANC__HTTP_HEADERS: '{"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,PUT,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,Authorization,X-Request-Id"}'
-      # PostgreSQL index plugin — keeps metadata in PG, files on volume
+      ORTHANC__HTTP_TIMEOUT: "300"
+      ORTHANC__HTTP_REQUEST_TIMEOUT: "300"
+      ORTHANC__NETWORK_TIMEOUT: "300"
+      ORTHANC__DICOM_SCU_TIMEOUT: "300"
+      ORTHANC__DICOM_SCP_TIMEOUT: "300"
+      ORTHANC__LOG_EXPORTED_RESOURCES: "true"
+
+      # ── Plugins: active dir + individual viewer .so files ──
+      # ── PostgreSQL index ──
       ORTHANC__POSTGRESQL__HOST: "postgres"
       ORTHANC__POSTGRESQL__PORT: "5432"
       ORTHANC__POSTGRESQL__DATABASE: "orthanc"
@@ -48,6 +62,42 @@ services:
       ORTHANC__POSTGRESQL__PASSWORD: "dev"
       ORTHANC__POSTGRESQL__ENABLE_INDEX: "true"
       ORTHANC__POSTGRESQL__ENABLE_STORAGE: "false"
+      ORTHANC__POSTGRESQL__MAXIMUM_CONNECTION_RETRIES: "10"
+      ORTHANC__POSTGRESQL__CONNECTION_RETRY_INTERVAL: "5"
+
+      # ── DICOMweb ──
+      ORTHANC__DICOM_WEB__ENABLE: "true"
+      ORTHANC__DICOM_WEB__ROOT: "/dicom-web/"
+      ORTHANC__DICOM_WEB__ENABLE_WADO: "true"
+      ORTHANC__DICOM_WEB__ENABLE_STOW: "true"
+      ORTHANC__DICOM_WEB__ENABLE_QIDO: "true"
+      ORTHANC__DICOM_WEB__CHUNKED_TRANSFERS: "true"
+      ORTHANC__DICOM_WEB__TIMEOUT: "300"
+      # Azure emulator DICOMweb server (for authMode: "oidc" dev testing)
+      ORTHANC__DICOM_WEB__SERVERS: >-
+        {"azure-emulator":{"Url":"http://azure-emulator:8080/v2","HasDelete":true,"ChunkedTransfers":true}}
+
+      # ── Orthanc Explorer 2 ──
+      ORTHANC__ORTHANC_EXPLORER_2__IS_DEFAULT_ORTHANC_UI: "true"
+      ORTHANC__ORTHANC_EXPLORER_2__ENABLE: "true"
+
+      # ── Stone Web Viewer ──
+      # STONE_WEB_VIEWER_PLUGIN_ENABLED is the non-standard env var that triggers
+      # the entrypoint to copy libStoneWebViewer.so into plugins/ on startup.
+      STONE_WEB_VIEWER_PLUGIN_ENABLED: "true"
+      ORTHANC__STONE_WEB_VIEWER__STUDY_DOWNLOAD_ENABLED: "true"
+
+      # ── OHIF Viewer ──
+      OHIF_PLUGIN_ENABLED: "true"
+      ORTHANC__OHIF__ROUTER_BASENAME: "/ohif/"
+      ORTHANC__OHIF__ENABLE_SHARED_ARRAY_BUFFER: "true"
+      ORTHANC__OHIF__STUDY_LIST_FUNCTIONALITY: "true"
+
+      # ── VolView ──
+      VOLVIEW_PLUGIN_ENABLED: "true"
+      ORTHANC__VOL_VIEW__VOLUME_RENDERING_ENABLED: "true"
+      ORTHANC__VOL_VIEW__MULTI_PLANAR_RECONSTRUCTION_ENABLED: "true"
+
     volumes:
       - orthanc-data:/var/lib/orthanc/db
     depends_on:
@@ -59,12 +109,18 @@ services:
       timeout: 5s
       retries: 10
       start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
 
   # ── Azure DICOM Service Emulator ───────────────────────────────────────────
   # Stand-in for Azure Health Data Services DICOM API.
   # Uses the shared postgres service (dicom_emulator database).
   azure-emulator:
     image: rhavekost/azure-dicom-service-emulator:latest
+    platform: linux/amd64
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -83,6 +139,11 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
 
   # ── OAuth DICOMweb Plugin ──────────────────────────────────────────────────
   # Proxies DICOMweb requests to azure-emulator with OAuth token injection.
@@ -118,9 +179,10 @@ services:
       orthanc:
         condition: service_healthy
     command: >
-      sh -c "curl -s -X POST http://orthanc:8042/instances
+      sh -c "curl -sf -X POST http://orthanc:8042/instances
                   --data-binary @/seed/sample.dcm
-                  -H 'Content-Type: application/dicom' | cat"
+                  -H 'Content-Type: application/dicom'
+                  -w '\nHTTP %{http_code}\n' && echo 'Seed complete' || (echo 'Seed FAILED' && exit 1)"
     volumes:
       - ./test-data:/seed:ro
 
