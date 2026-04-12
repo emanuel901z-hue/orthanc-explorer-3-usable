@@ -7,15 +7,20 @@
  */
 
 const SCRUBBED_MESSAGES: Record<number, string> = {
-  400: "The request was invalid.",
-  401: "Authentication required.",
-  403: "You are not authorized to perform this action.",
-  404: "The requested resource was not found.",
-  409: "A conflict occurred.",
-  500: "The server encountered an error.",
-  502: "Upstream service unavailable.",
-  503: "Service temporarily unavailable.",
+  400: 'The request was invalid.',
+  401: 'Authentication required.',
+  403: 'You are not authorized to perform this action.',
+  404: 'The requested resource was not found.',
+  409: 'A conflict occurred.',
+  413: 'File too large.',
+  500: 'The server encountered an error.',
+  502: 'Upstream service unavailable.',
+  503: 'Service temporarily unavailable.',
 };
+
+export function scrubbedHttpMessage(status: number): string {
+  return SCRUBBED_MESSAGES[status] ?? `Request failed (${status}).`;
+}
 
 export class OrthancError extends Error {
   readonly status: number;
@@ -25,13 +30,17 @@ export class OrthancError extends Error {
     super(message);
     this.status = status;
     this.correlationId = correlationId;
-    this.name = "OrthancError";
+    this.name = 'OrthancError';
   }
 
   static async from(res: Response, correlationId: string): Promise<OrthancError> {
     const msg = SCRUBBED_MESSAGES[res.status] ?? `Request failed (${res.status}).`;
     // Intentionally do not read res body into the message — may contain PHI.
-    try { await res.text(); } catch { /* ignore */ }
+    try {
+      await res.text();
+    } catch {
+      /* ignore */
+    }
     return new OrthancError(res.status, correlationId, msg);
   }
 }

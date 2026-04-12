@@ -8,23 +8,8 @@
  * XMLHttpRequest's upload.onprogress solves this. We wrap it in a Promise
  * to preserve async/await ergonomics for the caller.
  */
-import { OrthancError } from '@/lib/errors';
+import { OrthancError, scrubbedHttpMessage } from '@/lib/errors';
 import { newCorrelationId } from '@/lib/correlation';
-
-function scrubbedMessage(status: number): string {
-  const messages: Record<number, string> = {
-    400: 'The request was invalid.',
-    401: 'Authentication required.',
-    403: 'You are not authorized to perform this action.',
-    404: 'The requested resource was not found.',
-    409: 'A conflict occurred.',
-    413: 'File too large.',
-    500: 'The server encountered an error.',
-    502: 'Upstream service unavailable.',
-    503: 'Service temporarily unavailable.',
-  };
-  return messages[status] ?? `Request failed (${status}).`;
-}
 
 export function uploadDicomWithProgress(
   file: File,
@@ -59,7 +44,7 @@ export function uploadDicomWithProgress(
           reject(new OrthancError(xhr.status, correlationId, 'Response could not be parsed.'));
         }
       } else {
-        reject(new OrthancError(xhr.status, correlationId, scrubbedMessage(xhr.status)));
+        reject(new OrthancError(xhr.status, correlationId, scrubbedHttpMessage(xhr.status)));
       }
     };
 
