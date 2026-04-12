@@ -19,10 +19,11 @@ export async function sendStudyAction(
   targetKind: "modality" | "peer",
   targetName: string,
 ): Promise<void> {
+  const safeName = encodeURIComponent(targetName);
   const path =
     targetKind === "modality"
-      ? `/modalities/${targetName}/store`
-      : `/peers/${targetName}/store`;
+      ? `/modalities/${safeName}/store`
+      : `/peers/${safeName}/store`;
 
   const base = {
     action: "study.send",
