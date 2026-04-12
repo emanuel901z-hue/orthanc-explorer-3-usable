@@ -1,4 +1,6 @@
 import { useCallback } from 'react';
+import { type Study } from '@/api/studies';
+import { anonymizeStudyAction } from '@/actions/anonymizeStudy';
 import { useJobStore } from '@/store/job-store';
 
 interface AnonymizeTarget {
@@ -15,45 +17,55 @@ interface AnonymizeOptions {
 }
 
 export function useAnonymizeJob() {
-  const startAnonymize = useCallback(({ level, id, label }: AnonymizeTarget, options: AnonymizeOptions) => {
-    const jobStore = useJobStore.getState();
-    const jobId = `anonymize-${Date.now()}`;
+  const startAnonymize = useCallback(
+    async ({ level, id, label }: AnonymizeTarget, options: AnonymizeOptions) => {
+      const { addJob, updateJob } = useJobStore.getState();
+      const jobId = `anonymize-${Date.now()}`;
 
-    const desc = [
-      options.newPatientName && `→ ${options.newPatientName}`,
-      options.keepStudyDescription && 'keep study desc',
-      options.keepSeriesDescription && 'keep series desc',
-    ].filter(Boolean).join(', ') || 'Full anonymization';
+      const desc = [
+        options.newPatientName && `→ ${options.newPatientName}`,
+        options.keepStudyDescription && 'keep study desc',
+        options.keepSeriesDescription && 'keep series desc',
+      ]
+        .filter(Boolean)
+        .join(', ') || 'Full anonymization';
 
-    jobStore.addJob({
-      id: jobId,
-      type: 'anonymize',
-      label: `${label} (${level})`,
-      description: desc,
-      progress: 0,
-      status: 'pending',
-    });
+      addJob({
+        id: jobId,
+        type: 'anonymize',
+        label: `${label} (${level})`,
+        description: desc,
+        progress: 0,
+        status: 'running',
+      });
 
-    // Simulate anonymization progress
-    setTimeout(() => {
-      jobStore.updateJob(jobId, { status: 'running' });
-      let p = 0;
-      const interval = setInterval(() => {
-        p += Math.random() * 25 + 10;
-        if (p >= 100) {
-          clearInterval(interval);
-          const success = Math.random() > 0.1;
-          jobStore.updateJob(jobId, {
-            progress: 100,
-            status: success ? 'complete' : 'error',
-            error: success ? undefined : 'Anonymization failed — could not write modified tags',
-          });
-        } else {
-          jobStore.updateJob(jobId, { progress: p });
-        }
-      }, 400 + Math.random() * 300);
-    }, 200);
-  }, []);
+      const body: Record<string, unknown> = {
+        Keep: [
+          ...(options.keepStudyDescription ? ['StudyDescription'] : []),
+          ...(options.keepSeriesDescription ? ['SeriesDescription'] : []),
+        ],
+      };
+
+      if (options.newPatientName) {
+        body['Replace'] = { PatientName: options.newPatientName };
+      }
+      if (options.newPatientId) {
+        body['Replace'] = {
+          ...(body['Replace'] as Record<string, string> ?? {}),
+          PatientID: options.newPatientId,
+        };
+      }
+
+      try {
+        await anonymizeStudyAction({ ID: id } as Study, body);
+        updateJob(jobId, { progress: 100, status: 'complete' });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Anonymization failed';
+        updateJob(jobId, { status: 'error', error: message });
+      }
+    },
+    []
+  );
 
   return { startAnonymize };
 }
