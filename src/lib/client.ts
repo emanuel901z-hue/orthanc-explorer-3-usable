@@ -57,6 +57,8 @@ export async function orthancFetch<T>(
       throw err;
     }
     if (res.status === 204) return undefined as T;
+    // Non-JSON 2xx bodies will throw a SyntaxError here; callers using binary
+    // endpoints (e.g., /archive) must override Accept and handle the raw Response.
     return (await res.json()) as T;
   } catch (e) {
     if (!(e instanceof OrthancError)) {

@@ -59,6 +59,12 @@ describe("orthancFetch", () => {
     expect(healthTracker.getState().status).toBe("degraded");
   });
 
+  it("records failure and rethrows on network error", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("Failed to fetch"));
+    await expect(orthancFetch("/system")).rejects.toBeInstanceOf(TypeError);
+    expect(healthTracker.getState().consecutiveFailures).toBeGreaterThan(0);
+  });
+
   it("uses empty base for same-origin plugin mode", async () => {
     (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none", features: {} };
     loadConfig();
