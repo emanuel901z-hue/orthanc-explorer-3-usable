@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Send, Globe, Radio } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -12,8 +14,9 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { generateDemoDicomWebServers, generateDemoModalities } from '@/shared/api/mock/demo-data-generator';
-import { useJobStore } from '@/store/job-store';
+import { useModalities } from '@/features/settings/hooks/use-modalities';
+import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
+import { sendStudyAction } from '@/actions/sendStudy';
 
 interface StudyInfo {
   id: string;
@@ -33,8 +36,21 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
   const [protocol, setProtocol] = useState<SendProtocol>('stow-rs');
   const [selectedTarget, setSelectedTarget] = useState('');
 
-  const dicomWebServers = generateDemoDicomWebServers().filter((s) => s.hasStowSupport);
-  const modalities = generateDemoModalities();
+  const { data: modalityNames = [], isLoading: modalitiesLoading } = useModalities();
+  const { data: serverNames = [], isLoading: serversLoading } = useDicomWebServers();
+
+  const sendMutation = useMutation({
+    mutationFn: async ({ studyId, target }: { studyId: string; target: string }) =>
+      sendStudyAction(studyId, target),
+    onSuccess: () => {
+      toast.success('Study sent successfully');
+      handleClose();
+    },
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : 'Failed to send study';
+      toast.error(message);
+    },
+  });
 
   const handleClose = () => {
     onOpenChange(false);
@@ -51,51 +67,23 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
 
   const handleSend = () => {
     if (!selectedTarget) return;
-
-    const jobStore = useJobStore.getState();
-
-    if (protocol === 'stow-rs') {
-      const server = dicomWebServers.find((s) => s.id === selectedTarget);
-      if (!server) return;
-
-      studies.forEach((study, i) => {
-        const jobId = `send-stow-${Date.now()}-${i}`;
-        jobStore.addJob({
-          id: jobId,
-          type: 'send',
-          label: `${study.patientName} → ${server.name}`,
-          description: study.studyDescription || 'STOW-RS',
-          progress: 0,
-          status: 'pending',
-          totalItems: 1,
-          completedItems: 0,
-        });
-        simulateSendProgress(jobStore, jobId, i, 'STOW-RS');
-      });
-    } else {
-      const modality = modalities.find((m) => m.id === selectedTarget);
-      if (!modality) return;
-
-      studies.forEach((study, i) => {
-        const jobId = `send-cstore-${Date.now()}-${i}`;
-        jobStore.addJob({
-          id: jobId,
-          type: 'send',
-          label: `${study.patientName} → ${modality.name}`,
-          description: `C-STORE to ${modality.aet}`,
-          progress: 0,
-          status: 'pending',
-          totalItems: 1,
-          completedItems: 0,
-        });
-        simulateSendProgress(jobStore, jobId, i, 'C-STORE');
+    if (protocol === 'c-store') {
+      studies.forEach((study) => {
+        sendMutation.mutate({ studyId: study.id, target: selectedTarget });
       });
     }
-
-    handleClose();
+    // STOW-RS send is not yet implemented in the backend action layer;
+    // the tab displays live servers but send is disabled until the action exists.
   };
 
-  const hasTargets = protocol === 'stow-rs' ? dicomWebServers.length > 0 : modalities.length > 0;
+  const isSending = sendMutation.isPending;
+
+  const targets = protocol === 'stow-rs' ? serverNames : modalityNames;
+  const hasTargets = targets.length > 0;
+  const isLoading = protocol === 'stow-rs' ? serversLoading : modalitiesLoading;
+
+  // STOW-RS send is disabled pending a dedicated action
+  const canSend = !isSending && !!selectedTarget && hasTargets && protocol === 'c-store';
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -133,7 +121,9 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
             </TabsList>
 
             <TabsContent value="stow-rs" className="mt-3">
-              {dicomWebServers.length === 0 ? (
+              {isLoading ? (
+                <LoadingState />
+              ) : serverNames.length === 0 ? (
                 <EmptyState
                   icon={<Globe className="h-8 w-8 mx-auto mb-2 opacity-50" />}
                   message="No DICOMweb servers with STOW-RS support configured."
@@ -141,21 +131,18 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
                 />
               ) : (
                 <RadioGroup value={selectedTarget} onValueChange={setSelectedTarget} className="space-y-2">
-                  {dicomWebServers.map((server) => (
+                  {serverNames.map((name) => (
                     <label
-                      key={server.id}
-                      htmlFor={`target-${server.id}`}
+                      key={name}
+                      htmlFor={`target-stow-${name}`}
                       className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
                     >
-                      <RadioGroupItem value={server.id} id={`target-${server.id}`} />
+                      <RadioGroupItem value={name} id={`target-stow-${name}`} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">{server.name}</span>
-                          <Badge variant="outline" className="text-xs py-0 h-5">
-                            {server.authType === 'none' ? 'No Auth' : server.authType === 'basic' ? 'Basic' : 'Bearer'}
-                          </Badge>
+                          <span className="font-medium text-sm">{name}</span>
+                          <Badge variant="outline" className="text-xs py-0 h-5">STOW-RS</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground font-mono truncate">{server.url}</p>
                       </div>
                       <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
                     </label>
@@ -165,7 +152,9 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
             </TabsContent>
 
             <TabsContent value="c-store" className="mt-3">
-              {modalities.length === 0 ? (
+              {isLoading ? (
+                <LoadingState />
+              ) : modalityNames.length === 0 ? (
                 <EmptyState
                   icon={<Radio className="h-8 w-8 mx-auto mb-2 opacity-50" />}
                   message="No DICOM modalities configured."
@@ -173,21 +162,17 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
                 />
               ) : (
                 <RadioGroup value={selectedTarget} onValueChange={setSelectedTarget} className="space-y-2">
-                  {modalities.map((modality) => (
+                  {modalityNames.map((name) => (
                     <label
-                      key={modality.id}
-                      htmlFor={`target-${modality.id}`}
+                      key={name}
+                      htmlFor={`target-cstore-${name}`}
                       className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
                     >
-                      <RadioGroupItem value={modality.id} id={`target-${modality.id}`} />
+                      <RadioGroupItem value={name} id={`target-cstore-${name}`} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">{modality.name}</span>
-                          <Badge variant="outline" className="text-xs py-0 h-5">{modality.aet}</Badge>
+                          <span className="font-medium text-sm">{name}</span>
                         </div>
-                        <p className="text-xs text-muted-foreground font-mono truncate">
-                          {modality.host}:{modality.port}
-                        </p>
                       </div>
                       <Radio className="h-4 w-4 text-muted-foreground shrink-0" />
                     </label>
@@ -199,9 +184,10 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSend} disabled={!selectedTarget || !hasTargets} className="gap-1.5">
-            <Send className="h-3.5 w-3.5" /> Send via {protocol === 'stow-rs' ? 'STOW-RS' : 'C-STORE'}
+          <Button variant="outline" onClick={handleClose} disabled={isSending}>Cancel</Button>
+          <Button onClick={handleSend} disabled={!canSend} className="gap-1.5">
+            <Send className="h-3.5 w-3.5" />
+            {isSending ? 'Sending…' : `Send via ${protocol === 'stow-rs' ? 'STOW-RS' : 'C-STORE'}`}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -221,29 +207,10 @@ function EmptyState({ icon, message, hint }: { icon: React.ReactNode; message: s
   );
 }
 
-function simulateSendProgress(
-  jobStore: ReturnType<typeof useJobStore.getState>,
-  jobId: string,
-  index: number,
-  protocol: string,
-) {
-  setTimeout(() => {
-    jobStore.updateJob(jobId, { status: 'running' });
-    let p = 0;
-    const interval = setInterval(() => {
-      p += Math.random() * 20 + 5;
-      if (p >= 100) {
-        clearInterval(interval);
-        const success = Math.random() > 0.1;
-        jobStore.updateJob(jobId, {
-          progress: 100,
-          status: success ? 'complete' : 'error',
-          completedItems: success ? 1 : 0,
-          error: success ? undefined : `${protocol} transfer failed — connection refused`,
-        });
-      } else {
-        jobStore.updateJob(jobId, { progress: p });
-      }
-    }, 300);
-  }, 300 * (index + 1));
+function LoadingState() {
+  return (
+    <div className="text-center py-6 text-muted-foreground text-sm animate-pulse">
+      Loading…
+    </div>
+  );
 }
