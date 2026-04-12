@@ -22,7 +22,6 @@ import { useModalities } from '@/features/settings/hooks/useModalities';
 import { useModalityConfig } from '@/features/settings/hooks/useModalityConfig';
 import { useEchoModality } from '@/features/settings/hooks/useEchoModality';
 import { useDeleteModality } from '@/features/settings/hooks/useDeleteModality';
-import { echoModalityAction } from '@/actions/echoModality';
 import { DicomModality } from '@/shared/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -206,33 +205,31 @@ export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTab
     echo.mutate(name, {
       onSuccess: () => {
         setEchoResults((prev) => ({ ...prev, [name]: { status: 'success', at: new Date() } }));
-        setEchoingNames((prev) => { const next = new Set(prev); next.delete(name); return next; });
+        setEchoingNames((prev) => {
+          const next = new Set(prev);
+          next.delete(name);
+          if (next.size === 0) setIsEchoingAll(false);
+          return next;
+        });
         toast.success(`C-ECHO to ${name} succeeded`);
       },
       onError: () => {
         setEchoResults((prev) => ({ ...prev, [name]: { status: 'failure', at: new Date() } }));
-        setEchoingNames((prev) => { const next = new Set(prev); next.delete(name); return next; });
+        setEchoingNames((prev) => {
+          const next = new Set(prev);
+          next.delete(name);
+          if (next.size === 0) setIsEchoingAll(false);
+          return next;
+        });
         toast.error(`C-ECHO to ${name} failed`);
       },
     });
   };
 
-  const handleEchoAll = async () => {
+  const handleEchoAll = () => {
     if (modalityNames.length === 0) return;
     setIsEchoingAll(true);
-    await Promise.allSettled(
-      modalityNames.map((name) =>
-        echoModalityAction(name)
-          .then(() =>
-            setEchoResults((prev) => ({ ...prev, [name]: { status: 'success', at: new Date() } })),
-          )
-          .catch(() =>
-            setEchoResults((prev) => ({ ...prev, [name]: { status: 'failure', at: new Date() } })),
-          ),
-      ),
-    );
-    setIsEchoingAll(false);
-    toast.success('Echo All complete');
+    modalityNames.forEach((name) => handleEcho(name));
   };
 
   const handleDelete = (name: string) => {
