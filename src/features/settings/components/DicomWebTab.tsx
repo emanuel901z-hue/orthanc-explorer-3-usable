@@ -6,10 +6,9 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { generateDemoDicomWebServers } from '@/shared/api/mock/demo-data-generator';
+import { useDicomWebServers } from '@/features/settings/hooks/useDicomWebServers';
+import { DicomWebServer } from '@/shared/types';
 import { toast } from 'sonner';
-
-const dicomwebServers = generateDemoDicomWebServers();
 
 const authIcons: Record<string, typeof Shield> = {
   bearer: ShieldCheck,
@@ -27,10 +26,20 @@ const authColors: Record<string, string> = {
 
 interface DicomWebTabProps {
   onAddClick: () => void;
-  onEditClick: (server: typeof dicomwebServers[number]) => void;
+  onEditClick: (server: DicomWebServer) => void;
 }
 
 export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProps) {
+  const { data: serverNames = [] } = useDicomWebServers();
+  const dicomwebServers: DicomWebServer[] = serverNames.map((name) => ({
+    id: name,
+    name,
+    url: '',
+    authType: 'none' as const,
+    hasQidoSupport: false,
+    hasWadoSupport: false,
+    hasStowSupport: false,
+  }));
   return (
     <TooltipProvider>
       <div className="space-y-4">
