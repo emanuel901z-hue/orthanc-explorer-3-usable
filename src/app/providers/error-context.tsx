@@ -6,7 +6,13 @@
 
 import { createContext, useContext, useCallback, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { isApiError, type ApiError, AuthError, NetworkError, NotFoundError, DicomError } from '@/shared/api/errors';
+import {
+  isApiError,
+  AuthError,
+  NetworkError,
+  NotFoundError,
+  DicomError,
+} from '@/shared/api/errors';
 
 export interface ErrorContextValue {
   /** Report an error to the central handler */
@@ -47,11 +53,7 @@ export function ErrorProvider({ children }: { children: ReactNode }) {
     // Never include PHI in error reports
   }, []);
 
-  return (
-    <ErrorContext.Provider value={{ reportError }}>
-      {children}
-    </ErrorContext.Provider>
-  );
+  return <ErrorContext.Provider value={{ reportError }}>{children}</ErrorContext.Provider>;
 }
 
 export function useErrorHandler(): ErrorContextValue {

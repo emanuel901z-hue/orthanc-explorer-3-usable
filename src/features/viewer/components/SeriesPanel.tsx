@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, GripVertical, Layers } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 
 export interface SeriesItem {
   id: string;
@@ -11,7 +11,7 @@ export interface SeriesItem {
   modality: string;
   slices: number;
   sequence?: string;
-  studyInstanceUID: string;  // DICOM StudyInstanceUID — for building wadors: imageIds
+  studyInstanceUID: string; // DICOM StudyInstanceUID — for building wadors: imageIds
   seriesInstanceUID: string; // DICOM SeriesInstanceUID — for building wadors: imageIds
 }
 
@@ -124,19 +124,24 @@ export function SeriesPanel({ seriesList, collapsed, onToggle }: SeriesPanelProp
     <div
       className={cn(
         'shrink-0 bg-[#12122a] border-r border-white/10 flex flex-col transition-all duration-200',
-        collapsed ? 'w-10' : 'w-56'
+        collapsed ? 'w-10' : 'w-56',
       )}
     >
       {/* Header */}
-      <div className={cn(
-        'flex items-center border-b border-white/10 shrink-0',
-        collapsed ? 'justify-center py-2' : 'justify-between px-3 py-2'
-      )}>
+      <div
+        className={cn(
+          'flex items-center border-b border-white/10 shrink-0',
+          collapsed ? 'justify-center py-2' : 'justify-between px-3 py-2',
+        )}
+      >
         {!collapsed && (
           <div className="flex items-center gap-1.5 text-white/80 text-xs font-medium">
             <Layers className="h-3.5 w-3.5" />
             Series
-            <Badge variant="outline" className="text-[9px] text-white/40 border-white/20 px-1 py-0 ml-1">
+            <Badge
+              variant="outline"
+              className="text-[9px] text-white/40 border-white/20 px-1 py-0 ml-1"
+            >
               {seriesList.length}
             </Badge>
           </div>
@@ -149,7 +154,11 @@ export function SeriesPanel({ seriesList, collapsed, onToggle }: SeriesPanelProp
               className="h-6 w-6 p-0 text-white/40 hover:text-white hover:bg-white/10"
               onClick={onToggle}
             >
-              {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+              {collapsed ? (
+                <ChevronRight className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronLeft className="h-3.5 w-3.5" />
+              )}
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right" className="text-xs">
@@ -182,14 +191,12 @@ export function SeriesPanel({ seriesList, collapsed, onToggle }: SeriesPanelProp
                       variant="outline"
                       className={cn(
                         'text-[9px] px-1 py-0 border-white/20',
-                        s.modality === 'MR' ? 'text-blue-400' : 'text-amber-400'
+                        s.modality === 'MR' ? 'text-blue-400' : 'text-amber-400',
                       )}
                     >
                       {s.modality}
                     </Badge>
-                    <span className="text-white/30 text-[9px]">
-                      {s.slices} sl.
-                    </span>
+                    <span className="text-white/30 text-[9px]">{s.slices} sl.</span>
                   </div>
                 </div>
               </div>

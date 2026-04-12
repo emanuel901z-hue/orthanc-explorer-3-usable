@@ -1,9 +1,26 @@
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import {
-  Upload, Send, ShieldCheck, Trash2, Pencil, Tag, Download, Radio, Server,
-  CheckCircle2, AlertCircle, AlertTriangle, Info, X, Clock, User, FileText,
-  ExternalLink, FolderOpen, RotateCcw, Eye, Settings,
+  Upload,
+  Send,
+  ShieldCheck,
+  Trash2,
+  Pencil,
+  Tag,
+  Download,
+  Radio,
+  Server,
+  CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  X,
+  Clock,
+  User,
+  FileText,
+  ExternalLink,
+  FolderOpen,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,11 +40,30 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   system: <Server className="h-4 w-4" />,
 };
 
-const SEVERITY_CONFIG: Record<ActivitySeverity, { icon: React.ReactNode; label: string; className: string }> = {
-  success: { icon: <CheckCircle2 className="h-4 w-4" />, label: 'Success', className: 'text-success bg-success/10 border-success/20' },
-  error: { icon: <AlertCircle className="h-4 w-4" />, label: 'Error', className: 'text-destructive bg-destructive/10 border-destructive/20' },
-  warning: { icon: <AlertTriangle className="h-4 w-4" />, label: 'Warning', className: 'text-warning bg-warning/10 border-warning/20' },
-  info: { icon: <Info className="h-4 w-4" />, label: 'Info', className: 'text-info bg-info/10 border-info/20' },
+const SEVERITY_CONFIG: Record<
+  ActivitySeverity,
+  { icon: React.ReactNode; label: string; className: string }
+> = {
+  success: {
+    icon: <CheckCircle2 className="h-4 w-4" />,
+    label: 'Success',
+    className: 'text-success bg-success/10 border-success/20',
+  },
+  error: {
+    icon: <AlertCircle className="h-4 w-4" />,
+    label: 'Error',
+    className: 'text-destructive bg-destructive/10 border-destructive/20',
+  },
+  warning: {
+    icon: <AlertTriangle className="h-4 w-4" />,
+    label: 'Warning',
+    className: 'text-warning bg-warning/10 border-warning/20',
+  },
+  info: {
+    icon: <Info className="h-4 w-4" />,
+    label: 'Info',
+    className: 'text-info bg-info/10 border-info/20',
+  },
 };
 
 const CATEGORY_LABELS: Record<ActivityCategory, string> = {
@@ -55,14 +91,24 @@ interface ContextualAction {
   onClick: () => void;
 }
 
-function getContextualActions(event: ActivityEvent, navigate: (path: string) => void): ContextualAction[] {
+function getContextualActions(
+  event: ActivityEvent,
+  navigate: (path: string) => void,
+): ContextualAction[] {
   const actions: ContextualAction[] = [];
   const studyId = event.metadata?.['Study ID'];
   const isSuccess = event.severity === 'success';
   const isError = event.severity === 'error';
 
   // Navigate to study for study-related actions
-  if (studyId && (event.action === 'upload' || event.action === 'send' || event.action === 'anonymize' || event.action === 'modify' || event.action === 'download')) {
+  if (
+    studyId &&
+    (event.action === 'upload' ||
+      event.action === 'send' ||
+      event.action === 'anonymize' ||
+      event.action === 'modify' ||
+      event.action === 'download')
+  ) {
     actions.push({
       label: 'Go to Study',
       icon: <FolderOpen className="h-3.5 w-3.5" />,
@@ -134,19 +180,43 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
   const actions = getContextualActions(event, navigate);
 
   const details: DetailRow[] = [
-    { label: 'Timestamp', value: format(new Date(event.timestamp), 'PPpp'), icon: <Clock className="h-3.5 w-3.5 text-muted-foreground" /> },
-    { label: 'Category', value: CATEGORY_LABELS[event.category], icon: <FileText className="h-3.5 w-3.5 text-muted-foreground" /> },
-    { label: 'Action', value: event.action, icon: ACTION_ICONS[event.action] || <Info className="h-3.5 w-3.5" /> },
+    {
+      label: 'Timestamp',
+      value: format(new Date(event.timestamp), 'PPpp'),
+      icon: <Clock className="h-3.5 w-3.5 text-muted-foreground" />,
+    },
+    {
+      label: 'Category',
+      value: CATEGORY_LABELS[event.category],
+      icon: <FileText className="h-3.5 w-3.5 text-muted-foreground" />,
+    },
+    {
+      label: 'Action',
+      value: event.action,
+      icon: ACTION_ICONS[event.action] || <Info className="h-3.5 w-3.5" />,
+    },
   ];
 
   if (event.actor) {
-    details.push({ label: 'Actor', value: event.actor, icon: <User className="h-3.5 w-3.5 text-muted-foreground" /> });
+    details.push({
+      label: 'Actor',
+      value: event.actor,
+      icon: <User className="h-3.5 w-3.5 text-muted-foreground" />,
+    });
   }
   if (event.resource) {
-    details.push({ label: 'Resource', value: event.resource, icon: <FileText className="h-3.5 w-3.5 text-muted-foreground" /> });
+    details.push({
+      label: 'Resource',
+      value: event.resource,
+      icon: <FileText className="h-3.5 w-3.5 text-muted-foreground" />,
+    });
   }
   if (event.duration) {
-    details.push({ label: 'Duration', value: formatDuration(event.duration), icon: <Clock className="h-3.5 w-3.5 text-muted-foreground" /> });
+    details.push({
+      label: 'Duration',
+      value: formatDuration(event.duration),
+      icon: <Clock className="h-3.5 w-3.5 text-muted-foreground" />,
+    });
   }
 
   return (
@@ -154,7 +224,12 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
       {/* Header */}
       <div className="flex items-start justify-between p-4 border-b">
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          <div className={cn('h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border', severity.className)}>
+          <div
+            className={cn(
+              'h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border',
+              severity.className,
+            )}
+          >
             {severity.icon}
           </div>
           <div className="min-w-0">
@@ -169,7 +244,12 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
             </div>
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0 -mt-0.5" onClick={onClose}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0 shrink-0 -mt-0.5"
+          onClick={onClose}
+        >
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -237,9 +317,7 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
 
       {/* Footer */}
       <div className="border-t px-4 py-3">
-        <p className="text-[10px] text-muted-foreground text-center">
-          Event ID: {event.id}
-        </p>
+        <p className="text-[10px] text-muted-foreground text-center">Event ID: {event.id}</p>
       </div>
     </div>
   );

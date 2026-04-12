@@ -1,28 +1,75 @@
-import { ActivityEvent, ActivityCategory, ActivitySeverity } from '@/shared/types/activity';
+import { ActivityEvent, ActivitySeverity } from '@/shared/types/activity';
 
 const PATIENT_NAMES = [
-  'Rodriguez, Richard', 'Thompson, Robert', 'Chen, Wei', 'Müller, Hans',
-  'García, María', 'Sato, Yuki', 'O\'Brien, Sarah', 'Kim, Joon',
-  'Patel, Aisha', 'Johansson, Erik', 'Dubois, Pierre', 'Nakamura, Kenji',
+  'Rodriguez, Richard',
+  'Thompson, Robert',
+  'Chen, Wei',
+  'Müller, Hans',
+  'García, María',
+  'Sato, Yuki',
+  "O'Brien, Sarah",
+  'Kim, Joon',
+  'Patel, Aisha',
+  'Johansson, Erik',
+  'Dubois, Pierre',
+  'Nakamura, Kenji',
 ];
 
 const SERVERS = ['Cloud PACS', 'Research Archive', 'Regional Hub', 'AI Pipeline'];
 const MODALITIES_LIST = ['CT Scanner Room 1', 'MR-3T', 'CR Unit B', 'US Portable'];
 
-const AUDIT_ACTIONS: Array<{ action: string; titleFn: () => string; severity: ActivitySeverity }> = [
-  { action: 'delete', titleFn: () => `Study deleted: ${pick(PATIENT_NAMES)}`, severity: 'warning' },
-  { action: 'modify', titleFn: () => `Study modified: ${pick(PATIENT_NAMES)}`, severity: 'info' },
-  { action: 'anonymize', titleFn: () => `Study anonymized: ${pick(PATIENT_NAMES)}`, severity: 'info' },
-  { action: 'label', titleFn: () => `Label added to ${pick(PATIENT_NAMES)}`, severity: 'info' },
-  { action: 'download', titleFn: () => `Study downloaded: ${pick(PATIENT_NAMES)}`, severity: 'info' },
-];
+const AUDIT_ACTIONS: Array<{ action: string; titleFn: () => string; severity: ActivitySeverity }> =
+  [
+    {
+      action: 'delete',
+      titleFn: () => `Study deleted: ${pick(PATIENT_NAMES)}`,
+      severity: 'warning',
+    },
+    { action: 'modify', titleFn: () => `Study modified: ${pick(PATIENT_NAMES)}`, severity: 'info' },
+    {
+      action: 'anonymize',
+      titleFn: () => `Study anonymized: ${pick(PATIENT_NAMES)}`,
+      severity: 'info',
+    },
+    { action: 'label', titleFn: () => `Label added to ${pick(PATIENT_NAMES)}`, severity: 'info' },
+    {
+      action: 'download',
+      titleFn: () => `Study downloaded: ${pick(PATIENT_NAMES)}`,
+      severity: 'info',
+    },
+  ];
 
-const LOG_ACTIONS: Array<{ action: string; titleFn: () => string; severity: ActivitySeverity; descFn?: () => string }> = [
-  { action: 'echo', titleFn: () => `C-ECHO to ${pick(MODALITIES_LIST)}`, severity: 'success', descFn: () => 'Echo successful — round-trip 12ms' },
-  { action: 'echo', titleFn: () => `C-ECHO to ${pick(MODALITIES_LIST)} failed`, severity: 'error', descFn: () => 'Connection refused — host unreachable' },
+const LOG_ACTIONS: Array<{
+  action: string;
+  titleFn: () => string;
+  severity: ActivitySeverity;
+  descFn?: () => string;
+}> = [
+  {
+    action: 'echo',
+    titleFn: () => `C-ECHO to ${pick(MODALITIES_LIST)}`,
+    severity: 'success',
+    descFn: () => 'Echo successful — round-trip 12ms',
+  },
+  {
+    action: 'echo',
+    titleFn: () => `C-ECHO to ${pick(MODALITIES_LIST)} failed`,
+    severity: 'error',
+    descFn: () => 'Connection refused — host unreachable',
+  },
   { action: 'system', titleFn: () => 'Orthanc service restarted', severity: 'info' },
-  { action: 'system', titleFn: () => 'Database compaction completed', severity: 'info', descFn: () => 'Freed 2.4 GB — 12,340 studies indexed' },
-  { action: 'system', titleFn: () => 'Storage warning: 85% capacity', severity: 'warning', descFn: () => '425 GB used of 500 GB total' },
+  {
+    action: 'system',
+    titleFn: () => 'Database compaction completed',
+    severity: 'info',
+    descFn: () => 'Freed 2.4 GB — 12,340 studies indexed',
+  },
+  {
+    action: 'system',
+    titleFn: () => 'Storage warning: 85% capacity',
+    severity: 'warning',
+    descFn: () => '425 GB used of 500 GB total',
+  },
   { action: 'system', titleFn: () => 'Plugin loaded: DicomWeb', severity: 'info' },
   { action: 'system', titleFn: () => 'TLS certificate renewed', severity: 'success' },
 ];
@@ -64,8 +111,8 @@ export function generateDemoActivityEvents(count: number = 80): ActivityEvent[] 
         title: isUpload
           ? `Upload ${success ? 'completed' : 'failed'}: ${Math.floor(Math.random() * 50 + 1)} files`
           : isSend
-          ? `Send ${success ? 'completed' : 'failed'}: ${patient} → ${pick(SERVERS)}`
-          : `Anonymize ${success ? 'completed' : 'failed'}: ${patient}`,
+            ? `Send ${success ? 'completed' : 'failed'}: ${patient} → ${pick(SERVERS)}`
+            : `Anonymize ${success ? 'completed' : 'failed'}: ${patient}`,
         action,
         resource: patient,
         duration: randomDuration(),

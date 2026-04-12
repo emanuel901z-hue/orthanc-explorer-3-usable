@@ -1,12 +1,17 @@
 // PHI classification: UI (no PHI — persist-safe)
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Job, JobType, JobStatus } from '@/shared/types/job';
+import { Job, JobStatus } from '@/shared/types/job';
 
 interface JobState {
   jobs: Job[];
   addJob: (job: Omit<Job, 'createdAt' | 'updatedAt'>) => string;
-  updateJob: (id: string, patch: Partial<Pick<Job, 'progress' | 'status' | 'error' | 'completedItems' | 'label' | 'description'>>) => void;
+  updateJob: (
+    id: string,
+    patch: Partial<
+      Pick<Job, 'progress' | 'status' | 'error' | 'completedItems' | 'label' | 'description'>
+    >,
+  ) => void;
   removeJob: (id: string) => void;
   clearCompleted: () => void;
   retryJob: (id: string) => void;
@@ -30,21 +35,26 @@ export const useJobStore = create<JobState>()(
 
       updateJob: (id, patch) => {
         set((s) => ({
-          jobs: s.jobs.map((j) =>
-            j.id === id ? { ...j, ...patch, updatedAt: Date.now() } : j
-          ),
+          jobs: s.jobs.map((j) => (j.id === id ? { ...j, ...patch, updatedAt: Date.now() } : j)),
         }));
       },
 
       removeJob: (id) => set((s) => ({ jobs: s.jobs.filter((j) => j.id !== id) })),
 
-      clearCompleted: () =>
-        set((s) => ({ jobs: s.jobs.filter((j) => j.status !== 'complete') })),
+      clearCompleted: () => set((s) => ({ jobs: s.jobs.filter((j) => j.status !== 'complete') })),
 
       retryJob: (id) => {
         set((s) => ({
           jobs: s.jobs.map((j) =>
-            j.id === id ? { ...j, status: 'pending' as JobStatus, progress: 0, error: undefined, updatedAt: Date.now() } : j
+            j.id === id
+              ? {
+                  ...j,
+                  status: 'pending' as JobStatus,
+                  progress: 0,
+                  error: undefined,
+                  updatedAt: Date.now(),
+                }
+              : j,
           ),
         }));
       },
@@ -60,10 +70,10 @@ export const useJobStore = create<JobState>()(
           state.jobs = state.jobs.map((j) =>
             j.status === 'running' || j.status === 'pending'
               ? { ...j, status: 'interrupted' as JobStatus }
-              : j
+              : j,
           );
         }
       },
-    }
-  )
+    },
+  ),
 );

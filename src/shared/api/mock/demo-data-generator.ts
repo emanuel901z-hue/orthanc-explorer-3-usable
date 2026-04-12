@@ -1,9 +1,52 @@
 import { Study, Series, Instance, DicomTag, DicomModality, DicomWebServer } from '@/shared/types';
-import { subDays, subYears, addHours, format } from 'date-fns';
+import { subDays, subYears, addHours } from 'date-fns';
 
-const FIRST_NAMES_M = ['James', 'Robert', 'Michael', 'William', 'David', 'Richard', 'Thomas', 'Charles', 'Daniel', 'Matthew'];
-const FIRST_NAMES_F = ['Mary', 'Patricia', 'Jennifer', 'Linda', 'Barbara', 'Elizabeth', 'Susan', 'Jessica', 'Sarah', 'Karen'];
-const LAST_NAMES = ['Anderson', 'Thompson', 'Martinez', 'Robinson', 'Clark', 'Rodriguez', 'Lewis', 'Lee', 'Walker', 'Hall', 'Allen', 'Young', 'Hernandez', 'King', 'Wright', 'Lopez', 'Hill', 'Scott', 'Green', 'Adams'];
+const FIRST_NAMES_M = [
+  'James',
+  'Robert',
+  'Michael',
+  'William',
+  'David',
+  'Richard',
+  'Thomas',
+  'Charles',
+  'Daniel',
+  'Matthew',
+];
+const FIRST_NAMES_F = [
+  'Mary',
+  'Patricia',
+  'Jennifer',
+  'Linda',
+  'Barbara',
+  'Elizabeth',
+  'Susan',
+  'Jessica',
+  'Sarah',
+  'Karen',
+];
+const LAST_NAMES = [
+  'Anderson',
+  'Thompson',
+  'Martinez',
+  'Robinson',
+  'Clark',
+  'Rodriguez',
+  'Lewis',
+  'Lee',
+  'Walker',
+  'Hall',
+  'Allen',
+  'Young',
+  'Hernandez',
+  'King',
+  'Wright',
+  'Lopez',
+  'Hill',
+  'Scott',
+  'Green',
+  'Adams',
+];
 
 interface Patient {
   id: string;
@@ -28,13 +71,52 @@ function generatePatients(count: number): Patient[] {
 }
 
 const STUDY_TEMPLATES: { modality: string; descriptions: string[] }[] = [
-  { modality: 'CT', descriptions: ['CT Chest with Contrast', 'CT Abdomen Pelvis', 'CT Head without Contrast', 'CT Angiography Chest', 'CT Spine Lumbar'] },
-  { modality: 'MR', descriptions: ['MRI Brain with and without Contrast', 'MRI Knee Left', 'MRI Lumbar Spine', 'MRI Shoulder Right', 'MRI Cardiac'] },
-  { modality: 'US', descriptions: ['US Abdomen Complete', 'US Thyroid', 'US Renal', 'US Carotid Doppler', 'US Obstetric'] },
-  { modality: 'CR', descriptions: ['CR Chest PA and Lateral', 'CR Hand Left', 'CR Foot Right', 'CR Pelvis AP'] },
-  { modality: 'DX', descriptions: ['DX Chest', 'DX Spine Cervical', 'DX Knee Bilateral', 'DX Ankle Right'] },
-  { modality: 'PT', descriptions: ['PET/CT Whole Body', 'PET Brain FDG', 'PET/CT Oncology Follow-up'] },
-  { modality: 'NM', descriptions: ['NM Bone Scan Whole Body', 'NM Thyroid Uptake', 'NM Myocardial Perfusion'] },
+  {
+    modality: 'CT',
+    descriptions: [
+      'CT Chest with Contrast',
+      'CT Abdomen Pelvis',
+      'CT Head without Contrast',
+      'CT Angiography Chest',
+      'CT Spine Lumbar',
+    ],
+  },
+  {
+    modality: 'MR',
+    descriptions: [
+      'MRI Brain with and without Contrast',
+      'MRI Knee Left',
+      'MRI Lumbar Spine',
+      'MRI Shoulder Right',
+      'MRI Cardiac',
+    ],
+  },
+  {
+    modality: 'US',
+    descriptions: [
+      'US Abdomen Complete',
+      'US Thyroid',
+      'US Renal',
+      'US Carotid Doppler',
+      'US Obstetric',
+    ],
+  },
+  {
+    modality: 'CR',
+    descriptions: ['CR Chest PA and Lateral', 'CR Hand Left', 'CR Foot Right', 'CR Pelvis AP'],
+  },
+  {
+    modality: 'DX',
+    descriptions: ['DX Chest', 'DX Spine Cervical', 'DX Knee Bilateral', 'DX Ankle Right'],
+  },
+  {
+    modality: 'PT',
+    descriptions: ['PET/CT Whole Body', 'PET Brain FDG', 'PET/CT Oncology Follow-up'],
+  },
+  {
+    modality: 'NM',
+    descriptions: ['NM Bone Scan Whole Body', 'NM Thyroid Uptake', 'NM Myocardial Perfusion'],
+  },
 ];
 
 const LABELS = ['Urgent', 'Reviewed', 'Exported', 'Teaching', 'Follow-up', 'AI Processed'];
@@ -45,7 +127,8 @@ export function generateDemoStudies(count: number): Study[] {
   return Array.from({ length: count }, (_, i) => {
     const patient = patients[Math.floor(Math.random() * patients.length)];
     const template = STUDY_TEMPLATES[Math.floor(Math.random() * STUDY_TEMPLATES.length)];
-    const description = template.descriptions[Math.floor(Math.random() * template.descriptions.length)];
+    const description =
+      template.descriptions[Math.floor(Math.random() * template.descriptions.length)];
     const studyDate = subDays(new Date(), Math.floor(Math.random() * 365));
     const numSeries = Math.floor(Math.random() * 6) + 1;
     const numInstances = numSeries * (Math.floor(Math.random() * 80) + 10);
@@ -111,13 +194,17 @@ const SOP_CLASSES: Record<string, string> = {
 };
 
 const TRANSFER_SYNTAXES = [
-  '1.2.840.10008.1.2.1',        // Explicit VR Little Endian
-  '1.2.840.10008.1.2',          // Implicit VR Little Endian
-  '1.2.840.10008.1.2.4.70',     // JPEG Lossless
-  '1.2.840.10008.1.2.4.90',     // JPEG 2000 Lossless
+  '1.2.840.10008.1.2.1', // Explicit VR Little Endian
+  '1.2.840.10008.1.2', // Implicit VR Little Endian
+  '1.2.840.10008.1.2.4.70', // JPEG Lossless
+  '1.2.840.10008.1.2.4.90', // JPEG 2000 Lossless
 ];
 
-export function generateDemoInstances(seriesId: string, modality: string, count: number): Instance[] {
+export function generateDemoInstances(
+  seriesId: string,
+  modality: string,
+  count: number,
+): Instance[] {
   const sopClassUID = SOP_CLASSES[modality] || '1.2.840.10008.5.1.4.1.1.2';
   const transferSyntax = TRANSFER_SYNTAXES[Math.floor(Math.random() * TRANSFER_SYNTAXES.length)];
 
@@ -125,7 +212,12 @@ export function generateDemoInstances(seriesId: string, modality: string, count:
     const fileSize = Math.floor(Math.random() * 800000) + 50000;
     const tags: DicomTag[] = [
       { tag: '(0008,0016)', name: 'SOP Class UID', vr: 'UI', value: sopClassUID },
-      { tag: '(0008,0018)', name: 'SOP Instance UID', vr: 'UI', value: `1.2.840.113619.${Date.now()}.${seriesId}.${i}` },
+      {
+        tag: '(0008,0018)',
+        name: 'SOP Instance UID',
+        vr: 'UI',
+        value: `1.2.840.113619.${Date.now()}.${seriesId}.${i}`,
+      },
       { tag: '(0020,0013)', name: 'Instance Number', vr: 'IS', value: String(i + 1) },
       { tag: '(0008,0060)', name: 'Modality', vr: 'CS', value: modality },
       { tag: '(0028,0010)', name: 'Rows', vr: 'US', value: String(512) },
@@ -136,8 +228,18 @@ export function generateDemoInstances(seriesId: string, modality: string, count:
       { tag: '(0028,0103)', name: 'Pixel Representation', vr: 'US', value: '0' },
       { tag: '(0002,0010)', name: 'Transfer Syntax UID', vr: 'UI', value: transferSyntax },
       { tag: '(0008,0008)', name: 'Image Type', vr: 'CS', value: 'ORIGINAL\\PRIMARY\\AXIAL' },
-      { tag: '(0018,0050)', name: 'Slice Thickness', vr: 'DS', value: (Math.random() * 5 + 0.5).toFixed(1) },
-      { tag: '(0020,0032)', name: 'Image Position (Patient)', vr: 'DS', value: `${(Math.random() * 200 - 100).toFixed(1)}\\${(Math.random() * 200 - 100).toFixed(1)}\\${(i * 2.5).toFixed(1)}` },
+      {
+        tag: '(0018,0050)',
+        name: 'Slice Thickness',
+        vr: 'DS',
+        value: (Math.random() * 5 + 0.5).toFixed(1),
+      },
+      {
+        tag: '(0020,0032)',
+        name: 'Image Position (Patient)',
+        vr: 'DS',
+        value: `${(Math.random() * 200 - 100).toFixed(1)}\\${(Math.random() * 200 - 100).toFixed(1)}\\${(i * 2.5).toFixed(1)}`,
+      },
     ];
 
     return {
@@ -155,17 +257,79 @@ export function generateDemoInstances(seriesId: string, modality: string, count:
 
 export function generateDemoModalities(): DicomModality[] {
   return [
-    { id: 'mod-1', name: 'CT Scanner Main', aet: 'CT_MAIN', host: '192.168.1.10', port: 104, manufacturer: 'Siemens', lastEcho: subDays(new Date(), 0), lastEchoStatus: 'success' },
-    { id: 'mod-2', name: 'MRI Suite A', aet: 'MR_SUITE_A', host: '192.168.1.20', port: 104, manufacturer: 'GE Healthcare', lastEcho: subDays(new Date(), 1), lastEchoStatus: 'success' },
-    { id: 'mod-3', name: 'Ultrasound Room 3', aet: 'US_ROOM3', host: '192.168.1.30', port: 104, manufacturer: 'Philips', lastEcho: subDays(new Date(), 0), lastEchoStatus: 'success' },
-    { id: 'mod-4', name: 'X-Ray Emergency', aet: 'XR_ER', host: '192.168.1.40', port: 104, manufacturer: 'Canon', lastEcho: subDays(new Date(), 3), lastEchoStatus: 'failure' },
-    { id: 'mod-5', name: 'PET/CT', aet: 'PETCT', host: '192.168.1.50', port: 11112, manufacturer: 'Siemens', lastEcho: subDays(new Date(), 0), lastEchoStatus: 'success' },
+    {
+      id: 'mod-1',
+      name: 'CT Scanner Main',
+      aet: 'CT_MAIN',
+      host: '192.168.1.10',
+      port: 104,
+      manufacturer: 'Siemens',
+      lastEcho: subDays(new Date(), 0),
+      lastEchoStatus: 'success',
+    },
+    {
+      id: 'mod-2',
+      name: 'MRI Suite A',
+      aet: 'MR_SUITE_A',
+      host: '192.168.1.20',
+      port: 104,
+      manufacturer: 'GE Healthcare',
+      lastEcho: subDays(new Date(), 1),
+      lastEchoStatus: 'success',
+    },
+    {
+      id: 'mod-3',
+      name: 'Ultrasound Room 3',
+      aet: 'US_ROOM3',
+      host: '192.168.1.30',
+      port: 104,
+      manufacturer: 'Philips',
+      lastEcho: subDays(new Date(), 0),
+      lastEchoStatus: 'success',
+    },
+    {
+      id: 'mod-4',
+      name: 'X-Ray Emergency',
+      aet: 'XR_ER',
+      host: '192.168.1.40',
+      port: 104,
+      manufacturer: 'Canon',
+      lastEcho: subDays(new Date(), 3),
+      lastEchoStatus: 'failure',
+    },
+    {
+      id: 'mod-5',
+      name: 'PET/CT',
+      aet: 'PETCT',
+      host: '192.168.1.50',
+      port: 11112,
+      manufacturer: 'Siemens',
+      lastEcho: subDays(new Date(), 0),
+      lastEchoStatus: 'success',
+    },
   ];
 }
 
 export function generateDemoDicomWebServers(): DicomWebServer[] {
   return [
-    { id: 'dw-1', name: 'Cloud PACS', url: 'https://pacs.hospital.org/dicomweb', authType: 'bearer', hasQidoSupport: true, hasWadoSupport: true, hasStowSupport: true },
-    { id: 'dw-2', name: 'Research Archive', url: 'https://research.med.edu/wado-rs', authType: 'basic', username: 'researcher', hasQidoSupport: true, hasWadoSupport: true, hasStowSupport: false },
+    {
+      id: 'dw-1',
+      name: 'Cloud PACS',
+      url: 'https://pacs.hospital.org/dicomweb',
+      authType: 'bearer',
+      hasQidoSupport: true,
+      hasWadoSupport: true,
+      hasStowSupport: true,
+    },
+    {
+      id: 'dw-2',
+      name: 'Research Archive',
+      url: 'https://research.med.edu/wado-rs',
+      authType: 'basic',
+      username: 'researcher',
+      hasQidoSupport: true,
+      hasWadoSupport: true,
+      hasStowSupport: false,
+    },
   ];
 }

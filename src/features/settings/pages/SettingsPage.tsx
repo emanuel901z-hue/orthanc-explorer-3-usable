@@ -1,12 +1,23 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Server, Radio, Globe, Eye, Sliders, Activity, Sun, Moon, Monitor, Check, Languages } from 'lucide-react';
+import {
+  Server,
+  Radio,
+  Globe,
+  Eye,
+  Sliders,
+  Activity,
+  Sun,
+  Moon,
+  Monitor,
+  Check,
+  Languages,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useUiStore } from '@/store/ui-store';
 import { DicomModality, DicomWebServer } from '@/shared/types';
@@ -45,11 +56,21 @@ export default function SettingsPage() {
 
       <Tabs defaultValue="system" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
-          <TabsTrigger value="system" className="gap-1.5"><Server className="h-3.5 w-3.5" /> {t('settings.system')}</TabsTrigger>
-          <TabsTrigger value="modalities" className="gap-1.5"><Radio className="h-3.5 w-3.5" /> {t('settings.modalities')}</TabsTrigger>
-          <TabsTrigger value="dicomweb" className="gap-1.5"><Globe className="h-3.5 w-3.5" /> {t('settings.dicomweb')}</TabsTrigger>
-          <TabsTrigger value="viewer" className="gap-1.5"><Eye className="h-3.5 w-3.5" /> {t('settings.viewer')}</TabsTrigger>
-          <TabsTrigger value="preferences" className="gap-1.5"><Sliders className="h-3.5 w-3.5" /> {t('settings.preferences')}</TabsTrigger>
+          <TabsTrigger value="system" className="gap-1.5">
+            <Server className="h-3.5 w-3.5" /> {t('settings.system')}
+          </TabsTrigger>
+          <TabsTrigger value="modalities" className="gap-1.5">
+            <Radio className="h-3.5 w-3.5" /> {t('settings.modalities')}
+          </TabsTrigger>
+          <TabsTrigger value="dicomweb" className="gap-1.5">
+            <Globe className="h-3.5 w-3.5" /> {t('settings.dicomweb')}
+          </TabsTrigger>
+          <TabsTrigger value="viewer" className="gap-1.5">
+            <Eye className="h-3.5 w-3.5" /> {t('settings.viewer')}
+          </TabsTrigger>
+          <TabsTrigger value="preferences" className="gap-1.5">
+            <Sliders className="h-3.5 w-3.5" /> {t('settings.preferences')}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="system" className="space-y-4">
@@ -84,8 +105,14 @@ export default function SettingsPage() {
               <p className="text-xs text-muted-foreground">{t('settings.customizationDesc')}</p>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="app-name" className="text-sm font-medium">{t('settings.appName')}</Label>
-                  <Input id="app-name" placeholder={t('settings.appNamePlaceholder')} defaultValue="Orthanc Explorer 3" />
+                  <Label htmlFor="app-name" className="text-sm font-medium">
+                    {t('settings.appName')}
+                  </Label>
+                  <Input
+                    id="app-name"
+                    placeholder={t('settings.appNamePlaceholder')}
+                    defaultValue="Orthanc Explorer 3"
+                  />
                   <p className="text-xs text-muted-foreground">{t('settings.appNameDesc')}</p>
                 </div>
                 <div className="space-y-2">
@@ -95,7 +122,9 @@ export default function SettingsPage() {
                       <Activity className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <div className="space-y-1.5">
-                      <Button type="button" variant="outline" size="sm">{t('settings.uploadIcon')}</Button>
+                      <Button type="button" variant="outline" size="sm">
+                        {t('settings.uploadIcon')}
+                      </Button>
                       <p className="text-xs text-muted-foreground">{t('settings.appIconDesc')}</p>
                     </div>
                   </div>
@@ -103,7 +132,9 @@ export default function SettingsPage() {
               </div>
               <Separator />
               <div className="flex justify-end">
-                <Button size="sm" onClick={() => toast.success(t('settings.brandingSaved'))}>{t('settings.saveBranding')}</Button>
+                <Button size="sm" onClick={() => toast.success(t('settings.brandingSaved'))}>
+                  {t('settings.saveBranding')}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -120,7 +151,8 @@ export default function SettingsPage() {
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {SUPPORTED_LANGUAGES.map((lang) => {
-                  const isActive = i18n.language === lang.code || i18n.language?.startsWith(lang.code + '-');
+                  const isActive =
+                    i18n.language === lang.code || i18n.language?.startsWith(lang.code + '-');
                   return (
                     <button
                       key={lang.code}
@@ -155,11 +187,38 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-3">
-                {([
-                  { value: 'light' as const, label: t('settings.themeLight'), icon: Sun, bg: 'bg-white', sidebar: 'bg-slate-100', header: 'bg-blue-600', text: 'bg-slate-300', textSm: 'bg-slate-200' },
-                  { value: 'dark' as const, label: t('settings.themeDark'), icon: Moon, bg: 'bg-slate-900', sidebar: 'bg-slate-800', header: 'bg-blue-700', text: 'bg-slate-600', textSm: 'bg-slate-700' },
-                  { value: 'system' as const, label: t('settings.themeSystem'), icon: Monitor, bg: 'bg-gradient-to-r from-white to-slate-900', sidebar: 'bg-gradient-to-r from-slate-100 to-slate-800', header: 'bg-blue-600', text: 'bg-slate-400', textSm: 'bg-slate-300' },
-                ]).map((th) => {
+                {[
+                  {
+                    value: 'light' as const,
+                    label: t('settings.themeLight'),
+                    icon: Sun,
+                    bg: 'bg-white',
+                    sidebar: 'bg-slate-100',
+                    header: 'bg-blue-600',
+                    text: 'bg-slate-300',
+                    textSm: 'bg-slate-200',
+                  },
+                  {
+                    value: 'dark' as const,
+                    label: t('settings.themeDark'),
+                    icon: Moon,
+                    bg: 'bg-slate-900',
+                    sidebar: 'bg-slate-800',
+                    header: 'bg-blue-700',
+                    text: 'bg-slate-600',
+                    textSm: 'bg-slate-700',
+                  },
+                  {
+                    value: 'system' as const,
+                    label: t('settings.themeSystem'),
+                    icon: Monitor,
+                    bg: 'bg-gradient-to-r from-white to-slate-900',
+                    sidebar: 'bg-gradient-to-r from-slate-100 to-slate-800',
+                    header: 'bg-blue-600',
+                    text: 'bg-slate-400',
+                    textSm: 'bg-slate-300',
+                  },
+                ].map((th) => {
                   const isActive = theme === th.value;
                   return (
                     <button
@@ -171,7 +230,9 @@ export default function SettingsPage() {
                           : 'border-border hover:border-muted-foreground/40'
                       }`}
                     >
-                      <div className={`rounded-md ${th.bg} overflow-hidden aspect-[4/3] border border-black/10`}>
+                      <div
+                        className={`rounded-md ${th.bg} overflow-hidden aspect-[4/3] border border-black/10`}
+                      >
                         <div className={`${th.header} h-[10%]`} />
                         <div className="flex h-[90%]">
                           <div className={`${th.sidebar} w-[22%] p-1 space-y-0.5`}>
@@ -208,15 +269,30 @@ export default function SettingsPage() {
       <AddModalityDialog
         open={addModalityOpen || !!editModality}
         onOpenChange={(open) => {
-          if (!open) { setAddModalityOpen(false); setEditModality(null); }
+          if (!open) {
+            setAddModalityOpen(false);
+            setEditModality(null);
+          }
         }}
         editModality={editModality}
         onSave={(values) => {
           saveModality.mutate(
-            { name: values.name, config: { AET: values.aet, Host: values.host, Port: values.port, ...(values.manufacturer ? { Manufacturer: values.manufacturer } : {}) } },
+            {
+              name: values.name,
+              config: {
+                AET: values.aet,
+                Host: values.host,
+                Port: values.port,
+                ...(values.manufacturer ? { Manufacturer: values.manufacturer } : {}),
+              },
+            },
             {
               onSuccess: () => {
-                toast.success(editModality ? `Modality "${values.name}" updated` : `Modality "${values.name}" added`);
+                toast.success(
+                  editModality
+                    ? `Modality "${values.name}" updated`
+                    : `Modality "${values.name}" added`,
+                );
                 setAddModalityOpen(false);
                 setEditModality(null);
               },
@@ -229,11 +305,17 @@ export default function SettingsPage() {
       <AddServerDialog
         open={addServerOpen || !!editServer}
         onOpenChange={(open) => {
-          if (!open) { setAddServerOpen(false); setEditServer(null); }
+          if (!open) {
+            setAddServerOpen(false);
+            setEditServer(null);
+          }
         }}
         editServer={editServer}
         onSave={(values) => {
-          toast.success(editServer ? `Server "${values.name}" updated` : `Server "${values.name}" added`, { description: values.url });
+          toast.success(
+            editServer ? `Server "${values.name}" updated` : `Server "${values.name}" added`,
+            { description: values.url },
+          );
           setEditServer(null);
         }}
       />

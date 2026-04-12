@@ -11,12 +11,27 @@ import {
   type ColumnDef,
   type SortingState,
 } from '@tanstack/react-table';
-import { Search, Filter, ChevronDown, ArrowUpDown, Trash2, Download, Tag, Send } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  ChevronDown,
+  ArrowUpDown,
+  Trash2,
+  Download,
+  Tag,
+  Send,
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -29,7 +44,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useStudies } from '@/features/studies/hooks/use-studies';
 import { Study, StudyFilters } from '@/shared/types';
-import { ModalityBadge, formatPatientName, formatDiskSize } from '@/shared/components/ModalityBadge';
+import { ModalityBadge, formatPatientName } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 
 const MODALITY_OPTIONS = ['CT', 'MR', 'US', 'CR', 'DX', 'PT', 'NM'];
@@ -45,161 +60,186 @@ export default function StudyListPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
 
-  const filters: StudyFilters = useMemo(() => ({
-    patientName: searchParams.get('patientName') || undefined,
-    patientId: searchParams.get('patientId') || undefined,
-    accessionNumber: searchParams.get('accession') || undefined,
-    studyDescription: searchParams.get('description') || undefined,
-    modalities: searchParams.get('modality') ? [searchParams.get('modality')!] : undefined,
-  }), [searchParams]);
+  const filters: StudyFilters = useMemo(
+    () => ({
+      patientName: searchParams.get('patientName') || undefined,
+      patientId: searchParams.get('patientId') || undefined,
+      accessionNumber: searchParams.get('accession') || undefined,
+      studyDescription: searchParams.get('description') || undefined,
+      modalities: searchParams.get('modality') ? [searchParams.get('modality')!] : undefined,
+    }),
+    [searchParams],
+  );
 
   const { data: studies = [], isLoading, isFetching } = useStudies(filters);
 
-  const updateFilter = useCallback((key: string, value: string) => {
-    setSearchParams((prev) => {
-      // Always create a new instance — mutating prev can cause React Router
-      // to skip navigation when it compares old vs new by reference.
-      const next = new URLSearchParams(prev);
-      if (value) next.set(key, value);
-      else next.delete(key);
-      return next;
-    });
-  }, [setSearchParams]);
+  const updateFilter = useCallback(
+    (key: string, value: string) => {
+      setSearchParams((prev) => {
+        // Always create a new instance — mutating prev can cause React Router
+        // to skip navigation when it compares old vs new by reference.
+        const next = new URLSearchParams(prev);
+        if (value) next.set(key, value);
+        else next.delete(key);
+        return next;
+      });
+    },
+    [setSearchParams],
+  );
 
   const quickSearch = searchParams.get('patientName') || '';
 
-  const columns: ColumnDef<Study>[] = useMemo(() => [
-    {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(v) => row.toggleSelected(!!v)}
-          aria-label="Select row"
-          onClick={(e) => e.stopPropagation()}
-        />
-      ),
-      size: 40,
-      enableSorting: false,
-    },
-    {
-      accessorKey: 'patientName',
-      header: ({ column }) => (
-        <Button variant="ghost" size="sm" className="gap-1 -ml-2 h-8 font-semibold" onClick={() => column.toggleSorting()}>
-          {t('studies.patientName')} <ArrowUpDown className="h-3.5 w-3.5" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div>
-          <span className="font-medium">{formatPatientName(row.original.patientName)}</span>
-          <div className="text-xs text-muted-foreground">{row.original.patientId}</div>
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'studyDate',
-      header: ({ column }) => (
-        <Button variant="ghost" size="sm" className="gap-1 -ml-2 h-8 font-semibold" onClick={() => column.toggleSorting()}>
-          {t('studies.studyDate')} <ArrowUpDown className="h-3.5 w-3.5" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div>
-          <span>{format(row.original.studyDate, 'MMM dd, yyyy')}</span>
-          {row.original.studyTime && (
-            <div className="text-xs text-muted-foreground">{row.original.studyTime}</div>
-          )}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'modalities',
-      header: t('studyList.columns.modality'),
-      cell: ({ row }) => (
-        <div className="flex gap-1">
-          {row.original.modalities.map((m) => (
-            <ModalityBadge key={m} modality={m} />
-          ))}
-        </div>
-      ),
-      enableSorting: false,
-    },
-    {
-      accessorKey: 'studyDescription',
-      header: t('studyList.columns.description'),
-      cell: ({ row }) => (
-        <span className="text-sm truncate max-w-[200px] block">{row.original.studyDescription || '—'}</span>
-      ),
-    },
-    {
-      accessorKey: 'accessionNumber',
-      header: t('studyList.columns.accession'),
-      cell: ({ row }) => (
-        <span className="font-mono text-xs text-muted-foreground">
-          {row.original.accessionNumber || '—'}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'referringPhysician',
-      header: t('studyList.columns.referring'),
-      cell: ({ row }) => (
-        <span className="text-sm truncate max-w-[160px] block">
-          {row.original.referringPhysician
-            ? row.original.referringPhysician.replace(/\^/g, ', ')
-            : '—'}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'numberOfSeries',
-      header: t('studyList.columns.images'),
-      cell: ({ row }) => (
-        <div>
-          <span className="font-medium">
-            {row.original.numberOfInstances !== undefined
-              ? row.original.numberOfInstances
+  const columns: ColumnDef<Study>[] = useMemo(
+    () => [
+      {
+        id: 'select',
+        header: ({ table }) => (
+          <Checkbox
+            checked={table.getIsAllPageRowsSelected()}
+            onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(v) => row.toggleSelected(!!v)}
+            aria-label="Select row"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ),
+        size: 40,
+        enableSorting: false,
+      },
+      {
+        accessorKey: 'patientName',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1 -ml-2 h-8 font-semibold"
+            onClick={() => column.toggleSorting()}
+          >
+            {t('studies.patientName')} <ArrowUpDown className="h-3.5 w-3.5" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div>
+            <span className="font-medium">{formatPatientName(row.original.patientName)}</span>
+            <div className="text-xs text-muted-foreground">{row.original.patientId}</div>
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'studyDate',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1 -ml-2 h-8 font-semibold"
+            onClick={() => column.toggleSorting()}
+          >
+            {t('studies.studyDate')} <ArrowUpDown className="h-3.5 w-3.5" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div>
+            <span>{format(row.original.studyDate, 'MMM dd, yyyy')}</span>
+            {row.original.studyTime && (
+              <div className="text-xs text-muted-foreground">{row.original.studyTime}</div>
+            )}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'modalities',
+        header: t('studyList.columns.modality'),
+        cell: ({ row }) => (
+          <div className="flex gap-1">
+            {row.original.modalities.map((m) => (
+              <ModalityBadge key={m} modality={m} />
+            ))}
+          </div>
+        ),
+        enableSorting: false,
+      },
+      {
+        accessorKey: 'studyDescription',
+        header: t('studyList.columns.description'),
+        cell: ({ row }) => (
+          <span className="text-sm truncate max-w-[200px] block">
+            {row.original.studyDescription || '—'}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'accessionNumber',
+        header: t('studyList.columns.accession'),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs text-muted-foreground">
+            {row.original.accessionNumber || '—'}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'referringPhysician',
+        header: t('studyList.columns.referring'),
+        cell: ({ row }) => (
+          <span className="text-sm truncate max-w-[160px] block">
+            {row.original.referringPhysician
+              ? row.original.referringPhysician.replace(/\^/g, ', ')
               : '—'}
           </span>
-          <div className="text-xs text-muted-foreground">
-            {t('studyList.columns.seriesCount', { count: row.original.numberOfSeries })}
+        ),
+      },
+      {
+        accessorKey: 'numberOfSeries',
+        header: t('studyList.columns.images'),
+        cell: ({ row }) => (
+          <div>
+            <span className="font-medium">
+              {row.original.numberOfInstances !== undefined ? row.original.numberOfInstances : '—'}
+            </span>
+            <div className="text-xs text-muted-foreground">
+              {t('studyList.columns.seriesCount', { count: row.original.numberOfSeries })}
+            </div>
           </div>
-        </div>
-      ),
-    },
-    {
-      id: 'labels',
-      header: t('studyList.columns.labels'),
-      cell: ({ row }) => (
-        <div className="flex gap-1 flex-wrap">
-          {row.original.labels.map((l) => (
-            <Badge key={l} variant="outline" className="text-xs py-0 h-5">{l}</Badge>
-          ))}
-        </div>
-      ),
-      enableSorting: false,
-    },
-    {
-      id: 'status',
-      header: t('studyList.columns.status'),
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1.5">
-          <div className={`h-2 w-2 rounded-full ${row.original.isStable ? 'bg-success' : 'bg-warning animate-pulse'}`} />
-          <span className="text-xs text-muted-foreground">
-            {row.original.isStable ? t('studyList.status.stable') : t('studyList.status.receiving')}
-          </span>
-        </div>
-      ),
-      enableSorting: false,
-    },
-  ], [t]);
+        ),
+      },
+      {
+        id: 'labels',
+        header: t('studyList.columns.labels'),
+        cell: ({ row }) => (
+          <div className="flex gap-1 flex-wrap">
+            {row.original.labels.map((l) => (
+              <Badge key={l} variant="outline" className="text-xs py-0 h-5">
+                {l}
+              </Badge>
+            ))}
+          </div>
+        ),
+        enableSorting: false,
+      },
+      {
+        id: 'status',
+        header: t('studyList.columns.status'),
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1.5">
+            <div
+              className={`h-2 w-2 rounded-full ${row.original.isStable ? 'bg-success' : 'bg-warning animate-pulse'}`}
+            />
+            <span className="text-xs text-muted-foreground">
+              {row.original.isStable
+                ? t('studyList.status.stable')
+                : t('studyList.status.receiving')}
+            </span>
+          </div>
+        ),
+        enableSorting: false,
+      },
+    ],
+    [t],
+  );
 
   const table = useReactTable({
     data: studies,
@@ -221,7 +261,9 @@ export default function StudyListPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('studies.title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('studies.studiesFound', { count: studies.length })}</p>
+          <p className="text-sm text-muted-foreground">
+            {t('studies.studiesFound', { count: studies.length })}
+          </p>
         </div>
       </div>
 
@@ -245,14 +287,18 @@ export default function StudyListPage() {
             >
               <Filter className="h-4 w-4" />
               {t('studies.filters')}
-              <ChevronDown className={`h-3 w-3 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                className={`h-3 w-3 transition-transform ${showFilters ? 'rotate-180' : ''}`}
+              />
             </Button>
           </div>
 
           {showFilters && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3 pt-3 border-t">
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('studyList.filters.patientId')}</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  {t('studyList.filters.patientId')}
+                </label>
                 <Input
                   placeholder="PAT000..."
                   value={searchParams.get('patientId') || ''}
@@ -261,7 +307,9 @@ export default function StudyListPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('studyList.filters.accession')}</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  {t('studyList.filters.accession')}
+                </label>
                 <Input
                   placeholder="ACC..."
                   value={searchParams.get('accession') || ''}
@@ -270,7 +318,9 @@ export default function StudyListPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('studyList.filters.description')}</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  {t('studyList.filters.description')}
+                </label>
                 <Input
                   placeholder="CT Chest..."
                   value={searchParams.get('description') || ''}
@@ -279,7 +329,9 @@ export default function StudyListPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('studyList.filters.modality')}</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  {t('studyList.filters.modality')}
+                </label>
                 <Select
                   value={searchParams.get('modality') || 'all'}
                   onValueChange={(v) => updateFilter('modality', v === 'all' ? '' : v)}
@@ -290,7 +342,9 @@ export default function StudyListPage() {
                   <SelectContent>
                     <SelectItem value="all">{t('studyList.filters.allModalities')}</SelectItem>
                     {MODALITY_OPTIONS.map((m) => (
-                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -303,12 +357,27 @@ export default function StudyListPage() {
       {/* Bulk actions */}
       {selectedCount > 0 && (
         <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
-          <span className="text-sm font-medium">{t('studyList.selected', { count: selectedCount })}</span>
+          <span className="text-sm font-medium">
+            {t('studyList.selected', { count: selectedCount })}
+          </span>
           <div className="flex gap-1 ml-auto">
-            <Button size="sm" variant="outline" className="gap-1.5 h-8"><Download className="h-3.5 w-3.5" /> {t('studyList.actions.export')}</Button>
-            <Button size="sm" variant="outline" className="gap-1.5 h-8"><Tag className="h-3.5 w-3.5" /> {t('studyList.actions.label')}</Button>
-            <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('studyList.actions.send')}</Button>
-            <Button size="sm" variant="outline" className="gap-1.5 h-8 text-destructive"><Trash2 className="h-3.5 w-3.5" /> {t('studyList.actions.delete')}</Button>
+            <Button size="sm" variant="outline" className="gap-1.5 h-8">
+              <Download className="h-3.5 w-3.5" /> {t('studyList.actions.export')}
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5 h-8">
+              <Tag className="h-3.5 w-3.5" /> {t('studyList.actions.label')}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 h-8"
+              onClick={() => setSendOpen(true)}
+            >
+              <Send className="h-3.5 w-3.5" /> {t('studyList.actions.send')}
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5 h-8 text-destructive">
+              <Trash2 className="h-3.5 w-3.5" /> {t('studyList.actions.delete')}
+            </Button>
           </div>
         </div>
       )}
@@ -324,8 +393,13 @@ export default function StudyListPage() {
               {table.getHeaderGroups().map((hg) => (
                 <TableRow key={hg.id}>
                   {hg.headers.map((header) => (
-                    <TableHead key={header.id} style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    <TableHead
+                      key={header.id}
+                      style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -336,13 +410,18 @@ export default function StudyListPage() {
                 Array.from({ length: 10 }).map((_, i) => (
                   <TableRow key={i}>
                     {columns.map((_, ci) => (
-                      <TableCell key={ci}><Skeleton className="h-5 w-full" /></TableCell>
+                      <TableCell key={ci}>
+                        <Skeleton className="h-5 w-full" />
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : table.getRowModel().rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center py-12 text-muted-foreground">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="text-center py-12 text-muted-foreground"
+                  >
                     {t('studyList.empty')}
                   </TableCell>
                 </TableRow>
@@ -371,14 +450,32 @@ export default function StudyListPage() {
         <div className="flex items-center justify-between px-4 py-3 border-t">
           <span className="text-sm text-muted-foreground">
             {t('studyList.pagination.showing', {
-              from: table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1,
-              to: Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, studies.length),
+              from:
+                table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1,
+              to: Math.min(
+                (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                studies.length,
+              ),
               total: studies.length,
             })}
           </span>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>{t('studyList.pagination.previous')}</Button>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>{t('studyList.pagination.next')}</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {t('studyList.pagination.previous')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {t('studyList.pagination.next')}
+            </Button>
           </div>
         </div>
       </Card>

@@ -1,5 +1,3 @@
-import { Study } from '@/shared/types';
-
 const MODALITY_CLASSES: Record<string, string> = {
   CT: 'modality-ct',
   MR: 'modality-mr',

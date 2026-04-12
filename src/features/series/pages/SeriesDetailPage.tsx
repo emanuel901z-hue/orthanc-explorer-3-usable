@@ -1,25 +1,74 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Image, Layers, HardDrive, FileText, Download, Send, Eye, Trash2, Pencil, Shield, LayoutGrid, List } from 'lucide-react';
+import {
+  Image,
+  HardDrive,
+  FileText,
+  Download,
+  Send,
+  Eye,
+  Trash2,
+  Pencil,
+  Shield,
+  LayoutGrid,
+  List,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useSeries, useSeriesInstances, useStudy, useInstancePreview, useSeriesSharedTags } from '@/features/studies/hooks/use-studies';
+import {
+  useSeries,
+  useSeriesInstances,
+  useStudy,
+  useInstancePreview,
+  useSeriesSharedTags,
+} from '@/features/studies/hooks/use-studies';
 import DicomTagBrowser from '@/features/studies/components/DicomTagBrowser';
-import { ModalityBadge, formatDiskSize, formatPatientName } from '@/shared/components/ModalityBadge';
+import {
+  ModalityBadge,
+  formatDiskSize,
+  formatPatientName,
+} from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
 
-function InstanceThumbnail({ instanceId, instanceNumber, onClick }: {
+function InstanceThumbnail({
+  instanceId,
+  instanceNumber,
+  onClick,
+}: {
   instanceId: string;
   instanceNumber: number;
   onClick: () => void;
@@ -29,16 +78,29 @@ function InstanceThumbnail({ instanceId, instanceNumber, onClick }: {
     () => (previewBlob ? URL.createObjectURL(previewBlob) : null),
     [previewBlob],
   );
-  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    [previewUrl],
+  );
 
   return (
     <div
       className="aspect-square bg-black rounded overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all relative group"
       onClick={onClick}
     >
-      {isLoading && <div className="absolute inset-0 flex items-center justify-center"><Skeleton className="w-full h-full rounded-none" /></div>}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Skeleton className="w-full h-full rounded-none" />
+        </div>
+      )}
       {previewUrl ? (
-        <img src={previewUrl} alt={`Instance #${instanceNumber}`} className="w-full h-full object-cover" />
+        <img
+          src={previewUrl}
+          alt={`Instance #${instanceNumber}`}
+          className="w-full h-full object-cover"
+        />
       ) : !isLoading ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <Image className="h-4 w-4 text-muted-foreground mb-0.5" />
@@ -53,16 +115,16 @@ function InstanceThumbnail({ instanceId, instanceNumber, onClick }: {
 }
 
 const SOP_CLASS_NAMES: Record<string, string> = {
-  '1.2.840.10008.5.1.4.1.1.2':     'CT Image Storage',
-  '1.2.840.10008.5.1.4.1.1.4':     'MR Image Storage',
-  '1.2.840.10008.5.1.4.1.1.128':   'PET Image Storage',
-  '1.2.840.10008.5.1.4.1.1.7':     'Secondary Capture',
-  '1.2.840.10008.5.1.4.1.1.6.1':   'Ultrasound Image Storage',
-  '1.2.840.10008.5.1.4.1.1.1':     'Digital X-Ray (Presentation)',
-  '1.2.840.10008.5.1.4.1.1.1.1':   'Digital Mammography (Presentation)',
+  '1.2.840.10008.5.1.4.1.1.2': 'CT Image Storage',
+  '1.2.840.10008.5.1.4.1.1.4': 'MR Image Storage',
+  '1.2.840.10008.5.1.4.1.1.128': 'PET Image Storage',
+  '1.2.840.10008.5.1.4.1.1.7': 'Secondary Capture',
+  '1.2.840.10008.5.1.4.1.1.6.1': 'Ultrasound Image Storage',
+  '1.2.840.10008.5.1.4.1.1.1': 'Digital X-Ray (Presentation)',
+  '1.2.840.10008.5.1.4.1.1.1.1': 'Digital Mammography (Presentation)',
   '1.2.840.10008.5.1.4.1.1.481.1': 'RT Image Storage',
   '1.2.840.10008.5.1.4.1.1.481.3': 'RT Structure Set Storage',
-  '1.2.840.10008.5.1.4.1.1.66.4':  'Segmentation Storage',
+  '1.2.840.10008.5.1.4.1.1.66.4': 'Segmentation Storage',
 };
 
 /** Format DICOM time string "HHMMSS.ffffff" → "HH:MM:SS" */
@@ -80,7 +142,6 @@ function formatSlicePosition(pos?: string): string {
 }
 
 export default function SeriesDetailPage() {
-  const { t } = useTranslation();
   const { studyId, seriesId } = useParams<{ studyId: string; seriesId: string }>();
   const navigate = useNavigate();
   const { data: series, isLoading } = useSeries(seriesId!);
@@ -119,7 +180,9 @@ export default function SeriesDetailPage() {
     return (
       <div className="p-6 text-center py-20">
         <p className="text-muted-foreground">Series not found</p>
-        <Button variant="outline" className="mt-4" onClick={() => navigate(`/studies/${studyId}`)}>Back to Study</Button>
+        <Button variant="outline" className="mt-4" onClick={() => navigate(`/studies/${studyId}`)}>
+          Back to Study
+        </Button>
       </div>
     );
   }
@@ -133,11 +196,25 @@ export default function SeriesDetailPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#" onClick={(e) => { e.preventDefault(); navigate('/studies'); }}>Studies</BreadcrumbLink>
+              <BreadcrumbLink
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/studies');
+                }}
+              >
+                Studies
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="#" onClick={(e) => { e.preventDefault(); navigate(`/studies/${studyId}`); }}>
+              <BreadcrumbLink
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(`/studies/${studyId}`);
+                }}
+              >
                 {study ? formatPatientName(study.patientName) : studyId}
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -148,32 +225,106 @@ export default function SeriesDetailPage() {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" size="sm" className="gap-1.5"><Eye className="h-3.5 w-3.5" /> Viewer</Button>
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <Eye className="h-3.5 w-3.5" /> Viewer
+          </Button>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { audit({ action: 'download', title: 'Series downloaded', resource: `Series #${series.seriesNumber}`, description: `Downloaded series as DICOM ZIP archive` }); }}><Download className="h-3.5 w-3.5" /> Download</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => {
+                    audit({
+                      action: 'download',
+                      title: 'Series downloaded',
+                      resource: `Series #${series.seriesNumber}`,
+                      description: `Downloaded series as DICOM ZIP archive`,
+                    });
+                  }}
+                >
+                  <Download className="h-3.5 w-3.5" /> Download
+                </Button>
               </TooltipTrigger>
               <TooltipContent>Download as DICOM ZIP archive</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setSendOpen(true); audit({ action: 'send', title: 'Series send initiated', resource: `Series #${series.seriesNumber}` }); }}><Send className="h-3.5 w-3.5" /> Send</Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { audit({ action: 'modify', title: 'Series modify initiated', resource: `Series #${series.seriesNumber}` }); }}><Pencil className="h-3.5 w-3.5" /> Modify</Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setAnonOpen(true); audit({ action: 'anonymize', title: 'Series anonymize initiated', resource: `Series #${series.seriesNumber}` }); }}><Shield className="h-3.5 w-3.5" /> Anonymize</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => {
+              setSendOpen(true);
+              audit({
+                action: 'send',
+                title: 'Series send initiated',
+                resource: `Series #${series.seriesNumber}`,
+              });
+            }}
+          >
+            <Send className="h-3.5 w-3.5" /> Send
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => {
+              audit({
+                action: 'modify',
+                title: 'Series modify initiated',
+                resource: `Series #${series.seriesNumber}`,
+              });
+            }}
+          >
+            <Pencil className="h-3.5 w-3.5" /> Modify
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => {
+              setAnonOpen(true);
+              audit({
+                action: 'anonymize',
+                title: 'Series anonymize initiated',
+                resource: `Series #${series.seriesNumber}`,
+              });
+            }}
+          >
+            <Shield className="h-3.5 w-3.5" /> Anonymize
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1.5 text-destructive"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
+              <Button variant="outline" size="sm" className="gap-1.5 text-destructive">
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Series</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete Series #{series.seriesNumber} ({series.seriesDescription || series.modality}) and all {series.numberOfInstances} instance(s). This action cannot be undone.
+                  This will permanently delete Series #{series.seriesNumber} (
+                  {series.seriesDescription || series.modality}) and all {series.numberOfInstances}{' '}
+                  instance(s). This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { audit({ action: 'delete', title: 'Series deleted', severity: 'warning', resource: `Series #${series.seriesNumber}`, description: `Deleted series with ${series.numberOfInstances} instance(s)` }); }}>Delete Permanently</AlertDialogAction>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() => {
+                    audit({
+                      action: 'delete',
+                      title: 'Series deleted',
+                      severity: 'warning',
+                      resource: `Series #${series.seriesNumber}`,
+                      description: `Deleted series with ${series.numberOfInstances} instance(s)`,
+                    });
+                  }}
+                >
+                  Delete Permanently
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -192,7 +343,9 @@ export default function SeriesDetailPage() {
             <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Series Info</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Series Info
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex items-center gap-2 mb-3">
@@ -244,7 +397,9 @@ export default function SeriesDetailPage() {
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Statistics</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Statistics
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-3 text-center">
@@ -260,7 +415,9 @@ export default function SeriesDetailPage() {
                     </div>
                     <div className="p-2 rounded-lg bg-muted">
                       <FileText className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-                      <div className="font-semibold">{formatDiskSize(instances.length > 0 ? totalSize / instances.length : 0)}</div>
+                      <div className="font-semibold">
+                        {formatDiskSize(instances.length > 0 ? totalSize / instances.length : 0)}
+                      </div>
                       <div className="text-xs text-muted-foreground">Avg Size</div>
                     </div>
                   </div>
@@ -269,11 +426,15 @@ export default function SeriesDetailPage() {
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Identifiers</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Identifiers
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <div>
-                    <span className="text-muted-foreground block text-xs mb-0.5">Series Instance UID</span>
+                    <span className="text-muted-foreground block text-xs mb-0.5">
+                      Series Instance UID
+                    </span>
                     <code className="font-dicom text-xs break-all">{series.seriesInstanceUID}</code>
                   </div>
                 </CardContent>
@@ -288,9 +449,18 @@ export default function SeriesDetailPage() {
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       Instances ({instances.length})
                     </CardTitle>
-                    <ToggleGroup type="single" value={instanceView} onValueChange={(v) => v && setInstanceView(v as 'grid' | 'table')} size="sm">
-                      <ToggleGroupItem value="grid" aria-label="Grid view"><LayoutGrid className="h-3.5 w-3.5" /></ToggleGroupItem>
-                      <ToggleGroupItem value="table" aria-label="Table view"><List className="h-3.5 w-3.5" /></ToggleGroupItem>
+                    <ToggleGroup
+                      type="single"
+                      value={instanceView}
+                      onValueChange={(v) => v && setInstanceView(v as 'grid' | 'table')}
+                      size="sm"
+                    >
+                      <ToggleGroupItem value="grid" aria-label="Grid view">
+                        <LayoutGrid className="h-3.5 w-3.5" />
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="table" aria-label="Table view">
+                        <List className="h-3.5 w-3.5" />
+                      </ToggleGroupItem>
                     </ToggleGroup>
                   </div>
                 </CardHeader>
@@ -302,7 +472,9 @@ export default function SeriesDetailPage() {
                           key={inst.id}
                           instanceId={inst.id}
                           instanceNumber={inst.instanceNumber}
-                          onClick={() => navigate(`/studies/${studyId}/series/${seriesId}/instances/${inst.id}`)}
+                          onClick={() =>
+                            navigate(`/studies/${studyId}/series/${seriesId}/instances/${inst.id}`)
+                          }
                         />
                       ))}
                     </div>
@@ -319,31 +491,53 @@ export default function SeriesDetailPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {instancesLoading ? (
-                            Array.from({ length: 5 }).map((_, i) => (
-                              <TableRow key={i}>
-                                <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-                                <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                                <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                              </TableRow>
-                            ))
-                          ) : (
-                            instances.map((inst) => (
-                              <TableRow
-                                key={inst.id}
-                                className="cursor-pointer hover:bg-muted/50 transition-colors"
-                                onClick={() => navigate(`/studies/${studyId}/series/${seriesId}/instances/${inst.id}`)}
-                              >
-                                <TableCell className="font-medium">{inst.instanceNumber}</TableCell>
-                                <TableCell className="font-mono text-xs truncate max-w-[300px]">{inst.sopInstanceUID}</TableCell>
-                                <TableCell className="font-mono text-xs text-muted-foreground">{formatSlicePosition(inst.imagePositionPatient)}</TableCell>
-                                <TableCell className="text-sm text-muted-foreground">{formatDiskSize(inst.fileSize)}</TableCell>
-                                <TableCell className="font-mono text-xs text-muted-foreground">{formatDicomTime(inst.acquisitionTime)}</TableCell>
-                              </TableRow>
-                            ))
-                          )}
+                          {instancesLoading
+                            ? Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}>
+                                  <TableCell>
+                                    <Skeleton className="h-4 w-8" />
+                                  </TableCell>
+                                  <TableCell>
+                                    <Skeleton className="h-4 w-full" />
+                                  </TableCell>
+                                  <TableCell>
+                                    <Skeleton className="h-4 w-32" />
+                                  </TableCell>
+                                  <TableCell>
+                                    <Skeleton className="h-4 w-16" />
+                                  </TableCell>
+                                  <TableCell>
+                                    <Skeleton className="h-4 w-32" />
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            : instances.map((inst) => (
+                                <TableRow
+                                  key={inst.id}
+                                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                                  onClick={() =>
+                                    navigate(
+                                      `/studies/${studyId}/series/${seriesId}/instances/${inst.id}`,
+                                    )
+                                  }
+                                >
+                                  <TableCell className="font-medium">
+                                    {inst.instanceNumber}
+                                  </TableCell>
+                                  <TableCell className="font-mono text-xs truncate max-w-[300px]">
+                                    {inst.sopInstanceUID}
+                                  </TableCell>
+                                  <TableCell className="font-mono text-xs text-muted-foreground">
+                                    {formatSlicePosition(inst.imagePositionPatient)}
+                                  </TableCell>
+                                  <TableCell className="text-sm text-muted-foreground">
+                                    {formatDiskSize(inst.fileSize)}
+                                  </TableCell>
+                                  <TableCell className="font-mono text-xs text-muted-foreground">
+                                    {formatDicomTime(inst.acquisitionTime)}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
                         </TableBody>
                       </Table>
                     </div>
@@ -384,11 +578,13 @@ export default function SeriesDetailPage() {
         <SendStudyDialog
           open={sendOpen}
           onOpenChange={setSendOpen}
-          studies={[{
-            id: series.id,
-            patientName: `Series #${series.seriesNumber}`,
-            studyDescription: series.seriesDescription,
-          }]}
+          studies={[
+            {
+              id: series.id,
+              patientName: `Series #${series.seriesNumber}`,
+              studyDescription: series.seriesDescription,
+            },
+          ]}
         />
       )}
       {series && (

@@ -1,9 +1,14 @@
-import {
-  Plus, Pencil, Trash2, Globe, Shield, ShieldCheck, ShieldAlert, ExternalLink, RefreshCw
-} from 'lucide-react';
+import { Plus, Pencil, Trash2, Shield, ShieldCheck, ShieldAlert, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
@@ -45,8 +50,12 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <p className="text-sm text-muted-foreground">DICOMweb servers for WADO-RS, QIDO-RS, and STOW-RS operations.</p>
-            <Badge variant="secondary" className="text-xs">{dicomwebServers.length} servers</Badge>
+            <p className="text-sm text-muted-foreground">
+              DICOMweb servers for WADO-RS, QIDO-RS, and STOW-RS operations.
+            </p>
+            <Badge variant="secondary" className="text-xs">
+              {dicomwebServers.length} servers
+            </Badge>
           </div>
           <Button size="sm" className="gap-1.5" onClick={onAddClick}>
             <Plus className="h-3.5 w-3.5" /> Add Server
@@ -69,7 +78,9 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
               {dicomwebServers.map((s) => {
                 const AuthIcon = authIcons[s.authType] || Shield;
                 const authColor = authColors[s.authType] || 'text-muted-foreground';
-                const capCount = [s.hasQidoSupport, s.hasWadoSupport, s.hasStowSupport].filter(Boolean).length;
+                const capCount = [s.hasQidoSupport, s.hasWadoSupport, s.hasStowSupport].filter(
+                  Boolean,
+                ).length;
 
                 return (
                   <TableRow key={s.id}>
@@ -96,7 +107,9 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                             {s.url}
                           </code>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-sm font-mono text-xs">{s.url}</TooltipContent>
+                        <TooltipContent className="max-w-sm font-mono text-xs">
+                          {s.url}
+                        </TooltipContent>
                       </Tooltip>
                     </TableCell>
                     <TableCell>
@@ -109,8 +122,8 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                         </TooltipTrigger>
                         <TooltipContent>
                           {s.authType === 'bearer' && 'Bearer token authentication'}
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          {s.authType === 'basic' && `Basic auth (user: ${(s as any).username || 'configured'})`}
+                          {s.authType === 'basic' &&
+                            `Basic auth (user: ${(s as { username?: string }).username || 'configured'})`}
                           {s.authType === 'oauth' && 'OAuth 2.0 authentication'}
                           {s.authType === 'none' && 'No authentication'}
                         </TooltipContent>
@@ -127,7 +140,9 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                               QIDO
                             </Badge>
                           </TooltipTrigger>
-                          <TooltipContent>{s.hasQidoSupport ? 'QIDO-RS query enabled' : 'QIDO-RS not available'}</TooltipContent>
+                          <TooltipContent>
+                            {s.hasQidoSupport ? 'QIDO-RS query enabled' : 'QIDO-RS not available'}
+                          </TooltipContent>
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger>
@@ -138,7 +153,11 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                               WADO
                             </Badge>
                           </TooltipTrigger>
-                          <TooltipContent>{s.hasWadoSupport ? 'WADO-RS retrieval enabled' : 'WADO-RS not available'}</TooltipContent>
+                          <TooltipContent>
+                            {s.hasWadoSupport
+                              ? 'WADO-RS retrieval enabled'
+                              : 'WADO-RS not available'}
+                          </TooltipContent>
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger>
@@ -149,7 +168,9 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                               STOW
                             </Badge>
                           </TooltipTrigger>
-                          <TooltipContent>{s.hasStowSupport ? 'STOW-RS storage enabled' : 'STOW-RS not available'}</TooltipContent>
+                          <TooltipContent>
+                            {s.hasStowSupport ? 'STOW-RS storage enabled' : 'STOW-RS not available'}
+                          </TooltipContent>
                         </Tooltip>
                       </div>
                     </TableCell>
@@ -170,7 +191,12 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onEditClick(s)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              onClick={() => onEditClick(s)}
+                            >
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
                           </TooltipTrigger>
@@ -178,7 +204,11 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-destructive"
+                            >
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </TooltipTrigger>

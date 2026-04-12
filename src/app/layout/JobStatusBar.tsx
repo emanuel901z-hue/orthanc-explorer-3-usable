@@ -23,7 +23,6 @@ import { Badge } from '@/components/ui/badge';
 import { useJobStore } from '@/store/job-store';
 import { Job, JobType } from '@/shared/types/job';
 import { useActivityUIStore } from '@/store/activity-ui-store';
-import { cn } from '@/lib/utils';
 
 const TYPE_ICON: Record<JobType, React.ReactNode> = {
   upload: <Upload className="h-3.5 w-3.5" />,
@@ -85,8 +84,8 @@ export function JobStatusBar() {
             {activeCount > 0
               ? `${activeCount} job${activeCount > 1 ? 's' : ''} running`
               : errorCount > 0
-              ? `${errorCount} job${errorCount > 1 ? 's' : ''} need attention`
-              : `${completedCount} job${completedCount > 1 ? 's' : ''} complete`}
+                ? `${errorCount} job${errorCount > 1 ? 's' : ''} need attention`
+                : `${completedCount} job${completedCount > 1 ? 's' : ''} complete`}
           </span>
           {activeCount > 0 && (
             <div className="flex items-center gap-2 min-w-[120px] max-w-[200px]">
@@ -135,9 +134,14 @@ export function JobStatusBar() {
                 <div
                   key={job.id}
                   className="flex items-center gap-3 px-4 py-2 text-sm cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => { setPendingSelectId(job.id); navigate('/activity'); }}
+                  onClick={() => {
+                    setPendingSelectId(job.id);
+                    navigate('/activity');
+                  }}
                 >
-                  <span className="shrink-0" title={job.type}>{TYPE_ICON[job.type]}</span>
+                  <span className="shrink-0" title={job.type}>
+                    {TYPE_ICON[job.type]}
+                  </span>
                   <span className="shrink-0">{STATUS_ICON[job.status]}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -158,12 +162,22 @@ export function JobStatusBar() {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     {(job.status === 'error' || job.status === 'interrupted') && (
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => retryJob(job.id)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => retryJob(job.id)}
+                      >
                         <RotateCcw className="h-3 w-3" />
                       </Button>
                     )}
                     {job.status !== 'running' && (
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeJob(job.id)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => removeJob(job.id)}
+                      >
                         <X className="h-3 w-3" />
                       </Button>
                     )}

@@ -76,7 +76,7 @@ export function TabBar() {
     navigate(tab.path);
   };
 
-  const handleClose = (e: React.MouseEvent, tab: AppTab) => {
+  const handleClose = (e: React.SyntheticEvent, tab: AppTab) => {
     e.stopPropagation();
     const wasActive = tab.id === activeTabId;
     closeTab(tab.id);
@@ -111,7 +111,7 @@ export function TabBar() {
                   'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                   isActive
                     ? 'bg-background text-foreground shadow-[0_1px_0_0_hsl(var(--background))] z-10 rounded-t-md border border-black/20 dark:border-white/20 border-b-transparent'
-                    : 'bg-[#ddd] dark:bg-muted/70 text-muted-foreground/70 hover:bg-[#d0d0d0] dark:hover:bg-muted hover:text-muted-foreground border-b border-b-black/20 dark:border-b-white/20'
+                    : 'bg-[#ddd] dark:bg-muted/70 text-muted-foreground/70 hover:bg-[#d0d0d0] dark:hover:bg-muted hover:text-muted-foreground border-b border-b-black/20 dark:border-b-white/20',
                 )}
               >
                 {getTabIcon(tab)}
@@ -125,12 +125,12 @@ export function TabBar() {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        handleClose(e as any, tab);
+                        handleClose(e, tab);
                       }
                     }}
                     className={cn(
                       'ml-auto shrink-0 rounded p-0.5 hover:bg-muted-foreground/20 transition-opacity',
-                      isActive ? 'opacity-70' : 'opacity-0 group-hover:opacity-70'
+                      isActive ? 'opacity-70' : 'opacity-0 group-hover:opacity-70',
                     )}
                   >
                     <X className="h-3 w-3" />

@@ -26,10 +26,21 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useChanges } from '@/features/activity/hooks/useChanges';
@@ -100,7 +111,7 @@ function changeToActivity(change: Change): ActivityEvent {
     metadata: {
       'Resource Type': change.ResourceType,
       'Resource ID': change.ID,
-      'Sequence': String(change.Seq),
+      Sequence: String(change.Seq),
     },
   };
 }
@@ -111,17 +122,24 @@ function jobToActivity(job: Job): ActivityEvent {
     id: job.id,
     timestamp: job.updatedAt,
     category: 'job',
-    severity: job.status === 'complete' ? 'success'
-      : job.status === 'error' || job.status === 'interrupted' ? 'error'
-      : job.status === 'running' ? 'info'
-      : 'info',
+    severity:
+      job.status === 'complete'
+        ? 'success'
+        : job.status === 'error' || job.status === 'interrupted'
+          ? 'error'
+          : job.status === 'running'
+            ? 'info'
+            : 'info',
     title: `${job.type.charAt(0).toUpperCase() + job.type.slice(1)} ${statusLabel}: ${job.label}`,
     action: job.type,
     description: job.error || job.description,
-    duration: job.status === 'complete' || job.status === 'error' ? job.updatedAt - job.createdAt : undefined,
+    duration:
+      job.status === 'complete' || job.status === 'error'
+        ? job.updatedAt - job.createdAt
+        : undefined,
     metadata: {
       'Job ID': job.id,
-      'Status': job.status,
+      Status: job.status,
       ...(job.totalItems ? { 'Total Items': String(job.totalItems) } : {}),
       ...(job.completedItems ? { 'Completed Items': String(job.completedItems) } : {}),
     },
@@ -160,7 +178,9 @@ export default function ActivityPage() {
   const allEvents = useMemo(() => {
     const changeEvents = (changesData?.Changes ?? []).map(changeToActivity);
     const jobEvents = jobs.map(jobToActivity);
-    return [...liveAuditEvents, ...jobEvents, ...changeEvents].sort((a, b) => b.timestamp - a.timestamp);
+    return [...liveAuditEvents, ...jobEvents, ...changeEvents].sort(
+      (a, b) => b.timestamp - a.timestamp,
+    );
   }, [jobs, liveAuditEvents, changesData]);
 
   // Auto-select event from Job Manager bar
@@ -180,26 +200,40 @@ export default function ActivityPage() {
     if (dateTo) result = result.filter((e) => e.timestamp <= endOfDay(dateTo).getTime());
     if (search) {
       const q = search.toLowerCase();
-      result = result.filter((e) =>
-        e.title.toLowerCase().includes(q) ||
-        e.description?.toLowerCase().includes(q) ||
-        e.action.toLowerCase().includes(q) ||
-        e.resource?.toLowerCase().includes(q)
+      result = result.filter(
+        (e) =>
+          e.title.toLowerCase().includes(q) ||
+          e.description?.toLowerCase().includes(q) ||
+          e.action.toLowerCase().includes(q) ||
+          e.resource?.toLowerCase().includes(q),
       );
     }
     return result;
   }, [allEvents, categoryFilter, severityFilter, dateFrom, dateTo, search]);
 
-  const counts = useMemo(() => ({
-    total: allEvents.length,
-    job: allEvents.filter((e) => e.category === 'job').length,
-    audit: allEvents.filter((e) => e.category === 'audit').length,
-    log: allEvents.filter((e) => e.category === 'log').length,
-    errors: allEvents.filter((e) => e.severity === 'error').length,
-  }), [allEvents]);
+  const counts = useMemo(
+    () => ({
+      total: allEvents.length,
+      job: allEvents.filter((e) => e.category === 'job').length,
+      audit: allEvents.filter((e) => e.category === 'audit').length,
+      log: allEvents.filter((e) => e.category === 'log').length,
+      errors: allEvents.filter((e) => e.severity === 'error').length,
+    }),
+    [allEvents],
+  );
 
   const exportCsv = () => {
-    const headers = ['Timestamp', 'Category', 'Severity', 'Action', 'Title', 'Description', 'Resource', 'Actor', 'Duration (ms)'];
+    const headers = [
+      'Timestamp',
+      'Category',
+      'Severity',
+      'Action',
+      'Title',
+      'Description',
+      'Resource',
+      'Actor',
+      'Duration (ms)',
+    ];
     const rows = filtered.map((e) => [
       new Date(e.timestamp).toISOString(),
       e.category,
@@ -226,9 +260,7 @@ export default function ActivityPage() {
       <div className="flex-1 overflow-auto p-4 md:p-6 space-y-4 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {t('activity.subtitle')}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('activity.subtitle')}</p>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={exportCsv}>
             <FileDown className="h-3.5 w-3.5" /> {t('activity.exportCsv')}
           </Button>
@@ -240,15 +272,24 @@ export default function ActivityPage() {
             <Clock className="h-3 w-3" />
             {t('activity.events', { count: counts.total })}
           </Badge>
-          <Badge variant="outline" className={cn('gap-1.5', categoryFilter === 'job' && 'border-primary bg-primary/5')}>
+          <Badge
+            variant="outline"
+            className={cn('gap-1.5', categoryFilter === 'job' && 'border-primary bg-primary/5')}
+          >
             <Upload className="h-3 w-3" />
             {t('activity.jobs', { count: counts.job })}
           </Badge>
-          <Badge variant="outline" className={cn('gap-1.5', categoryFilter === 'audit' && 'border-accent bg-accent/5')}>
+          <Badge
+            variant="outline"
+            className={cn('gap-1.5', categoryFilter === 'audit' && 'border-accent bg-accent/5')}
+          >
             <ShieldCheck className="h-3 w-3" />
             {t('activity.audit', { count: counts.audit })}
           </Badge>
-          <Badge variant="outline" className={cn('gap-1.5', categoryFilter === 'log' && 'border-muted-foreground')}>
+          <Badge
+            variant="outline"
+            className={cn('gap-1.5', categoryFilter === 'log' && 'border-muted-foreground')}
+          >
             <Server className="h-3 w-3" />
             {t('activity.system', { count: counts.log })}
           </Badge>
@@ -312,29 +353,57 @@ export default function ActivityPage() {
               <div className="flex flex-wrap gap-2 items-center">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className={cn("h-9 gap-1.5 text-sm", !dateFrom && "text-muted-foreground")}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn('h-9 gap-1.5 text-sm', !dateFrom && 'text-muted-foreground')}
+                    >
                       <CalendarIcon className="h-3.5 w-3.5" />
                       {dateFrom ? format(dateFrom, 'MMM d, yyyy') : t('activity.from')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className={cn("p-3 pointer-events-auto")} />
+                    <Calendar
+                      mode="single"
+                      selected={dateFrom}
+                      onSelect={setDateFrom}
+                      initialFocus
+                      className={cn('p-3 pointer-events-auto')}
+                    />
                   </PopoverContent>
                 </Popover>
                 <span className="text-xs text-muted-foreground">→</span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className={cn("h-9 gap-1.5 text-sm", !dateTo && "text-muted-foreground")}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn('h-9 gap-1.5 text-sm', !dateTo && 'text-muted-foreground')}
+                    >
                       <CalendarIcon className="h-3.5 w-3.5" />
                       {dateTo ? format(dateTo, 'MMM d, yyyy') : t('activity.to')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className={cn("p-3 pointer-events-auto")} />
+                    <Calendar
+                      mode="single"
+                      selected={dateTo}
+                      onSelect={setDateTo}
+                      initialFocus
+                      className={cn('p-3 pointer-events-auto')}
+                    />
                   </PopoverContent>
                 </Popover>
                 {(dateFrom || dateTo) && (
-                  <Button variant="ghost" size="sm" className="h-9 px-2 text-xs" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 px-2 text-xs"
+                    onClick={() => {
+                      setDateFrom(undefined);
+                      setDateTo(undefined);
+                    }}
+                  >
                     <X className="h-3 w-3 mr-1" /> {t('activity.clearDates')}
                   </Button>
                 )}
@@ -370,9 +439,11 @@ export default function ActivityPage() {
                       key={event.id}
                       className={cn(
                         'group cursor-pointer transition-colors',
-                        selectedEvent?.id === event.id && 'bg-muted'
+                        selectedEvent?.id === event.id && 'bg-muted',
                       )}
-                      onClick={() => setSelectedEvent(selectedEvent?.id === event.id ? null : event)}
+                      onClick={() =>
+                        setSelectedEvent(selectedEvent?.id === event.id ? null : event)
+                      }
                     >
                       <TableCell className="pr-0">
                         <div className="flex items-center gap-1.5">
@@ -381,7 +452,9 @@ export default function ActivityPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="text-xs font-medium">{formatRelativeTime(event.timestamp)}</span>
+                          <span className="text-xs font-medium">
+                            {formatRelativeTime(event.timestamp)}
+                          </span>
                           <span className="text-[10px] text-muted-foreground">
                             {format(new Date(event.timestamp), 'HH:mm:ss')}
                           </span>
@@ -400,7 +473,9 @@ export default function ActivityPage() {
                         <div className="min-w-0">
                           <p className="text-sm font-medium truncate">{event.title}</p>
                           {event.description && (
-                            <p className="text-xs text-muted-foreground truncate">{event.description}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {event.description}
+                            </p>
                           )}
                         </div>
                       </TableCell>
@@ -410,9 +485,7 @@ export default function ActivityPage() {
                         </span>
                       </TableCell>
                       <TableCell className="hidden lg:table-cell">
-                        <span className="text-xs text-muted-foreground">
-                          {event.actor || '—'}
-                        </span>
+                        <span className="text-xs text-muted-foreground">{event.actor || '—'}</span>
                       </TableCell>
                     </TableRow>
                   ))

@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import {
-  ExternalLink, RefreshCw, Pencil, Settings2, Monitor, Globe, Download
-} from 'lucide-react';
+import { ExternalLink, RefreshCw, Pencil, Globe, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +9,11 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
@@ -33,7 +35,8 @@ const initialViewers: ViewerConfig[] = [
     url: 'https://viewer.ohif.org',
     status: 'connected',
     type: 'web',
-    description: 'Open-source web-based medical imaging viewer with MPR, 3D, and segmentation support.',
+    description:
+      'Open-source web-based medical imaging viewer with MPR, 3D, and segmentation support.',
     enabled: true,
     defaultViewer: true,
   },
@@ -70,9 +73,24 @@ const initialViewers: ViewerConfig[] = [
 ];
 
 const statusConfig = {
-  connected: { dot: 'bg-emerald-500', ring: 'bg-emerald-500/10', label: 'Connected', badgeVariant: 'secondary' as const },
-  configured: { dot: 'bg-amber-500', ring: 'bg-amber-500/10', label: 'Configured', badgeVariant: 'secondary' as const },
-  'not configured': { dot: 'bg-muted-foreground/40', ring: 'bg-muted/50', label: 'Not Configured', badgeVariant: 'outline' as const },
+  connected: {
+    dot: 'bg-emerald-500',
+    ring: 'bg-emerald-500/10',
+    label: 'Connected',
+    badgeVariant: 'secondary' as const,
+  },
+  configured: {
+    dot: 'bg-amber-500',
+    ring: 'bg-amber-500/10',
+    label: 'Configured',
+    badgeVariant: 'secondary' as const,
+  },
+  'not configured': {
+    dot: 'bg-muted-foreground/40',
+    ring: 'bg-muted/50',
+    label: 'Not Configured',
+    badgeVariant: 'outline' as const,
+  },
 };
 
 export default function ViewerTab() {
@@ -96,19 +114,22 @@ export default function ViewerTab() {
               ...v,
               url: editUrl,
               enabled: editEnabled,
-              status: editEnabled && editUrl ? (editUrl.startsWith('http') || editUrl.startsWith('/') ? 'configured' : 'configured') : 'not configured',
+              status:
+                editEnabled && editUrl
+                  ? editUrl.startsWith('http') || editUrl.startsWith('/')
+                    ? 'configured'
+                    : 'configured'
+                  : 'not configured',
             }
-          : v
-      )
+          : v,
+      ),
     );
     toast.success(`${editViewer.name} settings saved`, { description: editUrl });
     setEditViewer(null);
   };
 
   const setDefault = (id: string) => {
-    setViewers((prev) =>
-      prev.map((v) => ({ ...v, defaultViewer: v.id === id }))
-    );
+    setViewers((prev) => prev.map((v) => ({ ...v, defaultViewer: v.id === id })));
     const name = viewers.find((v) => v.id === id)?.name;
     toast.success(`${name} set as default viewer`);
   };
@@ -125,7 +146,9 @@ export default function ViewerTab() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <p className="text-sm text-muted-foreground">External DICOM viewers for opening studies directly from the explorer.</p>
+            <p className="text-sm text-muted-foreground">
+              External DICOM viewers for opening studies directly from the explorer.
+            </p>
             <div className="flex items-center gap-3 text-xs">
               {connectedCount > 0 && (
                 <span className="flex items-center gap-1.5">
@@ -160,13 +183,18 @@ export default function ViewerTab() {
           {viewers.map((v) => {
             const sc = statusConfig[v.status];
             return (
-              <Card key={v.id} className={`relative transition-all ${!v.enabled ? 'opacity-60' : ''}`}>
+              <Card
+                key={v.id}
+                className={`relative transition-all ${!v.enabled ? 'opacity-60' : ''}`}
+              >
                 <CardContent className="pt-5 pb-4 px-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <Tooltip>
                         <TooltipTrigger>
-                          <span className={`inline-flex items-center justify-center h-8 w-8 rounded-full ${sc.ring}`}>
+                          <span
+                            className={`inline-flex items-center justify-center h-8 w-8 rounded-full ${sc.ring}`}
+                          >
                             <span className={`h-3 w-3 rounded-full ${sc.dot}`} />
                           </span>
                         </TooltipTrigger>
@@ -179,7 +207,11 @@ export default function ViewerTab() {
                             <Badge className="text-[10px] h-4 px-1.5">Default</Badge>
                           )}
                           <Badge variant="outline" className="text-[10px] h-4 px-1.5 capitalize">
-                            {v.type === 'web' ? <Globe className="h-2.5 w-2.5 mr-0.5" /> : <Download className="h-2.5 w-2.5 mr-0.5" />}
+                            {v.type === 'web' ? (
+                              <Globe className="h-2.5 w-2.5 mr-0.5" />
+                            ) : (
+                              <Download className="h-2.5 w-2.5 mr-0.5" />
+                            )}
                             {v.type}
                           </Badge>
                         </div>
@@ -189,7 +221,9 @@ export default function ViewerTab() {
                   </div>
 
                   <div className="flex items-center gap-2 mb-3">
-                    <code className="bg-muted px-2 py-1 rounded text-xs font-mono flex-1 truncate">{v.url}</code>
+                    <code className="bg-muted px-2 py-1 rounded text-xs font-mono flex-1 truncate">
+                      {v.url}
+                    </code>
                     {v.type === 'web' && v.enabled && (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -245,7 +279,9 @@ export default function ViewerTab() {
                               Set Default
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Make this the default viewer for opening studies</TooltipContent>
+                          <TooltipContent>
+                            Make this the default viewer for opening studies
+                          </TooltipContent>
                         </Tooltip>
                       )}
                     </div>
@@ -261,7 +297,12 @@ export default function ViewerTab() {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editViewer} onOpenChange={(open) => { if (!open) setEditViewer(null); }}>
+      <Dialog
+        open={!!editViewer}
+        onOpenChange={(open) => {
+          if (!open) setEditViewer(null);
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Configure {editViewer?.name}</DialogTitle>
@@ -285,13 +326,17 @@ export default function ViewerTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Enabled</p>
-                <p className="text-xs text-muted-foreground">Show this viewer in the study action menu</p>
+                <p className="text-xs text-muted-foreground">
+                  Show this viewer in the study action menu
+                </p>
               </div>
               <Switch checked={editEnabled} onCheckedChange={setEditEnabled} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditViewer(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setEditViewer(null)}>
+              Cancel
+            </Button>
             <Button onClick={saveEdit}>Save</Button>
           </DialogFooter>
         </DialogContent>

@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import {
-  ExternalLink, Users, BookOpen, Layers, Image, HardDrive, Trash2,
-  Copy, Check, CircleDot, Info
-} from 'lucide-react';
+import { Users, BookOpen, Layers, Image, HardDrive, Copy, Check, CircleDot } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSystemInfo, useStats, usePlugins } from '@/features/settings/hooks/use-system-info';
 
@@ -36,7 +40,11 @@ function CopyButton({ value }: { value: string }) {
       className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
       onClick={handleCopy}
     >
-      {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3 text-muted-foreground" />}
+      {copied ? (
+        <Check className="h-3 w-3 text-success" />
+      ) : (
+        <Copy className="h-3 w-3 text-muted-foreground" />
+      )}
     </Button>
   );
 }
@@ -48,10 +56,34 @@ export default function SystemInfoTab() {
   const { data: pluginNames = [] } = usePlugins();
 
   const kpiCards = [
-    { label: 'Patients', value: stats ? String(stats.CountPatients) : '—', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Studies', value: stats ? String(stats.CountStudies) : '—', icon: BookOpen, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Series', value: stats ? String(stats.CountSeries) : '—', icon: Layers, color: 'text-violet-500', bg: 'bg-violet-500/10' },
-    { label: 'Instances', value: stats ? stats.CountInstances.toLocaleString() : '—', icon: Image, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    {
+      label: 'Patients',
+      value: stats ? String(stats.CountPatients) : '—',
+      icon: Users,
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
+    },
+    {
+      label: 'Studies',
+      value: stats ? String(stats.CountStudies) : '—',
+      icon: BookOpen,
+      color: 'text-emerald-500',
+      bg: 'bg-emerald-500/10',
+    },
+    {
+      label: 'Series',
+      value: stats ? String(stats.CountSeries) : '—',
+      icon: Layers,
+      color: 'text-violet-500',
+      bg: 'bg-violet-500/10',
+    },
+    {
+      label: 'Instances',
+      value: stats ? stats.CountInstances.toLocaleString() : '—',
+      icon: Image,
+      color: 'text-amber-500',
+      bg: 'bg-amber-500/10',
+    },
   ];
 
   const systemInfoRows = [
@@ -61,8 +93,16 @@ export default function SystemInfoTab() {
     { label: 'DICOM Port', value: system ? String(system.DicomPort) : '', copyable: true },
     { label: 'HTTP Port', value: system ? String(system.HttpPort) : '', copyable: false },
     { label: 'API Version', value: system ? String(system.ApiVersion) : '', copyable: false },
-    { label: 'Database Version', value: system ? String(system.DatabaseVersion) : '', copyable: false },
-    { label: 'Plugins Enabled', value: system ? String(system.PluginsEnabled) : '', copyable: false },
+    {
+      label: 'Database Version',
+      value: system ? String(system.DatabaseVersion) : '',
+      copyable: false,
+    },
+    {
+      label: 'Plugins Enabled',
+      value: system ? String(system.PluginsEnabled) : '',
+      copyable: false,
+    },
   ];
 
   const diskSize = stats?.TotalDiskSize ?? '—';
@@ -76,7 +116,9 @@ export default function SystemInfoTab() {
             <Card key={kpi.label}>
               <CardContent className="pt-5 pb-4 px-4">
                 <div className="flex items-center gap-3">
-                  <div className={`h-10 w-10 rounded-lg ${kpi.bg} flex items-center justify-center shrink-0`}>
+                  <div
+                    className={`h-10 w-10 rounded-lg ${kpi.bg} flex items-center justify-center shrink-0`}
+                  >
                     <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
                   </div>
                   <div className="min-w-0">
@@ -166,7 +208,9 @@ export default function SystemInfoTab() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               Installed Plugins
-              <Badge variant="secondary" className="text-xs font-normal">{pluginNames.length}</Badge>
+              <Badge variant="secondary" className="text-xs font-normal">
+                {pluginNames.length}
+              </Badge>
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Plugins installed on this Orthanc server.
@@ -187,7 +231,9 @@ export default function SystemInfoTab() {
                 ))}
                 {pluginNames.length === 0 && (
                   <TableRow>
-                    <TableCell className="text-muted-foreground text-sm">No plugins loaded</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      No plugins loaded
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>

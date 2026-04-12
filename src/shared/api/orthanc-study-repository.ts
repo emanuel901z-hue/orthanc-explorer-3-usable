@@ -10,7 +10,6 @@ import {
   StudyFilters,
   Series,
   Instance,
-  DicomTag,
   DicomModifications,
   AnonymizationConfig,
 } from '@/shared/types';
@@ -51,14 +50,12 @@ function mapOrthancStudy(s: OrthancStudy): Study {
   // ModalitiesInStudy comes back when requested via RequestedTags; fall back
   // to Modality (series-level tag sometimes stored at study level).
   const rawModalities = tags['ModalitiesInStudy'] ?? tags['Modality'] ?? '';
-  const modalities = rawModalities
-    ? String(rawModalities).split('\\').filter(Boolean)
-    : [];
+  const modalities = rawModalities ? String(rawModalities).split('\\').filter(Boolean) : [];
 
   // Parse LastUpdate from Orthanc format "YYYYMMDDTHHmmss"
   const lastUpdate = s.LastUpdate
     ? new Date(
-        `${s.LastUpdate.slice(0, 4)}-${s.LastUpdate.slice(4, 6)}-${s.LastUpdate.slice(6, 8)}T${s.LastUpdate.slice(9, 11)}:${s.LastUpdate.slice(11, 13)}:${s.LastUpdate.slice(13, 15)}`
+        `${s.LastUpdate.slice(0, 4)}-${s.LastUpdate.slice(4, 6)}-${s.LastUpdate.slice(6, 8)}T${s.LastUpdate.slice(9, 11)}:${s.LastUpdate.slice(11, 13)}:${s.LastUpdate.slice(13, 15)}`,
       )
     : new Date();
 
@@ -108,7 +105,6 @@ function mapOrthancSeries(s: SeriesDetail): Series {
   };
 }
 
-
 function mapOrthancInstance(inst: OrthancInstance, rawTags?: Record<string, unknown>): Instance {
   const dicomTags = inst.MainDicomTags ?? {};
   return {
@@ -148,9 +144,7 @@ export class OrthancStudyRepository implements IStudyRepository {
     // configurations, so apply the modality filter client-side using the already-
     // fetched ModalitiesInStudy values.
     if (filters?.modalities?.length) {
-      return allStudies.filter((s) =>
-        s.modalities.some((m) => filters.modalities!.includes(m))
-      );
+      return allStudies.filter((s) => s.modalities.some((m) => filters.modalities!.includes(m)));
     }
 
     return allStudies;
@@ -238,7 +232,10 @@ export class OrthancStudyRepository implements IStudyRepository {
       body['Replace'] = { PatientName: config.newPatientName };
     }
     if (config.newPatientId) {
-      body['Replace'] = { ...(body['Replace'] as Record<string, string> ?? {}), PatientID: config.newPatientId };
+      body['Replace'] = {
+        ...((body['Replace'] as Record<string, string>) ?? {}),
+        PatientID: config.newPatientId,
+      };
     }
     const result = await studiesApi.anonymize(id, body);
     return this.findById(result.ID) as Promise<Study>;
