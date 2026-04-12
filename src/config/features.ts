@@ -41,3 +41,17 @@ export function resolveFeature(key: FeatureKey, layers: Layers): boolean {
   if (layers.scopes && !scopeAllows(layers.scopes, key)) return false;
   return true;
 }
+
+export function useUserProfile(): UserProfile {
+  return null; // Phase 2: fetch from Authorization plugin
+}
+
+export function useSmartScopes(): SmartScopes {
+  return null; // Phase 2: parse from fhirclient token
+}
+
+export function useFeature(key: FeatureKey): boolean {
+  const profile = useUserProfile();
+  const scopes = useSmartScopes();
+  return resolveFeature(key, { profile, scopes });
+}
