@@ -1,8 +1,6 @@
 // PHI classification: SESSION (may hold PHI — memory-only)
-// CRITICAL: tab state holds open study IDs (studyId field) — must NOT use persist() middleware.
-// TODO: Remove persist() middleware — see PHI hygiene task.
+// studyId fields on AppTab may carry Orthanc study UUIDs — must NOT persist to localStorage.
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 export interface AppTab {
   id: string;
@@ -33,9 +31,7 @@ function generateTabId(): string {
   return `tab-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-export const useTabStore = create<TabState>()(
-  persist(
-    (set, get) => ({
+export const useTabStore = create<TabState>()((set, get) => ({
       tabs: [],
       activeTabId: null,
 
@@ -129,9 +125,4 @@ export const useTabStore = create<TabState>()(
       getTabByPath: (path) => {
         return get().tabs.find((t) => t.path === path);
       },
-    }),
-    {
-      name: 'orthanc-tabs',
-    }
-  )
-);
+}));
