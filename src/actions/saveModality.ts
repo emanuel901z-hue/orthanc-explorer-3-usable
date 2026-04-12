@@ -9,17 +9,13 @@
 import { modalitiesApi, type ModalityConfig } from "@/api/modalities";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
+import { makeAuditBase } from "@/actions/audit-base";
 
 export async function saveModalityAction(
   name: string,
   config: ModalityConfig,
 ): Promise<void> {
-  const base = {
-    action: "modality.save",
-    resourceType: "modality" as const,
-    resourceId: name,
-    timestamp: new Date().toISOString(),
-  };
+  const base = makeAuditBase('modality.save', 'modality', name);
   try {
     await modalitiesApi.put(name, config);
     auditClient.emit({ ...base, outcome: "success" });

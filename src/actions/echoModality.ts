@@ -13,16 +13,12 @@
 import { modalitiesApi } from "@/api/modalities";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
+import { makeAuditBase } from "@/actions/audit-base";
 
 export async function echoModalityAction(
   name: string,
 ): Promise<Record<string, unknown>> {
-  const base = {
-    action: "modality.echo",
-    resourceType: "modality" as const,
-    resourceId: name,
-    timestamp: new Date().toISOString(),
-  };
+  const base = makeAuditBase('modality.echo', 'modality', name);
   try {
     const result = await modalitiesApi.echo(name);
     auditClient.emit({ ...base, outcome: "success" });

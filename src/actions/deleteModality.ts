@@ -9,14 +9,10 @@
 import { modalitiesApi } from "@/api/modalities";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
+import { makeAuditBase } from "@/actions/audit-base";
 
 export async function deleteModalityAction(name: string): Promise<void> {
-  const base = {
-    action: "modality.delete",
-    resourceType: "modality" as const,
-    resourceId: name,
-    timestamp: new Date().toISOString(),
-  };
+  const base = makeAuditBase('modality.delete', 'modality', name);
   try {
     await modalitiesApi.delete(name);
     auditClient.emit({ ...base, outcome: "success" });
