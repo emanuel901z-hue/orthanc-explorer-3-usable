@@ -9,7 +9,7 @@
  *   POST   /modalities/:name/echo   — modalitiesApi.echo()
  */
 // src/api/modalities.ts
-import { orthancFetch } from "@/lib/client";
+import { orthancFetch, JSON_CONTENT_HEADERS } from '@/lib/client';
 
 export type ModalityConfig = {
   AET: string;
@@ -18,10 +18,8 @@ export type ModalityConfig = {
   Manufacturer?: string;
 };
 
-const JSON_HEADERS = { "Content-Type": "application/json" };
-
 export const modalitiesApi = {
-  list: () => orthancFetch<string[]>("/modalities"),
+  list: () => orthancFetch<string[]>('/modalities'),
 
   // GET /modalities/{id} returns sub-operation names in modern Orthanc.
   // The actual config is at /modalities/{id}/configuration.
@@ -29,18 +27,17 @@ export const modalitiesApi = {
 
   put: (name: string, body: ModalityConfig) =>
     orthancFetch<void>(`/modalities/${name}`, {
-      method: "PUT",
-      headers: JSON_HEADERS,
+      method: 'PUT',
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify(body),
     }),
 
-  delete: (name: string) =>
-    orthancFetch<void>(`/modalities/${name}`, { method: "DELETE" }),
+  delete: (name: string) => orthancFetch<void>(`/modalities/${name}`, { method: 'DELETE' }),
 
   echo: (name: string) =>
     orthancFetch<Record<string, unknown>>(`/modalities/${name}/echo`, {
-      method: "POST",
-      headers: JSON_HEADERS,
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify({}),
     }),
 };

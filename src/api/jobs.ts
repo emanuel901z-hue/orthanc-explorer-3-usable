@@ -7,14 +7,12 @@
  *   POST /jobs/:id/cancel — jobsApi.cancel()
  */
 // src/api/jobs.ts
-import { orthancFetch } from "@/lib/client";
-
-const JSON_HEADERS = { "Content-Type": "application/json" };
+import { orthancFetch, JSON_CONTENT_HEADERS } from '@/lib/client';
 
 export type Job = {
   ID: string;
   Type: string;
-  State: "Pending" | "Running" | "Success" | "Failure" | "Paused" | "Retry";
+  State: 'Pending' | 'Running' | 'Success' | 'Failure' | 'Paused' | 'Retry';
   Progress: number;
   CreationTime: string;
   CompletionTime?: string;
@@ -22,14 +20,14 @@ export type Job = {
 };
 
 export const jobsApi = {
-  list: () => orthancFetch<string[]>("/jobs"),
+  list: () => orthancFetch<string[]>('/jobs'),
 
   get: (id: string) => orthancFetch<Job>(`/jobs/${id}`),
 
   cancel: (id: string) =>
     orthancFetch<Record<string, unknown>>(`/jobs/${id}/cancel`, {
-      method: "POST",
-      headers: JSON_HEADERS,
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify({}),
     }),
 };

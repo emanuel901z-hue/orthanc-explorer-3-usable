@@ -5,21 +5,19 @@
  *   POST /tools/lookup — toolsApi.lookup()
  */
 // src/api/tools.ts
-import { orthancFetch } from "@/lib/client";
-
-const JSON_HEADERS = { "Content-Type": "application/json" };
+import { orthancFetch, JSON_CONTENT_HEADERS } from '@/lib/client';
 
 export type LookupResult = {
   ID: string;
   Path: string;
-  Type: "Patient" | "Study" | "Series" | "Instance";
+  Type: 'Patient' | 'Study' | 'Series' | 'Instance';
 };
 
 export const toolsApi = {
   lookup: (body: string | Record<string, unknown>) =>
-    orthancFetch<LookupResult>("/tools/lookup", {
-      method: "POST",
-      headers: JSON_HEADERS,
+    orthancFetch<LookupResult>('/tools/lookup', {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify(body),
     }),
 };

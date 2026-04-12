@@ -7,7 +7,7 @@
  *   DELETE /peers/:name   — peersApi.delete()
  */
 // src/api/peers.ts
-import { orthancFetch } from "@/lib/client";
+import { orthancFetch, JSON_CONTENT_HEADERS } from '@/lib/client';
 
 export type PeerConfig = {
   Url: string;
@@ -15,18 +15,15 @@ export type PeerConfig = {
   Password?: string;
 };
 
-const JSON_HEADERS = { "Content-Type": "application/json" };
-
 export const peersApi = {
-  list: () => orthancFetch<string[]>("/peers"),
+  list: () => orthancFetch<string[]>('/peers'),
 
   put: (name: string, body: PeerConfig) =>
     orthancFetch<void>(`/peers/${name}`, {
-      method: "PUT",
-      headers: JSON_HEADERS,
+      method: 'PUT',
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify(body),
     }),
 
-  delete: (name: string) =>
-    orthancFetch<void>(`/peers/${name}`, { method: "DELETE" }),
+  delete: (name: string) => orthancFetch<void>(`/peers/${name}`, { method: 'DELETE' }),
 };

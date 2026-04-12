@@ -7,7 +7,7 @@
  *   DELETE /dicom-web/servers/:name    — dicomWebServersApi.delete()
  */
 // src/api/dicomWebServers.ts
-import { orthancFetch } from "@/lib/client";
+import { orthancFetch, JSON_CONTENT_HEADERS } from '@/lib/client';
 
 export type DicomWebServerConfig = {
   Url: string;
@@ -15,18 +15,15 @@ export type DicomWebServerConfig = {
   ChunkedTransfers?: boolean;
 };
 
-const JSON_HEADERS = { "Content-Type": "application/json" };
-
 export const dicomWebServersApi = {
-  list: () => orthancFetch<string[]>("/dicom-web/servers"),
+  list: () => orthancFetch<string[]>('/dicom-web/servers'),
 
   put: (name: string, body: DicomWebServerConfig) =>
     orthancFetch<void>(`/dicom-web/servers/${name}`, {
-      method: "PUT",
-      headers: JSON_HEADERS,
+      method: 'PUT',
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify(body),
     }),
 
-  delete: (name: string) =>
-    orthancFetch<void>(`/dicom-web/servers/${name}`, { method: "DELETE" }),
+  delete: (name: string) => orthancFetch<void>(`/dicom-web/servers/${name}`, { method: 'DELETE' }),
 };

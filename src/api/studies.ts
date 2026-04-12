@@ -13,10 +13,10 @@
  * Never build query-string URLs from patient data.
  */
 // src/api/studies.ts
-import { orthancFetch } from "@/lib/client";
+import { orthancFetch, JSON_CONTENT_HEADERS } from '@/lib/client';
 
 export type OrthancFindQuery = {
-  Level: "Patient" | "Study" | "Series" | "Instance";
+  Level: 'Patient' | 'Study' | 'Series' | 'Instance';
   Query: Record<string, string>;
   Limit?: number;
   Since?: number;
@@ -34,7 +34,7 @@ export type OrthancStudy = {
   PatientMainDicomTags: Record<string, string | null>;
   ParentPatient: string;
   Series: string[];
-  Type: "Study";
+  Type: 'Study';
 };
 /** @deprecated Use OrthancStudy instead. */
 export type Study = OrthancStudy;
@@ -44,18 +44,16 @@ export type OrthancSeries = {
   MainDicomTags: Record<string, string | null>;
   ParentStudy: string;
   Instances: string[];
-  Type: "Series";
+  Type: 'Series';
 };
 /** @deprecated Use OrthancSeries instead. */
 export type Series = OrthancSeries;
 
-const JSON_HEADERS = { "Content-Type": "application/json" };
-
 export const studiesApi = {
   find: (query: OrthancFindQuery) =>
-    orthancFetch<OrthancStudy[]>("/tools/find", {
-      method: "POST",
-      headers: JSON_HEADERS,
+    orthancFetch<OrthancStudy[]>('/tools/find', {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify(query),
     }),
 
@@ -63,25 +61,23 @@ export const studiesApi = {
 
   getSeries: (id: string) => orthancFetch<OrthancSeries[]>(`/studies/${id}/series`),
 
-  delete: (id: string) =>
-    orthancFetch<void>(`/studies/${id}`, { method: "DELETE" }),
+  delete: (id: string) => orthancFetch<void>(`/studies/${id}`, { method: 'DELETE' }),
 
   anonymize: (id: string, body: Record<string, unknown> = {}) =>
     orthancFetch<{ ID: string; Path: string }>(`/studies/${id}/anonymize`, {
-      method: "POST",
-      headers: JSON_HEADERS,
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify(body),
     }),
 
   modify: (id: string, body: Record<string, unknown>) =>
     orthancFetch<{ ID: string; Path: string }>(`/studies/${id}/modify`, {
-      method: "POST",
-      headers: JSON_HEADERS,
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify(body),
     }),
 
-  archive: (id: string) =>
-    orthancFetch<Blob>(`/studies/${id}/archive`, { responseType: "blob" }),
+  archive: (id: string) => orthancFetch<Blob>(`/studies/${id}/archive`, { responseType: 'blob' }),
 
   getStatistics: (id: string) =>
     orthancFetch<{ CountInstances: number; DiskSize: number }>(`/studies/${id}/statistics`),
@@ -93,7 +89,7 @@ export const studiesApi = {
   sendToModality: (studyId: string, modalityId: string) =>
     orthancFetch<void>(`/modalities/${encodeURIComponent(modalityId)}/store`, {
       method: 'POST',
-      headers: JSON_HEADERS,
+      headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify({ Resources: [studyId] }),
     }),
 

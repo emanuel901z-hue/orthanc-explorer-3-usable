@@ -11,22 +11,26 @@
  * - Network/unexpected errors call healthTracker.recordFailure() before re-throwing
  */
 
-import { getConfig, type OE3Config } from "@/config/runtime";
-import { newCorrelationId } from "./correlation";
-import { healthTracker } from "./health";
-import { OrthancError } from "./errors";
-import { logger } from "./logger";
+import { getConfig, type OE3Config } from '@/config/runtime';
+import { newCorrelationId } from './correlation';
+import { healthTracker } from './health';
+import { OrthancError } from './errors';
+import { logger } from './logger';
+
+/** Shared Content-Type header for JSON request bodies. */
+export const JSON_CONTENT_HEADERS = { 'Content-Type': 'application/json' } as const;
 
 async function attachAuthHeaders(headers: Headers, cfg: OE3Config): Promise<void> {
   switch (cfg.authMode) {
-    case "none": return;
-    case "basic": {
+    case 'none':
+      return;
+    case 'basic': {
       // Dev/simple deployments — browser credential prompt or env injection.
       // Real implementation added when basic-auth deployment is exercised.
       return;
     }
-    case "oidc":
-    case "smart": {
+    case 'oidc':
+    case 'smart': {
       // Phase 2: pull bearer token from fhirclient / oidc-client-ts.
       return;
     }
@@ -35,30 +39,32 @@ async function attachAuthHeaders(headers: Headers, cfg: OE3Config): Promise<void
 
 export async function orthancFetch<T>(
   path: string,
-  init: RequestInit & { responseType?: "blob" | "text" } = {},
+  init: RequestInit & { responseType?: 'blob' | 'text' } = {},
 ): Promise<T> {
   const cfg = getConfig();
   const correlationId = newCorrelationId();
   const url = cfg.orthancUrl ? `${cfg.orthancUrl}${path}` : path;
 
   const headers = new Headers(init.headers);
-  headers.set("X-Request-Id", correlationId);
-  if (!headers.has("Accept")) headers.set("Accept", "application/json");
+  headers.set('X-Request-Id', correlationId);
+  if (!headers.has('Accept')) headers.set('Accept', 'application/json');
   await attachAuthHeaders(headers, cfg);
 
   try {
-    const res = await fetch(url, { ...init, headers, credentials: "include" });
+    const res = await fetch(url, { ...init, headers, credentials: 'include' });
     healthTracker.record(res.ok, res.status);
     if (!res.ok) {
       const err = await OrthancError.from(res, correlationId);
-      logger.error("orthanc.fetch.failed", {
-        path, status: err.status, correlationId,
+      logger.error('orthanc.fetch.failed', {
+        path,
+        status: err.status,
+        correlationId,
       });
       throw err;
     }
     if (res.status === 204) return undefined as T;
-    if (init.responseType === "blob") return (await res.blob()) as T;
-    if (init.responseType === "text") return (await res.text()) as T;
+    if (init.responseType === 'blob') return (await res.blob()) as T;
+    if (init.responseType === 'text') return (await res.text()) as T;
     // Read as text first — some Orthanc endpoints (PUT/DELETE) return 200 with
     // an empty body rather than 204.  Calling .json() on an empty body throws a
     // SyntaxError, so we parse only when there is actual content.
@@ -68,7 +74,7 @@ export async function orthancFetch<T>(
   } catch (e) {
     if (!(e instanceof OrthancError)) {
       healthTracker.recordFailure();
-      logger.error("orthanc.fetch.failed", { path, correlationId });
+      logger.error('orthanc.fetch.failed', { path, correlationId });
     }
     throw e;
   }
