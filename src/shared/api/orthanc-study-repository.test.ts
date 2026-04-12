@@ -21,6 +21,7 @@ const makeStudy = (id = "abc") => ({
 
 describe("OrthancStudyRepository", () => {
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = {
       orthancUrl: "",
       authMode: "none",

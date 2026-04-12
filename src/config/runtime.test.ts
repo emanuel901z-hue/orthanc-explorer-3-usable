@@ -8,11 +8,13 @@ describe("runtime config", () => {
   });
 
   afterEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (window as any).__OE3_CONFIG__;
     __resetConfigForTests();
   });
 
   it("parses a valid standalone config", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = {
       orthancUrl: "http://localhost:8042",
       authMode: "none",
@@ -24,17 +26,20 @@ describe("runtime config", () => {
   });
 
   it("defaults features to empty object", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none" };
     const cfg = loadConfig();
     expect(cfg.features).toEqual({});
   });
 
   it("accepts empty orthancUrl (plugin same-origin mode)", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none", features: {} };
     expect(() => loadConfig()).not.toThrow();
   });
 
   it("rejects invalid authMode", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "bogus", features: {} };
     expect(() => loadConfig()).toThrow();
   });
@@ -44,6 +49,7 @@ describe("runtime config", () => {
   });
 
   it("getConfig returns the loaded config after loadConfig", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none", features: {} };
     loadConfig();
     expect(getConfig().authMode).toBe("none");

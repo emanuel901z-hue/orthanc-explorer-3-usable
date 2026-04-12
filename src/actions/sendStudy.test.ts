@@ -12,6 +12,7 @@ describe("sendStudyAction", () => {
     vi.spyOn(auditClient, "emit").mockImplementation(() => {});
     // Must set up config first
     const { loadConfig, __resetConfigForTests } = await import("@/config/runtime");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none", features: {} };
     loadConfig();
     await sendStudyAction("study-abc", "modality", "REMOTE_AET");
@@ -27,6 +28,7 @@ describe("sendStudyAction", () => {
     );
     vi.spyOn(auditClient, "emit").mockImplementation(() => {});
     const { loadConfig, __resetConfigForTests } = await import("@/config/runtime");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none", features: {} };
     loadConfig();
     await sendStudyAction("study-abc", "peer", "PEER_A");

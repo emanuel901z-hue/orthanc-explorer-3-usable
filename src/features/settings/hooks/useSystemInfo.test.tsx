@@ -26,6 +26,7 @@ const mockSystem = {
 
 describe("useSystemInfo", () => {
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = {
       orthancUrl: "",
       authMode: "none",

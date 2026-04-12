@@ -108,7 +108,7 @@ export default function UploadPage() {
               ref={folderInputRef}
               type="file"
               multiple
-              {...{ webkitdirectory: '', directory: '' } as any}
+              {...{ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>}
               className="hidden"
               onChange={handleFileSelect}
             />

@@ -5,6 +5,7 @@ import { healthTracker } from "./health";
 import { OrthancError } from "./errors";
 
 const setCfg = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).__OE3_CONFIG__ = {
     orthancUrl: "http://localhost:8042", authMode: "none", features: {},
   };
@@ -79,6 +80,7 @@ describe("orthancFetch", () => {
   });
 
   it("uses empty base for same-origin plugin mode", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none", features: {} };
     loadConfig();
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(

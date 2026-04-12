@@ -40,6 +40,7 @@ describe("logger", () => {
   });
 
   it("drops nested object values for allowlisted keys (PHI leak prevention)", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     logger.info("test", { studyId: { id: "abc", patientName: "Jane" } as any });
     const event = sink.mock.calls[0][0];
     expect(event.fields.studyId).toBeUndefined();

@@ -21,7 +21,6 @@ type Event = { level: Level; event: string; fields: Record<string, unknown>; tim
 type Sink = (e: Event) => void;
 
 const defaultSink: Sink = (e) => {
-  // eslint-disable-next-line no-console
   console[e.level === "error" ? "error" : e.level === "warn" ? "warn" : "log"](e);
 };
 let sink: Sink = defaultSink;

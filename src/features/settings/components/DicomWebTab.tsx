@@ -109,6 +109,7 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                         </TooltipTrigger>
                         <TooltipContent>
                           {s.authType === 'bearer' && 'Bearer token authentication'}
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                           {s.authType === 'basic' && `Basic auth (user: ${(s as any).username || 'configured'})`}
                           {s.authType === 'oauth' && 'OAuth 2.0 authentication'}
                           {s.authType === 'none' && 'No authentication'}

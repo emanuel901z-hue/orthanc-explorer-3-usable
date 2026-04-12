@@ -22,6 +22,7 @@ describe("deleteStudyAction", () => {
   it("emits failure audit and rethrows on error", async () => {
     vi.spyOn(studiesApi, "delete").mockRejectedValue(new OrthancError(500, "c", "boom"));
     const auditSpy = vi.spyOn(auditClient, "emit").mockImplementation(() => {});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await expect(deleteStudyAction({ ID: "abc" } as any)).rejects.toBeInstanceOf(OrthancError);
     expect(auditSpy).toHaveBeenCalledWith(expect.objectContaining({
       outcome: "failure",
