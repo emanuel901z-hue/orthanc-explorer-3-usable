@@ -37,7 +37,7 @@ describe('addLabelAction', () => {
   });
 
   it('emits failure event and rethrows on error', async () => {
-    const err = new OrthancError(503, 'unavailable');
+    const err = new OrthancError(503, 'corr-id-add', 'unavailable');
     vi.mocked(studiesApi.addLabel).mockRejectedValue(err);
     await expect(addLabelAction('study-abc', 'urgent')).rejects.toBe(err);
     expect(auditClient.emit).toHaveBeenCalledWith(
@@ -68,11 +68,11 @@ describe('removeLabelAction', () => {
   });
 
   it('emits failure event and rethrows on error', async () => {
-    const err = new OrthancError(503, 'unavailable');
+    const err = new OrthancError(503, 'corr-id-remove', 'unavailable');
     vi.mocked(studiesApi.removeLabel).mockRejectedValue(err);
     await expect(removeLabelAction('study-abc', 'urgent')).rejects.toBe(err);
     expect(auditClient.emit).toHaveBeenCalledWith(
-      expect.objectContaining({ outcome: 'failure' }),
+      expect.objectContaining({ outcome: 'failure', errorCode: 503 }),
     );
   });
 });
