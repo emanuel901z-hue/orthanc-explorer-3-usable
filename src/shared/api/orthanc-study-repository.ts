@@ -20,8 +20,6 @@ import { instancesApi } from '@/api/instances';
 import type { Study as OrthancStudy } from '@/api/studies';
 import type { SeriesDetail } from '@/api/series';
 import type { Instance as OrthancInstance } from '@/api/instances';
-import { sendStudyAction } from '@/actions/sendStudy';
-import { addLabelAction, removeLabelAction } from '@/actions/studyLabel';
 import { mapDicomTagEntries, type RawDicomTag } from '@/lib/dicom-tag-utils';
 
 /** Narrows a mixed Orthanc response to string IDs (vs. full instance objects). */
@@ -248,16 +246,16 @@ export class OrthancStudyRepository implements IStudyRepository {
 
   /** Sends a study to a DICOM modality via /modalities/{name}/store. */
   async sendToModality(id: string, modalityId: string): Promise<void> {
-    await sendStudyAction(id, modalityId);
+    await studiesApi.sendToModality(id, modalityId);
   }
 
   /** Adds a label to a study. */
   async addLabel(id: string, label: string): Promise<void> {
-    await addLabelAction(id, label);
+    await studiesApi.addLabel(id, label);
   }
 
   /** Removes a label from a study. */
   async removeLabel(id: string, label: string): Promise<void> {
-    await removeLabelAction(id, label);
+    await studiesApi.removeLabel(id, label);
   }
 }
