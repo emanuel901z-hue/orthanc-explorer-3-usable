@@ -6,6 +6,7 @@
  */
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { getConfig } from '@/config/runtime';
 
 export type UserRole = 'admin' | 'physician' | 'technologist' | 'viewer';
 
@@ -77,6 +78,22 @@ function resolvePermissions(roles: UserRole[]): Set<Permission> {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const cfg = getConfig();
+
+  if (cfg.authMode === 'oidc') {
+    throw new Error(
+      'OIDC auth not yet implemented — authMode "oidc" requires Phase 2 implementation. ' +
+      'Set authMode to "none" in public/config.js for local development.'
+    );
+  }
+
+  if (cfg.authMode === 'smart') {
+    throw new Error(
+      'SMART-on-FHIR auth not yet implemented — authMode "smart" requires Phase 2 implementation. ' +
+      'Set authMode to "none" in public/config.js for local development.'
+    );
+  }
+
   const user = DEMO_USER;
 
   const value = useMemo<AuthContextValue>(() => {
