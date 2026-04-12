@@ -1,3 +1,11 @@
+/**
+ * healthTracker — module-level singleton tracking Orthanc connection health.
+ *
+ * The transport client calls record()/recordFailure() after every fetch.
+ * After FAILURE_THRESHOLD (3) consecutive failures, status transitions to "degraded".
+ * Any successful response resets status to "healthy".
+ * UI components subscribe to receive state change notifications.
+ */
 type Status = "unknown" | "healthy" | "degraded";
 type State = { status: Status; consecutiveFailures: number };
 type Listener = (s: State) => void;
