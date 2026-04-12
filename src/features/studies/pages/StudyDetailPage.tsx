@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,11 +24,15 @@ import DicomTagBrowser from '@/features/studies/components/DicomTagBrowser';
 import StudyActivityLog from '@/features/studies/components/StudyActivityLog';
 import { ModifyStudyDialog } from '@/features/studies/components/ModifyStudyDialog';
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
+import { deleteStudyAction } from '@/actions/deleteStudy';
+import { downloadStudyAction } from '@/actions/downloadStudy';
+import type { Study as OrthancStudy } from '@/api/studies';
 
 export default function StudyDetailPage() {
   const { t } = useTranslation();
   const { studyId } = useParams<{ studyId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: study, isLoading } = useStudy(studyId!);
   const { data: series = [] } = useStudySeries(studyId!);
   const { audit } = useAuditLog();
@@ -35,6 +40,19 @@ export default function StudyDetailPage() {
   const [anonOpen, setAnonOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
   const [seriesView, setSeriesView] = useState<'grid' | 'table'>('table');
+
+  const deleteMutation = useMutation({
+    mutationFn: (orthancStudy: OrthancStudy) => deleteStudyAction(orthancStudy),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studies'] });
+      navigate('/studies');
+    },
+  });
+
+  const downloadMutation = useMutation({
+    mutationFn: (id: string) =>
+      downloadStudyAction(id, study ? `${formatPatientName(study.patientName)}.zip` : `${id}.zip`),
+  });
 
   // Update tab label with patient name when loaded
   useTabLabel(study ? formatPatientName(study.patientName) : undefined);
@@ -79,9 +97,18 @@ export default function StudyDetailPage() {
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate(`/viewer/${studyId}`)}><Eye className="h-3.5 w-3.5" /> {t('actions.viewer')}</Button>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
-                audit({ action: 'download', title: `Study downloaded: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'info', metadata: { 'Study ID': studyId!, 'Format': 'DICOM ZIP' } });
-              }}><Download className="h-3.5 w-3.5" /> {t('actions.download')}</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                disabled={downloadMutation.isPending}
+                onClick={() => {
+                  audit({ action: 'download', title: `Study downloaded: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'info', metadata: { 'Study ID': studyId!, 'Format': 'DICOM ZIP' } });
+                  downloadMutation.mutate(studyId!);
+                }}
+              >
+                <Download className="h-3.5 w-3.5" /> {t('actions.download')}
+              </Button>
             </TooltipTrigger>
             <TooltipContent>Download as DICOM ZIP archive</TooltipContent>
           </Tooltip>
@@ -104,9 +131,14 @@ export default function StudyDetailPage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => {
-                  audit({ action: 'delete', title: `Study deleted: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'warning', metadata: { 'Study ID': studyId!, 'Series': String(study.numberOfSeries), 'Instances': String(study.numberOfInstances) } });
-                }}>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  disabled={deleteMutation.isPending}
+                  onClick={() => {
+                    audit({ action: 'delete', title: `Study deleted: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'warning', metadata: { 'Study ID': studyId!, 'Series': String(study.numberOfSeries), 'Instances': String(study.numberOfInstances) } });
+                    deleteMutation.mutate({ ID: studyId!, MainDicomTags: {}, PatientMainDicomTags: {}, ParentPatient: '', Series: [], Type: 'Study' });
+                  }}
+                >
                   {t('studies.deletePermanently')}
                 </AlertDialogAction>
               </AlertDialogFooter>
