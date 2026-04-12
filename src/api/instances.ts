@@ -11,16 +11,18 @@
 // src/api/instances.ts
 import { orthancFetch } from "@/lib/client";
 
-export type Instance = {
+export type OrthancInstance = {
   ID: string;
   MainDicomTags: Record<string, string | null>;
   ParentSeries: string;
   Type: "Instance";
   FileSize?: number;
 };
+/** @deprecated Use OrthancInstance instead. */
+export type Instance = OrthancInstance;
 
 export const instancesApi = {
-  get: (id: string) => orthancFetch<Instance>(`/instances/${id}`),
+  get: (id: string) => orthancFetch<OrthancInstance>(`/instances/${id}`),
 
   getTags: (id: string) => orthancFetch<Record<string, unknown>>(`/instances/${id}/tags`),
 

@@ -25,7 +25,7 @@ export type OrthancFindQuery = {
   RequestedTags?: string[];
 };
 
-export type Study = {
+export type OrthancStudy = {
   ID: string;
   IsStable: boolean;
   Labels: string[];
@@ -36,28 +36,32 @@ export type Study = {
   Series: string[];
   Type: "Study";
 };
+/** @deprecated Use OrthancStudy instead. */
+export type Study = OrthancStudy;
 
-export type Series = {
+export type OrthancSeries = {
   ID: string;
   MainDicomTags: Record<string, string | null>;
   ParentStudy: string;
   Instances: string[];
   Type: "Series";
 };
+/** @deprecated Use OrthancSeries instead. */
+export type Series = OrthancSeries;
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
 
 export const studiesApi = {
   find: (query: OrthancFindQuery) =>
-    orthancFetch<Study[]>("/tools/find", {
+    orthancFetch<OrthancStudy[]>("/tools/find", {
       method: "POST",
       headers: JSON_HEADERS,
       body: JSON.stringify(query),
     }),
 
-  get: (id: string) => orthancFetch<Study>(`/studies/${id}`),
+  get: (id: string) => orthancFetch<OrthancStudy>(`/studies/${id}`),
 
-  getSeries: (id: string) => orthancFetch<Series[]>(`/studies/${id}/series`),
+  getSeries: (id: string) => orthancFetch<OrthancSeries[]>(`/studies/${id}/series`),
 
   delete: (id: string) =>
     orthancFetch<void>(`/studies/${id}`, { method: "DELETE" }),

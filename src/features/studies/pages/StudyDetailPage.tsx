@@ -28,7 +28,7 @@ import { toast } from 'sonner';
 import { deleteStudyAction } from '@/actions/deleteStudy';
 import { downloadStudyAction } from '@/actions/downloadStudy';
 import { OrthancError } from '@/lib/errors';
-import type { Study as OrthancStudy } from '@/api/studies';
+import type { OrthancStudy } from '@/api/studies';
 
 function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
   const { data: previewBlob, isLoading } = useInstancePreview(instanceId ?? '');

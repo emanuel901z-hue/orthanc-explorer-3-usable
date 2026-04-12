@@ -8,7 +8,7 @@
  */
 // src/api/series.ts
 import { orthancFetch } from "@/lib/client";
-import type { Instance } from "@/api/instances";
+import type { OrthancInstance } from "@/api/instances";
 
 export type SeriesDetail = {
   ID: string;
@@ -27,7 +27,7 @@ export const seriesApi = {
    * Callers must handle both shapes — use `isInstanceIdArray` to discriminate.
    */
   getInstances: (id: string) =>
-    orthancFetch<string[] | Instance[]>(`/series/${id}/instances`),
+    orthancFetch<string[] | OrthancInstance[]>(`/series/${id}/instances`),
 
   /** Returns tags shared by ALL instances in the series — series-level DICOM tags only. */
   getSharedTags: (id: string) =>

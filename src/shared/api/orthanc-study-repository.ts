@@ -17,9 +17,9 @@ import {
 import { studiesApi } from '@/api/studies';
 import { seriesApi } from '@/api/series';
 import { instancesApi } from '@/api/instances';
-import type { Study as OrthancStudy } from '@/api/studies';
+import type { OrthancStudy } from '@/api/studies';
 import type { SeriesDetail } from '@/api/series';
-import type { Instance as OrthancInstance } from '@/api/instances';
+import type { OrthancInstance } from '@/api/instances';
 import { mapDicomTagEntries, type RawDicomTag } from '@/lib/dicom-tag-utils';
 
 /** Narrows a mixed Orthanc response to string IDs (vs. full instance objects). */
