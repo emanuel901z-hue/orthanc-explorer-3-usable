@@ -1,7 +1,7 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { StudyFilters } from '@/shared/types';
 import { RepositoryFactory } from '@/shared/api/repository-factory';
-import { mapDicomTagEntries } from '@/lib/dicom-tag-utils';
+import { mapDicomTagEntries, type RawDicomTag } from '@/lib/dicom-tag-utils';
 
 const repo = RepositoryFactory.createStudyRepository();
 
@@ -61,7 +61,7 @@ export function useSeriesSharedTags(seriesId: string) {
     queryFn: async () => {
       const { seriesApi } = await import('@/api/series');
       const raw = await seriesApi.getSharedTags(seriesId);
-      return mapDicomTagEntries(raw as Record<string, { Name?: string; Type?: string; Value?: string | null }>);
+      return mapDicomTagEntries(raw as Record<string, RawDicomTag>);
     },
     enabled: !!seriesId,
     staleTime: 5 * 60 * 1000,
@@ -75,7 +75,7 @@ export function useStudySharedTags(studyId: string) {
       const { studiesApi } = await import('@/api/studies');
       const raw = await studiesApi.getSharedTags(studyId);
       // Map to DicomTagEntry[] — same shape used by DicomTagBrowser
-      return mapDicomTagEntries(raw as Record<string, { Name?: string; Type?: string; Value?: string | null }>);
+      return mapDicomTagEntries(raw as Record<string, RawDicomTag>);
     },
     enabled: !!studyId,
     staleTime: 5 * 60 * 1000,

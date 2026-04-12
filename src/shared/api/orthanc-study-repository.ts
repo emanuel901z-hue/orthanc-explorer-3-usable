@@ -22,6 +22,7 @@ import type { SeriesDetail } from '@/api/series';
 import type { Instance as OrthancInstance } from '@/api/instances';
 import { sendStudyAction } from '@/actions/sendStudy';
 import { addLabelAction, removeLabelAction } from '@/actions/studyLabel';
+import { mapDicomTagEntries, type RawDicomTag } from '@/lib/dicom-tag-utils';
 
 /** Narrows a mixed Orthanc response to string IDs (vs. full instance objects). */
 function isInstanceIdArray(arr: string[] | OrthancInstance[]): arr is string[] {
@@ -109,21 +110,6 @@ function mapOrthancSeries(s: SeriesDetail): Series {
   };
 }
 
-type OrthancTagEntry = { Name?: string; Type?: string; Value?: string | null };
-
-function mapDicomTags(raw: Record<string, unknown>): DicomTag[] {
-  return Object.entries(raw).map(([tag, v]) => {
-    const entry = v as OrthancTagEntry;
-    const val = entry.Value;
-    return {
-      tag,
-      name: entry.Name ?? tag,
-      vr: entry.Type ?? '',
-      // Sequence tags have array/object values — stringify so React can render them
-      value: val == null ? '' : typeof val === 'string' ? val : JSON.stringify(val),
-    };
-  });
-}
 
 function mapOrthancInstance(inst: OrthancInstance, rawTags?: Record<string, unknown>): Instance {
   const dicomTags = inst.MainDicomTags ?? {};
@@ -135,7 +121,7 @@ function mapOrthancInstance(inst: OrthancInstance, rawTags?: Record<string, unkn
     fileSize: inst.FileSize ?? 0,
     imagePositionPatient: dicomTags['ImagePositionPatient'] ?? undefined,
     acquisitionTime: dicomTags['InstanceCreationTime'] ?? undefined,
-    tags: rawTags ? mapDicomTags(rawTags) : [],
+    tags: rawTags ? mapDicomTagEntries(rawTags as Record<string, RawDicomTag>) : [],
   };
 }
 
