@@ -23,6 +23,11 @@ import type { Instance as OrthancInstance } from '@/api/instances';
 import { sendStudyAction } from '@/actions/sendStudy';
 import { addLabelAction, removeLabelAction } from '@/actions/studyLabel';
 
+/** Narrows a mixed Orthanc response to string IDs (vs. full instance objects). */
+function isInstanceIdArray(arr: string[] | OrthancInstance[]): arr is string[] {
+  return arr.length === 0 || typeof arr[0] === 'string';
+}
+
 function parseOrthancDate(raw: string | null | undefined): Date | undefined {
   if (!raw || raw.length < 8) return undefined;
   return new Date(
@@ -205,16 +210,14 @@ export class OrthancStudyRepository implements IStudyRepository {
     const result = await seriesApi.getInstances(seriesId);
     if (!Array.isArray(result) || result.length === 0) return [];
 
-    if (typeof result[0] === 'string') {
+    if (isInstanceIdArray(result)) {
       // Older Orthanc: array of ID strings — fetch each individually
-      const instances = await Promise.all(
-        (result as unknown as string[]).map((id) => instancesApi.get(id))
-      );
+      const instances = await Promise.all(result.map((id) => instancesApi.get(id)));
       return instances.map(mapOrthancInstance);
     }
 
     // Newer Orthanc: array of full instance objects — map directly
-    return (result as unknown as OrthancInstance[]).map(mapOrthancInstance);
+    return result.map(mapOrthancInstance);
   }
 
   /** Returns a single instance by Orthanc UUID, including all DICOM tags. */
