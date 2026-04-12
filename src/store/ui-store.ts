@@ -1,3 +1,4 @@
+// PHI classification: UI (no PHI — persist-safe)
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

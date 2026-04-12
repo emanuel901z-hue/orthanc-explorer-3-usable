@@ -1,3 +1,5 @@
+// PHI classification: SESSION (may hold PHI — memory-only)
+// Audit events may reference study IDs and patient-identifying context.
 import { create } from 'zustand';
 import { ActivityEvent } from '@/shared/types/activity';
 

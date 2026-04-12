@@ -1,3 +1,6 @@
+// PHI classification: SESSION (may hold PHI — memory-only)
+// CRITICAL: tab state holds open study IDs (studyId field) — must NOT use persist() middleware.
+// TODO: Remove persist() middleware — see PHI hygiene task.
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

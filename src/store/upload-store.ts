@@ -1,3 +1,5 @@
+// PHI classification: SESSION (may hold PHI — memory-only)
+// File names passed to addFiles() may contain patient-identifying information.
 import { create } from 'zustand';
 import { useJobStore } from './job-store';
 
