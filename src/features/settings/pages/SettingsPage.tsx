@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useUiStore } from '@/store/ui-store';
-import { generateDemoModalities, generateDemoDicomWebServers } from '@/shared/api/mock/demo-data-generator';
+import { DicomModality, DicomWebServer } from '@/shared/types';
 import AddModalityDialog from '@/features/settings/components/AddModalityDialog';
 import AddServerDialog from '@/features/settings/components/AddServerDialog';
 import EmbeddedThemingCard from '@/features/settings/components/EmbeddedThemingCard';
@@ -20,16 +20,13 @@ import ViewerTab from '@/features/settings/components/ViewerTab';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
 import { toast } from 'sonner';
 
-const modalities = generateDemoModalities();
-const dicomwebServers = generateDemoDicomWebServers();
-
 export default function SettingsPage() {
   const { theme, setTheme } = useUiStore();
   const { t, i18n } = useTranslation();
   const [addModalityOpen, setAddModalityOpen] = useState(false);
-  const [editModality, setEditModality] = useState<typeof modalities[number] | null>(null);
+  const [editModality, setEditModality] = useState<DicomModality | null>(null);
   const [addServerOpen, setAddServerOpen] = useState(false);
-  const [editServer, setEditServer] = useState<typeof dicomwebServers[number] | null>(null);
+  const [editServer, setEditServer] = useState<DicomWebServer | null>(null);
 
   const changeLanguage = (code: string) => {
     i18n.changeLanguage(code);

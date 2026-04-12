@@ -8,16 +8,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { generateDemoModalities, generateDemoDicomWebServers } from '@/shared/api/mock/demo-data-generator';
+import { useModalities } from '@/features/settings/hooks/useModalities';
+import { useDicomWebServers } from '@/features/settings/hooks/useDicomWebServers';
 import { format } from 'date-fns';
-
-const modalities = generateDemoModalities();
-const dicomwebServers = generateDemoDicomWebServers();
 
 export default function RemoteSourcesPage() {
   const { t } = useTranslation();
-  const [selectedModality, setSelectedModality] = useState(modalities[0]?.id || '');
-  const [selectedServer, setSelectedServer] = useState(dicomwebServers[0]?.id || '');
+  const { data: modalityNames = [] } = useModalities();
+  const { data: serverNames = [] } = useDicomWebServers();
+  const modalities = modalityNames.map((name) => ({ id: name, name, aet: name, host: '—', port: 0 }));
+  const dicomwebServers = serverNames.map((name) => ({
+    id: name,
+    name,
+    url: '',
+    authType: 'none' as const,
+    hasQidoSupport: false,
+    hasWadoSupport: false,
+    hasStowSupport: false,
+  }));
+  const [selectedModality, setSelectedModality] = useState('');
+  const [selectedServer, setSelectedServer] = useState('');
 
   return (
     <div className="p-4 md:p-6 space-y-4 animate-fade-in">

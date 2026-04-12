@@ -9,17 +9,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { generateDemoModalities } from '@/shared/api/mock/demo-data-generator';
+import { useModalities } from '@/features/settings/hooks/useModalities';
+import { DicomModality } from '@/shared/types';
 import { toast } from 'sonner';
-
-const modalities = generateDemoModalities();
 
 interface ModalitiesTabProps {
   onAddClick: () => void;
-  onEditClick: (modality: typeof modalities[number]) => void;
+  onEditClick: (modality: DicomModality) => void;
 }
 
 export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTabProps) {
+  const { data: modalityNames = [] } = useModalities();
+  const modalities: DicomModality[] = modalityNames.map((name) => ({
+    id: name,
+    name,
+    aet: name,
+    host: '—',
+    port: 0,
+  }));
   const successCount = modalities.filter((m) => m.lastEchoStatus === 'success').length;
   const failCount = modalities.filter((m) => m.lastEchoStatus !== 'success').length;
 
