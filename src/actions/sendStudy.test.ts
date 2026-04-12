@@ -1,39 +1,49 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { sendStudyAction } from "./sendStudy";
-import { auditClient } from "@/lib/audit";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-describe("sendStudyAction", () => {
-  beforeEach(() => vi.restoreAllMocks());
+vi.mock('@/api/studies', () => ({
+  studiesApi: {
+    sendToModality: vi.fn(),
+  },
+}));
+vi.mock('@/lib/audit', () => ({
+  auditClient: { emit: vi.fn() },
+}));
 
-  it("POSTs to modality store endpoint", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response("{}", { status: 200 }),
-    );
-    vi.spyOn(auditClient, "emit").mockImplementation(() => {});
-    // Must set up config first
-    const { loadConfig, __resetConfigForTests } = await import("@/config/runtime");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none", features: {} };
-    loadConfig();
-    await sendStudyAction("study-abc", "modality", "REMOTE_AET");
-    const [url] = fetchMock.mock.calls[0];
-    expect(url).toBe("/modalities/REMOTE_AET/store");
-    // cleanup
-    __resetConfigForTests();
+import { sendStudyAction } from './sendStudy';
+import { studiesApi } from '@/api/studies';
+import { auditClient } from '@/lib/audit';
+import { OrthancError } from '@/lib/errors';
+
+describe('sendStudyAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it('calls studiesApi.sendToModality and emits success audit event', async () => {
+    vi.mocked(studiesApi.sendToModality).mockResolvedValue(undefined);
+
+    await sendStudyAction('study-abc', 'PACS_PRIMARY');
+
+    expect(studiesApi.sendToModality).toHaveBeenCalledWith('study-abc', 'PACS_PRIMARY');
+    expect(auditClient.emit).toHaveBeenCalledWith({
+      action: 'study.send',
+      resourceType: 'study',
+      resourceId: 'study-abc',
+      outcome: 'success',
+      timestamp: '2026-01-01T00:00:00.000Z',
+    });
   });
 
-  it("POSTs to peer store endpoint", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response("{}", { status: 200 }),
+  it('emits failure audit event and rethrows on error', async () => {
+    const err = new OrthancError(503, 'unavailable', 'Service temporarily unavailable.');
+    vi.mocked(studiesApi.sendToModality).mockRejectedValue(err);
+
+    await expect(sendStudyAction('study-abc', 'PACS_PRIMARY')).rejects.toBe(err);
+    expect(auditClient.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'failure', errorCode: 503 }),
     );
-    vi.spyOn(auditClient, "emit").mockImplementation(() => {});
-    const { loadConfig, __resetConfigForTests } = await import("@/config/runtime");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__OE3_CONFIG__ = { orthancUrl: "", authMode: "none", features: {} };
-    loadConfig();
-    await sendStudyAction("study-abc", "peer", "PEER_A");
-    const [url] = fetchMock.mock.calls[0];
-    expect(url).toBe("/peers/PEER_A/store");
-    __resetConfigForTests();
   });
 });

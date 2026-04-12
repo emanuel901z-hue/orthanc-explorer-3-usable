@@ -21,6 +21,7 @@ import type { Study as OrthancStudy } from '@/api/studies';
 import type { SeriesDetail } from '@/api/series';
 import type { Instance as OrthancInstance } from '@/api/instances';
 import { orthancFetch } from '@/lib/client';
+import { sendStudyAction } from '@/actions/sendStudy';
 
 function parseOrthancDate(raw: string | null | undefined): Date | undefined {
   if (!raw || raw.length < 8) return undefined;
@@ -258,11 +259,7 @@ export class OrthancStudyRepository implements IStudyRepository {
 
   /** Sends a study to a DICOM modality via /modalities/{name}/store. */
   async sendToModality(id: string, modalityId: string): Promise<void> {
-    await orthancFetch<unknown>(`/modalities/${modalityId}/store`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ Resources: [id] }),
-    });
+    await sendStudyAction(id, modalityId);
   }
 
   /** Adds a label to a study. */

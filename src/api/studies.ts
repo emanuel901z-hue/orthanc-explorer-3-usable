@@ -85,4 +85,11 @@ export const studiesApi = {
   /** Returns tags shared by ALL instances in the study — study + patient level only. */
   getSharedTags: (id: string) =>
     orthancFetch<Record<string, unknown>>(`/studies/${id}/shared-tags`),
+
+  sendToModality: (studyId: string, modalityId: string) =>
+    orthancFetch<void>(`/modalities/${encodeURIComponent(modalityId)}/store`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ Resources: [studyId] }),
+    }),
 };
