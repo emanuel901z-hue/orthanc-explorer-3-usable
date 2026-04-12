@@ -10,7 +10,7 @@
 import { orthancFetch } from "@/lib/client";
 import type { OrthancInstance } from "@/api/instances";
 
-export type SeriesDetail = {
+export type OrthancSeries = {
   ID: string;
   MainDicomTags: Record<string, string | null>;
   ParentStudy: string;
@@ -18,8 +18,11 @@ export type SeriesDetail = {
   Type: "Series";
 };
 
+/** @deprecated Use OrthancSeries — kept for backward compatibility */
+export type SeriesDetail = OrthancSeries;
+
 export const seriesApi = {
-  get: (id: string) => orthancFetch<SeriesDetail>(`/series/${id}`),
+  get: (id: string) => orthancFetch<OrthancSeries>(`/series/${id}`),
 
   /**
    * Returns either an array of UUID strings (older Orthanc builds) or an array
