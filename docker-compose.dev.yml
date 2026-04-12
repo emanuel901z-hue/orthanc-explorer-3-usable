@@ -169,6 +169,45 @@ services:
       azure-emulator:
         condition: service_healthy
 
+  # ── DICOM Peer (test modality) ────────────────────────────────────────────
+  # A second Orthanc instance using SQLite (no Postgres dependency).
+  # Acts as a real DICOM peer for C-ECHO, C-STORE, and C-MOVE testing.
+  #
+  # Inside the compose network: hostname "dicom-peer", DICOM port 4242.
+  # From the host: HTTP on 8043, DICOM on 4243.
+  #
+  # The primary Orthanc resolves "dicom-peer" via Docker DNS when executing
+  # C-ECHO — the browser never needs to resolve this hostname.
+  dicom-peer:
+    image: orthancteam/orthanc:latest
+    restart: unless-stopped
+    ports:
+      - "8043:8042"
+      - "4243:4242"
+    environment:
+      ORTHANC__NAME: "OE3 Dev Peer"
+      ORTHANC__DICOM_AET: "PEER"
+      ORTHANC__REMOTE_ACCESS_ALLOWED: "true"
+      ORTHANC__AUTHENTICATION_ENABLED: "false"
+      ORTHANC__HTTP_HEADERS: '{"Access-Control-Allow-Origin":"*"}'
+      ORTHANC__HTTP_TIMEOUT: "30"
+      ORTHANC__DICOM_SCU_TIMEOUT: "30"
+      ORTHANC__DICOM_SCP_TIMEOUT: "30"
+    volumes:
+      - peer-data:/var/lib/orthanc/db
+    healthcheck:
+      # orthanc:latest (slim) has no curl/wget — use python3 (always present)
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8042/system')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
   # ── Test data seeder ───────────────────────────────────────────────────────
   # Optional profile — loads test-data/sample.dcm into Orthanc.
   # Run: docker compose -f docker-compose.dev.yml --profile seed up seeder
@@ -182,7 +221,31 @@ services:
     volumes:
       - ./test-data:/seed:ro
 
+  # ── Modality seeder ────────────────────────────────────────────────────────
+  # Idempotently registers the PEER modality in the primary Orthanc DB on every
+  # `docker compose up`.  Runs after orthanc is healthy so PUT always succeeds.
+  #
+  # Why not use ORTHANC__DICOM_MODALITIES env var?
+  # With DICOM_MODALITIES_IN_DATABASE=true, Orthanc only imports static modality
+  # config on the very first run (empty DB).  This seeder approach works for
+  # both fresh and existing pgdata volumes because PUT /modalities is idempotent.
+  modality-seeder:
+    image: curlimages/curl:latest
+    restart: "no"
+    depends_on:
+      orthanc:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        curl -sf -X PUT http://orthanc:8042/modalities/PEER \
+          -H "Content-Type: application/json" \
+          -d '{"AET":"PEER","Host":"dicom-peer","Port":4242}' && \
+        echo "PEER modality registered"
+
 volumes:
   pgdata:
   orthanc-data:
   dicom-data:
+  peer-data:

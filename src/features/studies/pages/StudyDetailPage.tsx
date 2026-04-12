@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useStudy, useStudySeries } from '@/features/studies/hooks/use-studies';
+import { useStudy, useStudySeries, useInstancePreview, useStudySharedTags } from '@/features/studies/hooks/use-studies';
 import { ModalityBadge, formatPatientName, formatDiskSize } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
@@ -28,6 +28,29 @@ import { deleteStudyAction } from '@/actions/deleteStudy';
 import { downloadStudyAction } from '@/actions/downloadStudy';
 import type { Study as OrthancStudy } from '@/api/studies';
 
+function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
+  const { data: previewBlob, isLoading } = useInstancePreview(instanceId ?? '');
+  const previewUrl = useMemo(
+    () => (previewBlob ? URL.createObjectURL(previewBlob) : null),
+    [previewBlob],
+  );
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
+
+  if (isLoading) return <Skeleton className="h-16 w-16 rounded shrink-0" />;
+  if (previewUrl) {
+    return (
+      <div className="h-16 w-16 rounded overflow-hidden bg-black shrink-0">
+        <img src={previewUrl} alt="Series preview" className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div className="h-16 w-16 bg-muted rounded flex items-center justify-center shrink-0">
+      <Image className="h-6 w-6 text-muted-foreground" />
+    </div>
+  );
+}
+
 export default function StudyDetailPage() {
   const { t } = useTranslation();
   const { studyId } = useParams<{ studyId: string }>();
@@ -35,6 +58,7 @@ export default function StudyDetailPage() {
   const queryClient = useQueryClient();
   const { data: study, isLoading } = useStudy(studyId!);
   const { data: series = [] } = useStudySeries(studyId!);
+  const { data: sharedTags } = useStudySharedTags(studyId!);
   const { audit } = useAuditLog();
   const [sendOpen, setSendOpen] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
@@ -273,9 +297,7 @@ export default function StudyDetailPage() {
                           className="border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer flex gap-3"
                           onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
                         >
-                          <div className="h-16 w-16 bg-muted rounded flex items-center justify-center shrink-0">
-                            <Image className="h-6 w-6 text-muted-foreground" />
-                          </div>
+                          <SeriesThumbnail instanceId={s.firstInstanceId} />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <ModalityBadge modality={s.modality} />
@@ -353,7 +375,7 @@ export default function StudyDetailPage() {
         <TabsContent value="tags">
           <Card>
             <CardContent className="pt-6">
-              <DicomTagBrowser study={study} />
+              <DicomTagBrowser study={study} tags={sharedTags} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -361,7 +383,7 @@ export default function StudyDetailPage() {
         <TabsContent value="activity">
           <Card>
             <CardContent className="pt-6">
-              <StudyActivityLog />
+              <StudyActivityLog studyId={studyId} />
             </CardContent>
           </Card>
         </TabsContent>

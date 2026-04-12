@@ -22,6 +22,10 @@ export const seriesApi = {
 
   getInstances: (id: string) => orthancFetch<string[]>(`/series/${id}/instances`),
 
+  /** Returns tags shared by ALL instances in the series — series-level DICOM tags only. */
+  getSharedTags: (id: string) =>
+    orthancFetch<Record<string, unknown>>(`/series/${id}/shared-tags`),
+
   delete: (id: string) =>
     orthancFetch<void>(`/series/${id}`, { method: "DELETE" }),
 };

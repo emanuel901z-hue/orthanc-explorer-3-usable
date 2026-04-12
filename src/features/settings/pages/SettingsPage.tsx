@@ -19,6 +19,7 @@ import DicomWebTab from '@/features/settings/components/DicomWebTab';
 import ViewerTab from '@/features/settings/components/ViewerTab';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
 import { toast } from 'sonner';
+import { useSaveModality } from '@/features/settings/hooks/useSaveModality';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useUiStore();
@@ -27,6 +28,7 @@ export default function SettingsPage() {
   const [editModality, setEditModality] = useState<DicomModality | null>(null);
   const [addServerOpen, setAddServerOpen] = useState(false);
   const [editServer, setEditServer] = useState<DicomWebServer | null>(null);
+  const saveModality = useSaveModality();
 
   const changeLanguage = (code: string) => {
     i18n.changeLanguage(code);
@@ -210,8 +212,17 @@ export default function SettingsPage() {
         }}
         editModality={editModality}
         onSave={(values) => {
-          toast.success(editModality ? `Modality "${values.name}" updated` : `Modality "${values.name}" added`, { description: `${values.aet} @ ${values.host}:${values.port}` });
-          setEditModality(null);
+          saveModality.mutate(
+            { name: values.name, config: { AET: values.aet, Host: values.host, Port: values.port, ...(values.manufacturer ? { Manufacturer: values.manufacturer } : {}) } },
+            {
+              onSuccess: () => {
+                toast.success(editModality ? `Modality "${values.name}" updated` : `Modality "${values.name}" added`);
+                setAddModalityOpen(false);
+                setEditModality(null);
+              },
+              onError: () => toast.error(`Failed to save modality "${values.name}"`),
+            },
+          );
         }}
       />
 

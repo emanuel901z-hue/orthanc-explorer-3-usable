@@ -39,4 +39,8 @@ export const instancesApi = {
       headers: { "Content-Type": "application/dicom" },
       body: file,
     }),
+
+  /** Returns a single Orthanc metadata value as plain text (e.g. TransferSyntax). */
+  getMetadata: (id: string, key: string) =>
+    orthancFetch<string>(`/instances/${id}/metadata/${key}`, { responseType: "text" }),
 };

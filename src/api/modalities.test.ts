@@ -18,12 +18,12 @@ describe("modalitiesApi", () => {
     expect(fetchMock.mock.calls[0][0]).toBe("/modalities");
   });
 
-  it("get() hits /modalities/:name", async () => {
+  it("get() hits /modalities/:name/configuration", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("{}", { status: 200 }),
     );
     await modalitiesApi.get("MY_AET");
-    expect(fetchMock.mock.calls[0][0]).toBe("/modalities/MY_AET");
+    expect(fetchMock.mock.calls[0][0]).toBe("/modalities/MY_AET/configuration");
   });
 
   it("put() uses PUT method on /modalities/:name", async () => {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Image, Layers, HardDrive, FileText, Download, Send, Eye, Trash2, Pencil, Shield, LayoutGrid, List } from 'lucide-react';
@@ -11,12 +11,73 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useSeries, useSeriesInstances, useStudy } from '@/features/studies/hooks/use-studies';
+import { useSeries, useSeriesInstances, useStudy, useInstancePreview, useSeriesSharedTags } from '@/features/studies/hooks/use-studies';
+import DicomTagBrowser from '@/features/studies/components/DicomTagBrowser';
 import { ModalityBadge, formatDiskSize, formatPatientName } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
+
+function InstanceThumbnail({ instanceId, instanceNumber, onClick }: {
+  instanceId: string;
+  instanceNumber: number;
+  onClick: () => void;
+}) {
+  const { data: previewBlob, isLoading } = useInstancePreview(instanceId);
+  const previewUrl = useMemo(
+    () => (previewBlob ? URL.createObjectURL(previewBlob) : null),
+    [previewBlob],
+  );
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
+
+  return (
+    <div
+      className="aspect-square bg-black rounded overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all relative group"
+      onClick={onClick}
+    >
+      {isLoading && <div className="absolute inset-0 flex items-center justify-center"><Skeleton className="w-full h-full rounded-none" /></div>}
+      {previewUrl ? (
+        <img src={previewUrl} alt={`Instance #${instanceNumber}`} className="w-full h-full object-cover" />
+      ) : !isLoading ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <Image className="h-4 w-4 text-muted-foreground mb-0.5" />
+          <span className="text-[10px] text-muted-foreground">#{instanceNumber}</span>
+        </div>
+      ) : null}
+      <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] text-white/70 bg-black/40 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        #{instanceNumber}
+      </span>
+    </div>
+  );
+}
+
+const SOP_CLASS_NAMES: Record<string, string> = {
+  '1.2.840.10008.5.1.4.1.1.2':     'CT Image Storage',
+  '1.2.840.10008.5.1.4.1.1.4':     'MR Image Storage',
+  '1.2.840.10008.5.1.4.1.1.128':   'PET Image Storage',
+  '1.2.840.10008.5.1.4.1.1.7':     'Secondary Capture',
+  '1.2.840.10008.5.1.4.1.1.6.1':   'Ultrasound Image Storage',
+  '1.2.840.10008.5.1.4.1.1.1':     'Digital X-Ray (Presentation)',
+  '1.2.840.10008.5.1.4.1.1.1.1':   'Digital Mammography (Presentation)',
+  '1.2.840.10008.5.1.4.1.1.481.1': 'RT Image Storage',
+  '1.2.840.10008.5.1.4.1.1.481.3': 'RT Structure Set Storage',
+  '1.2.840.10008.5.1.4.1.1.66.4':  'Segmentation Storage',
+};
+
+/** Format DICOM time string "HHMMSS.ffffff" → "HH:MM:SS" */
+function formatDicomTime(t?: string): string {
+  if (!t) return '—';
+  return `${t.slice(0, 2)}:${t.slice(2, 4)}:${t.slice(4, 6)}`;
+}
+
+/** Extract Z coordinate from ImagePositionPatient "x\\y\\z" */
+function formatSlicePosition(pos?: string): string {
+  if (!pos) return '—';
+  const parts = pos.split('\\');
+  if (parts.length === 3) return parseFloat(parts[2]).toFixed(2);
+  return pos;
+}
 
 export default function SeriesDetailPage() {
   const { t } = useTranslation();
@@ -24,10 +85,19 @@ export default function SeriesDetailPage() {
   const navigate = useNavigate();
   const { data: series, isLoading } = useSeries(seriesId!);
   const { data: study } = useStudy(studyId!);
-  const { data: instances = [], isLoading: instancesLoading } = useSeriesInstances(seriesId!);
+  const { data: rawInstances = [], isLoading: instancesLoading } = useSeriesInstances(seriesId!);
+  const instances = useMemo(
+    () => [...rawInstances].sort((a, b) => a.instanceNumber - b.instanceNumber),
+    [rawInstances],
+  );
+  const { data: seriesTags } = useSeriesSharedTags(seriesId!);
+
+  const sopClassUID = seriesTags?.find((t) => t.name === 'SOPClassUID')?.value;
+  const sopClassName = sopClassUID ? SOP_CLASS_NAMES[sopClassUID] : undefined;
+
   const [sendOpen, setSendOpen] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
-  const [instanceView, setInstanceView] = useState<'grid' | 'table'>('table');
+  const [instanceView, setInstanceView] = useState<'grid' | 'table'>('grid');
   const { audit } = useAuditLog();
 
   // Update tab label with patient name when loaded
@@ -113,6 +183,7 @@ export default function SeriesDetailPage() {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="tags">DICOM Tags</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -133,10 +204,40 @@ export default function SeriesDetailPage() {
                     <span>{series.seriesDescription || '—'}</span>
                     <span className="text-muted-foreground">Modality</span>
                     <span>{series.modality}</span>
+                    {sopClassUID && (
+                      <>
+                        <span className="text-muted-foreground">SOP Class</span>
+                        <span title={sopClassUID}>{sopClassName ?? sopClassUID}</span>
+                      </>
+                    )}
                     <span className="text-muted-foreground">Series Number</span>
                     <span>{series.seriesNumber}</span>
                     <span className="text-muted-foreground">Instances</span>
                     <span>{series.numberOfInstances}</span>
+                    {series.bodyPartExamined && (
+                      <>
+                        <span className="text-muted-foreground">Body Part</span>
+                        <span>{series.bodyPartExamined}</span>
+                      </>
+                    )}
+                    {series.protocolName && (
+                      <>
+                        <span className="text-muted-foreground">Protocol</span>
+                        <span>{series.protocolName}</span>
+                      </>
+                    )}
+                    {series.seriesDate && (
+                      <>
+                        <span className="text-muted-foreground">Series Date</span>
+                        <span>{series.seriesDate}</span>
+                      </>
+                    )}
+                    {series.seriesTime && (
+                      <>
+                        <span className="text-muted-foreground">Series Time</span>
+                        <span>{series.seriesTime}</span>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -197,14 +298,12 @@ export default function SeriesDetailPage() {
                   {instanceView === 'grid' ? (
                     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                       {instances.map((inst) => (
-                        <div
+                        <InstanceThumbnail
                           key={inst.id}
-                          className="aspect-square bg-muted rounded flex flex-col items-center justify-center cursor-pointer hover:bg-muted/70 hover:ring-1 hover:ring-primary/30 transition-all"
+                          instanceId={inst.id}
+                          instanceNumber={inst.instanceNumber}
                           onClick={() => navigate(`/studies/${studyId}/series/${seriesId}/instances/${inst.id}`)}
-                        >
-                          <Image className="h-4 w-4 text-muted-foreground mb-0.5" />
-                          <span className="text-[10px] text-muted-foreground">#{inst.instanceNumber}</span>
-                        </div>
+                        />
                       ))}
                     </div>
                   ) : (
@@ -214,9 +313,9 @@ export default function SeriesDetailPage() {
                           <TableRow>
                             <TableHead className="w-12">#</TableHead>
                             <TableHead>SOP Instance UID</TableHead>
-                            <TableHead>SOP Class</TableHead>
+                            <TableHead>Position (Z)</TableHead>
                             <TableHead>File Size</TableHead>
-                            <TableHead>Transfer Syntax</TableHead>
+                            <TableHead>Acq. Time</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -239,9 +338,9 @@ export default function SeriesDetailPage() {
                               >
                                 <TableCell className="font-medium">{inst.instanceNumber}</TableCell>
                                 <TableCell className="font-mono text-xs truncate max-w-[300px]">{inst.sopInstanceUID}</TableCell>
-                                <TableCell className="text-xs text-muted-foreground truncate max-w-[200px]">{inst.sopClassUID}</TableCell>
+                                <TableCell className="font-mono text-xs text-muted-foreground">{formatSlicePosition(inst.imagePositionPatient)}</TableCell>
                                 <TableCell className="text-sm text-muted-foreground">{formatDiskSize(inst.fileSize)}</TableCell>
-                                <TableCell className="font-mono text-xs text-muted-foreground">{inst.transferSyntax}</TableCell>
+                                <TableCell className="font-mono text-xs text-muted-foreground">{formatDicomTime(inst.acquisitionTime)}</TableCell>
                               </TableRow>
                             ))
                           )}
@@ -253,6 +352,31 @@ export default function SeriesDetailPage() {
               </Card>
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="tags" className="space-y-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Series-Level DICOM Tags
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DicomTagBrowser
+                study={{
+                  patientName: study ? study.patientName : '',
+                  patientId: study ? study.patientId : '',
+                  patientBirthDate: study?.patientBirthDate,
+                  patientSex: study?.patientSex,
+                  studyInstanceUID: study?.studyInstanceUID ?? '',
+                  studyDate: study?.studyDate ?? new Date(0),
+                  studyDescription: study?.studyDescription,
+                  accessionNumber: study?.accessionNumber,
+                }}
+                tags={seriesTags ?? []}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 

@@ -35,7 +35,7 @@ async function attachAuthHeaders(headers: Headers, cfg: OE3Config): Promise<void
 
 export async function orthancFetch<T>(
   path: string,
-  init: RequestInit & { responseType?: "blob" } = {},
+  init: RequestInit & { responseType?: "blob" | "text" } = {},
 ): Promise<T> {
   const cfg = getConfig();
   const correlationId = newCorrelationId();
@@ -58,7 +58,13 @@ export async function orthancFetch<T>(
     }
     if (res.status === 204) return undefined as T;
     if (init.responseType === "blob") return (await res.blob()) as T;
-    return (await res.json()) as T;
+    if (init.responseType === "text") return (await res.text()) as T;
+    // Read as text first — some Orthanc endpoints (PUT/DELETE) return 200 with
+    // an empty body rather than 204.  Calling .json() on an empty body throws a
+    // SyntaxError, so we parse only when there is actual content.
+    const text = await res.text();
+    if (!text) return undefined as T;
+    return JSON.parse(text) as T;
   } catch (e) {
     if (!(e instanceof OrthancError)) {
       healthTracker.recordFailure();

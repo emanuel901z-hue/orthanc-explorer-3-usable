@@ -22,53 +22,66 @@ import type { SeriesDetail } from '@/api/series';
 import type { Instance as OrthancInstance } from '@/api/instances';
 import { orthancFetch } from '@/lib/client';
 
+function parseOrthancDate(raw: string | null | undefined): Date | undefined {
+  if (!raw || raw.length < 8) return undefined;
+  return new Date(
+    parseInt(raw.slice(0, 4), 10),
+    parseInt(raw.slice(4, 6), 10) - 1,
+    parseInt(raw.slice(6, 8), 10),
+  );
+}
+
+function parseOrthancDateTime(dateRaw: string | null | undefined): Date {
+  return parseOrthancDate(dateRaw) ?? new Date(0);
+}
+
 function mapOrthancStudy(s: OrthancStudy): Study {
   const tags = s.MainDicomTags ?? {};
   const patientTags = s.PatientMainDicomTags ?? {};
-
-  const rawDate = tags['StudyDate'] ?? '';
-  const studyDate = rawDate && rawDate.length >= 8
-    ? new Date(
-        parseInt(rawDate.slice(0, 4), 10),
-        parseInt(rawDate.slice(4, 6), 10) - 1,
-        parseInt(rawDate.slice(6, 8), 10)
-      )
-    : new Date(0);
-
-  const rawBirth = patientTags['PatientBirthDate'] ?? '';
-  const patientBirthDate = rawBirth && rawBirth.length >= 8
-    ? new Date(
-        parseInt(rawBirth.slice(0, 4), 10),
-        parseInt(rawBirth.slice(4, 6), 10) - 1,
-        parseInt(rawBirth.slice(6, 8), 10)
-      )
-    : undefined;
 
   const rawSex = patientTags['PatientSex'] ?? '';
   const patientSex: Study['patientSex'] =
     rawSex === 'M' ? 'M' : rawSex === 'F' ? 'F' : rawSex === 'O' ? 'O' : undefined;
 
+  // ModalitiesInStudy comes back when requested via RequestedTags; fall back
+  // to Modality (series-level tag sometimes stored at study level).
   const rawModalities = tags['ModalitiesInStudy'] ?? tags['Modality'] ?? '';
   const modalities = rawModalities
-    ? rawModalities.split('\\').filter(Boolean)
+    ? String(rawModalities).split('\\').filter(Boolean)
     : [];
+
+  // Parse LastUpdate from Orthanc format "YYYYMMDDTHHmmss"
+  const lastUpdate = s.LastUpdate
+    ? new Date(
+        `${s.LastUpdate.slice(0, 4)}-${s.LastUpdate.slice(4, 6)}-${s.LastUpdate.slice(6, 8)}T${s.LastUpdate.slice(9, 11)}:${s.LastUpdate.slice(11, 13)}:${s.LastUpdate.slice(13, 15)}`
+      )
+    : new Date();
+
+  const referringPhysician = tags['ReferringPhysicianName']
+    ? tags['ReferringPhysicianName'].replace(/\^/g, ' ').trim() || undefined
+    : undefined;
 
   return {
     id: s.ID,
     patientId: patientTags['PatientID'] ?? '',
     patientName: patientTags['PatientName'] ?? '',
-    patientBirthDate,
+    patientBirthDate: parseOrthancDate(patientTags['PatientBirthDate']),
     patientSex,
     studyInstanceUID: tags['StudyInstanceUID'] ?? '',
-    studyDate,
+    studyDate: parseOrthancDateTime(tags['StudyDate']),
     studyTime: tags['StudyTime'] ?? undefined,
     studyDescription: tags['StudyDescription'] ?? undefined,
-    accessionNumber: tags['AccessionNumber'] ?? undefined,
+    accessionNumber: tags['AccessionNumber'] || undefined,
+    referringPhysician,
+    bodyPart: tags['BodyPartExamined'] ?? undefined,
     modalities,
     numberOfSeries: s.Series?.length ?? 0,
-    numberOfInstances: 0,
-    isStable: true,
-    lastUpdate: new Date(),
+    // numberOfInstances is not available in list responses — fetched separately
+    // via /statistics in findById. Consumers should treat undefined as "unknown".
+    numberOfInstances: undefined,
+    labels: s.Labels ?? [],
+    isStable: s.IsStable ?? true,
+    lastUpdate,
   };
 }
 
@@ -81,7 +94,12 @@ function mapOrthancSeries(s: SeriesDetail): Series {
     seriesNumber: parseInt(tags['SeriesNumber'] ?? '0', 10),
     seriesDescription: tags['SeriesDescription'] ?? undefined,
     modality: tags['Modality'] ?? '',
+    bodyPartExamined: tags['BodyPartExamined'] ?? undefined,
+    seriesDate: tags['SeriesDate'] ?? undefined,
+    seriesTime: tags['SeriesTime'] ?? undefined,
+    protocolName: tags['ProtocolName'] ?? undefined,
     numberOfInstances: s.Instances?.length ?? 0,
+    firstInstanceId: s.Instances?.[0],
   };
 }
 
@@ -107,9 +125,10 @@ function mapOrthancInstance(inst: OrthancInstance, rawTags?: Record<string, unkn
     id: inst.ID,
     seriesId: inst.ParentSeries,
     sopInstanceUID: dicomTags['SOPInstanceUID'] ?? '',
-    sopClassUID: dicomTags['SOPClassUID'] ?? undefined,
     instanceNumber: parseInt(dicomTags['InstanceNumber'] ?? '0', 10),
     fileSize: inst.FileSize ?? 0,
+    imagePositionPatient: dicomTags['ImagePositionPatient'] ?? undefined,
+    acquisitionTime: dicomTags['InstanceCreationTime'] ?? undefined,
     tags: rawTags ? mapDicomTags(rawTags) : [],
   };
 }
@@ -128,15 +147,37 @@ export class OrthancStudyRepository implements IStudyRepository {
       Level: 'Study',
       Query: query,
       Expand: true,
-    });
+      // Ask Orthanc to compute and include these tags even if not in MainDicomTags.
+      // Requires Orthanc 1.11.0+ (orthancteam/orthanc:latest-full qualifies).
+      RequestedTags: ['ModalitiesInStudy', 'BodyPartExamined'],
+    } as Parameters<typeof studiesApi.find>[0]);
 
-    return results.map(mapOrthancStudy);
+    const allStudies = results.map(mapOrthancStudy);
+
+    // Orthanc's /tools/find doesn't reliably filter by ModalitiesInStudy on all
+    // configurations, so apply the modality filter client-side using the already-
+    // fetched ModalitiesInStudy values.
+    if (filters?.modalities?.length) {
+      return allStudies.filter((s) =>
+        s.modalities.some((m) => filters.modalities!.includes(m))
+      );
+    }
+
+    return allStudies;
   }
 
-  /** Returns a single study by Orthanc UUID. */
+  /** Returns a single study by Orthanc UUID, including instance count and disk size from statistics. */
   async findById(id: string): Promise<Study | null> {
-    const study = await studiesApi.get(id);
-    return mapOrthancStudy(study);
+    const [study, stats] = await Promise.all([
+      studiesApi.get(id),
+      studiesApi.getStatistics(id).catch(() => null),
+    ]);
+    const mapped = mapOrthancStudy(study);
+    return {
+      ...mapped,
+      numberOfInstances: stats?.CountInstances ?? mapped.numberOfInstances,
+      diskSize: stats?.DiskSize ?? mapped.diskSize,
+    };
   }
 
   /** Returns all series belonging to a study. */

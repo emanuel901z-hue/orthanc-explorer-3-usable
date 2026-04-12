@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { instancesApi } from '@/api/instances';
 import { auditClient } from '@/lib/audit';
 import { OrthancError } from '@/lib/errors';
+import { hasDicomMagicBytes, isKnownNonDicom } from '@/lib/dicom-validation';
 import { useJobStore } from './job-store';
 
 // Module-level registry: File objects cannot be JSON-serialized,
@@ -17,6 +18,18 @@ export function __resetFileRegistryForTests(): void {
 
 async function runUpload(jobId: string, file: File): Promise<void> {
   const jobStore = useJobStore.getState();
+
+  // Validate DICOM magic bytes (DICM at offset 128) before uploading.
+  const valid = await hasDicomMagicBytes(file);
+  if (!valid) {
+    fileRegistry.delete(jobId);
+    jobStore.updateJob(jobId, {
+      status: 'error',
+      error: 'Not a valid DICOM file (missing DICM preamble)',
+    });
+    return;
+  }
+
   jobStore.updateJob(jobId, { status: 'running', progress: 0 });
 
   const base = {
@@ -53,7 +66,12 @@ interface UploadState {
 export const useUploadStore = create<UploadState>(() => ({
   addFiles: (files) => {
     const jobStore = useJobStore.getState();
-    files.forEach((file) => {
+    // Silently drop files that are definitely not DICOM by name pattern
+    // (.DS_Store, .localized, Thumbs.db, known non-DICOM extensions, etc.).
+    // Files with no extension pass through — many DICOM files from scanners
+    // have no extension and are validated by magic bytes in runUpload().
+    const candidates = files.filter((f) => !isKnownNonDicom(f));
+    candidates.forEach((file) => {
       const jobId = `upload-${crypto.randomUUID()}`;
       fileRegistry.set(jobId, file);
       jobStore.addJob({

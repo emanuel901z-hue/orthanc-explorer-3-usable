@@ -109,6 +109,7 @@ export default function UploadPage() {
               ref={folderInputRef}
               type="file"
               multiple
+              accept=".dcm,.DCM,.dicom"
               {...{ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>}
               className="hidden"
               onChange={handleFileSelect}

@@ -21,10 +21,15 @@ export type OrthancFindQuery = {
   Limit?: number;
   Since?: number;
   Expand?: boolean;
+  /** Orthanc 1.11.0+: ask server to compute and include extra tags (e.g. ModalitiesInStudy). */
+  RequestedTags?: string[];
 };
 
 export type Study = {
   ID: string;
+  IsStable: boolean;
+  Labels: string[];
+  LastUpdate: string;
   MainDicomTags: Record<string, string | null>;
   PatientMainDicomTags: Record<string, string | null>;
   ParentPatient: string;
@@ -73,4 +78,11 @@ export const studiesApi = {
 
   archive: (id: string) =>
     orthancFetch<Blob>(`/studies/${id}/archive`, { responseType: "blob" }),
+
+  getStatistics: (id: string) =>
+    orthancFetch<{ CountInstances: number; DiskSize: number }>(`/studies/${id}/statistics`),
+
+  /** Returns tags shared by ALL instances in the study — study + patient level only. */
+  getSharedTags: (id: string) =>
+    orthancFetch<Record<string, unknown>>(`/studies/${id}/shared-tags`),
 };

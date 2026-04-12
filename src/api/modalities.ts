@@ -23,7 +23,9 @@ const JSON_HEADERS = { "Content-Type": "application/json" };
 export const modalitiesApi = {
   list: () => orthancFetch<string[]>("/modalities"),
 
-  get: (name: string) => orthancFetch<ModalityConfig>(`/modalities/${name}`),
+  // GET /modalities/{id} returns sub-operation names in modern Orthanc.
+  // The actual config is at /modalities/{id}/configuration.
+  get: (name: string) => orthancFetch<ModalityConfig>(`/modalities/${name}/configuration`),
 
   put: (name: string, body: ModalityConfig) =>
     orthancFetch<void>(`/modalities/${name}`, {

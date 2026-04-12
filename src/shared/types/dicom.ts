@@ -24,11 +24,14 @@ export interface Study {
   studyTime?: string;
   studyDescription?: string;
   accessionNumber?: string;
+  referringPhysician?: string;
+  bodyPart?: string;
   modalities: string[];
   numberOfSeries: number;
-  numberOfInstances: number;
+  /** Undefined in list view — only populated after fetching /statistics. */
+  numberOfInstances?: number;
   diskSize?: number;
-  labels?: string[];
+  labels: string[];
   isStable: boolean;
   lastUpdate: Date;
 }
@@ -51,7 +54,13 @@ export interface Series {
   seriesNumber: number;
   seriesDescription?: string;
   modality: string;
+  bodyPartExamined?: string;
+  seriesDate?: string;
+  seriesTime?: string;
+  protocolName?: string;
   numberOfInstances: number;
+  /** Orthanc ID of the first instance — used for thumbnail preview. */
+  firstInstanceId?: string;
 }
 
 // ===== Instance =====
@@ -59,10 +68,10 @@ export interface Instance {
   id: string;
   seriesId: string;
   sopInstanceUID: string;
-  sopClassUID?: string;
   instanceNumber: number;
   fileSize: number;
-  transferSyntax?: string;
+  imagePositionPatient?: string;
+  acquisitionTime?: string;
   tags: DicomTag[];
 }
 

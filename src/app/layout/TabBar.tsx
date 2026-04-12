@@ -64,6 +64,13 @@ export function TabBar() {
 
   if (tabs.length === 0) return null;
 
+  // Pinned (non-closable) tabs always render first
+  const sortedTabs = [...tabs].sort((a, b) => {
+    if (!a.closable && b.closable) return -1;
+    if (a.closable && !b.closable) return 1;
+    return 0;
+  });
+
   const handleActivate = (tab: AppTab) => {
     activateTab(tab.id);
     navigate(tab.path);
@@ -91,7 +98,7 @@ export function TabBar() {
       <div className="absolute bottom-0 left-0 right-0 h-px bg-black/20 dark:bg-white/20 z-0" />
       <ScrollArea className="w-full overflow-visible [&>div]:overflow-visible">
         <div className="relative flex items-stretch h-9" role="tablist" aria-label="Open pages">
-          {tabs.map((tab) => {
+          {sortedTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
               <button

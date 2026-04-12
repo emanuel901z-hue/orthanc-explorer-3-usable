@@ -268,13 +268,18 @@ interface DicomTagBrowserProps {
     studyDescription?: string;
     accessionNumber?: string;
   };
+  /** Real DICOM tags fetched from Orthanc. If provided, demo tags are not used. */
+  tags?: DicomTagEntry[];
   editable?: boolean;
   onModificationsChange?: (modifications: TagModification[]) => void;
 }
 
-export default function DicomTagBrowser({ study, editable, onModificationsChange }: DicomTagBrowserProps) {
+export default function DicomTagBrowser({ study, tags, editable, onModificationsChange }: DicomTagBrowserProps) {
   const [search, setSearch] = useState('');
-  const allTags = useMemo(() => generateStudyDemoTags(study), [study]);
+  const allTags = useMemo(
+    () => tags ?? generateStudyDemoTags(study),
+    [tags, study],
+  );
   const [modifications, setModifications] = useState<Map<string, string>>(new Map());
 
   const handleModify = useCallback((tag: string, name: string, originalValue: string, newValue: string) => {

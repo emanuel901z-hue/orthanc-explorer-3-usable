@@ -52,13 +52,16 @@ export default function StudyListPage() {
     modalities: searchParams.get('modality') ? [searchParams.get('modality')!] : undefined,
   }), [searchParams]);
 
-  const { data: studies = [], isLoading } = useStudies(filters);
+  const { data: studies = [], isLoading, isFetching } = useStudies(filters);
 
   const updateFilter = useCallback((key: string, value: string) => {
     setSearchParams((prev) => {
-      if (value) prev.set(key, value);
-      else prev.delete(key);
-      return prev;
+      // Always create a new instance — mutating prev can cause React Router
+      // to skip navigation when it compares old vs new by reference.
+      const next = new URLSearchParams(prev);
+      if (value) next.set(key, value);
+      else next.delete(key);
+      return next;
     });
   }, [setSearchParams]);
 
@@ -135,26 +138,47 @@ export default function StudyListPage() {
       ),
     },
     {
-      accessorKey: 'numberOfSeries',
-      header: 'Series',
+      accessorKey: 'accessionNumber',
+      header: 'Accession #',
       cell: ({ row }) => (
-        <div className="text-center">
-          <span className="font-medium">{row.original.numberOfSeries}</span>
-          <div className="text-xs text-muted-foreground">{row.original.numberOfInstances} img</div>
-        </div>
+        <span className="font-mono text-xs text-muted-foreground">
+          {row.original.accessionNumber || '—'}
+        </span>
       ),
     },
     {
-      accessorKey: 'diskSize',
-      header: 'Size',
-      cell: ({ row }) => <span className="text-sm text-muted-foreground">{formatDiskSize(row.original.diskSize)}</span>,
+      accessorKey: 'referringPhysician',
+      header: 'Referring',
+      cell: ({ row }) => (
+        <span className="text-sm truncate max-w-[160px] block">
+          {row.original.referringPhysician
+            ? row.original.referringPhysician.replace(/\^/g, ', ')
+            : '—'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'numberOfSeries',
+      header: 'Images',
+      cell: ({ row }) => (
+        <div>
+          <span className="font-medium">
+            {row.original.numberOfInstances !== undefined
+              ? row.original.numberOfInstances
+              : '—'}
+          </span>
+          <div className="text-xs text-muted-foreground">
+            {row.original.numberOfSeries} series
+          </div>
+        </div>
+      ),
     },
     {
       id: 'labels',
       header: 'Labels',
       cell: ({ row }) => (
         <div className="flex gap-1 flex-wrap">
-          {row.original.labels?.map((l) => (
+          {row.original.labels.map((l) => (
             <Badge key={l} variant="outline" className="text-xs py-0 h-5">{l}</Badge>
           ))}
         </div>
@@ -254,7 +278,7 @@ export default function StudyListPage() {
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Modality</label>
                 <Select
-                  value={searchParams.get('modality') || ''}
+                  value={searchParams.get('modality') || 'all'}
                   onValueChange={(v) => updateFilter('modality', v === 'all' ? '' : v)}
                 >
                   <SelectTrigger className="h-9">
@@ -287,7 +311,10 @@ export default function StudyListPage() {
       )}
 
       {/* Table */}
-      <Card>
+      <Card className="relative">
+        {isFetching && !isLoading && (
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/40 rounded-t-lg z-10 animate-pulse" />
+        )}
         <div className="overflow-auto">
           <Table>
             <TableHeader>
@@ -320,6 +347,7 @@ export default function StudyListPage() {
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
+                    data-testid="study-row"
                     data-state={row.getIsSelected() && 'selected'}
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => navigate(`/studies/${row.original.id}`)}
