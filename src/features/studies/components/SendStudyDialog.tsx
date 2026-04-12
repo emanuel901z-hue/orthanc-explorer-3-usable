@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Send, Globe, Radio } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -39,9 +39,21 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
   const { data: modalityNames = [], isLoading: modalitiesLoading } = useModalities();
   const { data: serverNames = [], isLoading: serversLoading } = useDicomWebServers();
 
+  // Fix 3: Define handleClose before useMutation with useCallback so onSuccess captures a stable reference
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+    setTimeout(() => {
+      setSelectedTarget('');
+      setProtocol('stow-rs');
+    }, 200);
+  }, [onOpenChange]);
+
+  // Fix 1: Batch all study sends inside a single mutationFn to avoid TanStack Query
+  // cancelling prior in-flight requests when .mutate() is called in a loop.
   const sendMutation = useMutation({
-    mutationFn: async ({ studyId, target }: { studyId: string; target: string }) =>
-      sendStudyAction(studyId, target),
+    mutationFn: async ({ studyIds, target }: { studyIds: string[]; target: string }) => {
+      await Promise.all(studyIds.map((id) => sendStudyAction(id, target)));
+    },
     onSuccess: () => {
       toast.success('Study sent successfully');
       handleClose();
@@ -52,14 +64,6 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
     },
   });
 
-  const handleClose = () => {
-    onOpenChange(false);
-    setTimeout(() => {
-      setSelectedTarget('');
-      setProtocol('stow-rs');
-    }, 200);
-  };
-
   const handleProtocolChange = (value: string) => {
     setProtocol(value as SendProtocol);
     setSelectedTarget('');
@@ -68,9 +72,7 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
   const handleSend = () => {
     if (!selectedTarget) return;
     if (protocol === 'c-store') {
-      studies.forEach((study) => {
-        sendMutation.mutate({ studyId: study.id, target: selectedTarget });
-      });
+      sendMutation.mutate({ studyIds: studies.map((s) => s.id), target: selectedTarget });
     }
     // STOW-RS send is not yet implemented in the backend action layer;
     // the tab displays live servers but send is disabled until the action exists.
@@ -78,12 +80,8 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
 
   const isSending = sendMutation.isPending;
 
-  const targets = protocol === 'stow-rs' ? serverNames : modalityNames;
-  const hasTargets = targets.length > 0;
-  const isLoading = protocol === 'stow-rs' ? serversLoading : modalitiesLoading;
-
   // STOW-RS send is disabled pending a dedicated action
-  const canSend = !isSending && !!selectedTarget && hasTargets && protocol === 'c-store';
+  const canSend = !isSending && !!selectedTarget && protocol === 'c-store';
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -120,8 +118,9 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
               </TabsTrigger>
             </TabsList>
 
+            {/* Fix 2: Use each tab's own loading flag directly — no shared isLoading derived variable */}
             <TabsContent value="stow-rs" className="mt-3">
-              {isLoading ? (
+              {serversLoading ? (
                 <LoadingState />
               ) : serverNames.length === 0 ? (
                 <EmptyState
@@ -152,7 +151,7 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
             </TabsContent>
 
             <TabsContent value="c-store" className="mt-3">
-              {isLoading ? (
+              {modalitiesLoading ? (
                 <LoadingState />
               ) : modalityNames.length === 0 ? (
                 <EmptyState

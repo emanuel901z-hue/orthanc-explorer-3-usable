@@ -134,7 +134,7 @@ describe('SendStudyDialog — live API wiring', () => {
     });
 
     await waitFor(() => {
-      expect(mutateSpy).toHaveBeenCalledWith({ studyId: 'study-001', target: 'PACS1' });
+      expect(mutateSpy).toHaveBeenCalledWith({ studyIds: ['study-001'], target: 'PACS1' });
     });
   });
 
