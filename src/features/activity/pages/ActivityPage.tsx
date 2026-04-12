@@ -32,7 +32,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { generateDemoActivityEvents } from '@/shared/api/mock/demo-activity-generator';
+import { useChanges } from '@/features/activity/hooks/useChanges';
+import type { Change } from '@/api/changes';
 import { useJobStore } from '@/store/job-store';
 import { useAuditStore } from '@/store/audit-store';
 import { ActivityEvent, ActivityCategory, ActivitySeverity } from '@/shared/types/activity';
@@ -71,6 +72,38 @@ const CATEGORY_COLORS: Record<ActivityCategory, string> = {
   audit: 'bg-accent/10 text-accent border-accent/20',
   log: 'bg-muted text-muted-foreground border-border',
 };
+
+function changeToActivity(change: Change): ActivityEvent {
+  const changeTypeMap: Record<string, string> = {
+    NewStudy: 'upload',
+    NewSeries: 'upload',
+    NewInstance: 'upload',
+    StableStudy: 'system',
+    StableSeries: 'system',
+    StableInstance: 'system',
+    DeletionStudy: 'delete',
+    DeletionSeries: 'delete',
+    DeletionInstance: 'delete',
+  };
+
+  const action = changeTypeMap[change.ChangeType] ?? 'system';
+  const ts = new Date(change.Date).getTime();
+
+  return {
+    id: `change-${change.Seq}`,
+    timestamp: isNaN(ts) ? Date.now() : ts,
+    category: 'log',
+    severity: 'info',
+    title: `${change.ChangeType}: ${change.ResourceType} ${change.ID}`,
+    action,
+    resource: change.Path,
+    metadata: {
+      'Resource Type': change.ResourceType,
+      'Resource ID': change.ID,
+      'Sequence': String(change.Seq),
+    },
+  };
+}
 
 function jobToActivity(job: Job): ActivityEvent {
   const statusLabel = job.status === 'running' ? 'in progress' : job.status;
@@ -115,6 +148,7 @@ export default function ActivityPage() {
   const { jobs } = useJobStore();
   const { events: liveAuditEvents } = useAuditStore();
   const { pendingSelectId, setPendingSelectId } = useActivityUIStore();
+  const { data: changesData } = useChanges();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
@@ -122,12 +156,12 @@ export default function ActivityPage() {
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [selectedEvent, setSelectedEvent] = useState<ActivityEvent | null>(null);
 
-  // Merge real jobs + live audit events + demo historical data
+  // Merge real jobs + live audit events + real changes feed
   const allEvents = useMemo(() => {
-    const demoEvents = generateDemoActivityEvents(80);
+    const changeEvents = (changesData?.Changes ?? []).map(changeToActivity);
     const jobEvents = jobs.map(jobToActivity);
-    return [...liveAuditEvents, ...jobEvents, ...demoEvents].sort((a, b) => b.timestamp - a.timestamp);
-  }, [jobs, liveAuditEvents]);
+    return [...liveAuditEvents, ...jobEvents, ...changeEvents].sort((a, b) => b.timestamp - a.timestamp);
+  }, [jobs, liveAuditEvents, changesData]);
 
   // Auto-select event from Job Manager bar
   useEffect(() => {
