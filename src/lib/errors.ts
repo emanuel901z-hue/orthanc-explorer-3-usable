@@ -1,3 +1,11 @@
+/**
+ * OrthancError — typed error for non-2xx Orthanc HTTP responses.
+ *
+ * Response bodies are never read into error messages to prevent PHI leakage.
+ * User-visible messages are pre-scripted per HTTP status code.
+ * The correlationId links UI errors to structured log entries.
+ */
+
 const SCRUBBED_MESSAGES: Record<number, string> = {
   400: "The request was invalid.",
   401: "Authentication required.",

@@ -24,4 +24,10 @@ describe("OrthancError", () => {
     const err = await OrthancError.from(new Response("", { status: 500 }), "y");
     expect(err).toBeInstanceOf(Error);
   });
+
+  it("falls back to generic message for unmapped status codes", async () => {
+    const err = await OrthancError.from(new Response("", { status: 422 }), "c");
+    expect(err.message).toMatch(/422/);
+    expect(err.status).toBe(422);
+  });
 });
