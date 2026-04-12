@@ -90,11 +90,13 @@ type OrthancTagEntry = { Name?: string; Type?: string; Value?: string | null };
 function mapDicomTags(raw: Record<string, unknown>): DicomTag[] {
   return Object.entries(raw).map(([tag, v]) => {
     const entry = v as OrthancTagEntry;
+    const val = entry.Value;
     return {
       tag,
       name: entry.Name ?? tag,
       vr: entry.Type ?? '',
-      value: entry.Value ?? '',
+      // Sequence tags have array/object values — stringify so React can render them
+      value: val == null ? '' : typeof val === 'string' ? val : JSON.stringify(val),
     };
   });
 }
