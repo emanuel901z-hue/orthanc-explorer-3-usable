@@ -39,25 +39,22 @@ export function useAnonymizeJob() {
         status: 'running',
       });
 
+      const replace: Record<string, string> = {
+        ...(options.newPatientName ? { PatientName: options.newPatientName } : {}),
+        ...(options.newPatientId ? { PatientID: options.newPatientId } : {}),
+      };
       const body: Record<string, unknown> = {
         Keep: [
           ...(options.keepStudyDescription ? ['StudyDescription'] : []),
           ...(options.keepSeriesDescription ? ['SeriesDescription'] : []),
         ],
+        ...(Object.keys(replace).length > 0 ? { Replace: replace } : {}),
       };
 
-      if (options.newPatientName) {
-        body['Replace'] = { PatientName: options.newPatientName };
-      }
-      if (options.newPatientId) {
-        body['Replace'] = {
-          ...(body['Replace'] as Record<string, string> ?? {}),
-          PatientID: options.newPatientId,
-        };
-      }
-
       try {
-        await anonymizeStudyAction({ ID: id } as Study, body);
+        // anonymizeStudyAction only accesses study.ID internally; full Study shape is not required at runtime
+        const stub = { ID: id } as Study;
+        await anonymizeStudyAction(stub, body);
         updateJob(jobId, { progress: 100, status: 'complete' });
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Anonymization failed';
