@@ -169,6 +169,21 @@ describe('StudyDetailPage — mutation error handlers', () => {
     });
   });
 
+  it('shows a toast without correlation ID when download fails with a generic error', async () => {
+    mockDownloadStudyAction.mockRejectedValue(new Error('Network error'));
+
+    renderPage();
+
+    const downloadButton = screen.getByRole('button', { name: /actions\.download/i });
+    await act(async () => {
+      fireEvent.click(downloadButton);
+    });
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Download failed.');
+    });
+  });
+
   it('shows a toast without correlation ID when delete fails with a generic error', async () => {
     mockDeleteStudyAction.mockRejectedValue(new Error('Network error'));
 
