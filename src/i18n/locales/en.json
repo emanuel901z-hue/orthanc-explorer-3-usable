@@ -60,6 +60,42 @@
     "deleteInstance": "Delete Instance",
     "deleteInstanceDesc": "This will permanently delete Instance #{{number}} ({{size}}). This action cannot be undone."
   },
+  "studyList": {
+    "columns": {
+      "modality": "Modality",
+      "description": "Description",
+      "accession": "Accession #",
+      "referring": "Referring",
+      "images": "Images",
+      "labels": "Labels",
+      "status": "Status",
+      "seriesCount": "{{count}} series"
+    },
+    "filters": {
+      "patientId": "Patient ID",
+      "accession": "Accession #",
+      "description": "Description",
+      "modality": "Modality",
+      "allModalities": "All modalities"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showing": "Showing {{from}}–{{to}} of {{total}}"
+    },
+    "status": {
+      "stable": "Stable",
+      "receiving": "Receiving"
+    },
+    "empty": "No studies found. Try adjusting your filters.",
+    "selected": "{{count}} selected",
+    "actions": {
+      "export": "Export",
+      "label": "Label",
+      "send": "Send",
+      "delete": "Delete"
+    }
+  },
   "upload": {
     "subtitle": "Drag and drop DICOM files or folders to upload",
     "dropTitle": "Drop DICOM files or folders here",

@@ -33,6 +33,7 @@ import { ModalityBadge, formatPatientName, formatDiskSize } from '@/shared/compo
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 
 const MODALITY_OPTIONS = ['CT', 'MR', 'US', 'CR', 'DX', 'PT', 'NM'];
+const DEFAULT_PAGE_SIZE = 25;
 
 export default function StudyListPage() {
   const navigate = useNavigate();
@@ -120,7 +121,7 @@ export default function StudyListPage() {
     },
     {
       accessorKey: 'modalities',
-      header: 'Modality',
+      header: t('studyList.columns.modality'),
       cell: ({ row }) => (
         <div className="flex gap-1">
           {row.original.modalities.map((m) => (
@@ -132,14 +133,14 @@ export default function StudyListPage() {
     },
     {
       accessorKey: 'studyDescription',
-      header: 'Description',
+      header: t('studyList.columns.description'),
       cell: ({ row }) => (
         <span className="text-sm truncate max-w-[200px] block">{row.original.studyDescription || '—'}</span>
       ),
     },
     {
       accessorKey: 'accessionNumber',
-      header: 'Accession #',
+      header: t('studyList.columns.accession'),
       cell: ({ row }) => (
         <span className="font-mono text-xs text-muted-foreground">
           {row.original.accessionNumber || '—'}
@@ -148,7 +149,7 @@ export default function StudyListPage() {
     },
     {
       accessorKey: 'referringPhysician',
-      header: 'Referring',
+      header: t('studyList.columns.referring'),
       cell: ({ row }) => (
         <span className="text-sm truncate max-w-[160px] block">
           {row.original.referringPhysician
@@ -159,7 +160,7 @@ export default function StudyListPage() {
     },
     {
       accessorKey: 'numberOfSeries',
-      header: 'Images',
+      header: t('studyList.columns.images'),
       cell: ({ row }) => (
         <div>
           <span className="font-medium">
@@ -168,14 +169,14 @@ export default function StudyListPage() {
               : '—'}
           </span>
           <div className="text-xs text-muted-foreground">
-            {row.original.numberOfSeries} series
+            {t('studyList.columns.seriesCount', { count: row.original.numberOfSeries })}
           </div>
         </div>
       ),
     },
     {
       id: 'labels',
-      header: 'Labels',
+      header: t('studyList.columns.labels'),
       cell: ({ row }) => (
         <div className="flex gap-1 flex-wrap">
           {row.original.labels.map((l) => (
@@ -187,16 +188,18 @@ export default function StudyListPage() {
     },
     {
       id: 'status',
-      header: 'Status',
+      header: t('studyList.columns.status'),
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
           <div className={`h-2 w-2 rounded-full ${row.original.isStable ? 'bg-success' : 'bg-warning animate-pulse'}`} />
-          <span className="text-xs text-muted-foreground">{row.original.isStable ? 'Stable' : 'Receiving'}</span>
+          <span className="text-xs text-muted-foreground">
+            {row.original.isStable ? t('studyList.status.stable') : t('studyList.status.receiving')}
+          </span>
         </div>
       ),
       enableSorting: false,
     },
-  ], []);
+  ], [t]);
 
   const table = useReactTable({
     data: studies,
@@ -207,7 +210,7 @@ export default function StudyListPage() {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 25 } },
+    initialState: { pagination: { pageSize: DEFAULT_PAGE_SIZE } },
   });
 
   const selectedCount = Object.keys(rowSelection).length;
@@ -249,7 +252,7 @@ export default function StudyListPage() {
           {showFilters && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3 pt-3 border-t">
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Patient ID</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('studyList.filters.patientId')}</label>
                 <Input
                   placeholder="PAT000..."
                   value={searchParams.get('patientId') || ''}
@@ -258,7 +261,7 @@ export default function StudyListPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Accession #</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('studyList.filters.accession')}</label>
                 <Input
                   placeholder="ACC..."
                   value={searchParams.get('accession') || ''}
@@ -267,7 +270,7 @@ export default function StudyListPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Description</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('studyList.filters.description')}</label>
                 <Input
                   placeholder="CT Chest..."
                   value={searchParams.get('description') || ''}
@@ -276,16 +279,16 @@ export default function StudyListPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Modality</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('studyList.filters.modality')}</label>
                 <Select
                   value={searchParams.get('modality') || 'all'}
                   onValueChange={(v) => updateFilter('modality', v === 'all' ? '' : v)}
                 >
                   <SelectTrigger className="h-9">
-                    <SelectValue placeholder="All modalities" />
+                    <SelectValue placeholder={t('studyList.filters.allModalities')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All modalities</SelectItem>
+                    <SelectItem value="all">{t('studyList.filters.allModalities')}</SelectItem>
                     {MODALITY_OPTIONS.map((m) => (
                       <SelectItem key={m} value={m}>{m}</SelectItem>
                     ))}
@@ -300,12 +303,12 @@ export default function StudyListPage() {
       {/* Bulk actions */}
       {selectedCount > 0 && (
         <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
-          <span className="text-sm font-medium">{selectedCount} selected</span>
+          <span className="text-sm font-medium">{t('studyList.selected', { count: selectedCount })}</span>
           <div className="flex gap-1 ml-auto">
-            <Button size="sm" variant="outline" className="gap-1.5 h-8"><Download className="h-3.5 w-3.5" /> Export</Button>
-            <Button size="sm" variant="outline" className="gap-1.5 h-8"><Tag className="h-3.5 w-3.5" /> Label</Button>
-            <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> Send</Button>
-            <Button size="sm" variant="outline" className="gap-1.5 h-8 text-destructive"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
+            <Button size="sm" variant="outline" className="gap-1.5 h-8"><Download className="h-3.5 w-3.5" /> {t('studyList.actions.export')}</Button>
+            <Button size="sm" variant="outline" className="gap-1.5 h-8"><Tag className="h-3.5 w-3.5" /> {t('studyList.actions.label')}</Button>
+            <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('studyList.actions.send')}</Button>
+            <Button size="sm" variant="outline" className="gap-1.5 h-8 text-destructive"><Trash2 className="h-3.5 w-3.5" /> {t('studyList.actions.delete')}</Button>
           </div>
         </div>
       )}
@@ -340,7 +343,7 @@ export default function StudyListPage() {
               ) : table.getRowModel().rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="text-center py-12 text-muted-foreground">
-                    No studies found. Try adjusting your filters.
+                    {t('studyList.empty')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -367,12 +370,15 @@ export default function StudyListPage() {
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-3 border-t">
           <span className="text-sm text-muted-foreground">
-            Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}–
-            {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, studies.length)} of {studies.length}
+            {t('studyList.pagination.showing', {
+              from: table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1,
+              to: Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, studies.length),
+              total: studies.length,
+            })}
           </span>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Previous</Button>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Next</Button>
+            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>{t('studyList.pagination.previous')}</Button>
+            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>{t('studyList.pagination.next')}</Button>
           </div>
         </div>
       </Card>
