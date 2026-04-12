@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { RenderingEngine, Enums, type Types } from '@cornerstonejs/core';
 import { ToolGroupManager } from '@cornerstonejs/tools';
 import { initCornerstone } from '@/lib/cornerstone';
@@ -7,9 +7,6 @@ import { useSeriesInstances } from '@/features/studies/hooks/use-studies';
 import { Loader2 } from 'lucide-react';
 
 const { ViewportType } = Enums;
-
-/** Counter to generate unique engine IDs — must never collide within a session. */
-let _engineCounter = 0;
 
 export interface SeriesInfo {
   orthancSeriesId: string;
@@ -40,16 +37,18 @@ export function CornerstoneViewport({
 }: CornerstoneViewportProps) {
   const divRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<RenderingEngine | null>(null);
-  const viewportIdRef = useRef<string>(`vp-${++_engineCounter}`);
+  // crypto.randomUUID() avoids module-level counter state (HMR-safe, test-safe)
+  const viewportIdRef = useRef<string>(`vp-${crypto.randomUUID()}`);
   const [engineReady, setEngineReady] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
 
+  // Empty string disables the query — useSeriesInstances must guard against ''
   const { data: instances, isLoading: instancesLoading } = useSeriesInstances(
     seriesInfo?.orthancSeriesId ?? ''
   );
 
-  // Build sorted imageIds whenever instances arrive
-  const imageIds: string[] = (() => {
+  // Memoize imageIds — avoids join(',') hack in dep array and prevents spurious stack reloads
+  const imageIds = useMemo<string[]>(() => {
     if (!instances || !seriesInfo) return [];
     return [...instances]
       .sort((a, b) => a.instanceNumber - b.instanceNumber)
@@ -60,9 +59,9 @@ export function CornerstoneViewport({
           instanceUID: inst.sopInstanceUID,
         })
       );
-  })();
+  }, [instances, seriesInfo]);
 
-  // Initialize RenderingEngine once on mount
+  // Initialize RenderingEngine once on mount; tear down on unmount
   useEffect(() => {
     if (!divRef.current) return;
     let mounted = true;
@@ -83,7 +82,6 @@ export function CornerstoneViewport({
         };
         engine.enableElement(viewportInput);
 
-        // Register with tool group so PanTool, WindowLevelTool etc. apply here
         const tg = ToolGroupManager.getToolGroup(toolGroupId);
         tg?.addViewport(viewportId, engineId);
 
@@ -97,28 +95,33 @@ export function CornerstoneViewport({
       mounted = false;
       const engine = engineRef.current;
       if (engine) {
-        // removeViewports(renderingEngineId, viewportId?)
         const tg = ToolGroupManager.getToolGroup(toolGroupId);
         tg?.removeViewports(engine.id, viewportIdRef.current);
         engine.destroy();
         engineRef.current = null;
       }
-      setEngineReady(false);
+      // Do NOT call setEngineReady here — component is unmounting, state is discarded
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toolGroupId]); // Only re-mount if toolGroupId changes
+  }, [toolGroupId]);
 
   // Load/update stack whenever imageIds change
   useEffect(() => {
     if (!engineReady || !engineRef.current || imageIds.length === 0) return;
 
-    const vp = engineRef.current.getViewport(viewportIdRef.current) as Types.IStackViewport;
-    vp.setStack(imageIds, 0)
-      .then(() => vp.render())
-      .catch((err) => setRenderError(err instanceof Error ? err.message : 'Stack load failed'));
-  }, [imageIds.join(','), engineReady]); // join gives stable primitive dep
+    const vp = engineRef.current.getViewport(viewportIdRef.current);
+    if (!vp || vp.type !== ViewportType.STACK) {
+      setRenderError('Viewport not available or wrong type');
+      return;
+    }
 
-  const isLoading = instancesLoading || (seriesInfo !== null && !engineReady);
+    (vp as Types.IStackViewport)
+      .setStack(imageIds, 0)
+      .then(() => (vp as Types.IStackViewport).render())
+      .catch((err) => setRenderError(err instanceof Error ? err.message : 'Stack load failed'));
+  }, [imageIds, engineReady]);
+
+  const isLoading = !renderError && (instancesLoading || (seriesInfo !== null && !engineReady));
 
   return (
     <div
