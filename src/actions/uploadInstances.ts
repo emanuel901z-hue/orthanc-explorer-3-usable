@@ -12,6 +12,7 @@
 import { instancesApi } from "@/api/instances";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
+import { makeAuditBase } from "@/actions/audit-base";
 
 export async function uploadInstancesAction(
   files: File[],
@@ -20,12 +21,7 @@ export async function uploadInstancesAction(
   let failed = 0;
 
   for (const file of files) {
-    const base = {
-      action: "instance.upload",
-      resourceType: "instance" as const,
-      resourceId: file.name,
-      timestamp: new Date().toISOString(),
-    };
+    const base = makeAuditBase("instance.upload", "instance", file.name);
     try {
       await instancesApi.upload(file);
       auditClient.emit({ ...base, outcome: "success" });

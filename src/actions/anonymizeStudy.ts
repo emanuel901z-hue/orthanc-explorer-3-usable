@@ -12,17 +12,13 @@
 import { studiesApi, type Study } from "@/api/studies";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
+import { makeAuditBase } from "@/actions/audit-base";
 
 export async function anonymizeStudyAction(
   study: Study,
   body: Record<string, unknown> = {},
 ): Promise<{ ID: string; Path: string }> {
-  const base = {
-    action: "study.anonymize",
-    resourceType: "study" as const,
-    resourceId: study.ID,
-    timestamp: new Date().toISOString(),
-  };
+  const base = makeAuditBase("study.anonymize", "study", study.ID);
   try {
     const result = await studiesApi.anonymize(study.ID, body);
     auditClient.emit({ ...base, outcome: "success" });

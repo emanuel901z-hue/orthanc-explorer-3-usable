@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { makeAuditBase } from './audit-base';
 
 describe('makeAuditBase', () => {
@@ -18,8 +18,9 @@ describe('makeAuditBase', () => {
     });
   });
 
-  it('resourceType is typed as const', () => {
-    const base = makeAuditBase('study.label.add', 'study', 'xyz');
-    expect(base.resourceType).toBe('study');
+  it('returns a new object on each call (no shared state)', () => {
+    const a = makeAuditBase('x', 'study', '1');
+    const b = makeAuditBase('x', 'study', '1');
+    expect(a).not.toBe(b);
   });
 });

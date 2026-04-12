@@ -12,15 +12,10 @@
 import { studiesApi, type Study } from "@/api/studies";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
+import { makeAuditBase } from "@/actions/audit-base";
 
 export async function deleteStudyAction(study: Study, reason?: string): Promise<void> {
-  const base = {
-    action: "study.delete",
-    resourceType: "study" as const,
-    resourceId: study.ID,
-    timestamp: new Date().toISOString(),
-    reason,
-  };
+  const base = { ...makeAuditBase("study.delete", "study", study.ID), reason };
   try {
     await studiesApi.delete(study.ID);
     auditClient.emit({ ...base, outcome: "success" });

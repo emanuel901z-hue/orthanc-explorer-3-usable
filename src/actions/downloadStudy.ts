@@ -13,14 +13,10 @@
 import { studiesApi } from "@/api/studies";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
+import { makeAuditBase } from "@/actions/audit-base";
 
 export async function downloadStudyAction(studyId: string, filename?: string): Promise<void> {
-  const base = {
-    action: "study.download",
-    resourceType: "study" as const,
-    resourceId: studyId,
-    timestamp: new Date().toISOString(),
-  };
+  const base = makeAuditBase("study.download", "study", studyId);
 
   try {
     const blob = await studiesApi.archive(studyId);
