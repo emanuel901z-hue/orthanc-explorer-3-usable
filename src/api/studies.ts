@@ -70,4 +70,7 @@ export const studiesApi = {
       headers: JSON_HEADERS,
       body: JSON.stringify(body),
     }),
+
+  archive: (id: string) =>
+    orthancFetch<Blob>(`/studies/${id}/archive`, { responseType: "blob" }),
 };

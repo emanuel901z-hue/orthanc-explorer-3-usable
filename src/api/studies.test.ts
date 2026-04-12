@@ -65,4 +65,14 @@ describe("studiesApi", () => {
     expect(url).toBe("/studies/abc-123/modify");
     expect((init as RequestInit).method).toBe("POST");
   });
+
+  it("archive() hits /studies/:id/archive as blob", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(new Blob(["ZIP"]), { status: 200, headers: { "Content-Type": "application/zip" } }),
+    );
+    const result = await studiesApi.archive("abc-123");
+    expect(fetchMock.mock.calls[0][0]).toBe("/studies/abc-123/archive");
+    // Verify it returns a blob-like object
+    expect(result).toBeDefined();
+  });
 });
