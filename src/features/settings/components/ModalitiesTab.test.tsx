@@ -38,4 +38,18 @@ describe('ModalitiesTab — Echo All', () => {
     expect(mutateMock).toHaveBeenCalledWith('PACS2', expect.any(Object));
     expect(mutateMock).toHaveBeenCalledTimes(2);
   });
+
+  it('icon-only buttons have accessible aria-labels for each modality', () => {
+    render(<ModalitiesTab onAddClick={vi.fn()} onEditClick={vi.fn()} />);
+
+    // Buttons for PACS1
+    expect(screen.getByRole('button', { name: /send c-echo to pacs1/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /edit modality pacs1/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete modality pacs1/i })).toBeInTheDocument();
+
+    // Buttons for PACS2
+    expect(screen.getByRole('button', { name: /send c-echo to pacs2/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /edit modality pacs2/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete modality pacs2/i })).toBeInTheDocument();
+  });
 });

@@ -147,6 +147,7 @@ function ModalityTableRow({
                 size="sm"
                 className="h-7 w-7 p-0"
                 disabled={isEchoing}
+                aria-label={`Send C-ECHO to ${name}`}
                 data-testid={`echo-modality-${name}`}
                 onClick={() => onEcho(name)}
               >
@@ -164,6 +165,7 @@ function ModalityTableRow({
                 variant="ghost"
                 size="sm"
                 className="h-7 w-7 p-0"
+                aria-label={`Edit modality ${name}`}
                 onClick={() => onEdit(modality)}
               >
                 <Pencil className="h-3.5 w-3.5" />
@@ -177,6 +179,7 @@ function ModalityTableRow({
                 variant="ghost"
                 size="sm"
                 className="h-7 w-7 p-0 text-destructive"
+                aria-label={`Delete modality ${name}`}
                 data-testid={`delete-modality-${name}`}
                 onClick={() => onDelete(name)}
               >
