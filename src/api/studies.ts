@@ -92,4 +92,14 @@ export const studiesApi = {
       headers: JSON_HEADERS,
       body: JSON.stringify({ Resources: [studyId] }),
     }),
+
+  addLabel: (studyId: string, label: string) =>
+    orthancFetch<void>(`/studies/${studyId}/labels/${encodeURIComponent(label)}`, {
+      method: 'PUT',
+    }),
+
+  removeLabel: (studyId: string, label: string) =>
+    orthancFetch<void>(`/studies/${studyId}/labels/${encodeURIComponent(label)}`, {
+      method: 'DELETE',
+    }),
 };

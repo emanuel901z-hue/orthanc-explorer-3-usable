@@ -20,8 +20,8 @@ import { instancesApi } from '@/api/instances';
 import type { Study as OrthancStudy } from '@/api/studies';
 import type { SeriesDetail } from '@/api/series';
 import type { Instance as OrthancInstance } from '@/api/instances';
-import { orthancFetch } from '@/lib/client';
 import { sendStudyAction } from '@/actions/sendStudy';
+import { addLabelAction, removeLabelAction } from '@/actions/studyLabel';
 
 function parseOrthancDate(raw: string | null | undefined): Date | undefined {
   if (!raw || raw.length < 8) return undefined;
@@ -264,15 +264,11 @@ export class OrthancStudyRepository implements IStudyRepository {
 
   /** Adds a label to a study. */
   async addLabel(id: string, label: string): Promise<void> {
-    await orthancFetch<unknown>(`/studies/${id}/labels/${encodeURIComponent(label)}`, {
-      method: 'PUT',
-    });
+    await addLabelAction(id, label);
   }
 
   /** Removes a label from a study. */
   async removeLabel(id: string, label: string): Promise<void> {
-    await orthancFetch<unknown>(`/studies/${id}/labels/${encodeURIComponent(label)}`, {
-      method: 'DELETE',
-    });
+    await removeLabelAction(id, label);
   }
 }
