@@ -1,10 +1,11 @@
 // PHI classification: SESSION (may hold PHI — memory-only)
 // File names passed to addFiles() may contain patient-identifying information.
 import { create } from 'zustand';
-import { instancesApi } from '@/api/instances';
 import { auditClient } from '@/lib/audit';
 import { OrthancError } from '@/lib/errors';
 import { hasDicomMagicBytes, isKnownNonDicom } from '@/lib/dicom-validation';
+import { uploadDicomWithProgress } from '@/lib/upload-xhr';
+import { getConfig } from '@/config/runtime';
 import { useJobStore } from './job-store';
 
 // Module-level registry: File objects cannot be JSON-serialized,
@@ -40,7 +41,10 @@ async function runUpload(jobId: string, file: File): Promise<void> {
   };
 
   try {
-    await instancesApi.upload(file);
+    const orthancBase = getConfig().orthancUrl?.replace(/\/$/, '') ?? '/orthanc-proxy';
+    await uploadDicomWithProgress(file, `${orthancBase}/instances`, (pct) => {
+      jobStore.updateJob(jobId, { progress: pct });
+    });
     auditClient.emit({ ...base, outcome: 'success' });
     fileRegistry.delete(jobId);
     jobStore.updateJob(jobId, { status: 'complete', progress: 100, completedItems: 1 });

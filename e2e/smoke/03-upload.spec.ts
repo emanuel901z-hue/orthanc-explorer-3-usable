@@ -4,11 +4,6 @@
  * Checklist:
  *   [7] Drag test-data/sample.dcm onto drop zone → upload completes
  *       Network tab shows POST /instances with Content-Type: application/dicom
- *
- * NOTE: The upload store (src/store/upload-store.ts) currently simulates
- * upload via setTimeout — it does NOT POST to /instances yet.
- * The "job appears and completes" test passes; the network assertion is
- * marked test.fixme until the real API call is wired.
  */
 import { test, expect } from '@playwright/test';
 import path from 'path';
@@ -34,8 +29,7 @@ test.describe('Upload', () => {
     await expect(page.locator('text=sample.dcm')).toBeVisible({ timeout: 10_000 });
   });
 
-  // TODO: Remove fixme when upload-store wires the real POST /instances call
-  test.fixme(
+  test(
     'item 7c: upload sends POST /instances with Content-Type: application/dicom',
     async ({ page }) => {
       const uploadRequest = page.waitForRequest(

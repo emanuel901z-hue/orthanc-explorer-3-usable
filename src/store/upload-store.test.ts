@@ -1,30 +1,50 @@
 // src/store/upload-store.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useUploadStore, __resetFileRegistryForTests } from './upload-store';
-import { instancesApi } from '@/api/instances';
-import { auditClient } from '@/lib/audit';
 import { useJobStore } from './job-store';
 
+// Mock the XHR-based upload function
+vi.mock('@/lib/upload-xhr', () => ({
+  uploadDicomWithProgress: vi.fn(),
+}));
+
+// Mock DICOM validation — test Files are too small to pass the magic-bytes check
+vi.mock('@/lib/dicom-validation', () => ({
+  hasDicomMagicBytes: vi.fn(() => Promise.resolve(true)),
+  isKnownNonDicom: vi.fn(() => false),
+}));
+
+// Mock getConfig so tests don't require window.__OE3_CONFIG__
+vi.mock('@/config/runtime', () => ({
+  getConfig: vi.fn(() => ({ orthancUrl: '/orthanc-proxy' })),
+}));
+
+// Mock auditClient
+vi.mock('@/lib/audit', () => ({
+  auditClient: { emit: vi.fn() },
+}));
+
+import { uploadDicomWithProgress } from '@/lib/upload-xhr';
+import { auditClient } from '@/lib/audit';
+
+const mockUpload = vi.mocked(uploadDicomWithProgress);
+const mockAuditEmit = vi.mocked(auditClient.emit);
+
 beforeEach(() => {
-  vi.restoreAllMocks();
+  vi.clearAllMocks();
+  mockUpload.mockResolvedValue({ ID: 'x', Status: 'Success' });
   useJobStore.setState({ jobs: [] });
   __resetFileRegistryForTests();
 });
 
 describe('addFiles()', () => {
-  it('calls instancesApi.upload once per file', async () => {
-    const uploadSpy = vi.spyOn(instancesApi, 'upload').mockResolvedValue({ ID: 'x', Status: 'Success' });
-    vi.spyOn(auditClient, 'emit').mockImplementation(() => {});
-
+  it('calls uploadDicomWithProgress once per file', async () => {
     useUploadStore.getState().addFiles([new File(['a'], 'a.dcm'), new File(['b'], 'b.dcm')]);
 
-    await vi.waitFor(() => expect(uploadSpy).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(mockUpload).toHaveBeenCalledTimes(2));
   });
 
   it('creates a job per file with type upload', async () => {
-    vi.spyOn(instancesApi, 'upload').mockResolvedValue({ ID: 'x', Status: 'Success' });
-    vi.spyOn(auditClient, 'emit').mockImplementation(() => {});
-
     useUploadStore.getState().addFiles([new File(['a'], 'a.dcm')]);
 
     await vi.waitFor(() => {
@@ -35,9 +55,6 @@ describe('addFiles()', () => {
   });
 
   it('marks the job complete when upload succeeds', async () => {
-    vi.spyOn(instancesApi, 'upload').mockResolvedValue({ ID: 'x', Status: 'Success' });
-    vi.spyOn(auditClient, 'emit').mockImplementation(() => {});
-
     useUploadStore.getState().addFiles([new File(['a'], 'a.dcm')]);
 
     await vi.waitFor(() => {
@@ -48,8 +65,7 @@ describe('addFiles()', () => {
   });
 
   it('marks the job as error when upload fails', async () => {
-    vi.spyOn(instancesApi, 'upload').mockRejectedValue(new Error('network error'));
-    vi.spyOn(auditClient, 'emit').mockImplementation(() => {});
+    mockUpload.mockRejectedValue(new Error('network error'));
 
     useUploadStore.getState().addFiles([new File(['a'], 'a.dcm')]);
 
@@ -60,8 +76,7 @@ describe('addFiles()', () => {
   });
 
   it('emits a success audit event when upload succeeds', async () => {
-    vi.spyOn(instancesApi, 'upload').mockResolvedValue({ ID: 'x', Status: 'Success' });
-    const auditSpy = vi.spyOn(auditClient, 'emit').mockImplementation(() => {});
+    const auditSpy = mockAuditEmit;
 
     useUploadStore.getState().addFiles([new File(['a'], 'a.dcm')]);
 
@@ -73,8 +88,8 @@ describe('addFiles()', () => {
   });
 
   it('emits a failure audit event when upload fails', async () => {
-    vi.spyOn(instancesApi, 'upload').mockRejectedValue(new Error('network error'));
-    const auditSpy = vi.spyOn(auditClient, 'emit').mockImplementation(() => {});
+    mockUpload.mockRejectedValue(new Error('network error'));
+    const auditSpy = mockAuditEmit;
 
     useUploadStore.getState().addFiles([new File(['a'], 'a.dcm')]);
 
@@ -86,8 +101,7 @@ describe('addFiles()', () => {
   });
 
   it('uses jobId (not file.name) as audit resourceId to avoid PHI leakage', async () => {
-    vi.spyOn(instancesApi, 'upload').mockResolvedValue({ ID: 'x', Status: 'Success' });
-    const auditSpy = vi.spyOn(auditClient, 'emit').mockImplementation(() => {});
+    const auditSpy = mockAuditEmit;
 
     useUploadStore.getState().addFiles([new File(['a'], 'patient-smith-dob19800101.dcm')]);
 
@@ -105,11 +119,10 @@ describe('addFiles()', () => {
 });
 
 describe('retryUpload()', () => {
-  it('re-calls instancesApi.upload for the same file after a failure', async () => {
-    const uploadSpy = vi.spyOn(instancesApi, 'upload')
+  it('re-calls uploadDicomWithProgress for the same file after a failure', async () => {
+    mockUpload
       .mockRejectedValueOnce(new Error('fail'))
       .mockResolvedValueOnce({ ID: 'x', Status: 'Success' });
-    vi.spyOn(auditClient, 'emit').mockImplementation(() => {});
 
     useUploadStore.getState().addFiles([new File(['a'], 'a.dcm')]);
 
@@ -128,12 +141,11 @@ describe('retryUpload()', () => {
       expect(jobs[0].status).toBe('complete');
     });
 
-    expect(uploadSpy).toHaveBeenCalledTimes(2);
+    expect(mockUpload).toHaveBeenCalledTimes(2);
   });
 
   it('does nothing when jobId is unknown (file no longer in registry)', () => {
-    const uploadSpy = vi.spyOn(instancesApi, 'upload').mockResolvedValue({ ID: 'x', Status: 'Success' });
     useUploadStore.getState().retryUpload('nonexistent-id');
-    expect(uploadSpy).not.toHaveBeenCalled();
+    expect(mockUpload).not.toHaveBeenCalled();
   });
 });
