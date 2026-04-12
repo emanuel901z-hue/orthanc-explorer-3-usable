@@ -316,23 +316,23 @@ function ViewportOverlay({ state, index }: { state: ViewportState; index: number
 }
 
 const SERIES_DEMOS_CT: SeriesItem[] = [
-  { id: 'ct-1', desc: 'CHEST W/O 5mm', modality: 'CT', slices: 64 },
-  { id: 'ct-2', desc: 'CHEST W/O 1.25mm', modality: 'CT', slices: 142 },
-  { id: 'ct-3', desc: 'LUNG WINDOW 5mm', modality: 'CT', slices: 64 },
-  { id: 'ct-4', desc: 'BONE WINDOW 5mm', modality: 'CT', slices: 64 },
-  { id: 'ct-5', desc: 'MEDIASTINUM 3mm', modality: 'CT', slices: 96 },
-  { id: 'ct-6', desc: 'COR REFORMAT 3mm', modality: 'CT', slices: 48 },
-  { id: 'ct-7', desc: 'SAG REFORMAT 3mm', modality: 'CT', slices: 36 },
+  { id: 'ct-1', desc: 'CHEST W/O 5mm', modality: 'CT', slices: 64, studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'ct-2', desc: 'CHEST W/O 1.25mm', modality: 'CT', slices: 142, studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'ct-3', desc: 'LUNG WINDOW 5mm', modality: 'CT', slices: 64, studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'ct-4', desc: 'BONE WINDOW 5mm', modality: 'CT', slices: 64, studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'ct-5', desc: 'MEDIASTINUM 3mm', modality: 'CT', slices: 96, studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'ct-6', desc: 'COR REFORMAT 3mm', modality: 'CT', slices: 48, studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'ct-7', desc: 'SAG REFORMAT 3mm', modality: 'CT', slices: 36, studyInstanceUID: '', seriesInstanceUID: '' },
 ];
 
 const SERIES_DEMOS_MR: SeriesItem[] = [
-  { id: 'mr-1', desc: 'SAG T1 SE', modality: 'MR', slices: 24, sequence: 'T1' },
-  { id: 'mr-2', desc: 'AX T2 FSE', modality: 'MR', slices: 36, sequence: 'T2' },
-  { id: 'mr-3', desc: 'AX FLAIR', modality: 'MR', slices: 36, sequence: 'FLAIR' },
-  { id: 'mr-4', desc: 'AX DWI b1000', modality: 'MR', slices: 28, sequence: 'T2' },
-  { id: 'mr-5', desc: 'COR T2 FSE', modality: 'MR', slices: 24, sequence: 'T2' },
-  { id: 'mr-6', desc: 'SAG T2 FSE', modality: 'MR', slices: 20, sequence: 'T2' },
-  { id: 'mr-7', desc: 'AX T1 POST', modality: 'MR', slices: 36, sequence: 'T1' },
+  { id: 'mr-1', desc: 'SAG T1 SE', modality: 'MR', slices: 24, sequence: 'T1', studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'mr-2', desc: 'AX T2 FSE', modality: 'MR', slices: 36, sequence: 'T2', studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'mr-3', desc: 'AX FLAIR', modality: 'MR', slices: 36, sequence: 'FLAIR', studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'mr-4', desc: 'AX DWI b1000', modality: 'MR', slices: 28, sequence: 'T2', studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'mr-5', desc: 'COR T2 FSE', modality: 'MR', slices: 24, sequence: 'T2', studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'mr-6', desc: 'SAG T2 FSE', modality: 'MR', slices: 20, sequence: 'T2', studyInstanceUID: '', seriesInstanceUID: '' },
+  { id: 'mr-7', desc: 'AX T1 POST', modality: 'MR', slices: 36, sequence: 'T1', studyInstanceUID: '', seriesInstanceUID: '' },
 ];
 
 export default function ViewerPage() {

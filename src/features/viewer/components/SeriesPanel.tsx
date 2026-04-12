@@ -11,6 +11,8 @@ export interface SeriesItem {
   modality: string;
   slices: number;
   sequence?: string;
+  studyInstanceUID: string;  // DICOM StudyInstanceUID — for building wadors: imageIds
+  seriesInstanceUID: string; // DICOM SeriesInstanceUID — for building wadors: imageIds
 }
 
 function renderThumbnail(canvas: HTMLCanvasElement, item: SeriesItem) {
