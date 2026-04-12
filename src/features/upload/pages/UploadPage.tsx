@@ -10,8 +10,8 @@ import { useJobStore } from '@/store/job-store';
 
 export default function UploadPage() {
   const { t } = useTranslation();
-  const { addFiles } = useUploadStore();
-  const { jobs, removeJob, clearCompleted, retryJob } = useJobStore();
+  const { addFiles, retryUpload } = useUploadStore();
+  const { jobs, removeJob, clearCompleted } = useJobStore();
   const uploadJobs = jobs.filter((j) => j.type === 'upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -82,6 +82,7 @@ export default function UploadPage() {
       <Card>
         <CardContent className="p-0">
           <div
+            data-testid="upload-drop-zone"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
             className="flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed border-border rounded-lg m-4 hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer"
@@ -162,7 +163,7 @@ export default function UploadPage() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         {(item.status === 'error' || item.status === 'interrupted') && (
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => retryJob(item.id)}>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => retryUpload(item.id)}>
                             <RotateCcw className="h-3.5 w-3.5" />
                           </Button>
                         )}
