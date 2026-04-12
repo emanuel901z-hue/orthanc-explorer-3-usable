@@ -16,6 +16,7 @@ export type Instance = {
   MainDicomTags: Record<string, string | null>;
   ParentSeries: string;
   Type: "Instance";
+  FileSize?: number;
 };
 
 export const instancesApi = {

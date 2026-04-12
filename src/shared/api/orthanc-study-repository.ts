@@ -92,7 +92,7 @@ function mapOrthancInstance(inst: OrthancInstance): Instance {
     sopInstanceUID: tags['SOPInstanceUID'] ?? '',
     sopClassUID: tags['SOPClassUID'] ?? undefined,
     instanceNumber: parseInt(tags['InstanceNumber'] ?? '0', 10),
-    fileSize: 0,
+    fileSize: inst.FileSize ?? 0,
     tags: [],
   };
 }
@@ -134,14 +134,28 @@ export class OrthancStudyRepository implements IStudyRepository {
     return mapOrthancSeries(s);
   }
 
-  /** Returns all instances in a series, fetching details per ID. */
+  /** Returns all instances in a series.
+   *
+   * Orthanc's GET /series/:id/instances returns either:
+   *   - string[] of IDs (older Orthanc builds)
+   *   - full instance objects[] (orthancteam/orthanc:latest-full)
+   *
+   * Handle both shapes so the UI works regardless of server version.
+   */
   async getInstancesForSeries(seriesId: string): Promise<Instance[]> {
-    const instanceIds = await seriesApi.getInstances(seriesId);
-    if (!Array.isArray(instanceIds)) return [];
-    const instances = await Promise.all(
-      (instanceIds as unknown as string[]).map((id) => instancesApi.get(id))
-    );
-    return instances.map(mapOrthancInstance);
+    const result = await seriesApi.getInstances(seriesId);
+    if (!Array.isArray(result) || result.length === 0) return [];
+
+    if (typeof result[0] === 'string') {
+      // Older Orthanc: array of ID strings — fetch each individually
+      const instances = await Promise.all(
+        (result as unknown as string[]).map((id) => instancesApi.get(id))
+      );
+      return instances.map(mapOrthancInstance);
+    }
+
+    // Newer Orthanc: array of full instance objects — map directly
+    return (result as unknown as OrthancInstance[]).map(mapOrthancInstance);
   }
 
   /** Returns a single instance by Orthanc UUID. */
