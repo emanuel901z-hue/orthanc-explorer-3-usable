@@ -37,7 +37,10 @@ export async function initCornerstone(): Promise<void> {
     addTool(StackScrollMouseWheelTool);
 
     _ready = true;
-  })();
+  })().catch((err) => {
+    _initPromise = null; // allow retry
+    throw err;
+  });
 
   return _initPromise;
 }
