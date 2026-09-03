@@ -44,6 +44,8 @@ export interface StudyFilters {
   accessionNumber?: string;
   studyDescription?: string;
   modalities?: string[];
+  /** Filter by Orthanc labels (AND logic — all labels must be present). */
+  labels?: string[];
 }
 
 // ===== Series =====

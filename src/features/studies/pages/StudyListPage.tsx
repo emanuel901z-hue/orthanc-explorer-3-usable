@@ -10,6 +10,7 @@ import {
   flexRender,
   type ColumnDef,
   type SortingState,
+  type ColumnSizingState,
 } from '@tanstack/react-table';
 import {
   Search,
@@ -46,6 +47,7 @@ import { useStudies } from '@/features/studies/hooks/use-studies';
 import { Study, StudyFilters } from '@/shared/types';
 import { ModalityBadge, formatPatientName } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
+import { useFeature } from '@/config/features';
 
 const MODALITY_OPTIONS = ['CT', 'MR', 'US', 'CR', 'DX', 'PT', 'NM'];
 const DEFAULT_PAGE_SIZE = 25;
@@ -59,6 +61,13 @@ export default function StudyListPage() {
   const [rowSelection, setRowSelection] = useState({});
   const [showFilters, setShowFilters] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+
+  // RBAC feature flags — controlled by config.js (deployment-time)
+  const canDownload = useFeature('download');
+  const canEditLabels = useFeature('editLabels');
+  const canSend = useFeature('send');
+  const canDelete = useFeature('delete');
 
   const filters: StudyFilters = useMemo(
     () => ({
@@ -67,6 +76,7 @@ export default function StudyListPage() {
       accessionNumber: searchParams.get('accession') || undefined,
       studyDescription: searchParams.get('description') || undefined,
       modalities: searchParams.get('modality') ? [searchParams.get('modality')!] : undefined,
+      labels: searchParams.get('labels') ? searchParams.get('labels')!.split(',').filter(Boolean) : undefined,
     }),
     [searchParams],
   );
@@ -182,6 +192,39 @@ export default function StudyListPage() {
         ),
       },
       {
+        accessorKey: 'studyInstanceUID',
+        header: t('studyList.columns.studyInstanceUID'),
+        cell: ({ row }) => (
+          <span
+            className="font-mono text-xs text-muted-foreground block truncate max-w-[280px]"
+            title={row.original.studyInstanceUID}
+          >
+            {row.original.studyInstanceUID || '—'}
+          </span>
+        ),
+        size: 280,
+        minSize: 200,
+      },
+      {
+        accessorKey: 'lastUpdate',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1 -ml-2 h-8 font-semibold"
+            onClick={() => column.toggleSorting()}
+          >
+            {t('studyList.columns.lastUpdate')} <ArrowUpDown className="h-3.5 w-3.5" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <span className="text-xs text-muted-foreground">
+            {format(row.original.lastUpdate, 'MMM dd, yyyy HH:mm')}
+          </span>
+        ),
+        size: 140,
+      },
+      {
         accessorKey: 'referringPhysician',
         header: t('studyList.columns.referring'),
         cell: ({ row }) => (
@@ -244,12 +287,15 @@ export default function StudyListPage() {
   const table = useReactTable({
     data: studies,
     columns,
-    state: { sorting, rowSelection },
+    state: { sorting, rowSelection, columnSizing },
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
+    onColumnSizingChange: setColumnSizing,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    enableColumnResizing: true,
+    columnResizeMode: 'onChange',
     initialState: { pagination: { pageSize: DEFAULT_PAGE_SIZE } },
   });
 
@@ -349,6 +395,20 @@ export default function StudyListPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  {t('studyList.filters.labels')}
+                </label>
+                <Input
+                  placeholder="tenant:abc, verified"
+                  value={searchParams.get('labels') || ''}
+                  onChange={(e) => updateFilter('labels', e.target.value)}
+                  className="h-9"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('studyList.filters.labelsHint')}
+                </p>
+              </div>
             </div>
           )}
         </CardContent>
@@ -361,23 +421,31 @@ export default function StudyListPage() {
             {t('studyList.selected', { count: selectedCount })}
           </span>
           <div className="flex gap-1 ml-auto">
-            <Button size="sm" variant="outline" className="gap-1.5 h-8">
-              <Download className="h-3.5 w-3.5" /> {t('studyList.actions.export')}
-            </Button>
-            <Button size="sm" variant="outline" className="gap-1.5 h-8">
-              <Tag className="h-3.5 w-3.5" /> {t('studyList.actions.label')}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5 h-8"
-              onClick={() => setSendOpen(true)}
-            >
-              <Send className="h-3.5 w-3.5" /> {t('studyList.actions.send')}
-            </Button>
-            <Button size="sm" variant="outline" className="gap-1.5 h-8 text-destructive">
-              <Trash2 className="h-3.5 w-3.5" /> {t('studyList.actions.delete')}
-            </Button>
+            {canDownload && (
+              <Button size="sm" variant="outline" className="gap-1.5 h-8">
+                <Download className="h-3.5 w-3.5" /> {t('studyList.actions.export')}
+              </Button>
+            )}
+            {canEditLabels && (
+              <Button size="sm" variant="outline" className="gap-1.5 h-8">
+                <Tag className="h-3.5 w-3.5" /> {t('studyList.actions.label')}
+              </Button>
+            )}
+            {canSend && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 h-8"
+                onClick={() => setSendOpen(true)}
+              >
+                <Send className="h-3.5 w-3.5" /> {t('studyList.actions.send')}
+              </Button>
+            )}
+            {canDelete && (
+              <Button size="sm" variant="outline" className="gap-1.5 h-8 text-destructive">
+                <Trash2 className="h-3.5 w-3.5" /> {t('studyList.actions.delete')}
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -388,18 +456,30 @@ export default function StudyListPage() {
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/40 rounded-t-lg z-10 animate-pulse" />
         )}
         <div className="overflow-auto">
-          <Table>
+          <Table style={{ tableLayout: 'fixed' }}>
             <TableHeader>
               {table.getHeaderGroups().map((hg) => (
                 <TableRow key={hg.id}>
                   {hg.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
+                      style={{ width: header.getSize(), position: 'relative' }}
                     >
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getCanResize() && (
+                        <span
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className="absolute right-0 top-0 h-full w-1 cursor-col-resize bg-border/0 hover:bg-primary/40 active:bg-primary/60 transition-colors"
+                          style={{
+                            transform: header.column.getIsResizing()
+                              ? `translateX(${header.column.getResizeOffset()}px)`
+                              : '',
+                          }}
+                        />
+                      )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -435,7 +515,7 @@ export default function StudyListPage() {
                     onClick={() => navigate(`/studies/${row.original.id}`)}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} style={{ width: cell.column.getSize() }}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}

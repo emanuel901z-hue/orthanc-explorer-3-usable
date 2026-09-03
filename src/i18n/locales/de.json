@@ -60,6 +60,46 @@
     "deleteInstance": "Instanz löschen",
     "deleteInstanceDesc": "Dies löscht Instanz #{{number}} ({{size}}) unwiderruflich."
   },
+  "studyList": {
+    "columns": {
+      "modality": "Modalität",
+      "description": "Beschreibung",
+      "accession": "Accession #",
+      "studyInstanceUID": "Study Instance UID",
+      "lastUpdate": "Letztes Update",
+      "referring": "Überweiser",
+      "images": "Bilder",
+      "labels": "Labels",
+      "status": "Status",
+      "seriesCount": "{{count}} Serien"
+    },
+    "filters": {
+      "patientId": "Patienten-ID",
+      "accession": "Accession #",
+      "description": "Beschreibung",
+      "modality": "Modalität",
+      "allModalities": "Alle Modalitäten",
+      "labels": "Labels",
+      "labelsHint": "Komma-getrennt — Studien müssen ALLE Labels haben"
+    },
+    "pagination": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "showing": "Zeige {{from}}–{{to}} von {{total}}"
+    },
+    "status": {
+      "stable": "Stabil",
+      "receiving": "Empfangen"
+    },
+    "empty": "Keine Studien gefunden. Filter anpassen.",
+    "selected": "{{count}} ausgewählt",
+    "actions": {
+      "export": "Export",
+      "label": "Label",
+      "send": "Senden",
+      "delete": "Löschen"
+    }
+  },
   "upload": {
     "subtitle": "DICOM-Dateien oder Ordner per Drag & Drop hochladen",
     "dropTitle": "DICOM-Dateien oder Ordner hier ablegen",
@@ -109,6 +149,7 @@
   },
   "actions": {
     "viewer": "Viewer",
+    "openInOhif": "In OHIF öffnen",
     "download": "Herunterladen",
     "send": "Senden",
     "modify": "Bearbeiten",

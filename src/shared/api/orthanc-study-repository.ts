@@ -129,14 +129,22 @@ export class OrthancStudyRepository implements IStudyRepository {
     if (filters?.accessionNumber) query['AccessionNumber'] = filters.accessionNumber;
     if (filters?.studyDescription) query['StudyDescription'] = `*${filters.studyDescription}*`;
 
-    const results = await studiesApi.find({
+    const findBody: Record<string, unknown> = {
       Level: 'Study',
       Query: query,
       Expand: true,
       // Ask Orthanc to compute and include these tags even if not in MainDicomTags.
       // Requires Orthanc 1.11.0+ (orthancteam/orthanc:latest-full qualifies).
       RequestedTags: ['ModalitiesInStudy', 'BodyPartExamined'],
-    } as Parameters<typeof studiesApi.find>[0]);
+    };
+
+    // Orthanc supports Labels filtering in /tools/find (AND logic: all labels must match)
+    if (filters?.labels?.length) {
+      findBody['Labels'] = filters.labels;
+      findBody['LabelsConstraint'] = 'All';
+    }
+
+    const results = await studiesApi.find(findBody as Parameters<typeof studiesApi.find>[0]);
 
     const allStudies = results.map(mapOrthancStudy);
 

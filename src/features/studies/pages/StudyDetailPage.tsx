@@ -29,6 +29,7 @@ import { deleteStudyAction } from '@/actions/deleteStudy';
 import { downloadStudyAction } from '@/actions/downloadStudy';
 import { OrthancError } from '@/lib/errors';
 import type { OrthancStudy } from '@/api/studies';
+import { useFeature } from '@/config/features';
 
 function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
   const { data: previewBlob, isLoading } = useInstancePreview(instanceId ?? '');
@@ -59,6 +60,13 @@ export default function StudyDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: study, isLoading } = useStudy(studyId!);
+
+  // RBAC feature flags — controlled by config.js (deployment-time)
+  const canDownload = useFeature('download');
+  const canSend = useFeature('send');
+  const canModify = useFeature('modify');
+  const canAnonymize = useFeature('anonymize');
+  const canDelete = useFeature('delete');
   const { data: series = [] } = useStudySeries(studyId!);
   const { data: sharedTags } = useStudySharedTags(studyId!);
   const { audit } = useAuditLog();
@@ -129,46 +137,74 @@ export default function StudyDetailPage() {
         </Breadcrumb>
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate(`/viewer/${studyId}`)}><Eye className="h-3.5 w-3.5" /> {t('actions.viewer')}</Button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                disabled={downloadMutation.isPending}
-                onClick={() => {
-                  audit({ action: 'download', title: `Study downloaded: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'info', metadata: { 'Study ID': studyId!, 'Format': 'DICOM ZIP' } });
-                  downloadMutation.mutate(studyId!);
-                }}
-              >
-                <Download className="h-3.5 w-3.5" /> {t('actions.download')}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Download as DICOM ZIP archive</TooltipContent>
-          </Tooltip>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('actions.send')}</Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setModifyOpen(true)}><Pencil className="h-3.5 w-3.5" /> {t('actions.modify')}</Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAnonOpen(true)}><Shield className="h-3.5 w-3.5" /> {t('actions.anonymize')}</Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1.5 text-destructive"><Trash2 className="h-3.5 w-3.5" /> {t('actions.delete')}</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                  {t('studies.deleteStudy')}
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete <strong>{formatPatientName(study.patientName)}</strong> and all {study.numberOfSeries} series ({study.numberOfInstances} instances). This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  disabled={deleteMutation.isPending}
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={async () => {
+              // Set httpOnly cookie for OHIF/DICOMweb access (8h PACS token)
+              try {
+                await fetch('/api/v1/pacs/viewer-session', {
+                  method: 'POST',
+                  credentials: 'include',
+                });
+              } catch (e) {
+                // Cookie may already be valid — continue to open OHIF
+              }
+              window.open(`/ohif/viewer?StudyInstanceUIDs=${study.studyInstanceUID}`, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            <Eye className="h-3.5 w-3.5" /> {t('actions.openInOhif')}
+          </Button>
+          {canDownload && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  disabled={downloadMutation.isPending}
                   onClick={() => {
+                    audit({ action: 'download', title: `Study downloaded: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'info', metadata: { 'Study ID': studyId!, 'Format': 'DICOM ZIP' } });
+                    downloadMutation.mutate(studyId!);
+                  }}
+                >
+                  <Download className="h-3.5 w-3.5" /> {t('actions.download')}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Download as DICOM ZIP archive</TooltipContent>
+            </Tooltip>
+          )}
+          {canSend && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('actions.send')}</Button>
+          )}
+          {canModify && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setModifyOpen(true)}><Pencil className="h-3.5 w-3.5" /> {t('actions.modify')}</Button>
+          )}
+          {canAnonymize && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAnonOpen(true)}><Shield className="h-3.5 w-3.5" /> {t('actions.anonymize')}</Button>
+          )}
+          {canDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5 text-destructive"><Trash2 className="h-3.5 w-3.5" /> {t('actions.delete')}</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                    {t('studies.deleteStudy')}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete <strong>{formatPatientName(study.patientName)}</strong> and all {study.numberOfSeries} series ({study.numberOfInstances} instances). This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={deleteMutation.isPending}
+                    onClick={() => {
                     audit({ action: 'delete', title: `Study deleted: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'warning', metadata: { 'Study ID': studyId!, 'Series': String(study.numberOfSeries), 'Instances': String(study.numberOfInstances) } });
                     deleteMutation.mutate({ ID: studyId!, MainDicomTags: {}, PatientMainDicomTags: {}, ParentPatient: '', Series: [], Type: 'Study' });
                   }}
@@ -178,6 +214,7 @@ export default function StudyDetailPage() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          )}
         </div>
       </div>
 

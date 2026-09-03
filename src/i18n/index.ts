@@ -8,6 +8,9 @@ import fr from './locales/fr.json';
 import de from './locales/de.json';
 import ja from './locales/ja.json';
 import zh from './locales/zh.json';
+import ru from './locales/ru.json';
+import tr from './locales/tr.json';
+import ar from './locales/ar.json';
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
@@ -16,6 +19,9 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
   { code: 'zh', name: 'Chinese', nativeName: '中文' },
+  { code: 'ru', name: 'Russian', nativeName: 'Русский' },
+  { code: 'tr', name: 'Turkish', nativeName: 'Türkçe' },
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
 ] as const;
 
 i18n
@@ -29,6 +35,9 @@ i18n
       de: { translation: de },
       ja: { translation: ja },
       zh: { translation: zh },
+      ru: { translation: ru },
+      tr: { translation: tr },
+      ar: { translation: ar },
     },
     fallbackLng: 'en',
     interpolation: {

@@ -65,6 +65,8 @@
       "modality": "Modality",
       "description": "Description",
       "accession": "Accession #",
+      "studyInstanceUID": "Study Instance UID",
+      "lastUpdate": "Last Update",
       "referring": "Referring",
       "images": "Images",
       "labels": "Labels",
@@ -76,7 +78,9 @@
       "accession": "Accession #",
       "description": "Description",
       "modality": "Modality",
-      "allModalities": "All modalities"
+      "allModalities": "All modalities",
+      "labels": "Labels",
+      "labelsHint": "Comma-separated — studies must have ALL labels"
     },
     "pagination": {
       "previous": "Previous",
@@ -145,6 +149,7 @@
   },
   "actions": {
     "viewer": "Viewer",
+    "openInOhif": "Open in OHIF",
     "download": "Download",
     "send": "Send",
     "modify": "Modify",
