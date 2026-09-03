@@ -91,6 +91,14 @@ vi.mock('@/features/studies/components/StudyActivityLog', () => ({
   default: () => null,
 }));
 
+vi.mock('@/config/features', () => ({
+  useFeature: vi.fn(() => true),
+}));
+
+vi.mock('@/api/tools', () => ({
+  toolsApi: { createArchive: vi.fn() },
+}));
+
 /* ── Helpers ───────────────────────────────────────────────────── */
 
 function makeQueryClient() {

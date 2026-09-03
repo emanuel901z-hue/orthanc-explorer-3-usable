@@ -21,6 +21,8 @@ export type Change = {
 export type ChangesResponse = {
   Changes: Change[];
   Done: boolean;
+  /** Orthanc 1.13.0+: oldest sequence number in the changes feed. */
+  First: number;
   Last: number;
 };
 

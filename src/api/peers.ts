@@ -16,8 +16,10 @@ export type PeerConfig = {
 };
 
 export const peersApi = {
+  /** GET /peers — Returns array of peer names (string[]). */
   list: () => orthancFetch<string[]>('/peers'),
 
+  /** PUT /peers/:name — Creates or updates a peer. Body: PeerConfig. Returns 200 (void). */
   put: (name: string, body: PeerConfig) =>
     orthancFetch<void>(`/peers/${name}`, {
       method: 'PUT',
@@ -25,5 +27,6 @@ export const peersApi = {
       body: JSON.stringify(body),
     }),
 
+  /** DELETE /peers/:name — Removes a peer. Returns 200 (void). */
   delete: (name: string) => orthancFetch<void>(`/peers/${name}`, { method: 'DELETE' }),
 };

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle } from 'lucide-react';
+import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useStudy, useStudySeries, useInstancePreview, useStudySharedTags } from '@/features/studies/hooks/use-studies';
 import { ModalityBadge, formatPatientName, formatDiskSize } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
@@ -30,6 +32,8 @@ import { downloadStudyAction } from '@/actions/downloadStudy';
 import { OrthancError } from '@/lib/errors';
 import type { OrthancStudy } from '@/api/studies';
 import { useFeature } from '@/config/features';
+import type { Series } from '@/shared/types';
+import { toolsApi } from '@/api/tools';
 
 function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
   const { data: previewBlob, isLoading } = useInstancePreview(instanceId ?? '');
@@ -47,6 +51,7 @@ function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
       </div>
     );
   }
+  // null = no pixel data (SR/PR documents) or preview failed — show neutral placeholder
   return (
     <div className="h-16 w-16 bg-muted rounded flex items-center justify-center shrink-0">
       <Image className="h-6 w-6 text-muted-foreground" />
@@ -74,6 +79,10 @@ export default function StudyDetailPage() {
   const [anonOpen, setAnonOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
   const [seriesView, setSeriesView] = useState<'grid' | 'table'>('table');
+  const [seriesSearch, setSeriesSearch] = useState('');
+  const [seriesSort, setSeriesSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'seriesNumber', dir: 'asc' });
+  const [selectedSeriesIds, setSelectedSeriesIds] = useState<Set<string>>(new Set());
+  const [bulkDownloading, setBulkDownloading] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: (orthancStudy: OrthancStudy) => deleteStudyAction(orthancStudy),
@@ -98,6 +107,108 @@ export default function StudyDetailPage() {
 
   // Update tab label with patient name when loaded
   useTabLabel(study ? formatPatientName(study.patientName) : undefined);
+
+  // ── Series filtering + sorting ──
+  type SortKey = 'seriesNumber' | 'modality' | 'seriesDescription' | 'numberOfInstances';
+  const filteredSortedSeries = useMemo(() => {
+    let result = [...series];
+    // Search filter
+    if (seriesSearch.trim()) {
+      const q = seriesSearch.toLowerCase();
+      result = result.filter((s) =>
+        s.seriesDescription?.toLowerCase().includes(q) ||
+        s.modality.toLowerCase().includes(q) ||
+        String(s.seriesNumber).includes(q) ||
+        s.seriesInstanceUID.toLowerCase().includes(q)
+      );
+    }
+    // Sort
+    result.sort((a, b) => {
+      const dir = seriesSort.dir === 'asc' ? 1 : -1;
+      switch (seriesSort.key) {
+        case 'seriesNumber':
+          return (a.seriesNumber - b.seriesNumber) * dir;
+        case 'modality':
+          return a.modality.localeCompare(b.modality) * dir;
+        case 'seriesDescription':
+          return (a.seriesDescription ?? '').localeCompare(b.seriesDescription ?? '') * dir;
+        case 'numberOfInstances':
+          return (a.numberOfInstances - b.numberOfInstances) * dir;
+        default:
+          return 0;
+      }
+    });
+    return result;
+  }, [series, seriesSearch, seriesSort]);
+
+  const toggleSort = (key: SortKey) => {
+    setSeriesSort((prev) =>
+      prev.key === key
+        ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
+        : { key, dir: 'asc' }
+    );
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (seriesSort.key !== col) return <ArrowUpDown className="h-3 w-3 ml-1 inline opacity-40" />;
+    return seriesSort.dir === 'asc'
+      ? <ArrowUp className="h-3 w-3 ml-1 inline" />
+      : <ArrowDown className="h-3 w-3 ml-1 inline" />;
+  };
+
+  // ── Multi-select series ──
+  const allFilteredIds = filteredSortedSeries.map((s) => s.id);
+  const allSelected = allFilteredIds.length > 0 && allFilteredIds.every((id) => selectedSeriesIds.has(id));
+  const someSelected = selectedSeriesIds.size > 0 && !allSelected;
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedSeriesIds(new Set());
+    } else {
+      setSelectedSeriesIds(new Set(allFilteredIds));
+    }
+  };
+
+  const toggleSelectSeries = (id: string) => {
+    setSelectedSeriesIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // ── Bulk download selected series ──
+  const handleBulkDownload = async () => {
+    const ids = Array.from(selectedSeriesIds);
+    if (ids.length === 0) return;
+    setBulkDownloading(true);
+    try {
+      const blob = await toolsApi.createArchive(ids);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${formatPatientName(study?.patientName ?? 'study')}_${ids.length}series.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      audit({
+        action: 'download',
+        title: `Bulk series download: ${ids.length} series from ${formatPatientName(study?.patientName ?? '')}`,
+        resource: study?.studyInstanceUID ?? '',
+        severity: 'info',
+        metadata: { 'Study ID': studyId!, 'Series Count': String(ids.length), 'Series IDs': ids.join(', ') },
+      });
+      toast.success(`${ids.length} series downloaded`);
+      setSelectedSeriesIds(new Set());
+    } catch (e) {
+      const ref = e instanceof OrthancError ? ` (Ref: ${e.correlationId})` : '';
+      toast.error(`Bulk download failed.${ref}`);
+    } finally {
+      setBulkDownloading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -295,7 +406,7 @@ export default function StudyDetailPage() {
                     </div>
                     <div className="p-2 rounded-lg bg-muted">
                       <Image className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-                      <div className="font-semibold">{study.numberOfInstances}</div>
+                      <div className="font-semibold">{study.numberOfInstances ?? '—'}</div>
                       <div className="text-xs text-muted-foreground">Images</div>
                     </div>
                     <div className="p-2 rounded-lg bg-muted">
@@ -327,18 +438,31 @@ export default function StudyDetailPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2 flex-col sm:flex-row">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Series ({series.length})</CardTitle>
-                    <ToggleGroup type="single" value={seriesView} onValueChange={(v) => v && setSeriesView(v as 'grid' | 'table')} size="sm">
-                      <ToggleGroupItem value="grid" aria-label="Grid view"><LayoutGrid className="h-3.5 w-3.5" /></ToggleGroupItem>
-                      <ToggleGroupItem value="table" aria-label="Table view"><List className="h-3.5 w-3.5" /></ToggleGroupItem>
-                    </ToggleGroup>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      {seriesView === 'table' && (
+                        <div className="relative flex-1 sm:w-48">
+                          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                          <Input
+                            placeholder="Filter series…"
+                            value={seriesSearch}
+                            onChange={(e) => setSeriesSearch(e.target.value)}
+                            className="pl-8 h-8 text-xs"
+                          />
+                        </div>
+                      )}
+                      <ToggleGroup type="single" value={seriesView} onValueChange={(v) => v && setSeriesView(v as 'grid' | 'table')} size="sm">
+                        <ToggleGroupItem value="grid" aria-label="Grid view"><LayoutGrid className="h-3.5 w-3.5" /></ToggleGroupItem>
+                        <ToggleGroupItem value="table" aria-label="Table view"><List className="h-3.5 w-3.5" /></ToggleGroupItem>
+                      </ToggleGroup>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   {seriesView === 'grid' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {series.map((s) => (
+                      {filteredSortedSeries.map((s) => (
                         <div
                           key={s.id}
                           className="border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer flex gap-3"
@@ -357,43 +481,101 @@ export default function StudyDetailPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="overflow-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-12">#</TableHead>
-                            <TableHead>Modality</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead>Instances</TableHead>
-                            <TableHead>Series Instance UID</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {series.map((s) => (
-                            <TableRow
-                              key={s.id}
-                              className="cursor-pointer hover:bg-muted/50 transition-colors"
-                              onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
+                    <>
+                      {/* Bulk action bar */}
+                      {selectedSeriesIds.size > 0 && (
+                        <div className="flex items-center justify-between gap-2 mb-3 p-2 rounded-md bg-primary/5 border border-primary/20 flex-col sm:flex-row">
+                          <span className="text-sm font-medium">
+                            {selectedSeriesIds.size} series selected
+                          </span>
+                          <div className="flex gap-2 flex-wrap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5"
+                              disabled={bulkDownloading}
+                              onClick={handleBulkDownload}
                             >
-                              <TableCell className="font-medium">{s.seriesNumber}</TableCell>
-                              <TableCell><ModalityBadge modality={s.modality} /></TableCell>
-                              <TableCell className="text-sm">{s.seriesDescription || '—'}</TableCell>
-                              <TableCell className="text-sm text-muted-foreground">{s.numberOfInstances}</TableCell>
-                            <TableCell className="font-mono text-xs text-muted-foreground max-w-[250px]">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="truncate block">{s.seriesInstanceUID}</span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top" className="max-w-md font-mono text-xs break-all">
-                                    {s.seriesInstanceUID}
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TableCell>
+                              {bulkDownloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                              Download {selectedSeriesIds.size} as ZIP
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedSeriesIds(new Set())}
+                            >
+                              Clear
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      <div className="overflow-auto">
+                        <Table style={{ minWidth: '700px' }}>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-10">
+                                <Checkbox
+                                  checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+                                  onCheckedChange={toggleSelectAll}
+                                  aria-label="Select all series"
+                                />
+                              </TableHead>
+                              <TableHead className="cursor-pointer select-none w-16" onClick={() => toggleSort('seriesNumber')}>
+                                #<SortIcon col="seriesNumber" />
+                              </TableHead>
+                              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('modality')}>
+                                Modality<SortIcon col="modality" />
+                              </TableHead>
+                              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('seriesDescription')}>
+                                Description<SortIcon col="seriesDescription" />
+                              </TableHead>
+                              <TableHead className="cursor-pointer select-none w-24" onClick={() => toggleSort('numberOfInstances')}>
+                                Images<SortIcon col="numberOfInstances" />
+                              </TableHead>
+                              <TableHead>Series Instance UID</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredSortedSeries.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                                  No series match "{seriesSearch}"
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              filteredSortedSeries.map((s) => {
+                                const isSelected = selectedSeriesIds.has(s.id);
+                                return (
+                                  <TableRow
+                                    key={s.id}
+                                    className={`cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}
+                                    onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
+                                  >
+                                    <TableCell onClick={(e) => { e.stopPropagation(); toggleSelectSeries(s.id); }}>
+                                      <Checkbox checked={isSelected} aria-label={`Select series ${s.seriesNumber}`} />
+                                    </TableCell>
+                                    <TableCell className="font-medium">{s.seriesNumber}</TableCell>
+                                    <TableCell><ModalityBadge modality={s.modality} /></TableCell>
+                                    <TableCell className="text-sm">{s.seriesDescription || '—'}</TableCell>
+                                    <TableCell className="text-sm text-muted-foreground">{s.numberOfInstances}</TableCell>
+                                    <TableCell className="font-mono text-xs text-muted-foreground max-w-[250px]">
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="truncate block">{s.seriesInstanceUID}</span>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="max-w-md font-mono text-xs break-all">
+                                          {s.seriesInstanceUID}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>

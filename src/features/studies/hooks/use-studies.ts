@@ -97,7 +97,19 @@ export function useInstanceTransferSyntax(instanceId: string) {
 export function useInstancePreview(instanceId: string) {
   return useQuery({
     queryKey: ['instance-preview', instanceId],
-    queryFn: () => import('@/api/instances').then(({ instancesApi }) => instancesApi.getPreview(instanceId)),
+    queryFn: async () => {
+      try {
+        const { instancesApi } = await import('@/api/instances');
+        return await instancesApi.getPreview(instanceId);
+      } catch (e: unknown) {
+        // 415 Unsupported Media Type — instance has no pixel data (e.g. SR, PR documents)
+        // Return null to signal "no preview available" without erroring the UI
+        if (e instanceof Error && (e.message.includes('415') || e.message.includes('Unsupported Media Type'))) {
+          return null;
+        }
+        throw e;
+      }
+    },
     enabled: !!instanceId,
     staleTime: 5 * 60 * 1000,
   });

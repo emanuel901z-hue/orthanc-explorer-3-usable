@@ -19,12 +19,13 @@ export type ModalityConfig = {
 };
 
 export const modalitiesApi = {
+  /** GET /modalities — Returns array of modality names (string[]). */
   list: () => orthancFetch<string[]>('/modalities'),
 
-  // GET /modalities/{id} returns sub-operation names in modern Orthanc.
-  // The actual config is at /modalities/{id}/configuration.
+  /** GET /modalities/:name/configuration — Returns ModalityConfig (AET, Host, Port). */
   get: (name: string) => orthancFetch<ModalityConfig>(`/modalities/${name}/configuration`),
 
+  /** PUT /modalities/:name — Creates or updates a modality. Body: ModalityConfig. Returns 200 (void). */
   put: (name: string, body: ModalityConfig) =>
     orthancFetch<void>(`/modalities/${name}`, {
       method: 'PUT',
@@ -32,8 +33,10 @@ export const modalitiesApi = {
       body: JSON.stringify(body),
     }),
 
+  /** DELETE /modalities/:name — Removes a modality. Returns 200 (void). */
   delete: (name: string) => orthancFetch<void>(`/modalities/${name}`, { method: 'DELETE' }),
 
+  /** POST /modalities/:name/echo — Sends DICOM C-ECHO. Returns response details. */
   echo: (name: string) =>
     orthancFetch<Record<string, unknown>>(`/modalities/${name}/echo`, {
       method: 'POST',

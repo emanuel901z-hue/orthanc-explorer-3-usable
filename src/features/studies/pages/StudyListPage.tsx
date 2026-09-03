@@ -250,22 +250,10 @@ export default function StudyListPage() {
         ),
       },
       {
-        id: 'labels',
-        header: t('studyList.columns.labels'),
-        cell: ({ row }) => (
-          <div className="flex gap-1 flex-wrap">
-            {row.original.labels.map((l) => (
-              <Badge key={l} variant="outline" className="text-xs py-0 h-5">
-                {l}
-              </Badge>
-            ))}
-          </div>
-        ),
-        enableSorting: false,
-      },
-      {
         id: 'status',
         header: t('studyList.columns.status'),
+        size: 120,
+        minSize: 100,
         cell: ({ row }) => (
           <div className="flex items-center gap-1.5">
             <div
@@ -302,7 +290,7 @@ export default function StudyListPage() {
   const selectedCount = Object.keys(rowSelection).length;
 
   return (
-    <div className="p-4 md:p-6 space-y-4 animate-fade-in">
+    <div className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -316,7 +304,7 @@ export default function StudyListPage() {
       {/* Search Bar */}
       <Card>
         <CardContent className="p-3">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -395,20 +383,6 @@ export default function StudyListPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                  {t('studyList.filters.labels')}
-                </label>
-                <Input
-                  placeholder="tenant:abc, verified"
-                  value={searchParams.get('labels') || ''}
-                  onChange={(e) => updateFilter('labels', e.target.value)}
-                  className="h-9"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t('studyList.filters.labelsHint')}
-                </p>
-              </div>
             </div>
           )}
         </CardContent>
@@ -416,11 +390,11 @@ export default function StudyListPage() {
 
       {/* Bulk actions */}
       {selectedCount > 0 && (
-        <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
+        <div className="flex flex-col sm:flex-row items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
           <span className="text-sm font-medium">
             {t('studyList.selected', { count: selectedCount })}
           </span>
-          <div className="flex gap-1 ml-auto">
+          <div className="flex gap-1 flex-wrap justify-center sm:ml-auto">
             {canDownload && (
               <Button size="sm" variant="outline" className="gap-1.5 h-8">
                 <Download className="h-3.5 w-3.5" /> {t('studyList.actions.export')}
@@ -456,7 +430,7 @@ export default function StudyListPage() {
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/40 rounded-t-lg z-10 animate-pulse" />
         )}
         <div className="overflow-auto">
-          <Table style={{ tableLayout: 'fixed' }}>
+          <Table style={{ tableLayout: 'auto', minWidth: '1200px' }}>
             <TableHeader>
               {table.getHeaderGroups().map((hg) => (
                 <TableRow key={hg.id}>
@@ -527,8 +501,8 @@ export default function StudyListPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3 border-t">
-          <span className="text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-2">
+          <span className="text-sm text-muted-foreground text-center sm:text-left">
             {t('studyList.pagination.showing', {
               from:
                 table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1,

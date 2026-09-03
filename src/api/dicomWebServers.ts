@@ -16,8 +16,10 @@ export type DicomWebServerConfig = {
 };
 
 export const dicomWebServersApi = {
+  /** GET /dicom-web/servers — Returns array of DICOMweb server names (string[]). */
   list: () => orthancFetch<string[]>('/dicom-web/servers'),
 
+  /** PUT /dicom-web/servers/:name — Creates or updates a DICOMweb server. Returns 200 (void). */
   put: (name: string, body: DicomWebServerConfig) =>
     orthancFetch<void>(`/dicom-web/servers/${name}`, {
       method: 'PUT',
@@ -25,5 +27,6 @@ export const dicomWebServersApi = {
       body: JSON.stringify(body),
     }),
 
+  /** DELETE /dicom-web/servers/:name — Removes a DICOMweb server. Returns 200 (void). */
   delete: (name: string) => orthancFetch<void>(`/dicom-web/servers/${name}`, { method: 'DELETE' }),
 };

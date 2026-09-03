@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Search, ChevronRight, ChevronDown, Undo2 } from 'lucide-react';
+import { Search, ChevronRight, ChevronDown, Undo2, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -276,6 +276,8 @@ interface DicomTagBrowserProps {
 
 export default function DicomTagBrowser({ study, tags, editable, onModificationsChange }: DicomTagBrowserProps) {
   const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<'tag' | 'name' | 'vr' | 'value'>('tag');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const allTags = useMemo(
     () => tags ?? generateStudyDemoTags(study),
     [tags, study],
@@ -303,18 +305,57 @@ export default function DicomTagBrowser({ study, tags, editable, onModifications
   }, [allTags, onModificationsChange]);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return allTags;
-    const q = search.toLowerCase();
-    return allTags.filter(
-      (t) =>
-        t.tag.toLowerCase().includes(q) ||
-        t.name.toLowerCase().includes(q) ||
-        t.value.toLowerCase().includes(q) ||
-        t.children?.some(
-          (c) => c.tag.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.value.toLowerCase().includes(q)
-        )
-    );
-  }, [allTags, search]);
+    let result = allTags;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (t) =>
+          t.tag.toLowerCase().includes(q) ||
+          t.name.toLowerCase().includes(q) ||
+          t.value.toLowerCase().includes(q) ||
+          t.children?.some(
+            (c) => c.tag.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.value.toLowerCase().includes(q)
+          )
+      );
+    }
+    // Sort — only top-level tags (children stay in their original order within SQ items)
+    const sorted = [...result].sort((a, b) => {
+      const dir = sortDir === 'asc' ? 1 : -1;
+      let cmp = 0;
+      switch (sortKey) {
+        case 'tag':
+          cmp = a.tag.localeCompare(b.tag);
+          break;
+        case 'name':
+          cmp = a.name.localeCompare(b.name);
+          break;
+        case 'vr':
+          cmp = a.vr.localeCompare(b.vr);
+          break;
+        case 'value':
+          cmp = (a.value || '').localeCompare(b.value || '');
+          break;
+      }
+      return cmp * dir;
+    });
+    return sorted;
+  }, [allTags, search, sortKey, sortDir]);
+
+  const toggleSort = (key: typeof sortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const SortIcon = ({ col }: { col: typeof sortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 ml-1 inline opacity-40" />;
+    return sortDir === 'asc'
+      ? <ArrowUp className="h-3 w-3 ml-1 inline" />
+      : <ArrowDown className="h-3 w-3 ml-1 inline" />;
+  };
 
   return (
     <div className="space-y-3">
@@ -342,10 +383,18 @@ export default function DicomTagBrowser({ study, tags, editable, onModifications
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[140px] text-xs">Tag</TableHead>
-              <TableHead className="w-[50px] text-xs">VR</TableHead>
-              <TableHead className="text-xs">Name</TableHead>
-              <TableHead className="text-xs">Value</TableHead>
+              <TableHead className="w-[140px] text-xs cursor-pointer select-none" onClick={() => toggleSort('tag')}>
+                Tag<SortIcon col="tag" />
+              </TableHead>
+              <TableHead className="w-[50px] text-xs cursor-pointer select-none" onClick={() => toggleSort('vr')}>
+                VR<SortIcon col="vr" />
+              </TableHead>
+              <TableHead className="text-xs cursor-pointer select-none" onClick={() => toggleSort('name')}>
+                Name<SortIcon col="name" />
+              </TableHead>
+              <TableHead className="text-xs cursor-pointer select-none" onClick={() => toggleSort('value')}>
+                Value<SortIcon col="value" />
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

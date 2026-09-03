@@ -1,5 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { buildWadorsImageId } from './cornerstoneImageIds';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('@/config/runtime', () => ({
+  getConfig: vi.fn().mockReturnValue({ orthancUrl: '/orthanc-proxy' }),
+}));
+
+import { buildWadorsImageId, getDicomWebUrl } from './cornerstoneImageIds';
 
 describe('buildWadorsImageId', () => {
   it('builds a wadors: URL with correct DICOMweb path segments', () => {
@@ -40,5 +45,11 @@ describe('buildWadorsImageId', () => {
       baseUrl: 'https://pacs.example.com/wado-rs',
     });
     expect(id).toContain('wadors:https://pacs.example.com/wado-rs');
+  });
+});
+
+describe('getDicomWebUrl', () => {
+  it('returns the DICOMweb base URL from runtime config', () => {
+    expect(getDicomWebUrl()).toBe('/orthanc-proxy/dicom-web');
   });
 });

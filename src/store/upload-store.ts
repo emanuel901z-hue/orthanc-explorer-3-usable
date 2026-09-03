@@ -41,7 +41,7 @@ async function runUpload(jobId: string, file: File): Promise<void> {
   };
 
   try {
-    const orthancBase = getConfig().orthancUrl?.replace(/\/$/, '') ?? '/orthanc-proxy';
+    const orthancBase = getConfig().orthancUrl?.replace(/\/$/, '') ?? '';
     await uploadDicomWithProgress(file, `${orthancBase}/instances`, (pct) => {
       jobStore.updateJob(jobId, { progress: pct });
     });

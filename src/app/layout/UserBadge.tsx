@@ -10,27 +10,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { AboutDialog } from './AboutDialog';
-
-interface DemoUser {
-  displayName: string;
-  email: string;
-  role: string;
-  initials: string;
-}
-
-const DEMO_USER: DemoUser = {
-  displayName: 'Dr. Sarah Chen',
-  email: 's.chen@hospital.org',
-  role: 'Admin',
-  initials: 'SC',
-};
+import { useAuth } from '@/app/providers/auth-context';
 
 export function UserBadge() {
   const [aboutOpen, setAboutOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
-  // In demo mode, always show a mock user. When no user context exists, render nothing.
-  const user: DemoUser | null = DEMO_USER;
   if (!user) return null;
+
+  const roleLabel = user.roles.includes('admin') ? 'Administrator' :
+    user.roles.includes('physician') ? 'Physician' :
+    user.roles.includes('technologist') ? 'Technologist' : 'Viewer';
 
   return (
     <>
@@ -60,7 +50,7 @@ export function UserBadge() {
           <div className="px-2 py-1.5">
             <Badge variant="outline" className="gap-1 text-[10px] h-5">
               <Shield className="h-3 w-3" />
-              {user.role}
+              {roleLabel}
             </Badge>
           </div>
           <DropdownMenuSeparator />
@@ -72,7 +62,10 @@ export function UserBadge() {
             About Orthanc Explorer 3
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+          <DropdownMenuItem
+            className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+            onClick={signOut}
+          >
             <LogOut className="h-4 w-4" />
             Sign Out
           </DropdownMenuItem>

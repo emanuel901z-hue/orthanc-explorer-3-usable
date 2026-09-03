@@ -42,14 +42,17 @@ function parseOrthancDateTime(dateRaw: string | null | undefined): Date {
 function mapOrthancStudy(s: OrthancStudy): Study {
   const tags = s.MainDicomTags ?? {};
   const patientTags = s.PatientMainDicomTags ?? {};
+  // RequestedTags are returned separately by Orthanc when requested via the
+  // RequestedTags field in /tools/find — they are NOT in MainDicomTags.
+  const requestedTags = (s as any).RequestedTags ?? {};
 
   const rawSex = patientTags['PatientSex'] ?? '';
   const patientSex: Study['patientSex'] =
     rawSex === 'M' ? 'M' : rawSex === 'F' ? 'F' : rawSex === 'O' ? 'O' : undefined;
 
-  // ModalitiesInStudy comes back when requested via RequestedTags; fall back
-  // to Modality (series-level tag sometimes stored at study level).
-  const rawModalities = tags['ModalitiesInStudy'] ?? tags['Modality'] ?? '';
+  // ModalitiesInStudy is a computed tag — only available via RequestedTags.
+  // Fall back to Modality (series-level tag sometimes stored at study level).
+  const rawModalities = requestedTags['ModalitiesInStudy'] ?? tags['ModalitiesInStudy'] ?? tags['Modality'] ?? '';
   const modalities = rawModalities ? String(rawModalities).split('\\').filter(Boolean) : [];
 
   // Parse LastUpdate from Orthanc format "YYYYMMDDTHHmmss"
@@ -75,7 +78,7 @@ function mapOrthancStudy(s: OrthancStudy): Study {
     studyDescription: tags['StudyDescription'] ?? undefined,
     accessionNumber: tags['AccessionNumber'] || undefined,
     referringPhysician,
-    bodyPart: tags['BodyPartExamined'] ?? undefined,
+    bodyPart: requestedTags['BodyPartExamined'] ?? tags['BodyPartExamined'] ?? undefined,
     modalities,
     numberOfSeries: s.Series?.length ?? 0,
     // numberOfInstances is not available in list responses — fetched separately
@@ -165,10 +168,17 @@ export class OrthancStudyRepository implements IStudyRepository {
       studiesApi.getStatistics(id).catch(() => null),
     ]);
     const mapped = mapOrthancStudy(study);
+
+    // Orthanc returns DiskSize as a string (bytes as decimal string).
+    // Convert to number so formatDiskSize() can do numeric comparisons.
+    const diskSizeNum = stats ? Number(stats.DiskSize) : undefined;
+    const diskSize = !isNaN(diskSizeNum as number) ? diskSizeNum : mapped.diskSize;
+
     return {
       ...mapped,
       numberOfInstances: stats?.CountInstances ?? mapped.numberOfInstances,
-      diskSize: stats?.DiskSize ?? mapped.diskSize,
+      numberOfSeries: stats?.CountSeries ?? mapped.numberOfSeries,
+      diskSize,
     };
   }
 

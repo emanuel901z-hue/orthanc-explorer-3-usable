@@ -1,5 +1,4 @@
-/** Default base URL — matches the Vite dev proxy (strips /orthanc-proxy prefix). */
-const DEFAULT_BASE_URL = '/orthanc-proxy/dicom-web';
+import { getConfig } from '@/config/runtime';
 
 interface WadorsParams {
   studyUID: string;
@@ -12,17 +11,32 @@ interface WadorsParams {
 }
 
 /**
+ * Get the DICOMweb base URL from runtime config.
+ * In dev: /orthanc-proxy/dicom-web (Vite proxy → localhost:8042)
+ * In prod: /api/v1/pacs/orthanc/dicom-web (backend proxy with JWT auth)
+ */
+function getDicomWebBaseUrl(): string {
+  const cfg = getConfig();
+  // cfg.orthancUrl is "/api/v1/pacs/orthanc" in prod, "/orthanc-proxy" in dev
+  return `${cfg.orthancUrl}/dicom-web`;
+}
+
+/**
  * Build a Cornerstone3D wadors: image ID pointing at Orthanc's DICOMweb endpoint.
- *
- * The Vite dev proxy rewrites /orthanc-proxy → http://localhost:8042,
- * so Orthanc receives: GET /dicom-web/studies/.../frames/1 (standard WADO-RS).
+ * Uses the runtime config to determine the correct base URL (dev vs prod).
  */
 export function buildWadorsImageId({
   studyUID,
   seriesUID,
   instanceUID,
   frame = 1,
-  baseUrl = DEFAULT_BASE_URL,
+  baseUrl,
 }: WadorsParams): string {
-  return `wadors:${baseUrl}/studies/${studyUID}/series/${seriesUID}/instances/${instanceUID}/frames/${frame}`;
+  const base = baseUrl ?? getDicomWebBaseUrl();
+  return `wadors:${base}/studies/${studyUID}/series/${seriesUID}/instances/${instanceUID}/frames/${frame}`;
+}
+
+/** Get the DICOMweb base URL (for metadata fetches etc.) */
+export function getDicomWebUrl(): string {
+  return getDicomWebBaseUrl();
 }

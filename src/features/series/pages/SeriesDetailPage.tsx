@@ -12,6 +12,7 @@ import {
   Shield,
   LayoutGrid,
   List,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,6 +64,8 @@ import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
+import { seriesApi } from '@/api/series';
+import { toast } from 'sonner';
 
 function InstanceThumbnail({
   instanceId,
@@ -102,6 +105,7 @@ function InstanceThumbnail({
           className="w-full h-full object-cover"
         />
       ) : !isLoading ? (
+        // null = no pixel data (SR/PR documents) or preview failed — show neutral placeholder
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <Image className="h-4 w-4 text-muted-foreground mb-0.5" />
           <span className="text-[10px] text-muted-foreground">#{instanceNumber}</span>
@@ -159,6 +163,8 @@ export default function SeriesDetailPage() {
   const [sendOpen, setSendOpen] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
   const [instanceView, setInstanceView] = useState<'grid' | 'table'>('grid');
+  const [downloading, setDownloading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { audit } = useAuditLog();
 
   // Update tab label with patient name when loaded
@@ -235,19 +241,39 @@ export default function SeriesDetailPage() {
                   variant="outline"
                   size="sm"
                   className="gap-1.5"
-                  onClick={() => {
-                    audit({
-                      action: 'download',
-                      title: 'Series downloaded',
-                      resource: `Series #${series.seriesNumber}`,
-                      description: `Downloaded series as DICOM ZIP archive`,
-                    });
+                  disabled={downloading}
+                  onClick={async () => {
+                    setDownloading(true);
+                    try {
+                      const blob = await seriesApi.archive(series.id);
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${formatPatientName(study?.patientName ?? 'patient')}_Series${series.seriesNumber}.zip`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                      audit({
+                        action: 'download',
+                        title: `Series downloaded: Series #${series.seriesNumber}`,
+                        resource: series.seriesInstanceUID,
+                        severity: 'info',
+                        metadata: { 'Series ID': series.id, 'Instances': String(series.numberOfInstances) },
+                      });
+                      toast.success('Series downloaded');
+                    } catch (e) {
+                      toast.error('Download failed');
+                    } finally {
+                      setDownloading(false);
+                    }
                   }}
                 >
-                  <Download className="h-3.5 w-3.5" /> Download
+                  {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                  Download Series
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Download as DICOM ZIP archive</TooltipContent>
+              <TooltipContent>Download this series as DICOM ZIP archive</TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <Button
@@ -258,12 +284,12 @@ export default function SeriesDetailPage() {
               setSendOpen(true);
               audit({
                 action: 'send',
-                title: 'Series send initiated',
-                resource: `Series #${series.seriesNumber}`,
+                title: `Series send initiated: Series #${series.seriesNumber}`,
+                resource: series.seriesInstanceUID,
               });
             }}
           >
-            <Send className="h-3.5 w-3.5" /> Send
+            <Send className="h-3.5 w-3.5" /> Send Series
           </Button>
           <Button
             variant="outline"
@@ -272,9 +298,10 @@ export default function SeriesDetailPage() {
             onClick={() => {
               audit({
                 action: 'modify',
-                title: 'Series modify initiated',
-                resource: `Series #${series.seriesNumber}`,
+                title: `Series modify initiated: Series #${series.seriesNumber}`,
+                resource: series.seriesInstanceUID,
               });
+              toast.info('Series modify', { description: 'Use the DICOM Tags tab to edit series-level tags.' });
             }}
           >
             <Pencil className="h-3.5 w-3.5" /> Modify
@@ -287,8 +314,8 @@ export default function SeriesDetailPage() {
               setAnonOpen(true);
               audit({
                 action: 'anonymize',
-                title: 'Series anonymize initiated',
-                resource: `Series #${series.seriesNumber}`,
+                title: `Series anonymize initiated: Series #${series.seriesNumber}`,
+                resource: series.seriesInstanceUID,
               });
             }}
           >
@@ -302,27 +329,39 @@ export default function SeriesDetailPage() {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete Series</AlertDialogTitle>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <Trash2 className="h-5 w-5 text-destructive" />
+                  Delete Series #{series.seriesNumber}
+                </AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete Series #{series.seriesNumber} (
-                  {series.seriesDescription || series.modality}) and all {series.numberOfInstances}{' '}
-                  instance(s). This action cannot be undone.
+                  This will permanently delete <strong>Series #{series.seriesNumber}</strong> ({series.seriesDescription || series.modality}) and all {series.numberOfInstances} instance(s) from this study. This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  onClick={() => {
-                    audit({
-                      action: 'delete',
-                      title: 'Series deleted',
-                      severity: 'warning',
-                      resource: `Series #${series.seriesNumber}`,
-                      description: `Deleted series with ${series.numberOfInstances} instance(s)`,
-                    });
+                  disabled={deleting}
+                  onClick={async () => {
+                    setDeleting(true);
+                    try {
+                      await seriesApi.delete(series.id);
+                      audit({
+                        action: 'delete',
+                        title: `Series deleted: Series #${series.seriesNumber}`,
+                        severity: 'warning',
+                        resource: series.seriesInstanceUID,
+                        metadata: { 'Series ID': series.id, 'Instances': String(series.numberOfInstances) },
+                      });
+                      toast.success('Series deleted');
+                      navigate(`/studies/${studyId}`);
+                    } catch (e) {
+                      toast.error('Delete failed');
+                      setDeleting(false);
+                    }
                   }}
                 >
+                  {deleting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
                   Delete Permanently
                 </AlertDialogAction>
               </AlertDialogFooter>

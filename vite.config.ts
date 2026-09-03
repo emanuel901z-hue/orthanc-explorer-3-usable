@@ -5,6 +5,9 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // OE3 is served under /oe3/ in production — all asset paths must be relative to that.
+  // In dev mode (vite dev server), base is '/' (default).
+  base: mode === "production" ? "/oe3/" : "/",
   server: {
     host: "::",
     port: 5173,

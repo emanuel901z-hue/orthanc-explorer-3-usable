@@ -85,6 +85,84 @@ Added:
 
 ---
 
+## v1.1.0 — Orthanc API Schema, Mobile, Series Management & Endpoint Matching (2026-09-03)
+
+### Orthanc REST API Schema Alignment (Orthanc 1.13.0, API v31)
+
+- **OrthancStudy type**: Added `ModifiedFrom?: string | null` (Orthanc 1.13.0 returns this field).
+- **OrthancSeries type**: Added `ExpectedNumberOfInstances`, `IsStable`, `Labels`, `LastUpdate`, `ModifiedFrom`, `Status` — all returned by Orthanc 1.13.0 but missing from the type definition.
+- **OrthancInstance type**: Added `FileUuid`, `IndexInSeries`, `Labels`, `ModifiedFrom` — `IndexInSeries` is needed for instance sorting.
+- **OrthancSystem type**: Added `HasLabels?: boolean` and `Capabilities?: Record<string, boolean>` for runtime feature detection (Orthanc 1.13.0+).
+- **OrthancStats type**: Added `TotalDiskSizeMB`, `TotalUncompressedSize`, `TotalUncompressedSizeMB`. Fixed `TotalDiskSize` type (string, not number — Orthanc returns bytes as string).
+- **StudyStatistics type**: Fixed `DiskSize` type from `number` to `string` (Runtime TypeError when displaying). Added `CountSeries`, `DiskSizeMB`, `UncompressedSize`, `UncompressedSizeMB`.
+- **ChangesResponse type**: Added `First` field (Orthanc 1.13.0 returns oldest sequence number).
+- **findById()**: Now converts `DiskSize` string→number via `Number(stats.DiskSize)`, uses `CountSeries` from statistics.
+
+### Series Management
+
+- **Series API**: Added `archive()`, `modify()`, `anonymize()`, `sendToModality()` to `seriesApi` — previously only `get`, `getInstances`, `getSharedTags`, `delete` were available.
+- **Tools API**: Added `createArchive()` — `POST /tools/create-archive` for multi-resource ZIP downloads.
+- **downloadSeriesAction**: New audit-seam wrapper for series archive downloads.
+- **sendSeriesAction**: New audit-seam wrapper for sending series to DICOM modalities.
+- **SeriesDetailPage**: Download, Send, Delete buttons now functional (were placeholder audit-only). Delete navigates back to study after success. All buttons clearly labeled "Series" (not "Study").
+- **StudyDetailPage Series Table**: Sortable columns (#, Modality, Description, Images) with click-to-sort and arrow icons. Filter search box for real-time series filtering by description, modality, series number, or SeriesInstanceUID.
+- **Multi-Select Series**: Checkbox column in series table with "Select All" header. Bulk action bar shows selected count + "Download N as ZIP" button using `POST /tools/create-archive`.
+
+### Preview 415 Fix
+
+- **useInstancePreview**: Catches 415 (Unsupported Media Type) and returns `null` instead of erroring. SR/PR documents (Structured Reports without pixel data) now show a neutral placeholder instead of console errors.
+
+### DICOM Tag Browser
+
+- **Sortable columns**: All 4 columns (Tag, VR, Name, Value) are now click-to-sort with ArrowUp/ArrowDown/ArrowUpDown icons. Only top-level tags are sorted; SQ children maintain their original order.
+
+### Mobile/Responsive
+
+- **StudyDetailPage**: Series table has `minWidth: 700px` with `overflow-auto` for horizontal scroll on mobile. Filter search and view toggle stack vertically on mobile (`flex-col sm:flex-row`). Bulk action bar wraps on mobile.
+- **SeriesDetailPage**: Responsive padding (`p-4 md:p-6`).
+
+### API Documentation
+
+- **All API files** (`src/api/*.ts`): Every `orthancFetch` call now has a JSDoc comment describing the HTTP method, endpoint path, request body, and response shape.
+
+### Frontend-Backend Endpoint Matching (GAP Check)
+
+- **Gap check `oe3.py`**: Added 4 new checks (31-34) for bidirectional frontend-backend API endpoint matching:
+  1. Catch-all `/orthanc` proxy exists with ADMIN+SUPERADMIN+domain_uuid='system' + correct pathRewrite
+  2. Backend OE3-specific routes (`/oe3-me`, `/viewer-session`) are used by the frontend
+  3. No direct `localhost:8042` URLs in production source (proxy bypass detection)
+  4. Cornerstone DICOMweb paths use runtime config (`getDicomWebUrl()`), not hardcoded URLs
+- **Reference endpoint list**: 44 Orthanc REST endpoints documented in `OE3_FRONTEND_ENDPOINTS` set for orphan detection.
+
+### Files Changed
+
+```
+Modified:
+  src/api/changes.ts
+  src/api/dicomWebServers.ts
+  src/api/instances.ts
+  src/api/modalities.ts
+  src/api/peers.ts
+  src/api/series.ts
+  src/api/studies.ts
+  src/api/system.ts
+  src/api/tools.ts
+  src/app/providers/auth-context.test.tsx
+  src/app/providers/auth-context.tsx
+  src/features/studies/components/DicomTagBrowser.tsx
+  src/features/studies/pages/StudyDetailPage.tsx
+  src/features/studies/pages/StudyDetailPage.test.tsx
+  src/features/studies/hooks/use-studies.ts
+  src/features/series/pages/SeriesDetailPage.tsx
+  src/shared/api/orthanc-study-repository.ts
+
+Added:
+  src/actions/downloadSeries.ts
+  src/actions/sendSeries.ts
+```
+
+---
+
 ## Upstream Sync
 
 To merge upstream changes into this fork:

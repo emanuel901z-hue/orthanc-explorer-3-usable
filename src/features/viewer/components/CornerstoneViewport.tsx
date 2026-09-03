@@ -3,7 +3,7 @@ import { RenderingEngine, Enums, type Types } from '@cornerstonejs/core';
 import { ToolGroupManager } from '@cornerstonejs/tools';
 import cornerstoneDICOMImageLoader from '@cornerstonejs/dicom-image-loader';
 import { initCornerstone } from '@/lib/cornerstone';
-import { buildWadorsImageId } from '@/lib/cornerstoneImageIds';
+import { buildWadorsImageId, getDicomWebUrl } from '@/lib/cornerstoneImageIds';
 import { useSeriesInstances } from '@/features/studies/hooks/use-studies';
 import { Loader2 } from 'lucide-react';
 
@@ -142,7 +142,7 @@ export function CornerstoneViewport({
 
     const { studyInstanceUID, seriesInstanceUID } = seriesInfo;
     const metadataUrl =
-      `/orthanc-proxy/dicom-web/studies/${studyInstanceUID}` +
+      `${getDicomWebUrl()}/studies/${studyInstanceUID}` +
       `/series/${seriesInstanceUID}/metadata`;
 
     fetch(metadataUrl, { headers: { Accept: 'application/dicom+json' } })

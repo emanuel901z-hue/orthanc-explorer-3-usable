@@ -31,6 +31,8 @@ export type OrthancStudy = {
   Labels: string[];
   LastUpdate: string;
   MainDicomTags: Record<string, string | null>;
+  /** Orthanc 1.13.0+: UUID of the resource this was modified from (or null). */
+  ModifiedFrom?: string | null;
   PatientMainDicomTags: Record<string, string | null>;
   ParentPatient: string;
   Series: string[];
@@ -50,6 +52,7 @@ export type OrthancSeries = {
 export type Series = OrthancSeries;
 
 export const studiesApi = {
+  /** POST /tools/find — Search resources. Body: OrthancFindQuery (Level, Query, Expand, RequestedTags). Returns OrthancStudy[] (when Level='Study'). PHI must stay in POST body. */
   find: (query: OrthancFindQuery) =>
     orthancFetch<OrthancStudy[]>('/tools/find', {
       method: 'POST',
@@ -57,12 +60,16 @@ export const studiesApi = {
       body: JSON.stringify(query),
     }),
 
+  /** GET /studies/:id — Returns full OrthancStudy (ID, MainDicomTags, PatientMainDicomTags, Series, Labels, IsStable). */
   get: (id: string) => orthancFetch<OrthancStudy>(`/studies/${id}`),
 
+  /** GET /studies/:id/series — Returns OrthancSeries[] (full objects with MainDicomTags, Instances, Status). */
   getSeries: (id: string) => orthancFetch<OrthancSeries[]>(`/studies/${id}/series`),
 
+  /** DELETE /studies/:id — Deletes a study and all its series/instances. Returns 200 (void). */
   delete: (id: string) => orthancFetch<void>(`/studies/${id}`, { method: 'DELETE' }),
 
+  /** POST /studies/:id/anonymize — Creates an anonymized copy. Body: { Remove, Replace, Keep }. Returns { ID, Path } of new resource. */
   anonymize: (id: string, body: Record<string, unknown> = {}) =>
     orthancFetch<{ ID: string; Path: string }>(`/studies/${id}/anonymize`, {
       method: 'POST',
@@ -70,6 +77,7 @@ export const studiesApi = {
       body: JSON.stringify(body),
     }),
 
+  /** POST /studies/:id/modify — Creates a modified copy. Body: { Replace, Remove }. Returns { ID, Path } of new resource. */
   modify: (id: string, body: Record<string, unknown>) =>
     orthancFetch<{ ID: string; Path: string }>(`/studies/${id}/modify`, {
       method: 'POST',
@@ -77,15 +85,25 @@ export const studiesApi = {
       body: JSON.stringify(body),
     }),
 
+  /** GET /studies/:id/archive — Downloads a ZIP archive of the study. Returns Blob (application/zip). */
   archive: (id: string) => orthancFetch<Blob>(`/studies/${id}/archive`, { responseType: 'blob' }),
 
+  /** GET /studies/:id/statistics — Returns { CountInstances, CountSeries, DiskSize (string!), DiskSizeMB, ... }. */
   getStatistics: (id: string) =>
-    orthancFetch<{ CountInstances: number; DiskSize: number }>(`/studies/${id}/statistics`),
+    orthancFetch<{
+      CountInstances: number;
+      CountSeries: number;
+      DiskSize: string;
+      DiskSizeMB: number;
+      UncompressedSize: string;
+      UncompressedSizeMB: number;
+    }>(`/studies/${id}/statistics`),
 
-  /** Returns tags shared by ALL instances in the study — study + patient level only. */
+  /** GET /studies/:id/shared-tags — Returns tags shared by ALL instances (study + patient level only). */
   getSharedTags: (id: string) =>
     orthancFetch<Record<string, unknown>>(`/studies/${id}/shared-tags`),
 
+  /** POST /modalities/:name/store — Sends study to a DICOM modality via C-STORE. Body: { Resources: [studyId] }. Returns 200 (void). */
   sendToModality: (studyId: string, modalityId: string) =>
     orthancFetch<void>(`/modalities/${encodeURIComponent(modalityId)}/store`, {
       method: 'POST',
@@ -93,11 +111,13 @@ export const studiesApi = {
       body: JSON.stringify({ Resources: [studyId] }),
     }),
 
+  /** PUT /studies/:id/labels/:label — Adds a label to the study. Returns 200 (void). */
   addLabel: (studyId: string, label: string) =>
     orthancFetch<void>(`/studies/${studyId}/labels/${encodeURIComponent(label)}`, {
       method: 'PUT',
     }),
 
+  /** DELETE /studies/:id/labels/:label — Removes a label from the study. Returns 200 (void). */
   removeLabel: (studyId: string, label: string) =>
     orthancFetch<void>(`/studies/${studyId}/labels/${encodeURIComponent(label)}`, {
       method: 'DELETE',

@@ -145,8 +145,12 @@ features: {
 | `src/lib/audit.ts` | AuditEvent emitter used by all write actions |
 | `src/lib/health.ts` | Global health tracking singleton |
 | `src/features/studies/pages/StudyListPage.tsx` | Study list with custom columns, resizing, label filter |
-| `src/features/studies/pages/StudyDetailPage.tsx` | Study detail with OHIF button, RBAC-gated actions |
-| `src/shared/api/orthanc-study-repository.ts` | Repository with label-based `/tools/find` filtering |
+| `src/features/studies/pages/StudyDetailPage.tsx` | Study detail with OHIF button, RBAC-gated actions, sortable/filterable series table with multi-select bulk download |
+| `src/features/series/pages/SeriesDetailPage.tsx` | Series detail with functional download/send/delete, instance grid/table view |
+| `src/features/studies/components/DicomTagBrowser.tsx` | DICOM tag browser with search, sortable columns, inline editing |
+| `src/shared/api/orthanc-study-repository.ts` | Repository with label-based `/tools/find` filtering, RequestedTags for computed tags |
+| `src/api/series.ts` | Series API: get, getInstances, getSharedTags, delete, archive, modify, anonymize, sendToModality |
+| `src/api/tools.ts` | Tools API: lookup, createArchive (multi-resource ZIP) |
 | `src/i18n/locales/` | 9 languages: en, es, fr, de, ja, zh, ru, tr, ar |
 | `Dockerfile` | Multi-stage build (bun + vite → nginx:alpine) |
 | `docker/oe3-nginx.conf` | SPA-aware nginx config (no-cache for config.js, try-files fallback) |

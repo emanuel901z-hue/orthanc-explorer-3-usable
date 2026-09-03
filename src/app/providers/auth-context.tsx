@@ -1,11 +1,10 @@
 /**
  * Authentication context.
- * Provides current user, roles, and permissions.
- * In demo mode a mock user is used; the structure is production-ready
- * for plugging in real auth (e.g. OIDC, SMART on FHIR).
+ * In production (authMode "none" with backend proxy), fetches the current user
+ * from /api/v1/pacs/oe3-me on boot. If 401/403, the SPA shows an auth-required screen.
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from 'react';
 import { getConfig } from '@/config/runtime';
 
 export type UserRole = 'admin' | 'physician' | 'technologist' | 'viewer';
@@ -51,23 +50,15 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
 export interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  authError: string | null;
   permissions: Set<Permission>;
   hasPermission: (permission: Permission) => boolean;
   hasRole: (role: UserRole) => boolean;
-  /** Sign out — in demo mode this is a no-op */
   signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-
-/** Demo user — used when no real auth provider is configured */
-const DEMO_USER: AuthUser = {
-  id: 'demo-user-001',
-  displayName: 'Dr. Sarah Chen',
-  email: 's.chen@hospital.org',
-  initials: 'SC',
-  roles: ['admin'],
-};
 
 function resolvePermissions(roles: UserRole[]): Set<Permission> {
   const perms = new Set<Permission>();
@@ -77,27 +68,91 @@ function resolvePermissions(roles: UserRole[]): Set<Permission> {
   return perms;
 }
 
+/** Map backend roles to OE3 internal roles */
+function mapBackendRoles(backendRoles: string[]): UserRole[] {
+  const roleMap: Record<string, UserRole> = {
+    ADMIN: 'admin',
+    SUPERADMIN: 'admin',
+    RADIOLOGIST: 'physician',
+    ERSTBEFUNDER: 'physician',
+    ZWEITBEFUNDER: 'physician',
+    MTRA: 'technologist',
+    KOORDINATOR: 'viewer',
+    SSB: 'viewer',
+  };
+  const mapped = backendRoles
+    .map((r) => roleMap[r])
+    .filter((r): r is UserRole => Boolean(r));
+  // Deduplicate
+  return [...new Set(mapped)];
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const cfg = getConfig();
-  // authMode 'none' | 'basic' use the demo user path; 'oidc' | 'smart' are Phase 2
-  const user = DEMO_USER;
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  // All hooks must be called unconditionally (Rules of Hooks); unsupported-mode
-  // guard is placed after hooks so the component function always calls the same
-  // hooks on every render, regardless of authMode.
+  useEffect(() => {
+    if (cfg.authMode === 'oidc' || cfg.authMode === 'smart') {
+      setAuthError(`${cfg.authMode} auth not yet implemented. Set authMode to "none" in config.js.`);
+      setIsLoading(false);
+      return;
+    }
+
+    // Fetch current user from backend — validates JWT cookie
+    // cfg.orthancUrl is "/api/v1/pacs/orthanc" — replace trailing /orthanc with /oe3-me
+    const url = `${cfg.orthancUrl.replace(/\/orthanc$/, '')}/oe3-me`;
+    fetch(url, { credentials: 'include' })
+      .then(async (res) => {
+        if (res.status === 401) {
+          setUser(null);
+          setAuthError(null); // Not an error — just not authenticated
+          return;
+        }
+        if (res.status === 403) {
+          setUser(null);
+          setAuthError('Nur System-Administratoren duerfen auf OE3 zugreifen.');
+          return;
+        }
+        if (!res.ok) {
+          setUser(null);
+          setAuthError(`Auth check failed (${res.status}).`);
+          return;
+        }
+        const data = await res.json();
+        setUser({
+          id: data.id,
+          displayName: data.displayName || data.email || 'User',
+          email: data.email || '',
+          initials: data.initials || '??',
+          roles: mapBackendRoles(data.roles || []),
+        });
+        setAuthError(null);
+      })
+      .catch((err) => {
+        setUser(null);
+        setAuthError(`Network error: ${err.message}`);
+      })
+      .finally(() => setIsLoading(false));
+  }, [cfg.authMode, cfg.orthancUrl]);
+
   const value = useMemo<AuthContextValue>(() => {
-    const permissions = resolvePermissions(user.roles);
+    const permissions = user ? resolvePermissions(user.roles) : new Set<Permission>();
     return {
       user,
-      isAuthenticated: true,
+      isAuthenticated: user !== null,
+      isLoading,
+      authError,
       permissions,
       hasPermission: (p: Permission) => permissions.has(p),
-      hasRole: (r: UserRole) => user.roles.includes(r),
+      hasRole: (r: UserRole) => user?.roles.includes(r) ?? false,
       signOut: () => {
-        // TODO: Implement real sign-out (Phase 2 — tracks with authMode guard below)
+        // Navigate back to admin — the cookie will expire naturally
+        window.location.href = '/admin?tab=pacs';
       },
     };
-  }, [user]);
+  }, [user, isLoading, authError]);
 
   if (cfg.authMode === 'oidc') {
     throw new Error(
