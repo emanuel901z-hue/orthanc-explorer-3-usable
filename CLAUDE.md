@@ -1,6 +1,8 @@
-# Orthanc Explorer 3
+# Orthanc Explorer 3 — Usable Fork
 
 A React SPA wired to a local Orthanc DICOM server with healthcare-grade architecture: typed API layer, audit seam, PHI-safe logging, runtime deployment mode config, and global health tracking.
+
+> **Fork of [rhavekost/orthanc-explorer-3](https://github.com/rhavekost/orthanc-explorer-3)** with production enhancements for backend-proxy auth mode, RBAC feature flags, custom columns, label filtering, OHIF integration, and 9-language i18n. See [docs/fork-changelog.md](docs/fork-changelog.md) for details.
 
 ## Commands
 
@@ -89,10 +91,39 @@ Controlled by `window.__OE3_CONFIG__.authMode` in `public/config.js`:
 
 | `authMode` | Description |
 |------------|-------------|
-| `"none"` | No auth — direct Orthanc plugin access (dev default) |
+| `"none"` | No auth — direct Orthanc plugin access (dev default) **or backend-proxy mode** (OE3 behind a JWT reverse proxy; `orthancUrl` points to proxy path, cookies flow via `credentials: 'include'`) |
 | `"basic"` | HTTP Basic auth |
 | `"oidc"` | OIDC/OAuth2 via Azure DICOM emulator |
 | `"smart"` | SMART-on-FHIR launch |
+
+### Backend-Proxy Auth Mode (fork-specific)
+
+When `authMode: "none"` and `orthancUrl` points to a backend proxy (e.g. `/api/v1/pacs/orthanc`), OE3 acts as a pure SPA with no auth headers. The backend proxy:
+- Validates JWT cookies (httpOnly, set via `/viewer-session` or `/oe3-ui` endpoint)
+- Injects Orthanc admin credentials server-side
+- Enforces RBAC and audit trails
+
+OE3's `lib/client.ts` uses `credentials: 'include'` so cookies are sent automatically on all API calls.
+
+## Feature Flags (RBAC)
+
+`src/config/features.ts` provides `useFeature(key)` — a layered resolver that checks:
+1. `config.js` feature flags (deployment-time)
+2. User profile permissions (Phase 2 — not yet implemented)
+3. SMART-on-FHIR scopes (Phase 2 — not yet implemented)
+
+UI buttons for download, send, modify, anonymize, delete, and editLabels are gated by `useFeature()`. Set flags in `config.js`:
+
+```javascript
+features: {
+  enableUpload: true,
+  enableModalityConfig: true,
+  enableAnonymize: false,  // handled by backend with audit trail
+  enableDelete: false,
+  enableModify: false,
+  enableSendTo: false,
+}
+```
 
 ## Code Style & Conventions
 
@@ -107,13 +138,22 @@ Controlled by `window.__OE3_CONFIG__.authMode` in `public/config.js`:
 | File | Purpose |
 |------|---------|
 | `public/config.js` | Runtime config injected at deploy — dev placeholder only; replaced in production |
+| `public/config.prod.js` | Example production config for backend-proxy auth mode |
 | `src/config/runtime.ts` | Zod schema + `loadConfig()` / `getConfig()` — parsed once at boot |
-| `src/lib/client.ts` | Central HTTP client for all Orthanc requests |
+| `src/config/features.ts` | Feature flag resolver + `useFeature()` hook (RBAC) |
+| `src/lib/client.ts` | Central HTTP client for all Orthanc requests (`credentials: 'include'`) |
 | `src/lib/audit.ts` | AuditEvent emitter used by all write actions |
 | `src/lib/health.ts` | Global health tracking singleton |
+| `src/features/studies/pages/StudyListPage.tsx` | Study list with custom columns, resizing, label filter |
+| `src/features/studies/pages/StudyDetailPage.tsx` | Study detail with OHIF button, RBAC-gated actions |
+| `src/shared/api/orthanc-study-repository.ts` | Repository with label-based `/tools/find` filtering |
+| `src/i18n/locales/` | 9 languages: en, es, fr, de, ja, zh, ru, tr, ar |
+| `Dockerfile` | Multi-stage build (bun + vite → nginx:alpine) |
+| `docker/oe3-nginx.conf` | SPA-aware nginx config (no-cache for config.js, try-files fallback) |
 | `docker-compose.dev.yml` | Full local dev stack definition |
 | `docker/postgres-init.sh` | Creates the `dicom_emulator` database on first start |
 | `docs/plans/` | Architecture and smoke-test planning documents |
+| `docs/fork-changelog.md` | Fork-specific changes vs upstream |
 
 ## Important Constraints
 
