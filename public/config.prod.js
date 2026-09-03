@@ -1,6 +1,6 @@
-// Production config example for OE3 behind a JWT-authenticated backend proxy.
+// Production config example for OE3
 // orthancUrl points to the backend proxy which enforces JWT auth + MFA + RBAC.
-// All Orthanc REST API calls go through the proxy path (e.g. /api/v1/pacs/orthanc/...).
+// All Orthanc REST API calls go through /api/v1/pacs/orthanc/...
 //
 // authMode "none" means OE3 does not add its own auth headers.
 // Auth is handled by the backend proxy (JWT cookie + Bearer token).
