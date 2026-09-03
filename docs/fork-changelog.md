@@ -163,6 +163,54 @@ Added:
 
 ---
 
+## v1.2.0 — AuthGate, Non-Secure Context Fix, Accessibility & Playwright E2E (2026-09-03)
+
+### AuthGate (app/providers/AuthGate.tsx)
+
+- **New component**: SPA-level auth gate that wraps the entire app. Calls `/oe3-me` on boot via `AuthProvider`; if the JWT cookie is missing or invalid, shows a "login required" screen instead of the UI.
+- **App.tsx**: Wrapped with `<AuthGate>` — no API calls fire until authentication is confirmed.
+- **BrowserRouter**: Added `basename="/oe3"` for sub-path deployment behind a reverse proxy.
+- **UserBadge.tsx**: Replaced hardcoded demo user with real `useAuth()` context — shows the authenticated user's display name, initials, and roles from `/oe3-me`.
+
+### Non-Secure Context Fix (lib/correlation.ts)
+
+- **Critical bug**: `crypto.randomUUID()` is only available in secure contexts (HTTPS or `localhost`). On internal HTTP deployments (e.g. `http://10.0.1.46:3080`), it is `undefined` and throws a `TypeError` — silently caught by `orthancFetch`'s catch block, causing **all API calls to fail**. OE3 showed "0 studies found" despite studies existing in Orthanc.
+- **Fix**: Fallback chain — `crypto.randomUUID()` → `crypto.getRandomValues()` with manual UUIDv4 formatting → `Math.random()` as last resort.
+
+### Accessibility
+
+- **Duplicate H1 fix**: Changed `<h1>` to `<span>` in `AppLayout.tsx` header — was creating 2 H1 tags per page (header + page title). Now only one H1 per page for SEO/screen readers.
+- **aria-label on search inputs**: Added `aria-label` to the patient search input in `StudyListPage.tsx` and the series filter input in `StudyDetailPage.tsx` — screen readers now announce the purpose of these inputs.
+
+### Playwright E2E Tests (e2e/prod/)
+
+- **New test suite**: Production viewport tests that run against a deployed OE3 instance.
+- **JWT cookie injection**: Generates a valid superadmin JWT via `docker exec` on the backend container and sets it as a Playwright cookie — authenticates without going through the MFA flow.
+- **Desktop tests (1280×800)**: App loads without console errors, study list renders with data (73 studies), study detail page with sortable series table + statistics card.
+- **Mobile tests (375×812 — iPhone X)**: No horizontal scroll, table in scrollable container, touch target analysis (< 44px detection), navigation works.
+- **DOM structure analysis**: Landmarks (main, nav, header), headings hierarchy, ARIA compliance, images without alt, inputs without labels.
+- **Screenshots**: Full-page screenshots saved for each viewport (desktop-01-03, mobile-01-04).
+
+### Files Changed
+
+```
+Modified:
+  README.md
+  docs/fork-changelog.md
+  src/app/layout/AppLayout.tsx
+  src/app/layout/UserBadge.tsx
+  src/features/studies/pages/StudyDetailPage.tsx
+  src/features/studies/pages/StudyListPage.tsx
+  src/lib/correlation.ts
+
+Added:
+  e2e/prod/playwright.prod.config.ts
+  e2e/prod/prod-viewport.spec.ts
+  src/app/providers/AuthGate.tsx
+```
+
+---
+
 ## Upstream Sync
 
 To merge upstream changes into this fork:

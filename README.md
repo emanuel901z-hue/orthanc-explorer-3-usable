@@ -3,6 +3,8 @@
 > A modern React admin UI for [Orthanc](https://www.orthanc-server.com/) — the open-source DICOM server. Runs as a Docker sidecar with no backend server required.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests: 191](https://img.shields.io/badge/tests-191%20passed-brightgreen)](#testing)
+[![Languages: 9](https://img.shields.io/badge/i18n-9%20languages-blue)](#internationalization)
 
 ---
 
@@ -19,14 +21,20 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | Feature | Description |
 |---------|-------------|
 | **Backend-Proxy Auth Mode** | `authMode: "none"` + `orthancUrl` pointing to a backend proxy that injects Orthanc credentials server-side. OE3 sends `credentials: 'include'` so httpOnly JWT cookies flow automatically. |
+| **AuthGate** | SPA-level auth gate that calls `/oe3-me` on boot. Shows a login-required screen if the JWT cookie is missing or invalid — prevents unauthenticated API calls from ever firing. |
 | **Docker Production Setup** | Multi-stage Dockerfile (bun + vite → nginx:alpine) with SPA-aware nginx config (no-cache for `config.js`, try-files fallback for client-side routing). |
 | **Custom Study Columns** | `StudyInstanceUID` column (monospace, truncated, tooltip) and `LastUpdate` column (sortable datetime from Orthanc metadata). |
 | **Column Resizing** | TanStack Table `columnResizeMode: 'onChange'` with `table-layout: fixed` for proper width enforcement. |
 | **Label-Based Filtering** | Filter studies by Orthanc Labels via `/tools/find` with `Labels` + `LabelsConstraint: 'All'` (AND logic). Comma-separated input in the filter panel. |
 | **RBAC Feature Flags** | Action buttons (download, send, modify, anonymize, delete, editLabels) are gated by `useFeature()` hooks. Feature flags set in `config.js` at deployment time. |
 | **OHIF Viewer Integration** | "Open in OHIF" button on study detail — calls `POST /api/v1/pacs/viewer-session` to set an httpOnly cookie, then opens `/ohif/viewer?StudyInstanceUIDs=<uid>` in a new tab. |
+| **Series Management** | Full series-level actions: download (ZIP archive), send to modality, modify, anonymize, delete. Sortable series table with multi-select and bulk download. |
+| **Sortable DICOM Tag Browser** | All 4 columns (Tag, VR, Name, Value) are click-to-sort with arrow icons. |
+| **Non-Secure Context Fix** | `crypto.randomUUID()` fallback for HTTP deployments (not just HTTPS/localhost). Without this fix, all API calls silently fail on plain HTTP. |
+| **Accessibility** | Single H1 per page, `aria-label` on all search/filter inputs, semantic landmarks (`main`, `header`), no images without `alt` text. |
+| **Playwright E2E Tests** | Production viewport tests (desktop 1280×800, mobile 375×812) with JWT cookie injection, DOM analysis, screenshots, and responsive layout validation. |
 | **i18n: 9 Languages** | English, Spanish, French, German, Japanese, Chinese, **Russian**, **Turkish**, **Arabic**. |
-| **tsconfig Fix** | Removed unnecessary `vitest/globals` type reference from `tsconfig.app.json` (test files import explicitly from `vitest`). |
+| **Orthanc API Schema Alignment** | Type definitions match Orthanc 1.13.0 (API v31) — `DiskSize` as string, `ModifiedFrom`, `ExpectedNumberOfInstances`, `IndexInSeries`, `Capabilities`, etc. |
 
 ---
 
@@ -40,11 +48,14 @@ Orthanc Explorer 2 (the official UI) is a Vue.js plugin compiled into C++ — up
 - Upload DICOM files via drag-and-drop with per-file progress tracking
 - Manage DICOM modalities and DICOMweb servers in-app (no config file edits, no restart)
 - Monitor jobs, ingestion activity, and system health in real time
-- Anonymize, modify, send, download, and delete studies via an audit-backed action layer
+- Anonymize, modify, send, download, and delete studies and series via an audit-backed action layer
 - Open studies in OHIF, Stone Web Viewer, VolView, or any configured external viewer
-- Adaptive auth display: shows identity when Basic auth, OIDC, or SMART on FHIR context is present; hides when auth is absent
+- **AuthGate**: SPA-level authentication check on boot — prevents unauthenticated API calls
 - **Backend-proxy auth mode**: OE3 behind a JWT-authenticated reverse proxy with httpOnly cookies
 - **RBAC feature flags**: selectively enable/disable UI actions via `config.js`
+- **Series-level operations**: download, send, modify, anonymize, delete — not just study-level
+- **Sortable tables**: study list, series table, and DICOM tag browser all support click-to-sort
+- **Multi-select bulk actions**: select multiple studies or series for bulk download/delete
 - One build artifact runs in four modes: Docker sidecar, Orthanc plugin (`ServeFolders`), SMART on FHIR EHR embed, or **backend-proxy behind JWT auth**
 
 ## Tech Stack
@@ -59,7 +70,8 @@ Orthanc Explorer 2 (the official UI) is a Vue.js plugin compiled into C++ — up
 | Routing | React Router v6 |
 | Validation | Zod |
 | i18n | i18next (9 languages) |
-| Testing | Vitest + React Testing Library |
+| Testing | Vitest + React Testing Library (191 unit tests) |
+| E2E Testing | Playwright (production viewport tests) |
 | Backend | Orthanc DICOM server (external, via REST API) |
 
 ## Getting Started
@@ -120,14 +132,17 @@ Open [http://localhost:5173](http://localhost:5173). The dev server proxies `/or
 # Start dev server (requires Docker stack running)
 npm run dev
 
-# Run tests (single pass)
+# Run unit tests (single pass, 191 tests)
 npm run test
 
-# Run tests in watch mode
+# Run unit tests in watch mode
 npm run test:watch
 
 # Run a single test file
 npx vitest run src/lib/audit.test.ts
+
+# Run Playwright production viewport tests (requires running deployment)
+npx playwright test --config=e2e/prod/playwright.prod.config.ts
 
 # Lint
 npm run lint
@@ -138,6 +153,33 @@ npx tsc --noEmit
 # Production build
 npm run build
 ```
+
+## Testing
+
+### Unit Tests (Vitest)
+
+191 unit tests covering the API layer, audit seam, health tracker, DICOM tag utilities, auth context, session store, and feature components.
+
+```bash
+npm run test          # Single pass
+npm run test:watch    # Watch mode
+```
+
+### Playwright E2E Tests
+
+Production viewport tests that run against a deployed OE3 instance. Tests cover:
+
+- **Desktop (1280×800)**: App loads without console errors, study list renders with data, study detail page with sortable series table + statistics
+- **Mobile (375×812 — iPhone X)**: No horizontal scroll, table in scrollable container, touch target analysis, navigation works
+- **DOM Structure Analysis**: Landmarks, headings hierarchy, ARIA compliance, images without alt, inputs without labels
+
+```bash
+# Configure: e2e/prod/playwright.prod.config.ts
+# Test file: e2e/prod/prod-viewport.spec.ts
+npx playwright test --config=e2e/prod/playwright.prod.config.ts
+```
+
+Tests use JWT cookie injection (generate a token via `docker exec` on the backend container, set as a Playwright cookie) to authenticate against the deployed instance.
 
 ## Deployment
 
@@ -198,17 +240,20 @@ window.__OE3_CONFIG__ = {
 ```
 
 **Auth flow:**
+
 1. User logs into the host application (JWT + MFA)
 2. Host app calls `POST /api/v1/pacs/viewer-session` → backend sets httpOnly cookie
 3. Host app redirects to `GET /api/v1/pacs/oe3-ui` → backend confirms cookie, 302 → `/oe3/`
-4. OE3 SPA loads; all API calls include the cookie via `credentials: 'include'`
-5. Backend proxy validates cookie, injects Orthanc admin credentials, forwards to Orthanc
+4. OE3 SPA loads → **AuthGate** calls `GET /api/v1/pacs/oe3-me` to verify the cookie
+5. If authenticated: SPA renders, all API calls include the cookie via `credentials: 'include'`
+6. If not authenticated: SPA shows a "login required" screen — no API calls are made
+7. Backend proxy validates cookie, injects Orthanc admin credentials, forwards to Orthanc
 
 ### Auth modes
 
 | `authMode` | Description |
 |------------|-------------|
-| `none` | No auth — direct Orthanc access (dev / internal lab) **or backend-proxy mode** |
+| `none` | No auth — direct Orthanc access (dev / internal lab) **or backend-proxy mode** (AuthGate still checks `/oe3-me`) |
 | `basic` | HTTP Basic auth forwarded to Orthanc |
 | `oidc` | Bearer token via OIDC/OAuth2 (e.g., Azure DICOM Service) |
 | `smart` | SMART on FHIR EHR launch with patient context |
@@ -246,6 +291,22 @@ api/*          Typed Orthanc endpoint wrappers (pure functions, no side effects)
 lib/client.ts  Transport — auth headers, correlation IDs, PHI-safe error handling
 ```
 
+**Auth flow (backend-proxy mode):**
+
+```
+AppProviders
+    ↓
+AuthProvider → fetch /oe3-me → sets isAuthenticated
+    ↓
+AuthGate → shows login screen if !isAuthenticated
+    ↓
+BrowserRouter (basename="/oe3")
+    ↓
+AppLayout (sidebar + header + UserBadge)
+    ↓
+StudyListPage / StudyDetailPage / SeriesDetailPage / ...
+```
+
 **PHI hygiene rules enforced in code:**
 - PHI-bearing searches use `POST /tools/find` — never GET with query strings in URLs or browser history
 - URL parameters carry only Orthanc UUIDs, never patient names or MRNs
@@ -259,7 +320,16 @@ lib/client.ts  Transport — auth headers, correlation IDs, PHI-safe error handl
 | `lib/audit.ts` | Logs `AuditEvent` to console | POST to Orthanc ATNA plugin |
 | `lib/health.ts` | In-memory tracker + degradation banner | Multi-endpoint SLO surfacing |
 | `lib/logger.ts` | Console + allowlist field redaction | Structured log collector |
-| `lib/correlation.ts` | UUIDv4 per request via `X-Request-Id` | Threaded into error toasts |
+| `lib/correlation.ts` | UUIDv4 per request via `X-Request-Id` (with non-secure context fallback) | Threaded into error toasts |
+
+### Non-Secure Context Support
+
+`lib/correlation.ts` generates UUIDv4 correlation IDs for the `X-Request-Id` header. `crypto.randomUUID()` is only available in **secure contexts** (HTTPS or `localhost`). On internal HTTP deployments (e.g. `http://10.0.1.46:3080`), it is `undefined` and throws a `TypeError` — which is silently caught by `orthancFetch`'s catch block, causing **all API calls to fail**.
+
+The fix provides a fallback chain:
+1. `crypto.randomUUID()` (secure contexts — HTTPS, localhost)
+2. `crypto.getRandomValues()` with manual UUIDv4 formatting (all contexts)
+3. `Math.random()` as last resort (not cryptographically secure, but sufficient for correlation IDs)
 
 ## Project Layout
 
@@ -268,26 +338,51 @@ orthanc-explorer-3-usable/
 ├── Dockerfile                 # Multi-stage: bun + vite → nginx:alpine
 ├── docker/oe3-nginx.conf      # SPA-aware nginx config
 ├── docker-compose.dev.yml     # Full local dev stack
+├── e2e/prod/                  # Playwright production viewport tests
+│   ├── playwright.prod.config.ts
+│   ├── prod-viewport.spec.ts
+│   └── screenshots/           # Test screenshots (desktop + mobile)
 ├── public/
 │   ├── config.js              # Dev placeholder — replaced at container start
 │   └── config.prod.js         # Example production config (backend-proxy mode)
 └── src/
+    ├── app/
+    │   ├── layout/            # AppLayout, AppSidebar, UserBadge
+    │   └── providers/         # AppProviders, AuthProvider, AuthGate, ErrorBoundary
     ├── config/
     │   ├── runtime.ts         # Boot config loader (Zod schema, window.__OE3_CONFIG__)
     │   └── features.ts        # Layered feature flag resolver (useFeature hook)
-    ├── lib/                   # Cross-cutting singletons (client, health, logger, audit, errors)
+    ├── lib/                   # Cross-cutting singletons (client, health, logger, audit, errors, correlation)
     ├── api/                   # Typed Orthanc endpoint wrappers (one file per resource)
     ├── actions/               # Audit seam — write actions only
     ├── features/              # React UI grouped by domain
-    │   └── studies/
-    │       └── pages/
-    │           ├── StudyListPage.tsx    # Custom columns, resizing, label filter
-    │           └── StudyDetailPage.tsx  # OHIF button, RBAC-gated actions
+    │   ├── studies/           # StudyListPage, StudyDetailPage (sortable series table, multi-select)
+    │   ├── series/            # SeriesDetailPage (download, send, modify, delete)
+    │   ├── instances/         # InstanceDetailPage, DicomTagBrowser (sortable columns)
+    │   ├── viewer/            # Cornerstone3D viewer integration
+    │   ├── upload/            # Drag-and-drop DICOM upload
+    │   └── settings/          # Modality + DICOMweb server management
     ├── i18n/
     │   └── locales/           # 9 languages: en, es, fr, de, ja, zh, ru, tr, ar
     ├── store/                 # Zustand stores (ui, session, upload, jobs, tabs)
     └── pages/                 # Top-level route targets
 ```
+
+## Internationalization
+
+9 languages with full translation of all UI strings. DICOM terms (Study, Series, Instance, Modality, etc.) are kept in English across all locales for clinical consistency.
+
+| Language | Code | Status |
+|----------|------|--------|
+| English | `en` | Complete (source language) |
+| Spanish | `es` | Complete |
+| French | `fr` | Complete |
+| German | `de` | Complete |
+| Japanese | `ja` | Complete |
+| Chinese | `zh` | Complete |
+| Russian | `ru` | Complete |
+| Turkish | `tr` | Complete |
+| Arabic | `ar` | Complete (RTL) |
 
 ## Contributing
 
@@ -303,7 +398,7 @@ npm run dev
 
 Tests run with `npm run test`. Please open an issue before starting a large change.
 
-Architectural context lives in [`docs/plans/`](docs/plans/).
+Architectural context lives in [`docs/plans/`](docs/plans/). Fork-specific changes are documented in [`docs/fork-changelog.md`](docs/fork-changelog.md).
 
 ### Upstream
 

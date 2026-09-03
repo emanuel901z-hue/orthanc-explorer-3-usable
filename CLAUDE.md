@@ -26,7 +26,7 @@ npm run preview
 
 ### Testing
 ```bash
-# Run all tests (single pass)
+# Run all unit tests (single pass, 191 tests)
 npm run test
 
 # Watch mode
@@ -34,6 +34,9 @@ npm run test:watch
 
 # Run a single test file
 npx vitest run src/lib/audit.test.ts
+
+# Run Playwright production viewport tests (requires running deployment)
+npx playwright test --config=e2e/prod/playwright.prod.config.ts
 ```
 
 ### Build & Quality
@@ -53,13 +56,15 @@ npx tsc --noEmit
 
 ## Architecture
 
-- `src/lib/` — cross-cutting singletons: `client`, `health`, `logger`, `audit`, `errors`, `correlation`
+- `src/app/providers/` — AppProviders (QueryClient + Auth + Error), AuthGate (SPA-level auth check via `/oe3-me`), AuthProvider (JWT cookie validation)
+- `src/lib/` — cross-cutting singletons: `client`, `health`, `logger`, `audit`, `errors`, `correlation` (with non-secure context fallback)
 - `src/api/` — typed Orthanc REST endpoint wrappers, one file per resource (studies, series, instances, modalities, peers, jobs, etc.)
 - `src/actions/` — audit seam: every write (delete, send, anonymize, modify, upload) emits an `AuditEvent` before/after execution
 - `src/features/` — React UI components and hooks grouped by domain (studies, series, instances, viewer, upload, audit, settings, etc.)
 - `src/store/` — Zustand stores for global UI, sessions, uploads, jobs, tabs, and audit
 - `src/config/` — runtime config: `runtime.ts` parses `window.__OE3_CONFIG__` via Zod at boot; `features.ts` for feature flags
 - `src/pages/` — top-level route pages
+- `e2e/prod/` — Playwright production viewport tests (desktop + mobile)
 - Entry point: `src/main.tsx` — calls `loadConfig()` before mounting React; shows a PHI-safe error screen on config failure
 - Runtime config: `public/config.js` — replaced at deploy time; sets `orthancUrl`, `authMode`, `features`, `branding`
 - Dev proxy: `vite.config.ts` rewrites `/orthanc-proxy → http://localhost:8042` to avoid CORS in dev
@@ -73,7 +78,8 @@ npx tsc --noEmit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom
+- **Testing:** Vitest + React Testing Library + jsdom (191 unit tests)
+- **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
 
@@ -142,8 +148,11 @@ features: {
 | `src/config/runtime.ts` | Zod schema + `loadConfig()` / `getConfig()` — parsed once at boot |
 | `src/config/features.ts` | Feature flag resolver + `useFeature()` hook (RBAC) |
 | `src/lib/client.ts` | Central HTTP client for all Orthanc requests (`credentials: 'include'`) |
+| `src/lib/correlation.ts` | UUIDv4 correlation IDs with non-secure context fallback (crypto.randomUUID → getRandomValues → Math.random) |
 | `src/lib/audit.ts` | AuditEvent emitter used by all write actions |
 | `src/lib/health.ts` | Global health tracking singleton |
+| `src/app/providers/AuthGate.tsx` | SPA-level auth gate — blocks rendering until `/oe3-me` confirms authentication |
+| `src/app/providers/auth-context.tsx` | AuthProvider — calls `/oe3-me` on boot, manages `isAuthenticated` state |
 | `src/features/studies/pages/StudyListPage.tsx` | Study list with custom columns, resizing, label filter |
 | `src/features/studies/pages/StudyDetailPage.tsx` | Study detail with OHIF button, RBAC-gated actions, sortable/filterable series table with multi-select bulk download |
 | `src/features/series/pages/SeriesDetailPage.tsx` | Series detail with functional download/send/delete, instance grid/table view |
@@ -158,6 +167,8 @@ features: {
 | `docker/postgres-init.sh` | Creates the `dicom_emulator` database on first start |
 | `docs/plans/` | Architecture and smoke-test planning documents |
 | `docs/fork-changelog.md` | Fork-specific changes vs upstream |
+| `e2e/prod/prod-viewport.spec.ts` | Playwright production viewport tests (desktop + mobile) |
+| `e2e/prod/playwright.prod.config.ts` | Playwright config for production deployment tests |
 
 ## Important Constraints
 
@@ -165,3 +176,5 @@ features: {
 - The `oauth-plugin` service in `docker-compose.dev.yml` is disabled by default (requires `--profile oauth`) and has a known TODO before it can be used — see inline comments
 - Dev Postgres credentials (`dev`/`dev`) are hardcoded in `docker-compose.dev.yml` — never use these in production
 - `src/api/` files must not log PHI; route through `src/lib/logger.ts` which scrubs identifiers
+- `crypto.randomUUID()` is NOT available in non-secure HTTP contexts — `lib/correlation.ts` has a fallback chain; never call `crypto.randomUUID()` directly outside that module
+- AuthGate wraps the entire app — no API calls fire until `/oe3-me` confirms authentication. Do not bypass AuthGate in new components.
