@@ -309,6 +309,7 @@ export default function StudyListPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={t('studies.searchPlaceholder')}
+                aria-label={t('studies.searchPlaceholder')}
                 value={quickSearch}
                 onChange={(e) => updateFilter('patientName', e.target.value)}
                 className="pl-9"

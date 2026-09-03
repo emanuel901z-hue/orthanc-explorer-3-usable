@@ -42,7 +42,7 @@ export function AppLayout() {
               <div className="h-7 w-7 rounded bg-primary-foreground flex items-center justify-center">
                 <span className="text-primary font-bold text-sm">O3</span>
               </div>
-              <h1 className="font-semibold text-sm text-primary-foreground hidden sm:block">Orthanc Explorer 3</h1>
+              <span className="font-semibold text-sm text-primary-foreground hidden sm:block">Orthanc Explorer 3</span>
             </div>
             <div className="flex-1" />
             <Tooltip>
