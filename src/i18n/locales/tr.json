@@ -227,7 +227,15 @@
       "replacedTags": "Değiştirilen etiketler",
       "userEmail": "Kullanıcı (e-posta)",
       "origin": "Kaynak",
-      "webUi": "Web arayüzü"
+      "webUi": "Web arayüzü",
+      "actor": "İşlemi yapan",
+      "accessionNumber": "Erişim numarası",
+      "targetAet": "Hedef AET",
+      "instancesCount": "Örnekler",
+      "failedInstances": "Başarısız örnekler",
+      "receivedInstances": "Alınan örnekler",
+      "archiveSize": "Arşiv boyutu",
+      "parentResources": "Üst kaynaklar"
     },
     "detail": {
       "timestamp": "Zaman Damgası",
@@ -240,7 +248,17 @@
       "details": "Detaylar",
       "metadata": "Meta veriler",
       "actions": "Eylemler",
-      "eventId": "Olay ID"
+      "eventId": "Olay ID",
+      "rawContent": "Ham iş verileri (JSON)",
+      "jobActions": "İş eylemleri",
+      "cancelJob": "İptal",
+      "pauseJob": "Duraklat",
+      "resumeJob": "Devam et",
+      "retryJob": "Yeniden dene",
+      "jobCancelled": "İş iptal edildi",
+      "jobPaused": "İş duraklatıldı",
+      "jobResumed": "İş devam ettirildi",
+      "jobRetried": "İş yeniden gönderildi"
     },
     "actions": {
       "goToStudy": "Çalışmaya Git",
@@ -252,12 +270,19 @@
     "jobContext": {
       "store": "{{target}} hedefine gönderildi",
       "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
-      "move": "{{source}} kaynağından alındı",
-      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
-      "modify": "{{patient}} — {{count}} etiket: {{tags}}",
-      "merge": "{{count}} kaynak → çalışma {{target}}",
-      "archive": "Arşiv oluşturma",
-      "split": "Seri bölme"
+      "move": "{{source}} kaynağından {{count}} örnek alındı",
+      "moveWithPatient": "{{patient}} ({{id}}) — {{source}} kaynağından {{count}} örnek",
+      "modify": "{{patient}} — {{count}} örnek değiştirildi",
+      "merge": "{{count}} kaynak birleştirildi",
+      "archive": "Arşiv — {{count}} örnek {{size}}",
+      "split": "Seri bölme",
+      "anonymize": "{{patient}} — {{count}} örnek anonimleştirildi",
+      "media": "Medya — {{count}} örnek"
+    },
+    "actor": {
+      "webUi": "Web arayüzü (Kullanıcı)",
+      "luaScript": "Lua betiği",
+      "system": "Sistem"
     }
   },
   "remote": {

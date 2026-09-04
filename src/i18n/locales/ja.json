@@ -187,7 +187,15 @@
       "replacedTags": "置換タグ",
       "userEmail": "ユーザー（メール）",
       "origin": "起点",
-      "webUi": "ウェブUI"
+      "webUi": "ウェブUI",
+      "actor": "実行者",
+      "accessionNumber": "アクセッション番号",
+      "targetAet": "対象AET",
+      "instancesCount": "インスタンス",
+      "failedInstances": "失敗インスタンス",
+      "receivedInstances": "受信インスタンス",
+      "archiveSize": "アーカイブサイズ",
+      "parentResources": "親リソース"
     },
     "detail": {
       "timestamp": "タイムスタンプ",
@@ -200,7 +208,17 @@
       "details": "詳細",
       "metadata": "メタデータ",
       "actions": "アクション",
-      "eventId": "イベントID"
+      "eventId": "イベントID",
+      "rawContent": "生ジョブデータ（JSON）",
+      "jobActions": "ジョブアクション",
+      "cancelJob": "キャンセル",
+      "pauseJob": "一時停止",
+      "resumeJob": "再開",
+      "retryJob": "再試行",
+      "jobCancelled": "ジョブをキャンセルしました",
+      "jobPaused": "ジョブを一時停止しました",
+      "jobResumed": "ジョブを再開しました",
+      "jobRetried": "ジョブを再送信しました"
     },
     "actions": {
       "goToStudy": "スタディへ移動",
@@ -212,12 +230,19 @@
     "jobContext": {
       "store": "{{target}}へ送信",
       "storeWithPatient": "{{patient}}（{{id}}）→ {{target}}",
-      "move": "{{source}}から取得",
-      "moveWithPatient": "{{patient}}（{{id}}）← {{source}}",
-      "modify": "{{patient}} — {{count}}件のタグ: {{tags}}",
-      "merge": "{{count}}件のソース → スタディ {{target}}",
-      "archive": "アーカイブ作成",
-      "split": "シリーズ分割"
+      "move": "{{source}}から{{count}}インスタンスを取得",
+      "moveWithPatient": "{{patient}}（{{id}}）— {{source}}から{{count}}インスタンス",
+      "modify": "{{patient}} — {{count}}インスタンスを変更",
+      "merge": "{{count}}ソースを統合",
+      "archive": "アーカイブ — {{count}}インスタンス {{size}}",
+      "split": "シリーズ分割",
+      "anonymize": "{{patient}} — {{count}}インスタンスを匿名化",
+      "media": "メディア — {{count}}インスタンス"
+    },
+    "actor": {
+      "webUi": "ウェブUI（ユーザー）",
+      "luaScript": "Luaスクリプト",
+      "system": "システム"
     }
   },
   "remote": {

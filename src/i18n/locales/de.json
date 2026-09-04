@@ -227,7 +227,15 @@
       "replacedTags": "Ersetzte Tags",
       "userEmail": "Benutzer (E-Mail)",
       "origin": "Ursprung",
-      "webUi": "Web-UI"
+      "webUi": "Web-UI",
+      "actor": "Akteur",
+      "accessionNumber": "Accession-Nummer",
+      "targetAet": "Ziel-AET",
+      "instancesCount": "Instanzen",
+      "failedInstances": "Fehlgeschlagene Instanzen",
+      "receivedInstances": "Empfangene Instanzen",
+      "archiveSize": "Archivgröße",
+      "parentResources": "Übergeordnete Ressourcen"
     },
     "detail": {
       "timestamp": "Zeitstempel",
@@ -240,7 +248,17 @@
       "details": "Details",
       "metadata": "Metadaten",
       "actions": "Aktionen",
-      "eventId": "Ereignis-ID"
+      "eventId": "Ereignis-ID",
+      "rawContent": "Rohe Job-Daten (JSON)",
+      "jobActions": "Job-Aktionen",
+      "cancelJob": "Abbrechen",
+      "pauseJob": "Pausieren",
+      "resumeJob": "Fortsetzen",
+      "retryJob": "Erneut versuchen",
+      "jobCancelled": "Job abgebrochen",
+      "jobPaused": "Job pausiert",
+      "jobResumed": "Job fortgesetzt",
+      "jobRetried": "Job erneut eingereicht"
     },
     "actions": {
       "goToStudy": "Zur Studie",
@@ -252,12 +270,19 @@
     "jobContext": {
       "store": "Gesendet an {{target}}",
       "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
-      "move": "Abgerufen von {{source}}",
-      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
-      "modify": "{{patient}} — {{count}} Tag(s): {{tags}}",
-      "merge": "{{count}} Quelle(n) → Studie {{target}}",
-      "archive": "Archiv-Erstellung",
-      "split": "Serien-Split"
+      "move": "{{count}} Instanz(en) abgerufen von {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) — {{count}} Instanz(en) von {{source}}",
+      "modify": "{{patient}} — {{count}} Instanz(en) geändert",
+      "merge": "{{count}} Quelle(n) zusammengeführt",
+      "archive": "Archiv — {{count}} Instanz(en) {{size}}",
+      "split": "Serien-Split",
+      "anonymize": "{{patient}} — {{count}} Instanz(en) anonymisiert",
+      "media": "Medien — {{count}} Instanz(en)"
+    },
+    "actor": {
+      "webUi": "Web-UI (Benutzer)",
+      "luaScript": "Lua-Skript",
+      "system": "System"
     }
   },
   "remote": {

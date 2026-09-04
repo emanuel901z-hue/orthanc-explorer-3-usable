@@ -227,7 +227,15 @@
       "replacedTags": "العلامات المستبدلة",
       "userEmail": "المستخدم (البريد)",
       "origin": "المصدر",
-      "webUi": "واجهة الويب"
+      "webUi": "واجهة الويب",
+      "actor": "المنفذ",
+      "accessionNumber": "رقم الوصول",
+      "targetAet": "AET الهدف",
+      "instancesCount": "المثيلات",
+      "failedInstances": "المثيلات الفاشلة",
+      "receivedInstances": "المثيلات المستلمة",
+      "archiveSize": "حجم الأرشيف",
+      "parentResources": "الموارد الأصلية"
     },
     "detail": {
       "timestamp": "الطابع الزمني",
@@ -240,7 +248,17 @@
       "details": "التفاصيل",
       "metadata": "البيانات الوصفية",
       "actions": "الإجراءات",
-      "eventId": "معرف الحدث"
+      "eventId": "معرف الحدث",
+      "rawContent": "بيانات الوظيفة الخام (JSON)",
+      "jobActions": "إجراءات الوظيفة",
+      "cancelJob": "إلغاء",
+      "pauseJob": "إيقاف مؤقت",
+      "resumeJob": "استئناف",
+      "retryJob": "إعادة المحاولة",
+      "jobCancelled": "تم إلغاء الوظيفة",
+      "jobPaused": "تم إيقاف الوظيفة مؤقتاً",
+      "jobResumed": "تم استئناف الوظيفة",
+      "jobRetried": "تم إعادة إرسال الوظيفة"
     },
     "actions": {
       "goToStudy": "الذهاب إلى الدراسة",
@@ -252,12 +270,19 @@
     "jobContext": {
       "store": "أُرسل إلى {{target}}",
       "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
-      "move": "تم الاسترجاع من {{source}}",
-      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
-      "modify": "{{patient}} — {{count}} علامة: {{tags}}",
-      "merge": "{{count}} مصدر → دراسة {{target}}",
-      "archive": "إنشاء أرشيف",
-      "split": "تقسيم السلسلة"
+      "move": "تم استرجاع {{count}} مثيل من {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) — {{count}} مثيل من {{source}}",
+      "modify": "{{patient}} — تم تعديل {{count}} مثيل",
+      "merge": "تم دمج {{count}} مصدر",
+      "archive": "أرشيف — {{count}} مثيل {{size}}",
+      "split": "تقسيم السلسلة",
+      "anonymize": "{{patient}} — تم إخفاء هوية {{count}} مثيل",
+      "media": "وسائط — {{count}} مثيل"
+    },
+    "actor": {
+      "webUi": "واجهة الويب (المستخدم)",
+      "luaScript": "برنامج Lua",
+      "system": "النظام"
     }
   },
   "remote": {

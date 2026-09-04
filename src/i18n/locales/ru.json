@@ -227,7 +227,15 @@
       "replacedTags": "Заменённые теги",
       "userEmail": "Пользователь (email)",
       "origin": "Источник",
-      "webUi": "Веб-интерфейс"
+      "webUi": "Веб-интерфейс",
+      "actor": "Исполнитель",
+      "accessionNumber": "№ доступа",
+      "targetAet": "Целевой AET",
+      "instancesCount": "Экземпляры",
+      "failedInstances": "Неудачные экземпляры",
+      "receivedInstances": "Полученные экземпляры",
+      "archiveSize": "Размер архива",
+      "parentResources": "Родительские ресурсы"
     },
     "detail": {
       "timestamp": "Метка времени",
@@ -240,7 +248,17 @@
       "details": "Подробности",
       "metadata": "Метаданные",
       "actions": "Действия",
-      "eventId": "ID события"
+      "eventId": "ID события",
+      "rawContent": "Необработанные данные (JSON)",
+      "jobActions": "Действия задания",
+      "cancelJob": "Отменить",
+      "pauseJob": "Пауза",
+      "resumeJob": "Возобновить",
+      "retryJob": "Повторить",
+      "jobCancelled": "Задание отменено",
+      "jobPaused": "Задание приостановлено",
+      "jobResumed": "Задание возобновлено",
+      "jobRetried": "Задание отправлено повторно"
     },
     "actions": {
       "goToStudy": "Перейти к исследованию",
@@ -252,12 +270,19 @@
     "jobContext": {
       "store": "Отправлено на {{target}}",
       "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
-      "move": "Получено с {{source}}",
-      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
-      "modify": "{{patient}} — {{count}} тег(ов): {{tags}}",
-      "merge": "{{count}} источник(ов) → исследование {{target}}",
-      "archive": "Создание архива",
-      "split": "Разделение серии"
+      "move": "{{count}} экземпляр(ов) получено с {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) — {{count}} экземпляр(ов) с {{source}}",
+      "modify": "{{patient}} — {{count}} экземпляр(ов) изменено",
+      "merge": "{{count}} источник(ов) объединено",
+      "archive": "Архив — {{count}} экземпляр(ов) {{size}}",
+      "split": "Разделение серии",
+      "anonymize": "{{patient}} — {{count}} экземпляр(ов) анонимизировано",
+      "media": "Медиа — {{count}} экземпляр(ов)"
+    },
+    "actor": {
+      "webUi": "Веб-интерфейс (Пользователь)",
+      "luaScript": "Скрипт Lua",
+      "system": "Система"
     }
   },
   "remote": {

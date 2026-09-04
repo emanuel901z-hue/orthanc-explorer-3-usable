@@ -187,7 +187,15 @@
       "replacedTags": "Etiquetas reemplazadas",
       "userEmail": "Usuario (correo)",
       "origin": "Origen",
-      "webUi": "Interfaz web"
+      "webUi": "Interfaz web",
+      "actor": "Actor",
+      "accessionNumber": "Nº de acceso",
+      "targetAet": "AET destino",
+      "instancesCount": "Instancias",
+      "failedInstances": "Instancias fallidas",
+      "receivedInstances": "Instancias recibidas",
+      "archiveSize": "Tamaño de archivo",
+      "parentResources": "Recursos padre"
     },
     "detail": {
       "timestamp": "Marca de tiempo",
@@ -200,7 +208,17 @@
       "details": "Detalles",
       "metadata": "Metadatos",
       "actions": "Acciones",
-      "eventId": "ID de Evento"
+      "eventId": "ID de Evento",
+      "rawContent": "Datos brutos del trabajo (JSON)",
+      "jobActions": "Acciones del trabajo",
+      "cancelJob": "Cancelar",
+      "pauseJob": "Pausar",
+      "resumeJob": "Reanudar",
+      "retryJob": "Reintentar",
+      "jobCancelled": "Trabajo cancelado",
+      "jobPaused": "Trabajo pausado",
+      "jobResumed": "Trabajo reanudado",
+      "jobRetried": "Trabajo reenviado"
     },
     "actions": {
       "goToStudy": "Ir al Estudio",
@@ -212,12 +230,19 @@
     "jobContext": {
       "store": "Enviado a {{target}}",
       "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
-      "move": "Recuperado de {{source}}",
-      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
-      "modify": "{{patient}} — {{count}} etiqueta(s): {{tags}}",
-      "merge": "{{count}} fuente(s) → estudio {{target}}",
-      "archive": "Creación de archivo",
-      "split": "División de serie"
+      "move": "{{count}} instancia(s) recuperada(s) de {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) — {{count}} instancia(s) de {{source}}",
+      "modify": "{{patient}} — {{count}} instancia(s) modificada(s)",
+      "merge": "{{count}} fuente(s) combinada(s)",
+      "archive": "Archivo — {{count}} instancia(s) {{size}}",
+      "split": "División de serie",
+      "anonymize": "{{patient}} — {{count}} instancia(s) anonimizada(s)",
+      "media": "Medios — {{count}} instancia(s)"
+    },
+    "actor": {
+      "webUi": "Interfaz web (Usuario)",
+      "luaScript": "Script Lua",
+      "system": "Sistema"
     }
   },
   "remote": {

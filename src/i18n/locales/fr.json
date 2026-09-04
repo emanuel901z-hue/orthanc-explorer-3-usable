@@ -187,7 +187,15 @@
       "replacedTags": "Étiquettes remplacées",
       "userEmail": "Utilisateur (courriel)",
       "origin": "Origine",
-      "webUi": "Interface web"
+      "webUi": "Interface web",
+      "actor": "Acteur",
+      "accessionNumber": "N° d'accès",
+      "targetAet": "AET cible",
+      "instancesCount": "Instances",
+      "failedInstances": "Instances échouées",
+      "receivedInstances": "Instances reçues",
+      "archiveSize": "Taille d'archive",
+      "parentResources": "Ressources parentes"
     },
     "detail": {
       "timestamp": "Horodatage",
@@ -200,7 +208,17 @@
       "details": "Détails",
       "metadata": "Métadonnées",
       "actions": "Actions",
-      "eventId": "ID d'Événement"
+      "eventId": "ID d'Événement",
+      "rawContent": "Données brutes (JSON)",
+      "jobActions": "Actions de tâche",
+      "cancelJob": "Annuler",
+      "pauseJob": "Pause",
+      "resumeJob": "Reprendre",
+      "retryJob": "Réessayer",
+      "jobCancelled": "Tâche annulée",
+      "jobPaused": "Tâche en pause",
+      "jobResumed": "Tâche reprise",
+      "jobRetried": "Tâche renvoyée"
     },
     "actions": {
       "goToStudy": "Aller à l'Étude",
@@ -212,12 +230,19 @@
     "jobContext": {
       "store": "Envoyé vers {{target}}",
       "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
-      "move": "Récupéré depuis {{source}}",
-      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
-      "modify": "{{patient}} — {{count}} étiquette(s) : {{tags}}",
-      "merge": "{{count}} source(s) → étude {{target}}",
-      "archive": "Création d'archive",
-      "split": "Division de série"
+      "move": "{{count}} instance(s) récupérée(s) de {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) — {{count}} instance(s) de {{source}}",
+      "modify": "{{patient}} — {{count}} instance(s) modifiée(s)",
+      "merge": "{{count}} source(s) fusionnée(s)",
+      "archive": "Archive — {{count}} instance(s) {{size}}",
+      "split": "Division de série",
+      "anonymize": "{{patient}} — {{count}} instance(s) anonymisée(s)",
+      "media": "Médias — {{count}} instance(s)"
+    },
+    "actor": {
+      "webUi": "Interface web (Utilisateur)",
+      "luaScript": "Script Lua",
+      "system": "Système"
     }
   },
   "remote": {

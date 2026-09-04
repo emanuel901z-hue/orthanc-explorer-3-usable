@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Upload,
   Send,
@@ -22,11 +25,19 @@ import {
   ExternalLink,
   FolderOpen,
   Settings,
+  Ban,
+  Pause,
+  Play,
+  RefreshCw,
+  ChevronDown,
+  ChevronRight,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ActivityEvent, ActivityCategory, ActivitySeverity } from '@/shared/types/activity';
+import { jobsApi } from '@/api/jobs';
 import { cn } from '@/lib/utils';
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
@@ -161,6 +172,9 @@ interface ActivityDetailPanelProps {
 export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [showRawContent, setShowRawContent] = useState(false);
+  const [jobActionLoading, setJobActionLoading] = useState<string | null>(null);
 
   if (!event) return null;
 
@@ -271,18 +285,143 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
         </dl>
 
         {/* Metadata */}
-        {event.metadata && Object.keys(event.metadata).length > 0 && (
+        {event.metadata && Object.keys(event.metadata).filter(k => k !== '__rawContent').length > 0 && (
           <>
             <Separator className="my-4" />
             <p className="text-xs font-medium text-muted-foreground mb-3">{t('activity.detail.metadata')}</p>
             <dl className="space-y-2">
-              {Object.entries(event.metadata).map(([key, value]) => (
+              {Object.entries(event.metadata).filter(([k]) => k !== '__rawContent').map(([key, value]) => (
                 <div key={key}>
                   <dt className="text-[11px] text-muted-foreground">{key}</dt>
                   <dd className="text-xs font-mono break-all">{value}</dd>
                 </div>
               ))}
             </dl>
+          </>
+        )}
+
+        {/* Raw Content (Orthanc job Content as JSON) */}
+        {event.metadata?.['__rawContent'] && (
+          <>
+            <Separator className="my-4" />
+            <button
+              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setShowRawContent(!showRawContent)}
+            >
+              {showRawContent ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+              {t('activity.detail.rawContent')}
+            </button>
+            {showRawContent && (
+              <pre className="mt-2 text-[10px] font-mono bg-muted rounded-lg p-3 overflow-auto max-h-[300px] whitespace-pre-wrap break-all">
+                {event.metadata['__rawContent']}
+              </pre>
+            )}
+          </>
+        )}
+
+        {/* Job Actions (Cancel/Pause/Resume/Retry for Orthanc jobs) */}
+        {event.category === 'job' && event.metadata?.[t('activity.metadata.jobId')] && (
+          <>
+            <Separator className="my-4" />
+            <p className="text-xs font-medium text-muted-foreground mb-3">{t('activity.detail.jobActions')}</p>
+            <div className="flex flex-wrap gap-2">
+              {event.metadata[t('activity.metadata.state')] === 'Running' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5 text-xs"
+                  disabled={jobActionLoading === 'cancel'}
+                  onClick={async () => {
+                    const jobId = event.metadata![t('activity.metadata.jobId')];
+                    setJobActionLoading('cancel');
+                    try {
+                      await jobsApi.cancel(jobId);
+                      toast.success(t('activity.detail.jobCancelled'));
+                      queryClient.invalidateQueries({ queryKey: ['orthanc-jobs-expanded'] });
+                    } catch (e) {
+                      toast.error(e instanceof Error ? e.message : 'Failed');
+                    } finally {
+                      setJobActionLoading(null);
+                    }
+                  }}
+                >
+                  {jobActionLoading === 'cancel' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Ban className="h-3 w-3" />}
+                  {t('activity.detail.cancelJob')}
+                </Button>
+              )}
+              {event.metadata[t('activity.metadata.state')] === 'Running' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5 text-xs"
+                  disabled={jobActionLoading === 'pause'}
+                  onClick={async () => {
+                    const jobId = event.metadata![t('activity.metadata.jobId')];
+                    setJobActionLoading('pause');
+                    try {
+                      await jobsApi.pause(jobId);
+                      toast.success(t('activity.detail.jobPaused'));
+                      queryClient.invalidateQueries({ queryKey: ['orthanc-jobs-expanded'] });
+                    } catch (e) {
+                      toast.error(e instanceof Error ? e.message : 'Failed');
+                    } finally {
+                      setJobActionLoading(null);
+                    }
+                  }}
+                >
+                  {jobActionLoading === 'pause' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Pause className="h-3 w-3" />}
+                  {t('activity.detail.pauseJob')}
+                </Button>
+              )}
+              {event.metadata[t('activity.metadata.state')] === 'Paused' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5 text-xs"
+                  disabled={jobActionLoading === 'resume'}
+                  onClick={async () => {
+                    const jobId = event.metadata![t('activity.metadata.jobId')];
+                    setJobActionLoading('resume');
+                    try {
+                      await jobsApi.resume(jobId);
+                      toast.success(t('activity.detail.jobResumed'));
+                      queryClient.invalidateQueries({ queryKey: ['orthanc-jobs-expanded'] });
+                    } catch (e) {
+                      toast.error(e instanceof Error ? e.message : 'Failed');
+                    } finally {
+                      setJobActionLoading(null);
+                    }
+                  }}
+                >
+                  {jobActionLoading === 'resume' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+                  {t('activity.detail.resumeJob')}
+                </Button>
+              )}
+              {event.metadata[t('activity.metadata.state')] === 'Failure' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5 text-xs"
+                  disabled={jobActionLoading === 'retry'}
+                  onClick={async () => {
+                    const jobId = event.metadata![t('activity.metadata.jobId')];
+                    setJobActionLoading('retry');
+                    try {
+                      await jobsApi.resubmit(jobId);
+                      toast.success(t('activity.detail.jobRetried'));
+                      queryClient.invalidateQueries({ queryKey: ['orthanc-jobs-expanded'] });
+                    } catch (e) {
+                      toast.error(e instanceof Error ? e.message : 'Failed');
+                    } finally {
+                      setJobActionLoading(null);
+                    }
+                  }}
+                >
+                  {jobActionLoading === 'retry' ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                  {t('activity.detail.retryJob')}
+                </Button>
+              )}
+            </div>
           </>
         )}
       </div>

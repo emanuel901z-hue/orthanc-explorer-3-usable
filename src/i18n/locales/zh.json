@@ -187,7 +187,15 @@
       "replacedTags": "替换的标签",
       "userEmail": "用户（邮箱）",
       "origin": "来源",
-      "webUi": "网页界面"
+      "webUi": "网页界面",
+      "actor": "执行者",
+      "accessionNumber": "检查号",
+      "targetAet": "目标AET",
+      "instancesCount": "实例",
+      "failedInstances": "失败实例",
+      "receivedInstances": "接收实例",
+      "archiveSize": "归档大小",
+      "parentResources": "父资源"
     },
     "detail": {
       "timestamp": "时间戳",
@@ -200,7 +208,17 @@
       "details": "详情",
       "metadata": "元数据",
       "actions": "操作",
-      "eventId": "事件ID"
+      "eventId": "事件ID",
+      "rawContent": "原始作业数据（JSON）",
+      "jobActions": "作业操作",
+      "cancelJob": "取消",
+      "pauseJob": "暂停",
+      "resumeJob": "恢复",
+      "retryJob": "重试",
+      "jobCancelled": "作业已取消",
+      "jobPaused": "作业已暂停",
+      "jobResumed": "作业已恢复",
+      "jobRetried": "作业已重新提交"
     },
     "actions": {
       "goToStudy": "转到研究",
@@ -212,12 +230,19 @@
     "jobContext": {
       "store": "已发送至{{target}}",
       "storeWithPatient": "{{patient}}（{{id}}）→ {{target}}",
-      "move": "从{{source}}检索",
-      "moveWithPatient": "{{patient}}（{{id}}）← {{source}}",
-      "modify": "{{patient}} — {{count}}个标签：{{tags}}",
-      "merge": "{{count}}个源 → 研究 {{target}}",
-      "archive": "创建归档",
-      "split": "系列拆分"
+      "move": "从{{source}}检索{{count}}个实例",
+      "moveWithPatient": "{{patient}}（{{id}}）— 从{{source}}获取{{count}}个实例",
+      "modify": "{{patient}} — {{count}}个实例已修改",
+      "merge": "合并{{count}}个源",
+      "archive": "归档 — {{count}}个实例 {{size}}",
+      "split": "系列拆分",
+      "anonymize": "{{patient}} — {{count}}个实例已匿名化",
+      "media": "媒体 — {{count}}个实例"
+    },
+    "actor": {
+      "webUi": "网页界面（用户）",
+      "luaScript": "Lua脚本",
+      "system": "系统"
     }
   },
   "remote": {

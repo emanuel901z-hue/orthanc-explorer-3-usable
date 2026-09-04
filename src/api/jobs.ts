@@ -22,6 +22,12 @@ export type OrthancJob = {
   ErrorMessage?: string;
   Content?: Record<string, unknown>;
   EffectiveLastUpdate?: string;
+  EffectiveRuntime?: number;
+  ErrorCode?: number;
+  ErrorDescription?: string;
+  ErrorDetails?: string;
+  Priority?: number;
+  Timestamp?: string;
 };
 
 export const jobsApi = {
@@ -33,6 +39,27 @@ export const jobsApi = {
 
   cancel: (id: string) =>
     orthancFetch<Record<string, unknown>>(`/jobs/${id}/cancel`, {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify({}),
+    }),
+
+  pause: (id: string) =>
+    orthancFetch<Record<string, unknown>>(`/jobs/${id}/pause`, {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify({}),
+    }),
+
+  resume: (id: string) =>
+    orthancFetch<Record<string, unknown>>(`/jobs/${id}/resume`, {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify({}),
+    }),
+
+  resubmit: (id: string) =>
+    orthancFetch<Record<string, unknown>>(`/jobs/${id}/resubmit`, {
       method: 'POST',
       headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify({}),

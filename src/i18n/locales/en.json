@@ -227,7 +227,15 @@
       "replacedTags": "Replaced Tags",
       "userEmail": "User (Email)",
       "origin": "Origin",
-      "webUi": "Web UI"
+      "webUi": "Web UI",
+      "actor": "Actor",
+      "accessionNumber": "Accession Number",
+      "targetAet": "Target AET",
+      "instancesCount": "Instances",
+      "failedInstances": "Failed Instances",
+      "receivedInstances": "Received Instances",
+      "archiveSize": "Archive Size",
+      "parentResources": "Parent Resources"
     },
     "detail": {
       "timestamp": "Timestamp",
@@ -240,7 +248,17 @@
       "details": "Details",
       "metadata": "Metadata",
       "actions": "Actions",
-      "eventId": "Event ID"
+      "eventId": "Event ID",
+      "rawContent": "Raw Job Content (JSON)",
+      "jobActions": "Job Actions",
+      "cancelJob": "Cancel",
+      "pauseJob": "Pause",
+      "resumeJob": "Resume",
+      "retryJob": "Retry",
+      "jobCancelled": "Job cancelled",
+      "jobPaused": "Job paused",
+      "jobResumed": "Job resumed",
+      "jobRetried": "Job resubmitted"
     },
     "actions": {
       "goToStudy": "Go to Study",
@@ -252,12 +270,19 @@
     "jobContext": {
       "store": "Sent to {{target}}",
       "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
-      "move": "Retrieved from {{source}}",
-      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
-      "modify": "{{patient}} — {{count}} tag(s): {{tags}}",
-      "merge": "{{count}} source(s) → study {{target}}",
-      "archive": "Archive creation",
-      "split": "Series split"
+      "move": "Retrieved {{count}} instance(s) from {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) — {{count}} instance(s) from {{source}}",
+      "modify": "{{patient}} — {{count}} instance(s) modified",
+      "merge": "{{count}} source(s) merged",
+      "archive": "Archive — {{count}} instance(s) {{size}}",
+      "split": "Series split",
+      "anonymize": "{{patient}} — {{count}} instance(s) anonymized",
+      "media": "Media — {{count}} instance(s)"
+    },
+    "actor": {
+      "webUi": "Web UI (User)",
+      "luaScript": "Lua Script",
+      "system": "System"
     }
   },
   "remote": {
