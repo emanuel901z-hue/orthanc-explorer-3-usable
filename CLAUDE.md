@@ -163,14 +163,24 @@ features: {
 | `src/features/activity/pages/ActivityPage.tsx` | Unified activity timeline — merges audit events, live Orthanc jobs (3s polling), client jobs, and change events |
 | `src/features/activity/components/ActivityDetailPanel.tsx` | Activity event detail panel with action icons, severity, navigation |
 | `src/features/activity/hooks/useOrthancJobs.ts` | Live Orthanc job polling (expanded, 3s interval, sorted by CreationTime desc) |
-| `src/features/settings/components/ViewerTab.tsx` | External viewer configuration (OHIF, Stone, VolView) — add/edit/remove, default, enable/disable |
+| `src/features/settings/components/ViewerTab.tsx` | External viewer configuration (OHIF, Stone, VolView, MedDream, Weasis) — add/edit/remove, default, enable/disable |
 | `src/features/settings/components/DicomWebTab.tsx` | DICOMweb server management with auth type indicators, external PACS QIDO/WADO config |
 | `src/features/settings/components/EmbeddedThemingCard.tsx` | White-labeling: app name, colors, fonts, border radius, compact mode, sidebar/header visibility |
 | `src/lib/smart-search.ts` | Multi-token search with umlaut tolerance and date pattern matching |
 | `src/actions/mergeStudy.ts` | Audit-seam wrapper for study merge — emits `study.merge` audit event |
 | `src/shared/api/orthanc-study-repository.ts` | Repository with label-based `/tools/find` filtering, RequestedTags for computed tags |
 | `src/api/series.ts` | Series API: get, getInstances, getSharedTags, delete, archive, modify, anonymize, sendToModality |
-| `src/api/tools.ts` | Tools API: lookup, createArchive (multi-resource ZIP) |
+| `src/api/tools.ts` | Tools API: lookup, createArchive (multi-resource ZIP), create-dicom (encapsulated series) |
+| `src/api/shares.ts` | Shares API: create, list, get, delete — Orthanc Shares plugin support |
+| `src/api/worklists.ts` | Worklists API: list, get, query, delete, upload — DICOM Modality Worklist Management |
+| `src/features/servers/pages/RemoteSourcesPage.tsx` | Remote query/retrieve (C-FIND/C-MOVE/C-ECHO) with results table |
+| `src/features/studies/components/ShareStudyDialog.tsx` | Share study via Shares plugin or instant viewer link, email, clipboard |
+| `src/features/studies/components/AddSeriesDialog.tsx` | Upload PDF/JPEG/PNG/STL as DICOM series via `/tools/create-dicom` |
+| `src/features/studies/components/QuickReportDialog.tsx` | Printable study summary → browser print/PDF |
+| `src/features/audit/pages/AuditLogsPage.tsx` | Global audit log viewer with search, filter, JSON export |
+| `src/features/worklists/pages/WorklistsPage.tsx` | DICOM worklist management (list, upload, delete) |
+| `src/lib/custom-buttons.ts` | Configurable custom HTTP buttons with template tokens (`{studyId}`, `{patientId}`, etc.) |
+| `src/lib/filename-template.ts` | Filename template engine for downloads (`{patientName}_{studyDate}_{accession}`) |
 | `src/i18n/locales/` | 9 languages: en, es, fr, de, ja, zh, ru, tr, ar |
 | `Dockerfile` | Multi-stage build (bun + vite → nginx:alpine) |
 | `docker/oe3-nginx.conf` | SPA-aware nginx config (no-cache for config.js, try-files fallback) |

@@ -4,6 +4,135 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v1.5.0 — Sprint 2: External Viewers, Remote Q/R, Sharing, Worklists, Custom Buttons, Add-Series (2026-09-04)
+
+### Sprint 2A: External Viewers
+
+- **VolView, MedDream, Weasis integration**: Open-in-viewer buttons for three additional external viewers. Viewer list configurable in Settings (ViewerTab), persisted to `localStorage`. MedDream added to the viewer type list.
+- **ViewerTab enhancements**: Add/edit/remove viewer configs with type selection (OHIF, Stone, VolView, MedDream, Weasis), URL, default viewer, enable/disable toggle.
+
+### Sprint 2B: Modification Modes
+
+- **Modify in-place vs Create duplicate**: Mode selector in `ModifyStudyDialog` — `KeepSource: false` (modify in-place) vs `KeepSource: true` (create duplicate). Orthanc `/studies/:id/modify` called with the selected mode.
+
+### Sprint 2C: Remote Query/Retrieve
+
+- **C-FIND query UI**: `POST /modalities/:name/query` — query remote modalities for studies by patient name, ID, accession, date range, modality.
+- **C-MOVE retrieve**: Retrieve query answers from remote modalities. Results table with per-answer retrieve buttons.
+- **Functional Echo button**: C-ECHO (`POST /modalities/:name/echo`) to test modality connectivity.
+- **RemoteSourcesPage**: Enhanced remote sources page with query/retrieve workflow.
+
+### Sprint 2D: Study Sharing
+
+- **ShareStudyDialog**: Share a study via Orthanc Shares plugin (`POST /shares`) if installed, with instant viewer link fallback (no plugin required).
+- **Share by email**: `mailto:` link with pre-filled subject and body.
+- **Share link copy to clipboard**: One-click copy button.
+- **Expiration date and description**: Optional fields for shared links.
+- **shares API**: `src/api/shares.ts` — create, list, get, delete shares.
+
+### Sprint 2E: Worklists
+
+- **WorklistsPage**: List, upload, delete DICOM worklists (`/worklists`).
+- **Worklists API**: `src/api/worklists.ts` — list, get, query, delete, upload worklists.
+- **Sidebar entry + route**: Worklists page registered in App sidebar and router.
+
+### Sprint 2F: Custom Buttons + Add Series
+
+- **Custom HTTP buttons**: Configurable buttons that open arbitrary URLs with template tokens (`{studyId}`, `{patientId}`, `{accession}`, `{studyDate}`, etc.). Config persisted to `localStorage` via `src/lib/custom-buttons.ts`.
+- **AddSeriesDialog**: Upload PDF/JPEG/PNG/STL files as a new DICOM series within an existing study. Uses Orthanc `/tools/create-dicom` for encapsulation.
+
+### Files Changed
+
+```
+Added:
+  oe3/src/api/shares.ts
+  oe3/src/api/worklists.ts
+  oe3/src/features/studies/components/AddSeriesDialog.tsx
+  oe3/src/features/studies/components/ShareStudyDialog.tsx
+  oe3/src/features/worklists/pages/WorklistsPage.tsx
+  oe3/src/lib/custom-buttons.ts
+
+Modified:
+  oe3/src/App.tsx
+  oe3/src/api/modalities.ts
+  oe3/src/app/layout/AppSidebar.tsx
+  oe3/src/features/servers/pages/RemoteSourcesPage.tsx
+  oe3/src/features/settings/components/ViewerTab.tsx
+  oe3/src/features/studies/components/ModifyStudyDialog.tsx
+  oe3/src/features/studies/pages/StudyDetailPage.tsx
+```
+
+---
+
+## v1.4.0 — Sprint 1: 18 Features from OE2/OE3 Audit (2026-09-04)
+
+### Batch A: Download Enhancements
+
+- **Custom filename templates**: Download studies/series/instances with templated filenames (`{patientName}_{studyDate}_{accession}`). Template engine in `src/lib/filename-template.ts`.
+- **DICOM-DIR download**: ZIP with DICOMDIR index via Orthanc `/studies/:id/media` endpoint.
+- **NIfTI export**: Download instances as NIfTI via `/instances/:id/nifti`.
+- **"Without labels" filter**: `LabelsConstraint: None` — exclude studies with specific labels.
+
+### Batch B: Study List UX
+
+- **Quick-Report button**: Printable study summary dialog (`QuickReportDialog`) → browser print/PDF export.
+- **Default ordering via URL param**: `order-by=field:desc` query parameter for deep-linkable sort state.
+- **Column show/hide configuration**: Dropdown to toggle column visibility in the study list.
+- **Multi-Label AND/OR search toggle**: Switch between `LabelsConstraint: 'All'` (AND) and `LabelsConstraint: 'Any'` (OR) for label filtering.
+
+### Batch C: Bulk Operations + Activity
+
+- **Bulk series send**: C-STORE multiple series to a modality in one action.
+- **Bulk series delete**: Delete multiple series with confirmation dialog.
+- **Job resource display**: Parsed `Content.Resources` from Orthanc jobs shown in activity detail.
+- **"My Jobs" filter**: Filter activity page to show only client-side jobs (not server-side Orthanc jobs).
+
+### Batch D: Settings + Audit
+
+- **Global Audit Logs page** (`/audit-logs`): Searchable, filterable audit log viewer with JSON export.
+- **31 modality filter options**: Expanded from 7 to 31 modality type filters in the study list.
+- **Date format config**: User-configurable date format in UI store (`ui-store.ts`).
+- **Plugin status badges**: Active/Loaded status indicators in `SystemInfoTab`.
+
+### Batch E: Developer + Mobile
+
+- **ApiView button**: Opens the Orthanc REST URL for a resource in a new tab — useful for debugging.
+- **Log level control**: Functional `PUT /tools/log-level` — change Orthanc log level from the UI.
+- **Touch-optimized controls**: 44px minimum touch target size on `pointer:coarse` devices (CSS in `index.css`).
+
+### Files Changed
+
+```
+Added:
+  oe3/src/actions/deleteSeries.ts
+  oe3/src/features/audit/pages/AuditLogsPage.tsx
+  oe3/src/features/studies/components/QuickReportDialog.tsx
+  oe3/src/lib/filename-template.ts
+
+Modified:
+  oe3/src/App.tsx
+  oe3/src/actions/downloadInstance.ts
+  oe3/src/actions/downloadSeries.ts
+  oe3/src/actions/downloadStudy.ts
+  oe3/src/api/instances.ts
+  oe3/src/api/series.ts
+  oe3/src/api/studies.ts
+  oe3/src/api/tools.ts
+  oe3/src/app/layout/AppSidebar.tsx
+  oe3/src/features/activity/components/ActivityDetailPanel.tsx
+  oe3/src/features/activity/pages/ActivityPage.tsx
+  oe3/src/features/instances/pages/InstanceDetailPage.tsx
+  oe3/src/features/settings/components/SystemInfoTab.tsx
+  oe3/src/features/studies/pages/StudyDetailPage.tsx
+  oe3/src/features/studies/pages/StudyListPage.tsx
+  oe3/src/index.css
+  oe3/src/shared/api/orthanc-study-repository.ts
+  oe3/src/shared/types/dicom.ts
+  oe3/src/store/ui-store.ts
+```
+
+---
+
 ## v1.3.0 — Custom Branding & Logo Integration (2026-09-04)
 
 ### Branding/Logo

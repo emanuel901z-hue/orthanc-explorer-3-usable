@@ -42,6 +42,21 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Viewer Configuration** | Manage external viewer integrations (OHIF, Stone, VolView) in settings — add/edit/remove viewers, set default, enable/disable, with status indicators. |
 | **DICOMweb Server Management** | Enhanced DICOMweb server config with auth type indicators (bearer/basic/oauth2/none) and external PACS QIDO/WADO configuration display. |
 | **Embedded Theming** | White-labeling card for embedded deployments — app name, primary/accent colors, font presets, border radius, compact mode, sidebar/header visibility. Persists to `localStorage`. |
+| **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
+| **Study Sharing** | Share studies via Orthanc Shares plugin or instant viewer link. Share by email, copy link, expiration date, description. |
+| **Worklists** | DICOM Modality Worklist Management — list, upload, delete worklists via dedicated page and API. |
+| **Custom HTTP Buttons** | Configurable buttons that open arbitrary URLs with template tokens (`{studyId}`, `{patientId}`, `{accession}`, etc.). Persisted to `localStorage`. |
+| **Add Series (Encapsulated)** | Upload PDF/JPEG/PNG/STL files as a new DICOM series within an existing study via Orthanc `/tools/create-dicom`. |
+| **Modify In-Place / Duplicate** | Choose between `KeepSource: false` (modify in-place) or `KeepSource: true` (create duplicate) in the Modify dialog. |
+| **External Viewers (Extended)** | VolView, MedDream, Weasis support in addition to OHIF and Stone. Configurable in Settings. |
+| **Quick-Report** | Printable study summary dialog → browser print/PDF export. |
+| **Custom Filename Templates** | Download with templated filenames (`{patientName}_{studyDate}_{accession}`). |
+| **DICOM-DIR & NIfTI Export** | Download studies as ZIP with DICOMDIR index (`/media`), export instances as NIfTI. |
+| **Audit Logs Page** | Global audit log viewer (`/audit-logs`) with search, filter, and JSON export. |
+| **Column Show/Hide** | Toggle study list column visibility via configuration dropdown. |
+| **Multi-Label AND/OR Toggle** | Switch between AND (`All`) and OR (`Any`) logic for label filtering. |
+| **Touch-Optimized Controls** | 44px minimum touch target size on `pointer:coarse` devices. |
+| **ApiView & Log Level** | Open Orthanc REST URL for any resource; change Orthanc log level from the UI. |
 
 ---
 
@@ -68,6 +83,13 @@ Orthanc Explorer 2 (the official UI) is a Vue.js plugin compiled into C++ — up
 - **Series-level operations**: download, send, modify, anonymize, delete, migrate — not just study-level
 - **Sortable tables**: study list, series table, and DICOM tag browser all support click-to-sort
 - **Multi-select bulk actions**: select multiple studies or series for bulk download/delete
+- **Remote query/retrieve**: C-FIND/C-MOVE/C-ECHO from remote modalities, with a query/retrieve workflow UI
+- **Study sharing**: share via Orthanc Shares plugin or instant viewer link, by email or clipboard
+- **Worklists**: manage DICOM Modality Worklists (list, upload, delete)
+- **Add encapsulated series**: upload PDF/JPEG/PNG/STL as DICOM series via `/tools/create-dicom`
+- **Custom HTTP buttons**: configurable external links with template tokens
+- **Quick-report**: printable study summary via browser print/PDF
+- **Audit logs page**: global audit log viewer with search, filter, JSON export
 - One build artifact runs in four modes: Docker sidecar, Orthanc plugin (`ServeFolders`), SMART on FHIR EHR embed, or **backend-proxy behind JWT auth**
 
 ## Tech Stack
