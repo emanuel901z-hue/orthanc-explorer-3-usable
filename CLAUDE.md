@@ -145,6 +145,7 @@ features: {
 |------|---------|
 | `public/config.js` | Runtime config injected at deploy — dev placeholder only; replaced in production |
 | `public/config.prod.js` | Example production config for backend-proxy auth mode |
+| `public/logo/` | Bundled logo assets (32/64/128/256px + favicon) — used as default when `branding.logoUrl` is not set |
 | `src/config/runtime.ts` | Zod schema + `loadConfig()` / `getConfig()` — parsed once at boot |
 | `src/config/features.ts` | Feature flag resolver + `useFeature()` hook (RBAC) |
 | `src/lib/client.ts` | Central HTTP client for all Orthanc requests (`credentials: 'include'`) |

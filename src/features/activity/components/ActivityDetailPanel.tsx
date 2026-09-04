@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Upload,
   Send,
@@ -38,38 +39,25 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   download: <Download className="h-4 w-4" />,
   echo: <Radio className="h-4 w-4" />,
   system: <Server className="h-4 w-4" />,
+  move: <Download className="h-4 w-4" />,
+  archive: <Download className="h-4 w-4" />,
+  transcode: <Server className="h-4 w-4" />,
+  split: <Pencil className="h-4 w-4" />,
+  merge: <Pencil className="h-4 w-4" />,
 };
 
-const SEVERITY_CONFIG: Record<
-  ActivitySeverity,
-  { icon: React.ReactNode; label: string; className: string }
-> = {
-  success: {
-    icon: <CheckCircle2 className="h-4 w-4" />,
-    label: 'Success',
-    className: 'text-success bg-success/10 border-success/20',
-  },
-  error: {
-    icon: <AlertCircle className="h-4 w-4" />,
-    label: 'Error',
-    className: 'text-destructive bg-destructive/10 border-destructive/20',
-  },
-  warning: {
-    icon: <AlertTriangle className="h-4 w-4" />,
-    label: 'Warning',
-    className: 'text-warning bg-warning/10 border-warning/20',
-  },
-  info: {
-    icon: <Info className="h-4 w-4" />,
-    label: 'Info',
-    className: 'text-info bg-info/10 border-info/20',
-  },
+const SEVERITY_ICON: Record<ActivitySeverity, React.ReactNode> = {
+  success: <CheckCircle2 className="h-4 w-4" />,
+  error: <AlertCircle className="h-4 w-4" />,
+  warning: <AlertTriangle className="h-4 w-4" />,
+  info: <Info className="h-4 w-4" />,
 };
 
-const CATEGORY_LABELS: Record<ActivityCategory, string> = {
-  job: 'Job',
-  audit: 'Audit',
-  log: 'System',
+const SEVERITY_CLASS: Record<ActivitySeverity, string> = {
+  success: 'text-success bg-success/10 border-success/20',
+  error: 'text-destructive bg-destructive/10 border-destructive/20',
+  warning: 'text-warning bg-warning/10 border-warning/20',
+  info: 'text-info bg-info/10 border-info/20',
 };
 
 function formatDuration(ms?: number): string {
@@ -94,9 +82,10 @@ interface ContextualAction {
 function getContextualActions(
   event: ActivityEvent,
   navigate: (path: string) => void,
+  t: (key: string) => string,
 ): ContextualAction[] {
   const actions: ContextualAction[] = [];
-  const studyId = event.metadata?.['Study ID'];
+  const studyId = event.metadata?.[t('activity.metadata.resourceId')] ?? event.metadata?.['Resource ID'];
   const isSuccess = event.severity === 'success';
   const isError = event.severity === 'error';
 
@@ -110,7 +99,7 @@ function getContextualActions(
       event.action === 'download')
   ) {
     actions.push({
-      label: 'Go to Study',
+      label: t('activity.actions.goToStudy'),
       icon: <FolderOpen className="h-3.5 w-3.5" />,
       onClick: () => navigate(`/studies/${studyId}`),
     });
@@ -119,7 +108,7 @@ function getContextualActions(
   // Browse studies for uploads without a specific study ID
   if (event.action === 'upload' && isSuccess && !studyId) {
     actions.push({
-      label: 'Browse Studies',
+      label: t('activity.actions.browseStudies'),
       icon: <FolderOpen className="h-3.5 w-3.5" />,
       onClick: () => navigate('/studies'),
     });
@@ -128,7 +117,7 @@ function getContextualActions(
   // Upload page for failed uploads (retry)
   if (event.action === 'upload' && isError) {
     actions.push({
-      label: 'Go to Upload',
+      label: t('activity.actions.goToUpload'),
       icon: <Upload className="h-3.5 w-3.5" />,
       onClick: () => navigate('/upload'),
     });
@@ -137,7 +126,7 @@ function getContextualActions(
   // Remote sources for send & echo actions
   if (event.action === 'send' || event.action === 'echo') {
     actions.push({
-      label: 'View Remote Sources',
+      label: t('activity.actions.viewRemoteSources'),
       icon: <ExternalLink className="h-3.5 w-3.5" />,
       onClick: () => navigate('/remote-sources'),
     });
@@ -146,7 +135,7 @@ function getContextualActions(
   // Settings for system events
   if (event.action === 'system') {
     actions.push({
-      label: 'Open Settings',
+      label: t('activity.actions.openSettings'),
       icon: <Settings className="h-3.5 w-3.5" />,
       onClick: () => navigate('/settings'),
     });
@@ -155,7 +144,7 @@ function getContextualActions(
   // Deleted studies → go to study list
   if (event.action === 'delete') {
     actions.push({
-      label: 'Browse Studies',
+      label: t('activity.actions.browseStudies'),
       icon: <FolderOpen className="h-3.5 w-3.5" />,
       onClick: () => navigate('/studies'),
     });
@@ -171,27 +160,31 @@ interface ActivityDetailPanelProps {
 
 export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   if (!event) return null;
 
-  const severity = SEVERITY_CONFIG[event.severity];
+  const severityIcon = SEVERITY_ICON[event.severity];
+  const severityClass = SEVERITY_CLASS[event.severity];
+  const severityLabel = t(`activity.severity.${event.severity}`);
+  const categoryLabel = t(`activity.categoryLabels.${event.category}`);
 
   // Build contextual actions based on event type, action, and severity
-  const actions = getContextualActions(event, navigate);
+  const actions = getContextualActions(event, navigate, t);
 
   const details: DetailRow[] = [
     {
-      label: 'Timestamp',
+      label: t('activity.detail.timestamp'),
       value: format(new Date(event.timestamp), 'PPpp'),
       icon: <Clock className="h-3.5 w-3.5 text-muted-foreground" />,
     },
     {
-      label: 'Category',
-      value: CATEGORY_LABELS[event.category],
+      label: t('activity.detail.category'),
+      value: categoryLabel,
       icon: <FileText className="h-3.5 w-3.5 text-muted-foreground" />,
     },
     {
-      label: 'Action',
+      label: t('activity.detail.action'),
       value: event.action,
       icon: ACTION_ICONS[event.action] || <Info className="h-3.5 w-3.5" />,
     },
@@ -199,21 +192,21 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
 
   if (event.actor) {
     details.push({
-      label: 'Actor',
+      label: t('activity.detail.actor'),
       value: event.actor,
       icon: <User className="h-3.5 w-3.5 text-muted-foreground" />,
     });
   }
   if (event.resource) {
     details.push({
-      label: 'Resource',
+      label: t('activity.detail.resource'),
       value: event.resource,
       icon: <FileText className="h-3.5 w-3.5 text-muted-foreground" />,
     });
   }
   if (event.duration) {
     details.push({
-      label: 'Duration',
+      label: t('activity.detail.duration'),
       value: formatDuration(event.duration),
       icon: <Clock className="h-3.5 w-3.5 text-muted-foreground" />,
     });
@@ -227,16 +220,16 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
           <div
             className={cn(
               'h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border',
-              severity.className,
+              severityClass,
             )}
           >
-            {severity.icon}
+            {severityIcon}
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold text-sm leading-tight">{event.title}</h3>
             <div className="flex items-center gap-1.5 mt-1">
-              <Badge variant="outline" className={cn('text-[10px] h-5', severity.className)}>
-                {severity.label}
+              <Badge variant="outline" className={cn('text-[10px] h-5', severityClass)}>
+                {severityLabel}
               </Badge>
               <span className="text-[10px] text-muted-foreground">
                 {format(new Date(event.timestamp), 'HH:mm:ss')}
@@ -257,14 +250,14 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
       {/* Description */}
       {event.description && (
         <div className="px-4 py-3 border-b">
-          <p className="text-xs font-medium text-muted-foreground mb-1">Description</p>
+          <p className="text-xs font-medium text-muted-foreground mb-1">{t('activity.detail.description')}</p>
           <p className="text-sm">{event.description}</p>
         </div>
       )}
 
       {/* Details */}
       <div className="flex-1 overflow-auto p-4">
-        <p className="text-xs font-medium text-muted-foreground mb-3">Details</p>
+        <p className="text-xs font-medium text-muted-foreground mb-3">{t('activity.detail.details')}</p>
         <dl className="space-y-3">
           {details.map((d) => (
             <div key={d.label} className="flex items-start gap-2.5">
@@ -281,7 +274,7 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
         {event.metadata && Object.keys(event.metadata).length > 0 && (
           <>
             <Separator className="my-4" />
-            <p className="text-xs font-medium text-muted-foreground mb-3">Metadata</p>
+            <p className="text-xs font-medium text-muted-foreground mb-3">{t('activity.detail.metadata')}</p>
             <dl className="space-y-2">
               {Object.entries(event.metadata).map(([key, value]) => (
                 <div key={key}>
@@ -297,7 +290,7 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
       {/* Actions */}
       {actions.length > 0 && (
         <div className="border-t px-4 py-3 space-y-2">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Actions</p>
+          <p className="text-xs font-medium text-muted-foreground mb-2">{t('activity.detail.actions')}</p>
           <div className="flex flex-col gap-1.5">
             {actions.map((a, i) => (
               <Button
@@ -317,7 +310,9 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
 
       {/* Footer */}
       <div className="border-t px-4 py-3">
-        <p className="text-[10px] text-muted-foreground text-center">Event ID: {event.id}</p>
+        <p className="text-[10px] text-muted-foreground text-center">
+          {t('activity.detail.eventId')}: {event.id}
+        </p>
       </div>
     </div>
   );

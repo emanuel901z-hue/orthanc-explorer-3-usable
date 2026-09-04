@@ -43,8 +43,8 @@ function mapOrthancStudy(s: OrthancStudy): Study {
   const tags = s.MainDicomTags ?? {};
   const patientTags = s.PatientMainDicomTags ?? {};
   // RequestedTags are returned separately by Orthanc when requested via the
-  // RequestedTags field in /tools/find — they are NOT in MainDicomTags.
-  const requestedTags = (s as any).RequestedTags ?? {};
+  // RequestedTags field in /tools/find or ?requestedTags= in GET /studies/:id.
+  const requestedTags = s.RequestedTags ?? {};
 
   const rawSex = patientTags['PatientSex'] ?? '';
   const patientSex: Study['patientSex'] =
@@ -66,6 +66,15 @@ function mapOrthancStudy(s: OrthancStudy): Study {
     ? tags['ReferringPhysicianName'].replace(/\^/g, ' ').trim() || undefined
     : undefined;
 
+  // NumberOfStudyRelatedInstances/Series are computed tags from RequestedTags.
+  // Fall back to Series.length for numberOfSeries if not provided.
+  const numSeriesFromTag = requestedTags['NumberOfStudyRelatedSeries']
+    ? parseInt(String(requestedTags['NumberOfStudyRelatedSeries']), 10)
+    : undefined;
+  const numInstancesFromTag = requestedTags['NumberOfStudyRelatedInstances']
+    ? parseInt(String(requestedTags['NumberOfStudyRelatedInstances']), 10)
+    : undefined;
+
   return {
     id: s.ID,
     patientId: patientTags['PatientID'] ?? '',
@@ -80,10 +89,9 @@ function mapOrthancStudy(s: OrthancStudy): Study {
     referringPhysician,
     bodyPart: requestedTags['BodyPartExamined'] ?? tags['BodyPartExamined'] ?? undefined,
     modalities,
-    numberOfSeries: s.Series?.length ?? 0,
-    // numberOfInstances is not available in list responses — fetched separately
-    // via /statistics in findById. Consumers should treat undefined as "unknown".
-    numberOfInstances: undefined,
+    numberOfSeries: numSeriesFromTag ?? s.Series?.length ?? 0,
+    // Computed from RequestedTags in list view; from /statistics in detail view.
+    numberOfInstances: numInstancesFromTag,
     labels: s.Labels ?? [],
     isStable: s.IsStable ?? true,
     lastUpdate,
@@ -138,7 +146,14 @@ export class OrthancStudyRepository implements IStudyRepository {
       Expand: true,
       // Ask Orthanc to compute and include these tags even if not in MainDicomTags.
       // Requires Orthanc 1.11.0+ (orthancteam/orthanc:latest-full qualifies).
-      RequestedTags: ['ModalitiesInStudy', 'BodyPartExamined'],
+      // NumberOfStudyRelatedInstances/Series are computed tags that give us
+      // instance/series counts without N+1 /statistics calls.
+      RequestedTags: [
+        'ModalitiesInStudy',
+        'BodyPartExamined',
+        'NumberOfStudyRelatedInstances',
+        'NumberOfStudyRelatedSeries',
+      ],
     };
 
     // Orthanc supports Labels filtering in /tools/find (AND logic: all labels must match)

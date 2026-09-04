@@ -18,18 +18,21 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { AboutDialog } from './AboutDialog';
+import { useUiStore } from '@/store/ui-store';
 
 export function AppSidebar() {
   const { toggleSidebar, state } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const [aboutOpen, setAboutOpen] = useState(false);
   const { t } = useTranslation();
+  const { appName, logoUrl } = useUiStore();
 
   const navItems = [
     { title: t('nav.studies'), url: '/studies', icon: BookOpen },
@@ -41,6 +44,21 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
+      <SidebarHeader className="border-b border-sidebar-border px-3 py-2">
+        <div className="flex items-center gap-2">
+          <img
+            src={logoUrl}
+            alt={appName}
+            className="h-8 w-8 shrink-0 rounded object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+          {!isCollapsed && (
+            <span className="font-semibold text-sm truncate">{appName}</span>
+          )}
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>{t('nav.navigation')}</SidebarGroupLabel>
@@ -67,14 +85,6 @@ export function AppSidebar() {
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="System Status">
-                  <div className="flex items-center gap-2 text-sidebar-muted-foreground cursor-default">
-                    <ActivityIcon className="h-4 w-4" />
-                    <span className="text-xs">{t('nav.demoMode')}</span>
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip={isCollapsed ? t('nav.expand') : t('nav.collapse')}

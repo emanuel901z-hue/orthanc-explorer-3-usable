@@ -35,6 +35,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Playwright E2E Tests** | Production viewport tests (desktop 1280×800, mobile 375×812) with JWT cookie injection, DOM analysis, screenshots, and responsive layout validation. |
 | **i18n: 9 Languages** | English, Spanish, French, German, Japanese, Chinese, **Russian**, **Turkish**, **Arabic**. |
 | **Orthanc API Schema Alignment** | Type definitions match Orthanc 1.13.0 (API v31) — `DiskSize` as string, `ModifiedFrom`, `ExpectedNumberOfInstances`, `IndexInSeries`, `Capabilities`, etc. |
+| **Custom Branding/Logo** | Configurable app name and logo via `branding.title` + `branding.logoUrl` in `config.js`. Logo appears in header, sidebar, and About dialog. Bundled default logo in `public/logo/`. |
 
 ---
 
@@ -235,6 +236,7 @@ window.__OE3_CONFIG__ = {
   },
   branding: {
     title: "Orthanc Explorer 3",
+    logoUrl: "/oe3/logo/oe3-logo-128.png",  // optional — bundled default if omitted
   },
 };
 ```
@@ -324,7 +326,7 @@ StudyListPage / StudyDetailPage / SeriesDetailPage / ...
 
 ### Non-Secure Context Support
 
-`lib/correlation.ts` generates UUIDv4 correlation IDs for the `X-Request-Id` header. `crypto.randomUUID()` is only available in **secure contexts** (HTTPS or `localhost`). On internal HTTP deployments (e.g. `http://10.0.1.46:3080`), it is `undefined` and throws a `TypeError` — which is silently caught by `orthancFetch`'s catch block, causing **all API calls to fail**.
+`lib/correlation.ts` generates UUIDv4 correlation IDs for the `X-Request-Id` header. `crypto.randomUUID()` is only available in **secure contexts** (HTTPS or `localhost`). On internal HTTP deployments (e.g. `http://10.0.0.1:8080`), it is `undefined` and throws a `TypeError` — which is silently caught by `orthancFetch`'s catch block, causing **all API calls to fail**.
 
 The fix provides a fallback chain:
 1. `crypto.randomUUID()` (secure contexts — HTTPS, localhost)
@@ -344,7 +346,8 @@ orthanc-explorer-3-usable/
 │   └── screenshots/           # Test screenshots (desktop + mobile)
 ├── public/
 │   ├── config.js              # Dev placeholder — replaced at container start
-│   └── config.prod.js         # Example production config (backend-proxy mode)
+│   ├── config.prod.js         # Example production config (backend-proxy mode)
+│   └── logo/                  # Bundled logo assets (128/256/32/64px + favicon)
 └── src/
     ├── app/
     │   ├── layout/            # AppLayout, AppSidebar, UserBadge

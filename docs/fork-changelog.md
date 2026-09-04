@@ -4,6 +4,58 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v1.3.0 — Custom Branding & Logo Integration (2026-09-04)
+
+### Branding/Logo
+
+- **Configurable logo via `branding.logoUrl`**: Runtime config now supports an optional `logoUrl` field in the `branding` object. When set, the logo image is displayed in the header, sidebar header, and About dialog. Falls back to a bundled default logo (`public/logo/oe3-logo-128.png`) when omitted.
+- **Bundled logo assets**: Optimized PNG assets in `public/logo/` (32px, 64px, 128px, 256px, favicon). Source logo in `Logo/` directory.
+- **`ui-store.ts`**: New `logoUrl` field with `setLogoUrl()` action. Excluded from `localStorage` persistence (always sourced from runtime config at boot).
+- **`main.tsx`**: Synchronizes `branding.logoUrl` from `config.js` → ui-store on app boot.
+- **`AppLayout.tsx`**: Header shows `<img>` logo instead of the "O3" text placeholder. `onError` fallback hides the image if it fails to load.
+- **`AppSidebar.tsx`**: Sidebar header shows logo + app name (replaces the previous text-only footer copyright).
+- **`AboutDialog.tsx`**: Logo displayed next to the dialog title.
+- **`index.html`**: Favicon, apple-touch-icon, and Open Graph/Twitter image tags point to bundled logo assets. Vite rewrites `/logo/` paths to `/oe3/logo/` in production builds.
+- **`config.js` / `config.prod.js`**: Updated with `branding.logoUrl` examples.
+
+### Test Fixes
+
+- **`studies.test.ts`**: Updated `get()` test to expect `requestedTags` query parameter (added in v1.1.0).
+- **`StudyDetailPage.test.tsx`**: Added mock for `MigrateStudyDialog` (added in v1.1.0) to prevent `useStudies` mock error.
+- **`orthanc-study-repository.test.ts`**: Updated `findAll` test to expect the full `RequestedTags` array (4 tags, not 2).
+
+### Files Changed
+
+```
+Modified:
+  index.html
+  public/config.js
+  public/config.prod.js
+  src/api/studies.test.ts
+  src/app/layout/AboutDialog.tsx
+  src/app/layout/AppLayout.tsx
+  src/app/layout/AppSidebar.tsx
+  src/features/studies/pages/StudyDetailPage.test.tsx
+  src/main.tsx
+  src/shared/api/orthanc-study-repository.test.ts
+  src/store/ui-store.ts
+  README.md
+  docs/fork-changelog.md
+
+Added:
+  Logo/OE_3_LOGO.png              # Source logo (2016×2086, 4.7MB)
+  public/logo/oe3-logo-128.png    # Header/sidebar (33KB)
+  public/logo/oe3-logo-256.png    # About dialog/apple-touch (115KB)
+  public/logo/oe3-logo-64.png     # Small variant (9.4KB)
+  public/logo/oe3-logo-32.png     # Tiny variant (2.9KB)
+  public/logo/oe3-favicon.png     # Browser favicon (115KB)
+
+Removed:
+  public/logo.png                 # Unused duplicate from earlier iteration
+```
+
+---
+
 ## v1.0.0 — Production Deployment Enhancements (2026-09-03)
 
 ### Docker + Nginx
@@ -128,7 +180,7 @@ Added:
 ### Frontend-Backend Endpoint Matching (GAP Check)
 
 - **Gap check `oe3.py`**: Added 4 new checks (31-34) for bidirectional frontend-backend API endpoint matching:
-  1. Catch-all `/orthanc` proxy exists with ADMIN+SUPERADMIN+domain_uuid='system' + correct pathRewrite
+  1. Catch-all `/orthanc` proxy exists with appropriate RBAC roles + correct pathRewrite
   2. Backend OE3-specific routes (`/oe3-me`, `/viewer-session`) are used by the frontend
   3. No direct `localhost:8042` URLs in production source (proxy bypass detection)
   4. Cornerstone DICOMweb paths use runtime config (`getDicomWebUrl()`), not hardcoded URLs
@@ -174,7 +226,7 @@ Added:
 
 ### Non-Secure Context Fix (lib/correlation.ts)
 
-- **Critical bug**: `crypto.randomUUID()` is only available in secure contexts (HTTPS or `localhost`). On internal HTTP deployments (e.g. `http://10.0.1.46:3080`), it is `undefined` and throws a `TypeError` — silently caught by `orthancFetch`'s catch block, causing **all API calls to fail**. OE3 showed "0 studies found" despite studies existing in Orthanc.
+- **Critical bug**: `crypto.randomUUID()` is only available in secure contexts (HTTPS or `localhost`). On internal HTTP deployments (e.g. `http://10.0.0.1:8080`), it is `undefined` and throws a `TypeError` — silently caught by `orthancFetch`'s catch block, causing **all API calls to fail**. OE3 showed "0 studies found" despite studies existing in Orthanc.
 - **Fix**: Fallback chain — `crypto.randomUUID()` → `crypto.getRandomValues()` with manual UUIDv4 formatting → `Math.random()` as last resort.
 
 ### Accessibility
@@ -185,8 +237,8 @@ Added:
 ### Playwright E2E Tests (e2e/prod/)
 
 - **New test suite**: Production viewport tests that run against a deployed OE3 instance.
-- **JWT cookie injection**: Generates a valid superadmin JWT via `docker exec` on the backend container and sets it as a Playwright cookie — authenticates without going through the MFA flow.
-- **Desktop tests (1280×800)**: App loads without console errors, study list renders with data (73 studies), study detail page with sortable series table + statistics card.
+- **JWT cookie injection**: Generates a valid JWT via `docker exec` on the backend container and sets it as a Playwright cookie — authenticates without going through the full auth flow.
+- **Desktop tests (1280×800)**: App loads without console errors, study list renders with data, study detail page with sortable series table + statistics card.
 - **Mobile tests (375×812 — iPhone X)**: No horizontal scroll, table in scrollable container, touch target analysis (< 44px detection), navigation works.
 - **DOM structure analysis**: Landmarks (main, nav, header), headings hierarchy, ARIA compliance, images without alt, inputs without labels.
 - **Screenshots**: Full-page screenshots saved for each viewport (desktop-01-03, mobile-01-04).

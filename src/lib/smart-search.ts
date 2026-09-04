@@ -1,0 +1,157 @@
+/**
+ * Smart multi-token search utility with umlaut + date normalization.
+ * Ported from PP Portal (frontend-functional/src/utils/search.ts) for OE3.
+ *
+ * Splits the query into tokens (by comma and/or whitespace), then requires
+ * EVERY token to match at least one of the provided field values (AND across
+ * tokens, OR across fields). This allows combined searches like
+ * "Müller, CT, 29.08" or "Muell ct 2908" to match a study where "Müller"
+ * is the patient name, "CT" is the modality, and "29.08" matches the study date.
+ *
+ * Umlaut-Toleranz: "ü" findet auch "ue", "ae" findet "ä", etc.
+ * Datum-Pattern: "2908", "290826", "29.08.2026", "29082026" finden "2026-08-29".
+ */
+
+function normalizeUmlauts(s: string): string {
+  return s
+    .replace(/ü/g, 'ue')
+    .replace(/ö/g, 'oe')
+    .replace(/ä/g, 'ae')
+    .replace(/ß/g, 'ss')
+    .replace(/Ü/g, 'Ue')
+    .replace(/Ö/g, 'Oe')
+    .replace(/Ä/g, 'Ae');
+}
+
+function normalize(s: string): string {
+  return normalizeUmlauts(s.toLowerCase()).replace(/-/g, '');
+}
+
+/**
+ * Generates multiple date pattern variants from a date string for matching.
+ * Input can be ISO (2026-08-29) or locale (29.8.2026, 29.08.2026).
+ * Returns array of patterns like: ["29.8.2026", "29.08.2026", "29082026",
+ * "290826", "29826", "29.8.26", "29.08.26", "2026-08-29", "20260829"].
+ */
+function datePatterns(dateStr: string): string[] {
+  if (!dateStr) return [];
+  let day = '', month = '', year = '';
+  const isoMatch = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+  const localeMatch = dateStr.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+
+  if (isoMatch) {
+    year = isoMatch[1];
+    month = isoMatch[2];
+    day = isoMatch[3];
+  } else if (localeMatch) {
+    day = localeMatch[1];
+    month = localeMatch[2];
+    year = localeMatch[3];
+  } else {
+    return [];
+  }
+
+  const dd = day.padStart(2, '0');
+  const mm = month.padStart(2, '0');
+  const d = String(parseInt(day, 10));
+  const m = String(parseInt(month, 10));
+  const yyyy = year.length === 2 ? (parseInt(year, 10) > 30 ? '19' + year : '20' + year) : year;
+  const yy = yyyy.slice(-2);
+
+  return [
+    `${d}.${m}.${yyyy}`,
+    `${dd}.${mm}.${yyyy}`,
+    `${d}.${m}.${yy}`,
+    `${dd}.${mm}.${yy}`,
+    `${dd}${mm}${yyyy}`,
+    `${d}${m}${yyyy}`,
+    `${dd}${mm}${yy}`,
+    `${d}${m}${yy}`,
+    `${d}${m}${yyyy.slice(-2)}`,
+    `${yyyy}-${mm}-${dd}`,
+    `${yyyy}${mm}${dd}`,
+  ];
+}
+
+function dateMatch(token: string, field: string): boolean {
+  const tokenClean = token.replace(/[.\-/\s]/g, '');
+  const fieldClean = field.replace(/[.\-/\s]/g, '');
+
+  if (fieldClean.includes(tokenClean)) return true;
+
+  const patterns = datePatterns(field);
+  for (const p of patterns) {
+    const pClean = p.replace(/[.\-/\s]/g, '');
+    if (pClean.includes(tokenClean)) return true;
+    if (p.includes(token)) return true;
+  }
+
+  const tokenDigits = token.replace(/\D/g, '');
+  if (tokenDigits.length >= 4 && tokenDigits.length <= 8) {
+    for (const p of patterns) {
+      const pClean = p.replace(/[.\-/\s]/g, '');
+      if (pClean.includes(tokenDigits)) return true;
+    }
+    if (tokenDigits.length === 4) {
+      const td = parseInt(tokenDigits[0], 10);
+      const tm = parseInt(tokenDigits[1], 10);
+      const tyy = tokenDigits.slice(2);
+      for (const p of patterns) {
+        const pClean = p.replace(/[.\-/\s]/g, '');
+        const d = String(td);
+        const m = String(tm);
+        if (pClean.includes(`${d}${m}${tyy}`)) return true;
+        const dd = String(td).padStart(2, '0');
+        const mm = String(tm).padStart(2, '0');
+        if (pClean.includes(`${dd}${mm}${tyy}`)) return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function isDateToken(token: string): boolean {
+  const digits = token.replace(/\D/g, '');
+  if (digits.length >= 4 && digits.length <= 8) return true;
+  if (/\d{1,2}[.\-\/]\d{1,2}([.\-\/]\d{2,4})?/.test(token)) return true;
+  return false;
+}
+
+export function smartSearch(query: string, fields: (string | number | null | undefined | Date)[]): boolean {
+  const tokens = query
+    .trim()
+    .toLowerCase()
+    .split(/[\s,]+/)
+    .filter(Boolean);
+  if (tokens.length === 0) return true;
+
+  const normalizedFields = fields.map(f =>
+    f === null || f === undefined ? '' : normalize(String(f))
+  );
+  const rawFields = fields.map(f => {
+    if (f === null || f === undefined) return '';
+    if (f instanceof Date) return f.toISOString();
+    return String(f);
+  });
+
+  return tokens.every(token => {
+    const normalizedToken = normalize(token);
+    const tokenIsDate = isDateToken(token);
+
+    return normalizedFields.some((field, idx) => {
+      if (field.includes(normalizedToken)) return true;
+      if (tokenIsDate && isDateToken(rawFields[idx])) {
+        return dateMatch(token, rawFields[idx]);
+      }
+      if (tokenIsDate && /\d{1,2}[.\-\/]\d{1,2}/.test(rawFields[idx])) {
+        return dateMatch(token, rawFields[idx]);
+      }
+      // Also try date matching on ISO date fields
+      if (tokenIsDate && /^\d{4}-\d{2}-\d{2}/.test(rawFields[idx])) {
+        return dateMatch(token, rawFields[idx]);
+      }
+      return false;
+    });
+  });
+}

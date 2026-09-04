@@ -3,9 +3,13 @@ import App from "./App.tsx";
 import "./index.css";
 import "./i18n";
 import { loadConfig } from "@/config/runtime";
+import { useUiStore } from "@/store/ui-store";
 
 try {
-  loadConfig();
+  const cfg = loadConfig();
+  if (cfg.branding?.logoUrl) {
+    useUiStore.getState().setLogoUrl(cfg.branding.logoUrl);
+  }
   createRoot(document.getElementById("root")!).render(<App />);
 } catch (err) {
   const message =

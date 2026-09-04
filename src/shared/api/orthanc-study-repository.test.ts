@@ -64,7 +64,7 @@ describe("OrthancStudyRepository", () => {
       Level: "Study",
       Query: {},
       Expand: true,
-      RequestedTags: ["ModalitiesInStudy", "BodyPartExamined"],
+      RequestedTags: ["ModalitiesInStudy", "BodyPartExamined", "NumberOfStudyRelatedInstances", "NumberOfStudyRelatedSeries"],
     });
     expect(result).toEqual([]);
   });

@@ -10,5 +10,5 @@ window.__OE3_CONFIG__ = {
   orthancUrl: "/orthanc-proxy",
   authMode: "none",
   features: {},
-  branding: { title: "Orthanc Explorer 3 (Dev)" },
+  branding: { title: "Orthanc Explorer 3 (Dev)", logoUrl: "/logo/oe3-logo-128.png" },
 };

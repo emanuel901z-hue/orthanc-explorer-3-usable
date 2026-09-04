@@ -37,6 +37,8 @@ export type OrthancStudy = {
   ParentPatient: string;
   Series: string[];
   Type: 'Study';
+  /** Computed tags returned when requested via ?requestedTags= or RequestedTags in /tools/find. */
+  RequestedTags?: Record<string, string>;
 };
 /** @deprecated Use OrthancStudy instead. */
 export type Study = OrthancStudy;
@@ -60,8 +62,12 @@ export const studiesApi = {
       body: JSON.stringify(query),
     }),
 
-  /** GET /studies/:id — Returns full OrthancStudy (ID, MainDicomTags, PatientMainDicomTags, Series, Labels, IsStable). */
-  get: (id: string) => orthancFetch<OrthancStudy>(`/studies/${id}`),
+  /** GET /studies/:id — Returns full OrthancStudy (ID, MainDicomTags, PatientMainDicomTags, Series, Labels, IsStable).
+   *  Requests ModalitiesInStudy, BodyPartExamined, NumberOfStudyRelatedInstances/Series as computed tags. */
+  get: (id: string) =>
+    orthancFetch<OrthancStudy>(
+      `/studies/${id}?requestedTags=ModalitiesInStudy;BodyPartExamined;NumberOfStudyRelatedInstances;NumberOfStudyRelatedSeries`,
+    ),
 
   /** GET /studies/:id/series — Returns OrthancSeries[] (full objects with MainDicomTags, Instances, Status). */
   getSeries: (id: string) => orthancFetch<OrthancSeries[]>(`/studies/${id}/series`),
@@ -121,5 +127,17 @@ export const studiesApi = {
   removeLabel: (studyId: string, label: string) =>
     orthancFetch<void>(`/studies/${studyId}/labels/${encodeURIComponent(label)}`, {
       method: 'DELETE',
+    }),
+
+  /** POST /studies/:id/merge — Merges source studies/series into this target study.
+   *  Body: { Resources: [sourceId, ...], KeepSource: boolean }.
+   *  When KeepSource=false, source resources are deleted after merge.
+   *  Returns { TargetStudy, MergedStudies } on success.
+   */
+  merge: (targetStudyId: string, sourceIds: string[], keepSource = false) =>
+    orthancFetch<{ TargetStudy: string; MergedStudies: string[] }>(`/studies/${targetStudyId}/merge`, {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify({ Resources: sourceIds, KeepSource: keepSource }),
     }),
 };

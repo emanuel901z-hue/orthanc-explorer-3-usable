@@ -15,53 +15,46 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-
-const FONT_PRESETS = [
-  { value: 'inter', label: 'Inter (Default)', stack: 'Inter, system-ui, sans-serif' },
-  { value: 'system', label: 'System Default', stack: 'system-ui, -apple-system, sans-serif' },
-  { value: 'segoe', label: 'Segoe UI (Windows)', stack: '"Segoe UI", Tahoma, Geneva, sans-serif' },
-  {
-    value: 'sf-pro',
-    label: 'SF Pro (Apple)',
-    stack: '-apple-system, BlinkMacSystemFont, sans-serif',
-  },
-  {
-    value: 'roboto',
-    label: 'Roboto (Android/Material)',
-    stack: 'Roboto, "Helvetica Neue", sans-serif',
-  },
-  { value: 'noto', label: 'Noto Sans (Cross-platform)', stack: '"Noto Sans", sans-serif' },
-  { value: 'custom', label: 'Custom…', stack: '' },
-];
-
-const RADIUS_PRESETS = [
-  { value: '0', label: 'None (0px)' },
-  { value: '0.25rem', label: 'Small (4px)' },
-  { value: '0.375rem', label: 'Medium (6px)' },
-  { value: '0.5rem', label: 'Default (8px)' },
-  { value: '0.75rem', label: 'Large (12px)' },
-  { value: '1rem', label: 'Extra Large (16px)' },
-];
+import { useTranslation } from 'react-i18next';
+import { useUiStore, FONT_PRESETS, RADIUS_PRESETS } from '@/store/ui-store';
 
 export default function EmbeddedThemingCard() {
-  const [primaryColor, setPrimaryColor] = useState('#2563EB');
-  const [accentColor, setAccentColor] = useState('#0D9488');
-  const [fontPreset, setFontPreset] = useState('inter');
-  const [customFontStack, setCustomFontStack] = useState('');
-  const [borderRadius, setBorderRadius] = useState('0.5rem');
-  const [compactMode, setCompactMode] = useState(false);
-  const [hideSidebar, setHideSidebar] = useState(false);
-  const [hideHeader, setHideHeader] = useState(false);
+  const { t } = useTranslation();
+  const {
+    primaryColor,
+    accentColor,
+    fontPreset,
+    customFontStack,
+    borderRadius,
+    compactMode,
+    hideSidebar,
+    hideHeader,
+    setPrimaryColor,
+    setAccentColor,
+    setFontPreset,
+    setCustomFontStack,
+    setBorderRadius,
+    setCompactMode,
+    setHideSidebar,
+    setHideHeader,
+    resetTheming,
+  } = useUiStore();
+
+  const [draftAppName, setDraftAppName] = useState(useUiStore.getState().appName);
+
+  const handleSave = () => {
+    useUiStore.getState().setAppName(draftAppName);
+    toast.success(t('settings.brandingSaved'));
+  };
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-base">Embedded Theming (SMART on FHIR)</CardTitle>
+            <CardTitle className="text-base">{t('theming.title')}</CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Adjust colors, typography, and layout to match the host EHR application when running
-              in embedded mode.
+              {t('theming.subtitle')}
             </p>
           </div>
           <Badge variant="outline" className="text-xs shrink-0">
@@ -74,12 +67,12 @@ export default function EmbeddedThemingCard() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Palette className="h-4 w-4 text-muted-foreground" />
-            Colors
+            {t('theming.colors')}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="primary-color" className="text-sm">
-                Primary Color
+                {t('theming.primaryColor')}
               </Label>
               <div className="flex gap-2">
                 <div className="relative">
@@ -99,12 +92,12 @@ export default function EmbeddedThemingCard() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Header bar, buttons, and active states
+                {t('theming.primaryColorHelp')}
               </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="accent-color" className="text-sm">
-                Accent Color
+                {t('theming.accentColor')}
               </Label>
               <div className="flex gap-2">
                 <div className="relative">
@@ -124,7 +117,7 @@ export default function EmbeddedThemingCard() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Links, badges, and secondary highlights
+                {t('theming.accentColorHelp')}
               </p>
             </div>
           </div>
@@ -136,11 +129,11 @@ export default function EmbeddedThemingCard() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Type className="h-4 w-4 text-muted-foreground" />
-            Typography
+            {t('theming.typography')}
           </div>
           <div className="space-y-3">
             <div className="space-y-2">
-              <Label className="text-sm">Font Family</Label>
+              <Label className="text-sm">{t('theming.fontFamily')}</Label>
               <Select value={fontPreset} onValueChange={setFontPreset}>
                 <SelectTrigger>
                   <SelectValue />
@@ -161,7 +154,7 @@ export default function EmbeddedThemingCard() {
             </div>
             {fontPreset === 'custom' && (
               <div className="space-y-2">
-                <Label className="text-sm">Custom Font Stack</Label>
+                <Label className="text-sm">{t('theming.customFontStack')}</Label>
                 <Input
                   value={customFontStack}
                   onChange={(e) => setCustomFontStack(e.target.value)}
@@ -169,7 +162,7 @@ export default function EmbeddedThemingCard() {
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Ensure the font is loaded by the host EHR or included via a CSS import.
+                  {t('theming.customFontStackHelp')}
                 </p>
               </div>
             )}
@@ -182,11 +175,11 @@ export default function EmbeddedThemingCard() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <RectangleHorizontal className="h-4 w-4 text-muted-foreground" />
-            Shape &amp; Density
+            {t('theming.shapeDensity')}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm">Border Radius</Label>
+              <Label className="text-sm">{t('theming.borderRadius')}</Label>
               <Select value={borderRadius} onValueChange={setBorderRadius}>
                 <SelectTrigger>
                   <SelectValue />
@@ -200,15 +193,15 @@ export default function EmbeddedThemingCard() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Match the EHR's corner style for a seamless look.
+                {t('theming.borderRadiusHelp')}
               </p>
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">Compact Mode</p>
+                  <p className="text-sm font-medium">{t('theming.compactMode')}</p>
                   <p className="text-xs text-muted-foreground">
-                    Reduce padding and spacing for tighter layouts
+                    {t('theming.compactModeHelp')}
                   </p>
                 </div>
                 <Switch checked={compactMode} onCheckedChange={setCompactMode} />
@@ -223,26 +216,26 @@ export default function EmbeddedThemingCard() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <LayoutGrid className="h-4 w-4 text-muted-foreground" />
-            Embedded Layout
+            {t('theming.embeddedLayout')}
           </div>
           <p className="text-xs text-muted-foreground">
-            When launched inside an EHR iframe, hide redundant chrome to avoid duplicate navigation.
+            {t('theming.embeddedLayoutHelp')}
           </p>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm">Hide Sidebar</p>
+                <p className="text-sm">{t('theming.hideSidebar')}</p>
                 <p className="text-xs text-muted-foreground">
-                  Remove the left navigation when EHR provides its own
+                  {t('theming.hideSidebarHelp')}
                 </p>
               </div>
               <Switch checked={hideSidebar} onCheckedChange={setHideSidebar} />
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm">Hide Header Bar</p>
+                <p className="text-sm">{t('theming.hideHeader')}</p>
                 <p className="text-xs text-muted-foreground">
-                  Remove the top header when embedded in an EHR frame
+                  {t('theming.hideHeaderHelp')}
                 </p>
               </div>
               <Switch checked={hideHeader} onCheckedChange={setHideHeader} />
@@ -258,35 +251,29 @@ export default function EmbeddedThemingCard() {
             <div
               className="h-8 w-8 rounded-md border"
               style={{ backgroundColor: primaryColor }}
-              aria-label="Primary color preview"
+              aria-label={t('theming.primaryColor')}
             />
             <div
               className="h-8 w-8 rounded-md border"
               style={{ backgroundColor: accentColor, borderRadius: borderRadius }}
-              aria-label="Accent color preview"
+              aria-label={t('theming.accentColor')}
             />
-            <span className="text-xs text-muted-foreground">Live preview</span>
+            <span className="text-xs text-muted-foreground">{t('theming.livePreview')}</span>
           </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                setPrimaryColor('#2563EB');
-                setAccentColor('#0D9488');
-                setFontPreset('inter');
-                setCustomFontStack('');
-                setBorderRadius('0.5rem');
-                setCompactMode(false);
-                setHideSidebar(false);
-                setHideHeader(false);
-                toast.info('Embedded theming reset to defaults');
+                resetTheming();
+                setDraftAppName(useUiStore.getState().appName);
+                toast.info(t('theming.reset'));
               }}
             >
-              Reset
+              {t('theming.reset')}
             </Button>
-            <Button size="sm" onClick={() => toast.success('Embedded theming settings saved')}>
-              Save Theming
+            <Button size="sm" onClick={handleSave}>
+              {t('theming.saveTheming')}
             </Button>
           </div>
         </div>

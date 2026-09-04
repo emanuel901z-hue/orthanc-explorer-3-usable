@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2 } from 'lucide-react';
+import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2, GitMerge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -20,6 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useStudy, useStudySeries, useInstancePreview, useStudySharedTags } from '@/features/studies/hooks/use-studies';
 import { ModalityBadge, formatPatientName, formatDiskSize } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
+import MigrateStudyDialog from '@/features/studies/components/MigrateStudyDialog';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
 import DicomTagBrowser from '@/features/studies/components/DicomTagBrowser';
@@ -78,6 +79,7 @@ export default function StudyDetailPage() {
   const [sendOpen, setSendOpen] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
+  const [migrateOpen, setMigrateOpen] = useState(false);
   const [seriesView, setSeriesView] = useState<'grid' | 'table'>('table');
   const [seriesSearch, setSeriesSearch] = useState('');
   const [seriesSort, setSeriesSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'seriesNumber', dir: 'asc' });
@@ -291,6 +293,9 @@ export default function StudyDetailPage() {
           )}
           {canModify && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setModifyOpen(true)}><Pencil className="h-3.5 w-3.5" /> {t('actions.modify')}</Button>
+          )}
+          {canModify && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setMigrateOpen(true)}><GitMerge className="h-3.5 w-3.5" /> {t('migrate.title')}</Button>
           )}
           {canAnonymize && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAnonOpen(true)}><Shield className="h-3.5 w-3.5" /> {t('actions.anonymize')}</Button>
@@ -641,6 +646,13 @@ export default function StudyDetailPage() {
           onOpenChange={setModifyOpen}
           study={study}
           instanceCount={study.numberOfInstances}
+        />
+      )}
+      {study && (
+        <MigrateStudyDialog
+          open={migrateOpen}
+          onOpenChange={setMigrateOpen}
+          targetStudy={study}
         />
       )}
     </div>

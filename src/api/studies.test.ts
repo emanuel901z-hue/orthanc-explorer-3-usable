@@ -23,12 +23,17 @@ describe("studiesApi", () => {
     expect((init as RequestInit & { headers: Headers }).headers.get("Content-Type")).toBe("application/json");
   });
 
-  it("get() hits /studies/:id", async () => {
+  it("get() hits /studies/:id with requestedTags for computed fields", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("{}", { status: 200 }),
     );
     await studiesApi.get("abc-123");
-    expect(fetchMock.mock.calls[0][0]).toBe("/studies/abc-123");
+    const url = fetchMock.mock.calls[0][0] as string;
+    expect(url.startsWith("/studies/abc-123")).toBe(true);
+    expect(url).toContain("requestedTags=ModalitiesInStudy");
+    expect(url).toContain("BodyPartExamined");
+    expect(url).toContain("NumberOfStudyRelatedInstances");
+    expect(url).toContain("NumberOfStudyRelatedSeries");
   });
 
   it("getSeries() hits /studies/:id/series", async () => {

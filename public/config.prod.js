@@ -18,5 +18,6 @@ window.__OE3_CONFIG__ = {
   },
   branding: {
     title: "Orthanc Explorer 3",
+    logoUrl: "/oe3/logo/oe3-logo-128.png",
   },
 };

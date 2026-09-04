@@ -21,6 +21,7 @@ import {
   X,
   FileDown,
   CalendarIcon,
+  Loader2,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,11 +45,12 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useChanges } from '@/features/activity/hooks/useChanges';
+import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
 import type { Change } from '@/api/changes';
+import type { OrthancJob } from '@/api/jobs';
 import { useJobStore } from '@/store/job-store';
 import { useAuditStore } from '@/store/audit-store';
 import { ActivityEvent, ActivityCategory, ActivitySeverity } from '@/shared/types/activity';
-import { Job } from '@/shared/types/job';
 import { ActivityDetailPanel } from '@/features/activity/components/ActivityDetailPanel';
 import { useActivityUIStore } from '@/store/activity-ui-store';
 import { cn } from '@/lib/utils';
@@ -63,6 +65,11 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   download: <Download className="h-3.5 w-3.5" />,
   echo: <Radio className="h-3.5 w-3.5" />,
   system: <Server className="h-3.5 w-3.5" />,
+  move: <Download className="h-3.5 w-3.5" />,
+  archive: <Download className="h-3.5 w-3.5" />,
+  transcode: <Server className="h-3.5 w-3.5" />,
+  split: <Pencil className="h-3.5 w-3.5" />,
+  merge: <Pencil className="h-3.5 w-3.5" />,
 };
 
 const SEVERITY_ICON: Record<ActivitySeverity, React.ReactNode> = {
@@ -72,23 +79,61 @@ const SEVERITY_ICON: Record<ActivitySeverity, React.ReactNode> = {
   info: <Info className="h-3.5 w-3.5 text-info" />,
 };
 
-const CATEGORY_LABELS: Record<ActivityCategory, string> = {
-  job: 'Job',
-  audit: 'Audit',
-  log: 'System',
-};
-
 const CATEGORY_COLORS: Record<ActivityCategory, string> = {
   job: 'bg-primary/10 text-primary border-primary/20',
   audit: 'bg-accent/10 text-accent border-accent/20',
   log: 'bg-muted text-muted-foreground border-border',
 };
 
-function changeToActivity(change: Change): ActivityEvent {
+// Orthanc job type → action mapping
+const JOB_TYPE_MAP: Record<string, string> = {
+  'orthanc-store': 'send',
+  'orthanc-move': 'move',
+  'orthanc-anonymize': 'anonymize',
+  'orthanc-modify': 'modify',
+  'orthanc-archive': 'archive',
+  'orthanc-media': 'download',
+  'orthanc-split': 'split',
+  'orthanc-merge': 'merge',
+  'orthanc-transcode': 'transcode',
+  'orthanc-dicomweb': 'system',
+};
+
+// Orthanc job type → i18n label key suffix
+const JOB_TYPE_LABEL_MAP: Record<string, string> = {
+  'orthanc-store': 'store',
+  'orthanc-move': 'move',
+  'orthanc-anonymize': 'anonymize',
+  'orthanc-modify': 'modify',
+  'orthanc-archive': 'archive',
+  'orthanc-media': 'media',
+  'orthanc-split': 'split',
+  'orthanc-merge': 'merge',
+  'orthanc-transcode': 'transcode',
+  'orthanc-dicomweb': 'dicomweb',
+};
+
+function parseOrthancDate(dateStr?: string): number {
+  if (!dateStr) return 0;
+  // Orthanc format: "20240101T120000" (YYYYMMDDTHHMMSS)
+  const m = dateStr.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/);
+  if (!m) return 0;
+  return new Date(
+    parseInt(m[1]),
+    parseInt(m[2]) - 1,
+    parseInt(m[3]),
+    parseInt(m[4]),
+    parseInt(m[5]),
+    parseInt(m[6]),
+  ).getTime();
+}
+
+function changeToActivity(change: Change, t: (key: string, opts?: any) => string): ActivityEvent {
   const changeTypeMap: Record<string, string> = {
     NewStudy: 'upload',
     NewSeries: 'upload',
     NewInstance: 'upload',
+    NewPatient: 'upload',
     StableStudy: 'system',
     StableSeries: 'system',
     StableInstance: 'system',
@@ -98,26 +143,95 @@ function changeToActivity(change: Change): ActivityEvent {
   };
 
   const action = changeTypeMap[change.ChangeType] ?? 'system';
-  const ts = new Date(change.Date).getTime();
+  const ts = parseOrthancDate(change.Date) || Date.now();
+
+  // i18n the change type
+  const changeTypeKey = `activity.changeTypes.${change.ChangeType}`;
+  const changeTypeLabel = t(changeTypeKey);
+  const resourceTypeLabel = t(`activity.resourceTypes.${change.ResourceType}`, {
+    defaultValue: change.ResourceType,
+  });
 
   return {
     id: `change-${change.Seq}`,
-    timestamp: isNaN(ts) ? Date.now() : ts,
+    timestamp: ts,
     category: 'log',
-    severity: 'info',
-    title: `${change.ChangeType}: ${change.ResourceType} ${change.ID}`,
+    severity: change.ChangeType.startsWith('Deletion') ? 'warning' : 'info',
+    title: `${changeTypeLabel}: ${resourceTypeLabel} ${change.ID.substring(0, 12)}`,
     action,
     resource: change.Path,
     metadata: {
-      'Resource Type': change.ResourceType,
-      'Resource ID': change.ID,
-      Sequence: String(change.Seq),
+      [t('activity.metadata.resourceType')]: change.ResourceType,
+      [t('activity.metadata.resourceId')]: change.ID,
+      [t('activity.metadata.sequence')]: String(change.Seq),
     },
   };
 }
 
-function jobToActivity(job: Job): ActivityEvent {
-  const statusLabel = job.status === 'running' ? 'in progress' : job.status;
+function orthancJobToActivity(
+  job: OrthancJob,
+  t: (key: string, opts?: any) => string,
+): ActivityEvent {
+  const action = JOB_TYPE_MAP[job.Type] ?? 'system';
+  const typeLabelKey = JOB_TYPE_LABEL_MAP[job.Type] ?? 'system';
+  const typeLabel = t(`activity.jobTypes.${typeLabelKey}`, { defaultValue: job.Type });
+
+  const stateMap: Record<string, ActivitySeverity> = {
+    Success: 'success',
+    Failure: 'error',
+    Running: 'info',
+    Pending: 'info',
+    Paused: 'warning',
+    Retry: 'warning',
+  };
+  const severity = stateMap[job.State] ?? 'info';
+
+  const createdAt = parseOrthancDate(job.CreationTime) || Date.now();
+  const completedAt = parseOrthancDate(job.CompletionTime);
+  const duration = completedAt && completedAt > createdAt ? completedAt - createdAt : undefined;
+
+  const stateLabel = t(`activity.jobStates.${job.State.toLowerCase()}`, {
+    defaultValue: job.State,
+  });
+
+  const title =
+    job.State === 'Running'
+      ? `${typeLabel} — ${stateLabel} (${job.Progress}%)`
+      : job.State === 'Failure'
+        ? `${typeLabel} — ${stateLabel}`
+        : `${typeLabel} — ${stateLabel}`;
+
+  // Extract useful info from Content
+  const content = job.Content || {};
+  const metadata: Record<string, string> = {
+    [t('activity.metadata.jobId')]: job.ID,
+    [t('activity.metadata.state')]: job.State,
+    [t('activity.metadata.progress')]: `${job.Progress}%`,
+  };
+
+  // Add content fields if available
+  if (content['Description']) metadata[t('activity.metadata.description')] = String(content['Description']);
+  if (content['LocalAet']) metadata[t('activity.metadata.localAet')] = String(content['LocalAet']);
+  if (content['RemoteAet']) metadata[t('activity.metadata.remoteAet')] = String(content['RemoteAet']);
+  if (content['PatientID']) metadata[t('activity.metadata.patientId')] = String(content['PatientID']);
+  if (content['StudyInstanceUID']) metadata[t('activity.metadata.studyInstanceUid')] = String(content['StudyInstanceUID']);
+
+  return {
+    id: `orthanc-job-${job.ID}`,
+    timestamp: createdAt,
+    category: 'job',
+    severity,
+    title,
+    action,
+    description: job.ErrorMessage || undefined,
+    duration,
+    metadata,
+  };
+}
+
+function jobToActivity(job: import('@/shared/types/job').Job, t: (key: string, opts?: any) => string): ActivityEvent {
+  const statusLabel = t(`activity.jobStates.${job.status}`, { defaultValue: job.status });
+  const typeLabel = t(`activity.jobTypes.${job.type}`, { defaultValue: job.type });
   return {
     id: job.id,
     timestamp: job.updatedAt,
@@ -130,7 +244,7 @@ function jobToActivity(job: Job): ActivityEvent {
           : job.status === 'running'
             ? 'info'
             : 'info',
-    title: `${job.type.charAt(0).toUpperCase() + job.type.slice(1)} ${statusLabel}: ${job.label}`,
+    title: `${typeLabel} — ${statusLabel}: ${job.label}`,
     action: job.type,
     description: job.error || job.description,
     duration:
@@ -138,10 +252,10 @@ function jobToActivity(job: Job): ActivityEvent {
         ? job.updatedAt - job.createdAt
         : undefined,
     metadata: {
-      'Job ID': job.id,
-      Status: job.status,
-      ...(job.totalItems ? { 'Total Items': String(job.totalItems) } : {}),
-      ...(job.completedItems ? { 'Completed Items': String(job.completedItems) } : {}),
+      [t('activity.metadata.jobId')]: job.id,
+      [t('activity.metadata.state')]: job.status,
+      ...(job.totalItems ? { [t('activity.metadata.totalItems')]: String(job.totalItems) } : {}),
+      ...(job.completedItems ? { [t('activity.metadata.completedItems')]: String(job.completedItems) } : {}),
     },
   };
 }
@@ -153,20 +267,22 @@ function formatDuration(ms?: number): string {
   return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`;
 }
 
-function formatRelativeTime(ts: number): string {
+function formatRelativeTime(ts: number, t: (key: string, options?: any) => string): string {
   const seconds = Math.floor((Date.now() - ts) / 1000);
-  if (seconds < 60) return 'just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 60) return t('activity.relativeTime.justNow');
+  if (seconds < 3600) return t('activity.relativeTime.minutesAgo', { count: Math.floor(seconds / 60) });
+  if (seconds < 86400) return t('activity.relativeTime.hoursAgo', { count: Math.floor(seconds / 3600) });
+  if (seconds < 86400 * 7) return t('activity.relativeTime.daysAgo', { count: Math.floor(seconds / 86400) });
   return format(new Date(ts), 'MMM d, HH:mm');
 }
 
 export default function ActivityPage() {
   const { t } = useTranslation();
-  const { jobs } = useJobStore();
+  const { jobs: clientJobs } = useJobStore();
   const { events: liveAuditEvents } = useAuditStore();
   const { pendingSelectId, setPendingSelectId } = useActivityUIStore();
   const { data: changesData } = useChanges();
+  const { data: orthancJobs = [] } = useOrthancJobs();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
@@ -174,14 +290,21 @@ export default function ActivityPage() {
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [selectedEvent, setSelectedEvent] = useState<ActivityEvent | null>(null);
 
-  // Merge real jobs + live audit events + real changes feed
+  // Merge: Orthanc jobs + client-side jobs + live audit events + changes feed
   const allEvents = useMemo(() => {
-    const changeEvents = (changesData?.Changes ?? []).map(changeToActivity);
-    const jobEvents = jobs.map(jobToActivity);
-    return [...liveAuditEvents, ...jobEvents, ...changeEvents].sort(
-      (a, b) => b.timestamp - a.timestamp,
-    );
-  }, [jobs, liveAuditEvents, changesData]);
+    const changeEvents = (changesData?.Changes ?? []).map((c) => changeToActivity(c, t));
+    const orthancJobEvents = orthancJobs.map((j) => orthancJobToActivity(j, t));
+    const clientJobEvents = clientJobs.map((j) => jobToActivity(j, t));
+    // Deduplicate: Orthanc jobs and client jobs may overlap by ID
+    const seenIds = new Set<string>();
+    const merged = [...liveAuditEvents, ...orthancJobEvents, ...clientJobEvents, ...changeEvents];
+    const deduped = merged.filter((e) => {
+      if (seenIds.has(e.id)) return false;
+      seenIds.add(e.id);
+      return true;
+    });
+    return deduped.sort((a, b) => b.timestamp - a.timestamp);
+  }, [orthancJobs, clientJobs, liveAuditEvents, changesData, t]);
 
   // Auto-select event from Job Manager bar
   useEffect(() => {
@@ -254,6 +377,9 @@ export default function ActivityPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  const categoryLabel = (cat: ActivityCategory) =>
+    t(`activity.categoryLabels.${cat}`);
 
   return (
     <div className="flex h-full">
@@ -343,10 +469,10 @@ export default function ActivityPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t('activity.allSeverities')}</SelectItem>
-                    <SelectItem value="success">Success</SelectItem>
-                    <SelectItem value="info">Info</SelectItem>
-                    <SelectItem value="warning">Warning</SelectItem>
-                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="success">{t('activity.severity.success')}</SelectItem>
+                    <SelectItem value="info">{t('activity.severity.info')}</SelectItem>
+                    <SelectItem value="warning">{t('activity.severity.warning')}</SelectItem>
+                    <SelectItem value="error">{t('activity.severity.error')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -419,82 +545,104 @@ export default function ActivityPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10" />
-                  <TableHead className="w-[140px]">Time</TableHead>
-                  <TableHead className="w-[80px]">Type</TableHead>
-                  <TableHead>Event</TableHead>
-                  <TableHead className="w-[100px] hidden md:table-cell">Duration</TableHead>
-                  <TableHead className="w-[80px] hidden lg:table-cell">Actor</TableHead>
+                  <TableHead className="w-[140px]">{t('activity.colTime')}</TableHead>
+                  <TableHead className="w-[80px]">{t('activity.colType')}</TableHead>
+                  <TableHead>{t('activity.colEvent')}</TableHead>
+                  <TableHead className="w-[100px] hidden md:table-cell">{t('activity.colDuration')}</TableHead>
+                  <TableHead className="w-[80px] hidden lg:table-cell">{t('activity.colActor')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                      No events match your filters
+                      {t('activity.noEvents')}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filtered.slice(0, 200).map((event) => (
-                    <TableRow
-                      key={event.id}
-                      className={cn(
-                        'group cursor-pointer transition-colors',
-                        selectedEvent?.id === event.id && 'bg-muted',
-                      )}
-                      onClick={() =>
-                        setSelectedEvent(selectedEvent?.id === event.id ? null : event)
-                      }
-                    >
-                      <TableCell className="pr-0">
-                        <div className="flex items-center gap-1.5">
-                          {SEVERITY_ICON[event.severity]}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-medium">
-                            {formatRelativeTime(event.timestamp)}
+                  filtered.slice(0, 200).map((event) => {
+                    // Check if this is a running Orthanc job
+                    const isRunningJob =
+                      event.category === 'job' &&
+                      event.metadata?.[t('activity.metadata.state')] === 'Running';
+                    const progress = isRunningJob
+                      ? parseInt(event.metadata?.[t('activity.metadata.progress')] || '0')
+                      : null;
+
+                    return (
+                      <TableRow
+                        key={event.id}
+                        className={cn(
+                          'group cursor-pointer transition-colors',
+                          selectedEvent?.id === event.id && 'bg-muted',
+                        )}
+                        onClick={() =>
+                          setSelectedEvent(selectedEvent?.id === event.id ? null : event)
+                        }
+                      >
+                        <TableCell className="pr-0">
+                          <div className="flex items-center gap-1.5">
+                            {isRunningJob ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                            ) : (
+                              SEVERITY_ICON[event.severity]
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-medium">
+                              {formatRelativeTime(event.timestamp, t)}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {format(new Date(event.timestamp), 'HH:mm:ss')}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={cn('text-[10px] h-5 gap-1', CATEGORY_COLORS[event.category])}
+                          >
+                            {ACTION_ICONS[event.action] || <Info className="h-3 w-3" />}
+                            {categoryLabel(event.category)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{event.title}</p>
+                            {event.description && (
+                              <p className="text-xs text-muted-foreground truncate">
+                                {event.description}
+                              </p>
+                            )}
+                            {isRunningJob && progress !== null && (
+                              <div className="mt-1 w-full max-w-[200px] h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-primary rounded-full transition-all"
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {formatDuration(event.duration)}
                           </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {format(new Date(event.timestamp), 'HH:mm:ss')}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={cn('text-[10px] h-5 gap-1', CATEGORY_COLORS[event.category])}
-                        >
-                          {ACTION_ICONS[event.action] || <Info className="h-3 w-3" />}
-                          {CATEGORY_LABELS[event.category]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">{event.title}</p>
-                          {event.description && (
-                            <p className="text-xs text-muted-foreground truncate">
-                              {event.description}
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <span className="text-xs text-muted-foreground font-mono">
-                          {formatDuration(event.duration)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        <span className="text-xs text-muted-foreground">{event.actor || '—'}</span>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          <span className="text-xs text-muted-foreground">{event.actor || '—'}</span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
             {filtered.length > 200 && (
               <div className="text-center py-3 text-xs text-muted-foreground border-t">
-                Showing 200 of {filtered.length} events
+                {t('activity.showingOf', { shown: 200, total: filtered.length })}
               </div>
             )}
           </CardContent>

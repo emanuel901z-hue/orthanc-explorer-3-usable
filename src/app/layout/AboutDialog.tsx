@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { useUiStore } from '@/store/ui-store';
 
 interface AboutDialogProps {
   open: boolean;
@@ -22,11 +23,19 @@ const systemInfo = [
 ];
 
 export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
+  const { logoUrl, appName } = useUiStore();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-3">
+            <img
+              src={logoUrl}
+              alt={appName}
+              className="h-10 w-10 rounded object-contain"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
             Orthanc Explorer
             <Badge variant="secondary" className="text-[10px]">v0.1.0</Badge>
           </DialogTitle>

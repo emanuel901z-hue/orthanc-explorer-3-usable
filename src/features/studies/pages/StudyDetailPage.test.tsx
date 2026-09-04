@@ -83,6 +83,10 @@ vi.mock('@/features/studies/components/ModifyStudyDialog', () => ({
   ModifyStudyDialog: () => null,
 }));
 
+vi.mock('@/features/studies/components/MigrateStudyDialog', () => ({
+  default: () => null,
+}));
+
 vi.mock('@/features/studies/components/DicomTagBrowser', () => ({
   default: () => null,
 }));

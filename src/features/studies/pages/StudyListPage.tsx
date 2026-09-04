@@ -17,10 +17,13 @@ import {
   Filter,
   ChevronDown,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   Trash2,
   Download,
   Tag,
   Send,
+  HelpCircle,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -43,14 +46,51 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from '@/components/ui/tooltip';
 import { useStudies } from '@/features/studies/hooks/use-studies';
 import { Study, StudyFilters } from '@/shared/types';
 import { ModalityBadge, formatPatientName } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import { useFeature } from '@/config/features';
+import { smartSearch } from '@/lib/smart-search';
 
 const MODALITY_OPTIONS = ['CT', 'MR', 'US', 'CR', 'DX', 'PT', 'NM'];
 const DEFAULT_PAGE_SIZE = 25;
+
+/** Sortable header button — renders sort direction indicator. */
+function SortableHeader({
+  label,
+  column,
+  t,
+}: {
+  label: string;
+  column: { toggleSorting: () => void; getIsSorted: () => false | 'asc' | 'desc' };
+  t: (key: string) => string;
+}) {
+  const sorted = column.getIsSorted();
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="gap-1 -ml-2 h-8 font-semibold"
+      onClick={() => column.toggleSorting()}
+    >
+      {label}
+      {sorted === 'asc' ? (
+        <ArrowUp className="h-3.5 w-3.5" />
+      ) : sorted === 'desc' ? (
+        <ArrowDown className="h-3.5 w-3.5" />
+      ) : (
+        <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />
+      )}
+    </Button>
+  );
+}
 
 export default function StudyListPage() {
   const navigate = useNavigate();
@@ -83,11 +123,33 @@ export default function StudyListPage() {
 
   const { data: studies = [], isLoading, isFetching } = useStudies(filters);
 
+  // Smart search query — separate from structured Orthanc filters.
+  // The smart search runs client-side across ALL fields (name, ID, date,
+  // modality, description, accession, SIUID, referring physician).
+  const smartQuery = searchParams.get('q') || '';
+
+  // Apply smart search client-side on top of Orthanc results
+  const filteredStudies = useMemo(() => {
+    if (!smartQuery.trim()) return studies;
+    return studies.filter((s) =>
+      smartSearch(smartQuery, [
+        s.patientName,
+        s.patientId,
+        s.studyDate,
+        s.studyDescription,
+        s.accessionNumber,
+        s.studyInstanceUID,
+        s.referringPhysician,
+        s.modalities.join(' '),
+        s.modalities.join(','),
+        s.studyTime,
+      ]),
+    );
+  }, [studies, smartQuery]);
+
   const updateFilter = useCallback(
     (key: string, value: string) => {
       setSearchParams((prev) => {
-        // Always create a new instance — mutating prev can cause React Router
-        // to skip navigation when it compares old vs new by reference.
         const next = new URLSearchParams(prev);
         if (value) next.set(key, value);
         else next.delete(key);
@@ -96,8 +158,6 @@ export default function StudyListPage() {
     },
     [setSearchParams],
   );
-
-  const quickSearch = searchParams.get('patientName') || '';
 
   const columns: ColumnDef<Study>[] = useMemo(
     () => [
@@ -124,14 +184,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'patientName',
         header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1 -ml-2 h-8 font-semibold"
-            onClick={() => column.toggleSorting()}
-          >
-            {t('studies.patientName')} <ArrowUpDown className="h-3.5 w-3.5" />
-          </Button>
+          <SortableHeader label={t('studies.patientName')} column={column} t={t} />
         ),
         cell: ({ row }) => (
           <div>
@@ -143,14 +196,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'studyDate',
         header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1 -ml-2 h-8 font-semibold"
-            onClick={() => column.toggleSorting()}
-          >
-            {t('studies.studyDate')} <ArrowUpDown className="h-3.5 w-3.5" />
-          </Button>
+          <SortableHeader label={t('studies.studyDate')} column={column} t={t} />
         ),
         cell: ({ row }) => (
           <div>
@@ -163,7 +209,9 @@ export default function StudyListPage() {
       },
       {
         accessorKey: 'modalities',
-        header: t('studyList.columns.modality'),
+        header: ({ column }) => (
+          <SortableHeader label={t('studyList.columns.modality')} column={column} t={t} />
+        ),
         cell: ({ row }) => (
           <div className="flex gap-1">
             {row.original.modalities.map((m) => (
@@ -171,11 +219,18 @@ export default function StudyListPage() {
             ))}
           </div>
         ),
-        enableSorting: false,
+        // Sort by first modality string
+        sortingFn: (a, b) => {
+          const ma = a.original.modalities[0] ?? '';
+          const mb = b.original.modalities[0] ?? '';
+          return ma.localeCompare(mb);
+        },
       },
       {
         accessorKey: 'studyDescription',
-        header: t('studyList.columns.description'),
+        header: ({ column }) => (
+          <SortableHeader label={t('studyList.columns.description')} column={column} t={t} />
+        ),
         cell: ({ row }) => (
           <span className="text-sm truncate max-w-[200px] block">
             {row.original.studyDescription || '—'}
@@ -184,7 +239,9 @@ export default function StudyListPage() {
       },
       {
         accessorKey: 'accessionNumber',
-        header: t('studyList.columns.accession'),
+        header: ({ column }) => (
+          <SortableHeader label={t('studyList.columns.accession')} column={column} t={t} />
+        ),
         cell: ({ row }) => (
           <span className="font-mono text-xs text-muted-foreground">
             {row.original.accessionNumber || '—'}
@@ -193,7 +250,9 @@ export default function StudyListPage() {
       },
       {
         accessorKey: 'studyInstanceUID',
-        header: t('studyList.columns.studyInstanceUID'),
+        header: ({ column }) => (
+          <SortableHeader label={t('studyList.columns.studyInstanceUID')} column={column} t={t} />
+        ),
         cell: ({ row }) => (
           <span
             className="font-mono text-xs text-muted-foreground block truncate max-w-[280px]"
@@ -208,14 +267,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'lastUpdate',
         header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1 -ml-2 h-8 font-semibold"
-            onClick={() => column.toggleSorting()}
-          >
-            {t('studyList.columns.lastUpdate')} <ArrowUpDown className="h-3.5 w-3.5" />
-          </Button>
+          <SortableHeader label={t('studyList.columns.lastUpdate')} column={column} t={t} />
         ),
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground">
@@ -226,7 +278,9 @@ export default function StudyListPage() {
       },
       {
         accessorKey: 'referringPhysician',
-        header: t('studyList.columns.referring'),
+        header: ({ column }) => (
+          <SortableHeader label={t('studyList.columns.referring')} column={column} t={t} />
+        ),
         cell: ({ row }) => (
           <span className="text-sm truncate max-w-[160px] block">
             {row.original.referringPhysician
@@ -236,8 +290,10 @@ export default function StudyListPage() {
         ),
       },
       {
-        accessorKey: 'numberOfSeries',
-        header: t('studyList.columns.images'),
+        accessorKey: 'numberOfInstances',
+        header: ({ column }) => (
+          <SortableHeader label={t('studyList.columns.images')} column={column} t={t} />
+        ),
         cell: ({ row }) => (
           <div>
             <span className="font-medium">
@@ -248,10 +304,18 @@ export default function StudyListPage() {
             </div>
           </div>
         ),
+        sortingFn: (a, b) => {
+          const ia = a.original.numberOfInstances ?? 0;
+          const ib = b.original.numberOfInstances ?? 0;
+          return ia - ib;
+        },
       },
       {
         id: 'status',
-        header: t('studyList.columns.status'),
+        accessorFn: (row) => (row.isStable ? 1 : 0),
+        header: ({ column }) => (
+          <SortableHeader label={t('studyList.columns.status')} column={column} t={t} />
+        ),
         size: 120,
         minSize: 100,
         cell: ({ row }) => (
@@ -266,14 +330,13 @@ export default function StudyListPage() {
             </span>
           </div>
         ),
-        enableSorting: false,
       },
     ],
     [t],
   );
 
   const table = useReactTable({
-    data: studies,
+    data: filteredStudies,
     columns,
     state: { sorting, rowSelection, columnSizing },
     onSortingChange: setSorting,
@@ -296,7 +359,7 @@ export default function StudyListPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('studies.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            {t('studies.studiesFound', { count: studies.length })}
+            {t('studies.studiesFound', { count: filteredStudies.length })}
           </p>
         </div>
       </div>
@@ -308,12 +371,32 @@ export default function StudyListPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t('studies.searchPlaceholder')}
-                aria-label={t('studies.searchPlaceholder')}
-                value={quickSearch}
-                onChange={(e) => updateFilter('patientName', e.target.value)}
+                placeholder={t('studies.searchPlaceholderSmart')}
+                aria-label={t('studies.searchPlaceholderSmart')}
+                value={smartQuery}
+                onChange={(e) => updateFilter('q', e.target.value)}
                 className="pl-9"
               />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-md text-xs">
+                    <div className="space-y-1">
+                      <p className="font-semibold">{t('search.helpTitle')}</p>
+                      <p>{t('search.helpDescription')}</p>
+                      <ul className="list-disc list-inside space-y-0.5 ml-2">
+                        <li>{t('search.helpName')}</li>
+                        <li>{t('search.helpDate')}</li>
+                        <li>{t('search.helpModality')}</li>
+                        <li>{t('search.helpAccession')}</li>
+                        <li>{t('search.helpCombine')}</li>
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <Button
               variant={showFilters ? 'secondary' : 'outline'}
@@ -326,6 +409,12 @@ export default function StudyListPage() {
                 className={`h-3 w-3 transition-transform ${showFilters ? 'rotate-180' : ''}`}
               />
             </Button>
+          </div>
+
+          {/* Search hint */}
+          <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
+            <Search className="h-3 w-3" />
+            <span>{t('search.hintText')}</span>
           </div>
 
           {showFilters && (
@@ -509,9 +598,9 @@ export default function StudyListPage() {
                 table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1,
               to: Math.min(
                 (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-                studies.length,
+                filteredStudies.length,
               ),
-              total: studies.length,
+              total: filteredStudies.length,
             })}
           </span>
           <div className="flex gap-1">

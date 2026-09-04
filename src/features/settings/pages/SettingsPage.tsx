@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import {
   Server,
   Radio,
@@ -33,18 +34,39 @@ import { toast } from 'sonner';
 import { useSaveModality } from '@/features/settings/hooks/use-save-modality';
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useUiStore();
+  const { theme, setTheme, appName, setAppName } = useUiStore();
   const { t, i18n } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [addModalityOpen, setAddModalityOpen] = useState(false);
   const [editModality, setEditModality] = useState<DicomModality | null>(null);
   const [addServerOpen, setAddServerOpen] = useState(false);
   const [editServer, setEditServer] = useState<DicomWebServer | null>(null);
+  const [brandingName, setBrandingName] = useState(appName);
   const saveModality = useSaveModality();
+
+  useEffect(() => {
+    setBrandingName(appName);
+  }, [appName]);
+
+  // Deep-link support: read/write active tab from URL ?tab= parameter
+  const activeTab = searchParams.get('tab') || 'system';
+  const setActiveTab = (tab: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('tab', tab);
+      return next;
+    });
+  };
+
+  const saveBranding = () => {
+    setAppName(brandingName || appName);
+    toast.success(t('settings.brandingSaved'));
+  };
 
   const changeLanguage = (code: string) => {
     i18n.changeLanguage(code);
     const lang = SUPPORTED_LANGUAGES.find((l) => l.code === code);
-    toast.success(`Language changed to ${lang?.name}`, { description: lang?.nativeName });
+    toast.success(t('settings.languageChanged', { name: lang?.name }), { description: lang?.nativeName });
   };
 
   return (
@@ -54,7 +76,7 @@ export default function SettingsPage() {
         <p className="text-sm text-muted-foreground">{t('settings.subtitle')}</p>
       </div>
 
-      <Tabs defaultValue="system" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="system" className="gap-1.5">
             <Server className="h-3.5 w-3.5" /> {t('settings.system')}
@@ -111,7 +133,8 @@ export default function SettingsPage() {
                   <Input
                     id="app-name"
                     placeholder={t('settings.appNamePlaceholder')}
-                    defaultValue="Orthanc Explorer 3"
+                    value={brandingName}
+                    onChange={(e) => setBrandingName(e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">{t('settings.appNameDesc')}</p>
                 </div>
@@ -132,7 +155,7 @@ export default function SettingsPage() {
               </div>
               <Separator />
               <div className="flex justify-end">
-                <Button size="sm" onClick={() => toast.success(t('settings.brandingSaved'))}>
+                <Button size="sm" onClick={saveBranding}>
                   {t('settings.saveBranding')}
                 </Button>
               </div>
