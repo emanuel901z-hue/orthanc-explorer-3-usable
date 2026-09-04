@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -17,10 +18,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DicomModality } from '@/shared/types';
 
 const modalitySchema = z.object({
-  name: z.string().trim().min(1, 'Name is required').max(100),
-  aet: z.string().trim().min(1, 'AET is required').max(16, 'AET must be ≤16 characters').regex(/^[A-Z0-9_]+$/i, 'Only letters, numbers, underscores'),
-  host: z.string().trim().min(1, 'Host is required').max(255),
-  port: z.coerce.number().int().min(1, 'Port must be ≥1').max(65535, 'Port must be ≤65535'),
+  name: z.string().trim().min(1, 'required').max(100),
+  aet: z.string().trim().min(1, 'required').max(16, 'aetMax').regex(/^[A-Z0-9_]+$/i, 'aetPattern'),
+  host: z.string().trim().min(1, 'required').max(255),
+  port: z.coerce.number().int().min(1, 'portMin').max(65535, 'portMax'),
   manufacturer: z.string().trim().max(100).optional(),
 });
 
@@ -36,6 +37,7 @@ interface AddModalityDialogProps {
 const MANUFACTURERS = ['Siemens', 'GE Healthcare', 'Philips', 'Canon', 'Fujifilm', 'Hologic', 'Other'];
 
 export default function AddModalityDialog({ open, onOpenChange, editModality, onSave }: AddModalityDialogProps) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -74,43 +76,59 @@ export default function AddModalityDialog({ open, onOpenChange, editModality, on
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{editModality ? 'Edit Modality' : 'Add DICOM Modality'}</DialogTitle>
+          <DialogTitle>
+            {editModality ? t('modality.editTitle') : t('modality.addTitle')}
+          </DialogTitle>
           <DialogDescription>
-            Configure a DICOM modality for C-STORE, C-FIND, and C-MOVE operations.
+            {t('modality.description')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="mod-name">Name</Label>
-            <Input id="mod-name" placeholder="CT Scanner Main" {...register('name')} />
-            {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+            <Label htmlFor="mod-name">{t('modality.name')}</Label>
+            <Input id="mod-name" placeholder={t('modality.namePlaceholder')} {...register('name')} />
+            {errors.name && <p className="text-xs text-destructive">{t('modality.validation.required')}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="mod-aet">AET (Application Entity Title)</Label>
-              <Input id="mod-aet" placeholder="CT_MAIN" className="font-mono" {...register('aet')} />
-              {errors.aet && <p className="text-xs text-destructive">{errors.aet.message}</p>}
+              <Label htmlFor="mod-aet">{t('modality.aet')}</Label>
+              <Input id="mod-aet" placeholder={t('modality.aetPlaceholder')} className="font-mono" {...register('aet')} />
+              {errors.aet && (
+                <p className="text-xs text-destructive">
+                  {errors.aet.message === 'aetMax'
+                    ? t('modality.validation.aetMax')
+                    : errors.aet.message === 'aetPattern'
+                      ? t('modality.validation.aetPattern')
+                      : t('modality.validation.required')}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mod-port">Port</Label>
+              <Label htmlFor="mod-port">{t('modality.port')}</Label>
               <Input id="mod-port" type="number" placeholder="104" {...register('port')} />
-              {errors.port && <p className="text-xs text-destructive">{errors.port.message}</p>}
+              {errors.port && (
+                <p className="text-xs text-destructive">
+                  {errors.port.message === 'portMin' || errors.port.message === 'portMax'
+                    ? t('modality.validation.portRange')
+                    : t('modality.validation.required')}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="mod-host">Host / IP Address</Label>
-            <Input id="mod-host" placeholder="192.168.1.10" className="font-mono" {...register('host')} />
-            {errors.host && <p className="text-xs text-destructive">{errors.host.message}</p>}
+            <Label htmlFor="mod-host">{t('modality.host')}</Label>
+            <Input id="mod-host" placeholder={t('modality.hostPlaceholder')} className="font-mono" {...register('host')} />
+            {errors.host && <p className="text-xs text-destructive">{t('modality.validation.required')}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label>Manufacturer</Label>
+            <Label>{t('modality.manufacturer')}</Label>
             <Select value={manufacturer || ''} onValueChange={(v) => setValue('manufacturer', v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select manufacturer (optional)" />
+                <SelectValue placeholder={t('modality.manufacturerPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {MANUFACTURERS.map((m) => (
@@ -121,8 +139,8 @@ export default function AddModalityDialog({ open, onOpenChange, editModality, on
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
-            <Button type="submit">{editModality ? 'Save Changes' : 'Add Modality'}</Button>
+            <Button type="button" variant="outline" onClick={handleClose}>{t('common.cancel')}</Button>
+            <Button type="submit">{editModality ? t('modality.saveChanges') : t('modality.addButton')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

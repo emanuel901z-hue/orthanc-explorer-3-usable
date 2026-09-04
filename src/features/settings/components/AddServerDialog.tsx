@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -18,8 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DicomWebServer } from '@/shared/types';
 
 const serverSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required').max(100),
-  url: z.string().trim().min(1, 'URL is required').url('Must be a valid URL'),
+  name: z.string().trim().min(1, 'required').max(100),
+  url: z.string().trim().min(1, 'required').url('urlInvalid'),
   authType: z.enum(['none', 'basic', 'bearer', 'oauth']),
   username: z.string().trim().max(100).optional(),
   clientId: z.string().trim().max(200).optional(),
@@ -39,6 +40,7 @@ interface AddServerDialogProps {
 }
 
 export default function AddServerDialog({ open, onOpenChange, editServer, onSave }: AddServerDialogProps) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -98,62 +100,70 @@ export default function AddServerDialog({ open, onOpenChange, editServer, onSave
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{editServer ? 'Edit DICOMweb Server' : 'Add DICOMweb Server'}</DialogTitle>
+          <DialogTitle>
+            {editServer ? t('dicomweb.editTitle') : t('dicomweb.addTitle')}
+          </DialogTitle>
           <DialogDescription>
-            Configure a DICOMweb server for QIDO-RS, WADO-RS, and STOW-RS operations.
+            {t('dicomweb.addDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="srv-name">Name</Label>
-            <Input id="srv-name" placeholder="Cloud PACS" {...register('name')} />
-            {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+            <Label htmlFor="srv-name">{t('dicomweb.serverName')}</Label>
+            <Input id="srv-name" placeholder={t('dicomweb.serverNamePlaceholder')} {...register('name')} />
+            {errors.name && <p className="text-xs text-destructive">{t('dicomweb.validation.required')}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="srv-url">Server URL</Label>
-            <Input id="srv-url" placeholder="https://pacs.hospital.org/dicomweb" className="font-mono" {...register('url')} />
-            {errors.url && <p className="text-xs text-destructive">{errors.url.message}</p>}
+            <Label htmlFor="srv-url">{t('dicomweb.serverUrl')}</Label>
+            <Input id="srv-url" placeholder={t('dicomweb.serverUrlPlaceholder')} className="font-mono" {...register('url')} />
+            {errors.url && (
+              <p className="text-xs text-destructive">
+                {errors.url.message === 'urlInvalid'
+                  ? t('dicomweb.validation.urlInvalid')
+                  : t('dicomweb.validation.required')}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label>Authentication</Label>
+            <Label>{t('dicomweb.authentication')}</Label>
             <Select value={authType} onValueChange={(v) => setValue('authType', v as 'none' | 'basic' | 'bearer' | 'oauth')}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No Authentication</SelectItem>
-                <SelectItem value="basic">Basic Auth</SelectItem>
-                <SelectItem value="bearer">Bearer Token</SelectItem>
-                <SelectItem value="oauth">OAuth 2.0</SelectItem>
+                <SelectItem value="none">{t('dicomweb.authNone')}</SelectItem>
+                <SelectItem value="basic">{t('dicomweb.authBasic')}</SelectItem>
+                <SelectItem value="bearer">{t('dicomweb.authBearer')}</SelectItem>
+                <SelectItem value="oauth">{t('dicomweb.authOauth')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {authType === 'basic' && (
             <div className="space-y-2">
-              <Label htmlFor="srv-user">Username</Label>
-              <Input id="srv-user" placeholder="username" {...register('username')} />
+              <Label htmlFor="srv-user">{t('dicomweb.username')}</Label>
+              <Input id="srv-user" placeholder={t('dicomweb.usernamePlaceholder')} {...register('username')} />
             </div>
           )}
 
           {authType === 'oauth' && (
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="srv-client-id">Client ID</Label>
-                <Input id="srv-client-id" placeholder="your-client-id" className="font-mono" {...register('clientId')} />
+                <Label htmlFor="srv-client-id">{t('dicomweb.clientId')}</Label>
+                <Input id="srv-client-id" placeholder={t('dicomweb.clientIdPlaceholder')} className="font-mono" {...register('clientId')} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="srv-client-secret">Client Secret</Label>
-                <Input id="srv-client-secret" type="password" placeholder="your-client-secret" className="font-mono" {...register('clientSecret')} />
+                <Label htmlFor="srv-client-secret">{t('dicomweb.clientSecret')}</Label>
+                <Input id="srv-client-secret" type="password" placeholder={t('dicomweb.clientSecretPlaceholder')} className="font-mono" {...register('clientSecret')} />
               </div>
             </div>
           )}
 
           <div className="space-y-3">
-            <Label className="text-sm">Capabilities</Label>
+            <Label className="text-sm">{t('dicomweb.capabilities')}</Label>
             <div className="space-y-2.5">
               <Controller
                 name="hasQidoSupport"
@@ -162,7 +172,7 @@ export default function AddServerDialog({ open, onOpenChange, editServer, onSave
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">QIDO-RS</p>
-                      <p className="text-xs text-muted-foreground">Query/search for DICOM objects</p>
+                      <p className="text-xs text-muted-foreground">{t('dicomweb.qidoDesc')}</p>
                     </div>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </div>
@@ -175,7 +185,7 @@ export default function AddServerDialog({ open, onOpenChange, editServer, onSave
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">WADO-RS</p>
-                      <p className="text-xs text-muted-foreground">Retrieve DICOM objects</p>
+                      <p className="text-xs text-muted-foreground">{t('dicomweb.wadoDesc')}</p>
                     </div>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </div>
@@ -188,7 +198,7 @@ export default function AddServerDialog({ open, onOpenChange, editServer, onSave
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">STOW-RS</p>
-                      <p className="text-xs text-muted-foreground">Store/send DICOM objects</p>
+                      <p className="text-xs text-muted-foreground">{t('dicomweb.stowDesc')}</p>
                     </div>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </div>
@@ -198,8 +208,8 @@ export default function AddServerDialog({ open, onOpenChange, editServer, onSave
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
-            <Button type="submit">{editServer ? 'Save Changes' : 'Add Server'}</Button>
+            <Button type="button" variant="outline" onClick={handleClose}>{t('common.cancel')}</Button>
+            <Button type="submit">{editServer ? t('dicomweb.saveChanges') : t('dicomweb.addButton')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

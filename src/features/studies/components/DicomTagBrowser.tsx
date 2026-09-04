@@ -270,8 +270,8 @@ interface DicomTagBrowserProps {
     studyDescription?: string;
     accessionNumber?: string;
   };
-  /** Real DICOM tags fetched from Orthanc. If provided, demo tags are not used. */
-  tags?: DicomTagEntry[];
+  /** Real DICOM tags fetched from Orthanc. Required — demo-tag fallback removed. */
+  tags: DicomTagEntry[];
   editable?: boolean;
   onModificationsChange?: (modifications: TagModification[]) => void;
 }
@@ -282,8 +282,8 @@ export default function DicomTagBrowser({ study, tags, editable, onModifications
   const [sortKey, setSortKey] = useState<'tag' | 'name' | 'vr' | 'value'>('tag');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const allTags = useMemo(
-    () => tags ?? generateStudyDemoTags(study),
-    [tags, study],
+    () => tags,
+    [tags],
   );
   const [modifications, setModifications] = useState<Map<string, string>>(new Map());
 

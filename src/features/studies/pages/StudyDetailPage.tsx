@@ -610,7 +610,13 @@ export default function StudyDetailPage() {
         <TabsContent value="tags">
           <Card>
             <CardContent className="pt-6">
-              <DicomTagBrowser study={study} tags={sharedTags} />
+              {sharedTags ? (
+                <DicomTagBrowser study={study} tags={sharedTags} />
+              ) : (
+                <p className="text-center text-muted-foreground text-sm py-8 animate-pulse">
+                  {t('dicomTagBrowser.loading') || 'Loading tags…'}
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -640,7 +646,7 @@ export default function StudyDetailPage() {
           resourceLabel={formatPatientName(study.patientName)}
         />
       )}
-      {study && (
+      {study && sharedTags && (
         <ModifyStudyDialog
           open={modifyOpen}
           onOpenChange={setModifyOpen}

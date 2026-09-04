@@ -20,22 +20,13 @@ import { format } from 'date-fns';
 export default function RemoteSourcesPage() {
   const { t } = useTranslation();
   const { data: modalityNames = [] } = useModalities();
-  const { data: serverNames = [] } = useDicomWebServers();
+  const { data: dicomwebServers = [] } = useDicomWebServers();
   const modalities = modalityNames.map((name) => ({
     id: name,
     name,
     aet: name,
     host: '—',
     port: 0,
-  }));
-  const dicomwebServers = serverNames.map((name) => ({
-    id: name,
-    name,
-    url: '',
-    authType: 'none' as const,
-    hasQidoSupport: false,
-    hasWadoSupport: false,
-    hasStowSupport: false,
   }));
   const [selectedModality, setSelectedModality] = useState('');
   const [selectedServer, setSelectedServer] = useState('');

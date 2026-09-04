@@ -29,11 +29,16 @@ describe("useDicomWebServers", () => {
     vi.restoreAllMocks();
   });
 
-  it("fetches DICOMweb servers via dicomWebServersApi.list", async () => {
+  it("fetches DICOMweb servers via dicomWebServersApi.list and enriches with sidecar meta", async () => {
     const spy = vi.spyOn(dicomWebServersApi, "list").mockResolvedValue(["orthanc-wado", "ohif"]);
     const { result } = renderHook(() => useDicomWebServers(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(spy).toHaveBeenCalled();
-    expect(result.current.data).toEqual(["orthanc-wado", "ohif"]);
+    expect(result.current.data).toHaveLength(2);
+    expect(result.current.data?.[0].name).toBe("orthanc-wado");
+    expect(result.current.data?.[1].name).toBe("ohif");
+    // Sidecar metadata defaults when not present
+    expect(result.current.data?.[0].authType).toBe("none");
+    expect(result.current.data?.[0].hasQidoSupport).toBe(false);
   });
 });

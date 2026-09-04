@@ -32,6 +32,7 @@ import ViewerTab from '@/features/settings/components/ViewerTab';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
 import { toast } from 'sonner';
 import { useSaveModality } from '@/features/settings/hooks/use-save-modality';
+import { useSaveDicomWebServer } from '@/features/settings/hooks/use-save-dicom-web-server';
 
 export default function SettingsPage() {
   const { theme, setTheme, appName, setAppName } = useUiStore();
@@ -43,6 +44,7 @@ export default function SettingsPage() {
   const [editServer, setEditServer] = useState<DicomWebServer | null>(null);
   const [brandingName, setBrandingName] = useState(appName);
   const saveModality = useSaveModality();
+  const saveServer = useSaveDicomWebServer();
 
   useEffect(() => {
     setBrandingName(appName);
@@ -335,11 +337,33 @@ export default function SettingsPage() {
         }}
         editServer={editServer}
         onSave={(values) => {
-          toast.success(
-            editServer ? `Server "${values.name}" updated` : `Server "${values.name}" added`,
-            { description: values.url },
+          saveServer.mutate(
+            {
+              name: values.name,
+              url: values.url,
+              authType: values.authType,
+              username: values.username,
+              clientId: values.clientId,
+              clientSecret: values.clientSecret,
+              hasQidoSupport: values.hasQidoSupport,
+              hasWadoSupport: values.hasWadoSupport,
+              hasStowSupport: values.hasStowSupport,
+            },
+            {
+              onSuccess: () => {
+                toast.success(
+                  editServer
+                    ? t('dicomweb.saveSuccessEdit', { name: values.name })
+                    : t('dicomweb.saveSuccessAdd', { name: values.name }),
+                  { description: values.url },
+                );
+                setEditServer(null);
+              },
+              onError: () => {
+                toast.error(t('dicomweb.saveError', { name: values.name }));
+              },
+            },
           );
-          setEditServer(null);
         }}
       />
     </div>

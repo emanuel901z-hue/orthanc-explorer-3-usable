@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import SendStudyDialog from './SendStudyDialog';
 import { useModalities } from '@/features/settings/hooks/use-modalities';
-import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
 
 /* ── Hoisted mocks ───────────────────────────────────────────── */
 
@@ -15,10 +14,6 @@ const { mockSendStudyAction } = vi.hoisted(() => ({
 
 vi.mock('@/features/settings/hooks/use-modalities', () => ({
   useModalities: vi.fn(() => ({ data: ['PACS1', 'SCANNER_A'], isLoading: false })),
-}));
-
-vi.mock('@/features/settings/hooks/use-dicom-web-servers', () => ({
-  useDicomWebServers: vi.fn(() => ({ data: ['CloudPACS', 'ResearchArchive'], isLoading: false })),
 }));
 
 vi.mock('@/actions/sendStudy', () => ({
@@ -33,14 +28,22 @@ vi.mock('@/api/modalities', () => ({
   },
 }));
 
-vi.mock('@/api/dicomWebServers', () => ({
-  dicomWebServersApi: {
-    list: vi.fn(() => Promise.resolve(['CloudPACS', 'ResearchArchive'])),
-  },
-}));
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) => {
+      if (opts && typeof opts === 'object') {
+        return Object.entries(opts).reduce(
+          (acc, [k, v]) => acc.replace(`{{${k}}}`, String(v)),
+          key,
+        );
+      }
+      return key;
+    },
+  }),
 }));
 
 // useMutation mock — stable, uses a per-call mutate spy captured via let
@@ -69,20 +72,6 @@ function renderDialog() {
   );
 }
 
-/**
- * Switches to the C-STORE tab.
- * Radix UI Tabs requires the full pointer event sequence (mouseDown + mouseUp + click)
- * to update tab state in jsdom, in addition to wrapping in act().
- */
-function switchToCStore() {
-  const tab = screen.getByRole('tab', { name: /c-store/i });
-  act(() => {
-    fireEvent.mouseDown(tab);
-    fireEvent.mouseUp(tab);
-    fireEvent.click(tab);
-  });
-}
-
 /* ── Tests ─────────────────────────────────────────────────────── */
 
 describe('SendStudyDialog — live API wiring', () => {
@@ -91,36 +80,23 @@ describe('SendStudyDialog — live API wiring', () => {
     vi.mocked(useModalities).mockReturnValue(
       { data: ['PACS1', 'SCANNER_A'], isLoading: false } as ReturnType<typeof useModalities>,
     );
-    vi.mocked(useDicomWebServers).mockReturnValue(
-      { data: ['CloudPACS', 'ResearchArchive'], isLoading: false } as ReturnType<typeof useDicomWebServers>,
-    );
   });
 
-  it('renders modality names from useModalities hook in C-STORE tab', () => {
+  it('renders modality names from useModalities hook (C-STORE only, no STOW-RS tab)', () => {
     renderDialog();
-    switchToCStore();
     expect(screen.getByRole('radio', { name: /PACS1/i })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: /SCANNER_A/i })).toBeInTheDocument();
   });
 
-  it('renders DICOMweb server names from useDicomWebServers hook in STOW-RS tab', () => {
-    renderDialog();
-    // STOW-RS is the default tab
-    expect(screen.getByRole('radio', { name: /CloudPACS/i })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /ResearchArchive/i })).toBeInTheDocument();
-  });
-
-  it('calls useModalities and useDicomWebServers hooks (not demo generators)', () => {
+  it('calls useModalities hook (not demo generators)', () => {
     renderDialog();
     expect(useModalities).toHaveBeenCalled();
-    expect(useDicomWebServers).toHaveBeenCalled();
   });
 
   it('calls useMutation when C-STORE send is triggered', async () => {
     mockSendStudyAction.mockResolvedValue(undefined);
 
     renderDialog();
-    switchToCStore();
 
     // Select PACS1 radio
     act(() => {
@@ -130,7 +106,7 @@ describe('SendStudyDialog — live API wiring', () => {
     // Click the Send button — use the mutate spy captured during render
     const mutateSpy = latestMutate;
     act(() => {
-      fireEvent.click(screen.getByRole('button', { name: /send via c-store/i }));
+      fireEvent.click(screen.getByRole('button', { name: /send.sendViaCStore/i }));
     });
 
     await waitFor(() => {
@@ -151,15 +127,6 @@ describe('SendStudyDialog — live API wiring', () => {
       { data: [], isLoading: false } as ReturnType<typeof useModalities>,
     );
     renderDialog();
-    switchToCStore();
-    expect(screen.getByText(/no dicom modalities configured/i)).toBeInTheDocument();
-  });
-
-  it('shows empty state when no DICOMweb servers are configured', () => {
-    vi.mocked(useDicomWebServers).mockReturnValue(
-      { data: [], isLoading: false } as ReturnType<typeof useDicomWebServers>,
-    );
-    renderDialog();
-    expect(screen.getByText(/no dicomweb servers/i)).toBeInTheDocument();
+    expect(screen.getByText(/send.noModalities/i)).toBeInTheDocument();
   });
 });

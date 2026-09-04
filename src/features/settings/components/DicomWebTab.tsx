@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, Shield, ShieldCheck, ShieldAlert, RefreshCw, Globe, KeyRound, Server } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,9 +14,20 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
+import { useDeleteDicomWebServer } from '@/features/settings/hooks/use-delete-dicom-web-server';
 import { DicomWebServer } from '@/shared/types';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const authIcons: Record<string, typeof Shield> = {
   bearer: ShieldCheck,
@@ -52,23 +64,15 @@ interface DicomWebTabProps {
 
 export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProps) {
   const { t } = useTranslation();
-  const { data: serverNames = [] } = useDicomWebServers();
+  const { data: dicomwebServers = [] } = useDicomWebServers();
+  const deleteServer = useDeleteDicomWebServer();
+  const [serverToDelete, setServerToDelete] = useState<DicomWebServer | null>(null);
   const { data: extConfig, isLoading: extLoading } = useQuery({
     queryKey: ['external-dicomweb-config'],
     queryFn: fetchExternalDicomWebConfig,
     staleTime: 60 * 1000,
     retry: false,
   });
-
-  const dicomwebServers: DicomWebServer[] = serverNames.map((name) => ({
-    id: name,
-    name,
-    url: '',
-    authType: 'none' as const,
-    hasQidoSupport: false,
-    hasWadoSupport: false,
-    hasStowSupport: false,
-  }));
 
   return (
     <TooltipProvider>
@@ -339,11 +343,12 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                                 variant="ghost"
                                 size="sm"
                                 className="h-7 w-7 p-0 text-destructive"
+                                onClick={() => setServerToDelete(s)}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Delete</TooltipContent>
+                            <TooltipContent>{t('common.delete')}</TooltipContent>
                           </Tooltip>
                         </div>
                       </TableCell>
@@ -355,6 +360,44 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
           </Table>
         </Card>
       </div>
+
+      {/* Delete confirmation */}
+      <AlertDialog
+        open={!!serverToDelete}
+        onOpenChange={(open) => {
+          if (!open) setServerToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('dicomweb.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('dicomweb.deleteDescription', { name: serverToDelete?.name })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteServer.isPending}
+              onClick={() => {
+                if (!serverToDelete) return;
+                deleteServer.mutate(serverToDelete.name, {
+                  onSuccess: () => {
+                    toast.success(t('dicomweb.deleteSuccess', { name: serverToDelete.name }));
+                    setServerToDelete(null);
+                  },
+                  onError: () => {
+                    toast.error(t('dicomweb.deleteError', { name: serverToDelete.name }));
+                  },
+                });
+              }}
+            >
+              {deleteServer.isPending ? t('common.loading') : t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
   );
 }

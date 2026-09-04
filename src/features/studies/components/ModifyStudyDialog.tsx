@@ -45,8 +45,8 @@ interface ModifyStudyDialogProps {
     accessionNumber?: string;
   };
   instanceCount: number;
-  /** Real study-level shared tags from Orthanc. Falls back to demo tags if not provided. */
-  tags?: DicomTagEntry[];
+  /** Real study-level shared tags from Orthanc. */
+  tags: DicomTagEntry[];
 }
 
 type Step = 'edit' | 'review';
