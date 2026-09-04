@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Download, Image, Send, Eye, Trash2, Pencil, Shield, Search, GitMerge } from 'lucide-react';
+import { Download, Image, Send, Eye, Trash2, Pencil, Shield, Search, GitMerge, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
