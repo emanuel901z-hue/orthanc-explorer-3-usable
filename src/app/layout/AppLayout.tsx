@@ -5,13 +5,13 @@ import { TabBar } from './TabBar';
 import { JobStatusBar } from './JobStatusBar';
 import { UserBadge } from './UserBadge';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useTabStore } from '@/store/tab-store';
 import { useUiStore } from '@/store/ui-store';
 import { useKeyboardShortcuts } from '@/shared/hooks/use-keyboard-shortcuts';
 import { KeyboardShortcutsDialog } from '@/shared/components/KeyboardShortcutsDialog';
 import { Button } from '@/components/ui/button';
-import { Keyboard } from 'lucide-react';
+import { Keyboard, Menu } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function AppLayout() {
@@ -45,6 +45,11 @@ export function AppLayout() {
         <div className="flex-1 flex flex-col min-w-0 h-full">
           {!hideHeader && (
             <header className="h-14 border-b flex items-center px-4 gap-3 bg-primary shrink-0">
+              {!hideSidebar && (
+                <SidebarTrigger className="md:hidden text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9">
+                  <Menu className="h-5 w-5" />
+                </SidebarTrigger>
+              )}
               <div className="flex items-center gap-2">
                 <img
                   src={logoUrl}

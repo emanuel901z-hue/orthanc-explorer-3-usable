@@ -11,6 +11,7 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 - **`useMediaQuery` hook** (`src/shared/hooks/use-media-query.ts`): Reactive CSS media query hook with `addEventListener` for real-time breakpoint switching. Used by StudyListPage and StudyDetailPage to switch between table (desktop) and card (mobile) layouts at the `md` breakpoint (768px).
 - **StudyListPage mobile cards**: On screens < 768px, studies render as vertical cards instead of a 1200px-wide scrollable table. Each card shows patient name + ID, status dot, study date, modality badges, accession number, image/series count, and description. Quick-viewer and quick-report buttons are inline. Checkbox for bulk selection is preserved.
 - **StudyDetailPage series cards**: On mobile, the series table (700px minWidth) switches to compact cards showing series number, modality badge, image count, description, and truncated SeriesInstanceUID. Checkbox for bulk selection preserved.
+- **Mobile hamburger menu**: Added `SidebarTrigger` (Menu icon) to the header, visible only on mobile (`md:hidden`). Without this, the sidebar drawer (Settings, Activity, Jobs, Upload, Servers) was inaccessible on mobile — only studies were reachable via the tab bar. The `SidebarTrigger` component was enhanced to accept custom children (icon override) instead of always rendering the default `PanelLeft` icon.
 
 ### Runtime Config Fix (GAP-Test)
 
@@ -23,6 +24,8 @@ Added:
   src/shared/hooks/use-media-query.ts
 
 Modified:
+  src/app/layout/AppLayout.tsx
+  src/components/ui/sidebar.tsx
   src/features/studies/pages/StudyListPage.tsx
   src/features/studies/pages/StudyDetailPage.tsx
   src/features/studies/components/AddSeriesDialog.tsx
