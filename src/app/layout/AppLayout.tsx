@@ -4,6 +4,7 @@ import { AppSidebar } from './AppSidebar';
 import { TabBar } from './TabBar';
 import { JobStatusBar } from './JobStatusBar';
 import { UserBadge } from './UserBadge';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { useTabStore } from '@/store/tab-store';
 import { useUiStore } from '@/store/ui-store';
@@ -70,6 +71,7 @@ export function AppLayout() {
                 </TooltipTrigger>
                 <TooltipContent>Keyboard shortcuts (?)</TooltipContent>
               </Tooltip>
+              <LanguageSwitcher />
               <UserBadge />
             </header>
           )}
