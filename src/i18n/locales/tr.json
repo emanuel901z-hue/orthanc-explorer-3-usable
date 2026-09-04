@@ -487,7 +487,28 @@
     "auditModifyInitiated": "Örnek değişikliği başlatıldı",
     "auditAnonymizeInitiated": "Örnek anonimleştirme başlatıldı",
     "auditDeleted": "Örnek silindi",
-    "auditDeleteDesc": "Örnek silindi ({{size}})"
+    "auditDeleteDesc": "Örnek silindi ({{size}})",
+    "downloadSuccess": "Örnek indirildi",
+    "downloadFailed": "İndirme başarısız",
+    "deleteSuccess": "Örnek silindi",
+    "deleteFailed": "Silme başarısız",
+    "modifyTitle": "Örnek etiketlerini değiştir",
+    "modifyEditHint": "Düzenlemek için herhangi bir etiket değerine çift tıklayın. UID'ler ve piksel verileri salt okunur.",
+    "modifyReview": "Değişiklikleri incele",
+    "modifyReviewHint": "Uygulamadan önce {{count}} bekleyen değişikliği inceleyin.",
+    "modifyApplyInfo": "Uygulanmaya hazır",
+    "modifyApplyDescription": "Değişiklikler örnek #{{number}}'a uygulanacak",
+    "modifySuccess": "{{count}} etiket başarıyla değiştirildi",
+    "modifyError": "Örnek değiştirilemedi",
+    "reviewChanges": "Değişiklikleri incele ({{count}})",
+    "applyChanges": "Değişiklikleri uygula",
+    "applying": "Uygulanıyor…",
+    "backToEditor": "Editöre dön",
+    "changes": "değişiklik",
+    "tagName": "Ad",
+    "original": "Orijinal",
+    "newValue": "Yeni değer",
+    "empty": "boş"
   },
   "seriesMigrate": {
     "title": "Seri Taşı",
@@ -501,6 +522,19 @@
     "warningDelete": "Merge sonrası kaynak seri SİLİNECEK. Bu işlem geri alınamaz.",
     "migrateButton": "Seri Taşı",
     "success": "Seri hedef çalışmaya başarıyla taşındı",
+    "error": "Taşıma başarısız"
+  },
+  "instanceMigrate": {
+    "title": "Örneği taşı",
+    "description": "Bu örneği başka bir çalışmaya taşıyın.",
+    "instanceToMigrate": "Taşınacak örnek",
+    "instanceLabel": "Örnek #{{number}}",
+    "searchPlaceholder": "Hedef çalışmaları ara…",
+    "noCandidates": "Aday çalışma bulunamadı.",
+    "keepSource": "Kaynak örneği tut (kopya)",
+    "warningDelete": "Kaynak örnek birleştirmeden sonra kalıcı olarak silinecek.",
+    "migrateButton": "Örneği taşı",
+    "success": "Örnek başarıyla taşındı",
     "error": "Taşıma başarısız"
   }
 }

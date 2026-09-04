@@ -634,6 +634,7 @@ export default function SeriesDetailPage() {
         <SendStudyDialog
           open={sendOpen}
           onOpenChange={setSendOpen}
+          level="series"
           studies={[
             {
               id: series.id,

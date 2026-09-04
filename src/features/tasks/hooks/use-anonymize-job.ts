@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
-import { type Study } from '@/api/studies';
 import { anonymizeStudyAction } from '@/actions/anonymizeStudy';
+import { anonymizeSeriesAction } from '@/actions/anonymizeSeries';
+import { anonymizeInstanceAction } from '@/actions/anonymizeInstance';
 import { useJobStore } from '@/store/job-store';
 
 interface AnonymizeTarget {
@@ -20,7 +21,7 @@ export function useAnonymizeJob() {
   const startAnonymize = useCallback(
     async ({ level, id, label }: AnonymizeTarget, options: AnonymizeOptions) => {
       const { addJob, updateJob } = useJobStore.getState();
-      const jobId = `anonymize-${Date.now()}`;
+      const jobId = `anonymize-${level}-${Date.now()}`;
 
       const desc = [
         options.newPatientName && `→ ${options.newPatientName}`,
@@ -52,9 +53,13 @@ export function useAnonymizeJob() {
       };
 
       try {
-        // anonymizeStudyAction only accesses study.ID internally; full Study shape is not required at runtime
-        const stub = { ID: id } as Study;
-        await anonymizeStudyAction(stub, body);
+        if (level === 'study') {
+          await anonymizeStudyAction({ ID: id } as Parameters<typeof anonymizeStudyAction>[0], body);
+        } else if (level === 'series') {
+          await anonymizeSeriesAction(id, body);
+        } else {
+          await anonymizeInstanceAction(id, body);
+        }
         updateJob(jobId, { progress: 100, status: 'complete' });
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Anonymization failed';

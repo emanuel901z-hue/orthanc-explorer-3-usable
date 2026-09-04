@@ -446,7 +446,28 @@
     "auditModifyInitiated": "实例修改已启动",
     "auditAnonymizeInitiated": "实例匿名化已启动",
     "auditDeleted": "实例已删除",
-    "auditDeleteDesc": "实例已删除 ({{size}})"
+    "auditDeleteDesc": "实例已删除 ({{size}})",
+    "downloadSuccess": "实例已下载",
+    "downloadFailed": "下载失败",
+    "deleteSuccess": "实例已删除",
+    "deleteFailed": "删除失败",
+    "modifyTitle": "修改实例标签",
+    "modifyEditHint": "双击任何标签值进行编辑。UID和像素数据为只读。",
+    "modifyReview": "审查更改",
+    "modifyReviewHint": "应用前请审查{{count}}个待处理修改。",
+    "modifyApplyInfo": "准备应用",
+    "modifyApplyDescription": "更改将应用于实例#{{number}}",
+    "modifySuccess": "成功修改{{count}}个标签",
+    "modifyError": "修改实例失败",
+    "reviewChanges": "审查更改 ({{count}})",
+    "applyChanges": "应用更改",
+    "applying": "应用中…",
+    "backToEditor": "返回编辑器",
+    "changes": "更改",
+    "tagName": "名称",
+    "original": "原始值",
+    "newValue": "新值",
+    "empty": "空"
   },
   "seriesMigrate": {
     "title": "迁移系列",
@@ -460,6 +481,19 @@
     "warningDelete": "合并后源系列将被删除。此操作不可逆。",
     "migrateButton": "迁移系列",
     "success": "系列已成功迁移到目标研究",
+    "error": "迁移失败"
+  },
+  "instanceMigrate": {
+    "title": "迁移实例",
+    "description": "将此实例移动到另一个研究。",
+    "instanceToMigrate": "要迁移的实例",
+    "instanceLabel": "实例 #{{number}}",
+    "searchPlaceholder": "搜索目标研究…",
+    "noCandidates": "未找到候选研究。",
+    "keepSource": "保留源实例（副本）",
+    "warningDelete": "源实例将在合并后永久删除。",
+    "migrateButton": "迁移实例",
+    "success": "实例迁移成功",
     "error": "迁移失败"
   }
 }

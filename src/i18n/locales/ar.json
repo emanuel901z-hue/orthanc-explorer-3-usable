@@ -475,7 +475,7 @@
     "loadingPreview": "جاري تحميل المعاينة…",
     "dicomTags": "علامات DICOM",
     "searchTags": "بحث في العلامات...",
-    "tag": "العلامة",
+    "tag": "علامة",
     "vr": "VR",
     "name": "الاسم",
     "value": "القيمة",
@@ -487,7 +487,28 @@
     "auditModifyInitiated": "بدأ تعديل المثيل",
     "auditAnonymizeInitiated": "بدأ إخفاء هوية المثيل",
     "auditDeleted": "تم حذف المثيل",
-    "auditDeleteDesc": "تم حذف المثيل ({{size}})"
+    "auditDeleteDesc": "تم حذف المثيل ({{size}})",
+    "downloadSuccess": "تم تنزيل المثيل",
+    "downloadFailed": "فشل التنزيل",
+    "deleteSuccess": "تم حذف المثيل",
+    "deleteFailed": "فشل الحذف",
+    "modifyTitle": "تعديل علامات المثيل",
+    "modifyEditHint": "انقر نقراً مزدوجاً على أي قيمة علامة لتحريرها. المعرفات وبيانات البكسل للقراءة فقط.",
+    "modifyReview": "مراجعة التغييرات",
+    "modifyReviewHint": "راجع {{count}} تعديل معلق قبل التطبيق.",
+    "modifyApplyInfo": "جاهز للتطبيق",
+    "modifyApplyDescription": "سيتم تطبيق التغييرات على المثيل #{{number}}",
+    "modifySuccess": "تم تعديل {{count}} علامة بنجاح",
+    "modifyError": "فشل في تعديل المثيل",
+    "reviewChanges": "مراجعة التغييرات ({{count}})",
+    "applyChanges": "تطبيق التغييرات",
+    "applying": "جاري التطبيق…",
+    "backToEditor": "العودة إلى المحرر",
+    "changes": "تغييرات",
+    "tagName": "الاسم",
+    "original": "الأصلي",
+    "newValue": "القيمة الجديدة",
+    "empty": "فارغ"
   },
   "seriesMigrate": {
     "title": "ترحيل السلسلة",
@@ -501,6 +522,19 @@
     "warningDelete": "سيتم حذف السلسلة المصدرية بعد الدمج. لا يمكن التراجع عن هذا الإجراء.",
     "migrateButton": "ترحيل السلسلة",
     "success": "تم ترحيل السلسلة بنجاح إلى الدراسة المستهدفة",
+    "error": "فشل الترحيل"
+  },
+  "instanceMigrate": {
+    "title": "ترحيل المثيل",
+    "description": "نقل هذا المثيل إلى دراسة مختلفة.",
+    "instanceToMigrate": "المثيل المراد ترحيله",
+    "instanceLabel": "المثيل #{{number}}",
+    "searchPlaceholder": "البحث عن الدراسات المستهدفة…",
+    "noCandidates": "لم يتم العثور على دراسات مرشحة.",
+    "keepSource": "الاحتفاظ بالمثيل المصدر (نسخة)",
+    "warningDelete": "سيتم حذف المثيل المصدر نهائياً بعد الدمج.",
+    "migrateButton": "ترحيل المثيل",
+    "success": "تم ترحيل المثيل بنجاح",
     "error": "فشل الترحيل"
   }
 }

@@ -434,7 +434,7 @@
     "loadingPreview": "Cargando vista previa…",
     "dicomTags": "Tags DICOM",
     "searchTags": "Buscar tags...",
-    "tag": "Tag",
+    "tag": "Etiqueta",
     "vr": "VR",
     "name": "Nombre",
     "value": "Valor",
@@ -446,7 +446,28 @@
     "auditModifyInitiated": "Modificación de instancia iniciada",
     "auditAnonymizeInitiated": "Anonimización de instancia iniciada",
     "auditDeleted": "Instancia eliminada",
-    "auditDeleteDesc": "Instancia eliminada ({{size}})"
+    "auditDeleteDesc": "Instancia eliminada ({{size}})",
+    "downloadSuccess": "Instancia descargada",
+    "downloadFailed": "Descarga fallida",
+    "deleteSuccess": "Instancia eliminada",
+    "deleteFailed": "Eliminación fallida",
+    "modifyTitle": "Modificar etiquetas de instancia",
+    "modifyEditHint": "Doble clic en cualquier valor de etiqueta para editarlo. UIDs y datos de píxel son de solo lectura.",
+    "modifyReview": "Revisar cambios",
+    "modifyReviewHint": "Revise {{count}} modificación(es) pendiente(s) antes de aplicar.",
+    "modifyApplyInfo": "Listo para aplicar",
+    "modifyApplyDescription": "Los cambios se aplicarán a la instancia #{{number}}",
+    "modifySuccess": "{{count}} etiqueta(s) modificada(s) correctamente",
+    "modifyError": "Error al modificar la instancia",
+    "reviewChanges": "Revisar cambios ({{count}})",
+    "applyChanges": "Aplicar cambios",
+    "applying": "Aplicando…",
+    "backToEditor": "Volver al editor",
+    "changes": "cambios",
+    "tagName": "Nombre",
+    "original": "Original",
+    "newValue": "Nuevo valor",
+    "empty": "vacío"
   },
   "seriesMigrate": {
     "title": "Migrar Serie",
@@ -460,6 +481,19 @@
     "warningDelete": "La serie origen será ELIMINADA después del merge. Esta acción es irreversible.",
     "migrateButton": "Migrar Serie",
     "success": "Serie migrada exitosamente al estudio destino",
+    "error": "Migración fallida"
+  },
+  "instanceMigrate": {
+    "title": "Migrar instancia",
+    "description": "Mover esta instancia a un estudio diferente.",
+    "instanceToMigrate": "Instancia a migrar",
+    "instanceLabel": "Instancia #{{number}}",
+    "searchPlaceholder": "Buscar estudios destino…",
+    "noCandidates": "No se encontraron estudios candidatos.",
+    "keepSource": "Mantener instancia origen (copia)",
+    "warningDelete": "La instancia origen se eliminará permanentemente después de la fusión.",
+    "migrateButton": "Migrar instancia",
+    "success": "Instancia migrada correctamente",
     "error": "Migración fallida"
   }
 }

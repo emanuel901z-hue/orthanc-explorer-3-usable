@@ -434,7 +434,7 @@
     "loadingPreview": "Chargement de l'aperçu…",
     "dicomTags": "Tags DICOM",
     "searchTags": "Rechercher tags...",
-    "tag": "Tag",
+    "tag": "Étiquette",
     "vr": "VR",
     "name": "Nom",
     "value": "Valeur",
@@ -446,7 +446,28 @@
     "auditModifyInitiated": "Modification d'instance initiée",
     "auditAnonymizeInitiated": "Anonymisation d'instance initiée",
     "auditDeleted": "Instance supprimée",
-    "auditDeleteDesc": "Instance supprimée ({{size}})"
+    "auditDeleteDesc": "Instance supprimée ({{size}})",
+    "downloadSuccess": "Instance téléchargée",
+    "downloadFailed": "Échec du téléchargement",
+    "deleteSuccess": "Instance supprimée",
+    "deleteFailed": "Échec de la suppression",
+    "modifyTitle": "Modifier les étiquettes d'instance",
+    "modifyEditHint": "Double-cliquez sur une valeur d'étiquette pour la modifier. Les UID et données pixel sont en lecture seule.",
+    "modifyReview": "Réviser les modifications",
+    "modifyReviewHint": "Révisez {{count}} modification(s) en attente avant d'appliquer.",
+    "modifyApplyInfo": "Prêt à appliquer",
+    "modifyApplyDescription": "Les modifications seront appliquées à l'instance #{{number}}",
+    "modifySuccess": "{{count}} étiquette(s) modifiée(s) avec succès",
+    "modifyError": "Échec de la modification de l'instance",
+    "reviewChanges": "Réviser les modifications ({{count}})",
+    "applyChanges": "Appliquer les modifications",
+    "applying": "Application…",
+    "backToEditor": "Retour à l'éditeur",
+    "changes": "modifications",
+    "tagName": "Nom",
+    "original": "Original",
+    "newValue": "Nouvelle valeur",
+    "empty": "vide"
   },
   "seriesMigrate": {
     "title": "Migrer Série",
@@ -461,5 +482,18 @@
     "migrateButton": "Migrer Série",
     "success": "Série migrée avec succès vers l'étude cible",
     "error": "Échec de la migration"
+  },
+  "instanceMigrate": {
+    "title": "Migrer l'instance",
+    "description": "Déplacer cette instance vers une autre étude.",
+    "instanceToMigrate": "Instance à migrer",
+    "instanceLabel": "Instance #{{number}}",
+    "searchPlaceholder": "Rechercher des études cibles…",
+    "noCandidates": "Aucune étude candidate trouvée.",
+    "keepSource": "Garder l'instance source (copie)",
+    "warningDelete": "L'instance source sera définitivement supprimée après la fusion.",
+    "migrateButton": "Migrer l'instance",
+    "success": "Instance migrée avec succès",
+    "error": "Migration échouée"
   }
 }

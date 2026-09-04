@@ -17,8 +17,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useModalities } from '@/features/settings/hooks/use-modalities';
 import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
 import { sendStudyAction } from '@/actions/sendStudy';
+import { sendSeriesAction } from '@/actions/sendSeries';
+import { sendInstanceAction } from '@/actions/sendInstance';
 
-interface StudyInfo {
+interface ResourceInfo {
   id: string;
   patientName: string;
   studyDescription?: string;
@@ -27,19 +29,20 @@ interface StudyInfo {
 interface SendStudyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  studies: StudyInfo[];
+  studies: ResourceInfo[];
+  /** Resource level: 'study' (default), 'series', or 'instance'. Determines which send action is used. */
+  level?: 'study' | 'series' | 'instance';
 }
 
 type SendProtocol = 'stow-rs' | 'c-store';
 
-export default function SendStudyDialog({ open, onOpenChange, studies }: SendStudyDialogProps) {
+export default function SendStudyDialog({ open, onOpenChange, studies, level = 'study' }: SendStudyDialogProps) {
   const [protocol, setProtocol] = useState<SendProtocol>('stow-rs');
   const [selectedTarget, setSelectedTarget] = useState('');
 
   const { data: modalityNames = [], isLoading: modalitiesLoading } = useModalities();
   const { data: serverNames = [], isLoading: serversLoading } = useDicomWebServers();
 
-  // Fix 3: Define handleClose before useMutation with useCallback so onSuccess captures a stable reference
   const handleClose = useCallback(() => {
     onOpenChange(false);
     setTimeout(() => {
@@ -48,18 +51,22 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
     }, 200);
   }, [onOpenChange]);
 
-  // Fix 1: Batch all study sends inside a single mutationFn to avoid TanStack Query
-  // cancelling prior in-flight requests when .mutate() is called in a loop.
   const sendMutation = useMutation({
-    mutationFn: async ({ studyIds, target }: { studyIds: string[]; target: string }) => {
-      await Promise.all(studyIds.map((id) => sendStudyAction(id, target)));
+    mutationFn: async ({ resourceIds, target }: { resourceIds: string[]; target: string }) => {
+      if (level === 'series') {
+        await Promise.all(resourceIds.map((id) => sendSeriesAction(id, target)));
+      } else if (level === 'instance') {
+        await Promise.all(resourceIds.map((id) => sendInstanceAction(id, target)));
+      } else {
+        await Promise.all(resourceIds.map((id) => sendStudyAction(id, target)));
+      }
     },
     onSuccess: () => {
-      toast.success('Study sent successfully');
+      toast.success(`${level.charAt(0).toUpperCase() + level.slice(1)} sent successfully`);
       handleClose();
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to send study';
+      const message = err instanceof Error ? err.message : `Failed to send ${level}`;
       toast.error(message);
     },
   });
@@ -72,16 +79,14 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
   const handleSend = () => {
     if (!selectedTarget) return;
     if (protocol === 'c-store') {
-      sendMutation.mutate({ studyIds: studies.map((s) => s.id), target: selectedTarget });
+      sendMutation.mutate({ resourceIds: studies.map((s) => s.id), target: selectedTarget });
     }
-    // STOW-RS send is not yet implemented in the backend action layer;
-    // the tab displays live servers but send is disabled until the action exists.
   };
 
   const isSending = sendMutation.isPending;
-
-  // STOW-RS send is disabled pending a dedicated action
   const canSend = !isSending && !!selectedTarget && protocol === 'c-store';
+  const levelLabel = level.charAt(0).toUpperCase() + level.slice(1);
+  const pluralLabel = studies.length === 1 ? levelLabel : `${studies.length} ${levelLabel}s`;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -89,7 +94,7 @@ export default function SendStudyDialog({ open, onOpenChange, studies }: SendStu
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Send className="h-4 w-4" />
-            Send {studies.length === 1 ? 'Study' : `${studies.length} Studies`}
+            Send {pluralLabel}
           </DialogTitle>
           <DialogDescription>
             Choose a protocol and destination. Progress will be tracked in the Job Manager.

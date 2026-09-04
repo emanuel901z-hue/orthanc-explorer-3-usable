@@ -487,7 +487,28 @@
     "auditModifyInitiated": "Instance modify initiated",
     "auditAnonymizeInitiated": "Instance anonymize initiated",
     "auditDeleted": "Instance deleted",
-    "auditDeleteDesc": "Deleted instance ({{size}})"
+    "auditDeleteDesc": "Deleted instance ({{size}})",
+    "downloadSuccess": "Instance downloaded",
+    "downloadFailed": "Download failed",
+    "deleteSuccess": "Instance deleted",
+    "deleteFailed": "Delete failed",
+    "modifyTitle": "Modify Instance Tags",
+    "modifyEditHint": "Double-click any tag value to edit it. UIDs and pixel data tags are read-only.",
+    "modifyReview": "Review Changes",
+    "modifyReviewHint": "Review {{count}} pending modification(s) before applying.",
+    "modifyApplyInfo": "Ready to apply",
+    "modifyApplyDescription": "Changes will be applied to instance #{{number}}",
+    "modifySuccess": "{{count}} tag(s) modified successfully",
+    "modifyError": "Failed to modify instance",
+    "reviewChanges": "Review Changes ({{count}})",
+    "applyChanges": "Apply Changes",
+    "applying": "Applying…",
+    "backToEditor": "Back to Editor",
+    "changes": "changes",
+    "tagName": "Name",
+    "original": "Original",
+    "newValue": "New Value",
+    "empty": "empty"
   },
   "seriesMigrate": {
     "title": "Migrate Series",
@@ -501,6 +522,19 @@
     "warningDelete": "The source series will be DELETED after merge. This action is irreversible.",
     "migrateButton": "Migrate Series",
     "success": "Series successfully migrated into target study",
+    "error": "Migration failed"
+  },
+  "instanceMigrate": {
+    "title": "Migrate Instance",
+    "description": "Move this instance to a different study.",
+    "instanceToMigrate": "Instance to migrate",
+    "instanceLabel": "Instance #{{number}}",
+    "searchPlaceholder": "Search target studies…",
+    "noCandidates": "No candidate studies found.",
+    "keepSource": "Keep source instance (copy)",
+    "warningDelete": "The source instance will be permanently deleted after merge.",
+    "migrateButton": "Migrate Instance",
+    "success": "Instance migrated successfully",
     "error": "Migration failed"
   }
 }

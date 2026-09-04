@@ -487,7 +487,28 @@
     "auditModifyInitiated": "Изменение экземпляра начато",
     "auditAnonymizeInitiated": "Анонимизация экземпляра начата",
     "auditDeleted": "Экземпляр удалён",
-    "auditDeleteDesc": "Экземпляр удалён ({{size}})"
+    "auditDeleteDesc": "Экземпляр удалён ({{size}})",
+    "downloadSuccess": "Экземпляр загружен",
+    "downloadFailed": "Ошибка загрузки",
+    "deleteSuccess": "Экземпляр удалён",
+    "deleteFailed": "Ошибка удаления",
+    "modifyTitle": "Изменить теги экземпляра",
+    "modifyEditHint": "Дважды кликните по значению тега для редактирования. UID и пиксельные данные только для чтения.",
+    "modifyReview": "Проверить изменения",
+    "modifyReviewHint": "Проверьте {{count}} ожидающих изменений перед применением.",
+    "modifyApplyInfo": "Готово к применению",
+    "modifyApplyDescription": "Изменения будут применены к экземпляру #{{number}}",
+    "modifySuccess": "{{count}} тег(ов) успешно изменено",
+    "modifyError": "Не удалось изменить экземпляр",
+    "reviewChanges": "Проверить изменения ({{count}})",
+    "applyChanges": "Применить изменения",
+    "applying": "Применение…",
+    "backToEditor": "Вернуться к редактору",
+    "changes": "изменений",
+    "tagName": "Имя",
+    "original": "Оригинал",
+    "newValue": "Новое значение",
+    "empty": "пусто"
   },
   "seriesMigrate": {
     "title": "Мигрировать серию",
@@ -502,5 +523,18 @@
     "migrateButton": "Мигрировать серию",
     "success": "Серия успешно мигрирована в целевое исследование",
     "error": "Ошибка миграции"
+  },
+  "instanceMigrate": {
+    "title": "Мигрировать экземпляр",
+    "description": "Переместить этот экземпляр в другое исследование.",
+    "instanceToMigrate": "Экземпляр для миграции",
+    "instanceLabel": "Экземпляр #{{number}}",
+    "searchPlaceholder": "Поиск целевых исследований…",
+    "noCandidates": "Целевые исследования не найдены.",
+    "keepSource": "Сохранить исходный экземпляр (копия)",
+    "warningDelete": "Исходный экземпляр будет удалён после слияния.",
+    "migrateButton": "Мигрировать",
+    "success": "Экземпляр успешно мигрирован",
+    "error": "Миграция не удалась"
   }
 }

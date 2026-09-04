@@ -446,7 +446,28 @@
     "auditModifyInitiated": "インスタンス変更開始",
     "auditAnonymizeInitiated": "インスタンス匿名化開始",
     "auditDeleted": "インスタンス削除",
-    "auditDeleteDesc": "インスタンス削除 ({{size}})"
+    "auditDeleteDesc": "インスタンス削除 ({{size}})",
+    "downloadSuccess": "インスタンスをダウンロードしました",
+    "downloadFailed": "ダウンロードに失敗しました",
+    "deleteSuccess": "インスタンスを削除しました",
+    "deleteFailed": "削除に失敗しました",
+    "modifyTitle": "インスタンスタグを変更",
+    "modifyEditHint": "タグ値をダブルクリックして編集します。UIDとピクセルデータは読み取り専用です。",
+    "modifyReview": "変更を確認",
+    "modifyReviewHint": "適用前に{{count}}件の保留中の変更を確認してください。",
+    "modifyApplyInfo": "適用準備完了",
+    "modifyApplyDescription": "変更をインスタンス#{{number}}に適用します",
+    "modifySuccess": "{{count}}個のタグが正常に変更されました",
+    "modifyError": "インスタンスの変更に失敗しました",
+    "reviewChanges": "変更を確認 ({{count}})",
+    "applyChanges": "変更を適用",
+    "applying": "適用中…",
+    "backToEditor": "エディタに戻る",
+    "changes": "変更",
+    "tagName": "名前",
+    "original": "元の値",
+    "newValue": "新しい値",
+    "empty": "空"
   },
   "seriesMigrate": {
     "title": "シリーズ移行",
@@ -460,6 +481,19 @@
     "warningDelete": "マージ後にソースシリーズは削除されます。この操作は取り消せません。",
     "migrateButton": "シリーズ移行",
     "success": "シリーズをターゲットスタディに正常に移行しました",
+    "error": "移行に失敗しました"
+  },
+  "instanceMigrate": {
+    "title": "インスタンスを移行",
+    "description": "このインスタンスを別のスタディに移動します。",
+    "instanceToMigrate": "移行するインスタンス",
+    "instanceLabel": "インスタンス #{{number}}",
+    "searchPlaceholder": "対象スタディを検索…",
+    "noCandidates": "候補スタディが見つかりません。",
+    "keepSource": "ソースインスタンスを保持（コピー）",
+    "warningDelete": "ソースインスタンスはマージ後に完全に削除されます。",
+    "migrateButton": "インスタンスを移行",
+    "success": "インスタンスが正常に移行されました",
     "error": "移行に失敗しました"
   }
 }

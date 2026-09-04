@@ -487,7 +487,28 @@
     "auditModifyInitiated": "Instanz-Änderung eingeleitet",
     "auditAnonymizeInitiated": "Instanz-Anonymisierung eingeleitet",
     "auditDeleted": "Instanz gelöscht",
-    "auditDeleteDesc": "Instanz gelöscht ({{size}})"
+    "auditDeleteDesc": "Instanz gelöscht ({{size}})",
+    "downloadSuccess": "Instanz heruntergeladen",
+    "downloadFailed": "Download fehlgeschlagen",
+    "deleteSuccess": "Instanz gelöscht",
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "modifyTitle": "Instanz-Tags ändern",
+    "modifyEditHint": "Doppelklicken Sie auf einen Tag-Wert, um ihn zu bearbeiten. UIDs und Pixel-Daten sind schreibgeschützt.",
+    "modifyReview": "Änderungen prüfen",
+    "modifyReviewHint": "Prüfen Sie {{count}} ausstehende Änderung(en) vor dem Anwenden.",
+    "modifyApplyInfo": "Bereit zum Anwenden",
+    "modifyApplyDescription": "Änderungen werden auf Instanz #{{number}} angewendet",
+    "modifySuccess": "{{count}} Tag(s) erfolgreich geändert",
+    "modifyError": "Änderung der Instanz fehlgeschlagen",
+    "reviewChanges": "Änderungen prüfen ({{count}})",
+    "applyChanges": "Änderungen anwenden",
+    "applying": "Wird angewendet…",
+    "backToEditor": "Zurück zum Editor",
+    "changes": "Änderungen",
+    "tagName": "Name",
+    "original": "Original",
+    "newValue": "Neuer Wert",
+    "empty": "leer"
   },
   "seriesMigrate": {
     "title": "Serie migrieren",
@@ -501,6 +522,19 @@
     "warningDelete": "Die Quell-Serie wird nach dem Merge GELÖSCHT. Diese Aktion ist unwiderruflich.",
     "migrateButton": "Serie migrieren",
     "success": "Serie erfolgreich in Zielstudie migriert",
+    "error": "Migration fehlgeschlagen"
+  },
+  "instanceMigrate": {
+    "title": "Instanz migrieren",
+    "description": "Verschiebe diese Instanz in eine andere Studie.",
+    "instanceToMigrate": "Zu migrierende Instanz",
+    "instanceLabel": "Instanz #{{number}}",
+    "searchPlaceholder": "Ziel-Studien suchen…",
+    "noCandidates": "Keine Kandidaten-Studien gefunden.",
+    "keepSource": "Quell-Instanz behalten (Kopie)",
+    "warningDelete": "Die Quell-Instanz wird nach dem Merge dauerhaft gelöscht.",
+    "migrateButton": "Instanz migrieren",
+    "success": "Instanz erfolgreich migriert",
     "error": "Migration fehlgeschlagen"
   }
 }

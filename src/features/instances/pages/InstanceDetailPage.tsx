@@ -14,11 +14,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useInstance, useStudy, useSeries, useInstancePreview, useInstanceTransferSyntax } from '@/features/studies/hooks/use-studies';
 import { formatDiskSize, formatPatientName } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
-import MigrateSeriesDialog from '@/features/series/components/MigrateSeriesDialog';
+import MigrateInstanceDialog from '@/features/instances/components/MigrateInstanceDialog';
+import ModifyInstanceDialog from '@/features/instances/components/ModifyInstanceDialog';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
 import { useFeature } from '@/config/features';
+import { downloadInstanceAction } from '@/actions/downloadInstance';
+import { deleteInstanceAction } from '@/actions/deleteInstance';
+import { toast } from 'sonner';
 import type { DicomTag } from '@/shared/types';
 
 const SOP_CLASS_NAMES: Record<string, string> = {
@@ -81,6 +85,9 @@ export default function InstanceDetailPage() {
   const [sendOpen, setSendOpen] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);
+  const [modifyOpen, setModifyOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { audit } = useAuditLog();
   const { data: previewBlob } = useInstancePreview(instanceId!);
 
@@ -170,7 +177,32 @@ export default function InstanceDetailPage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => audit({ action: 'download', title: t('instance.auditDownloaded'), resource: t('instance.instanceNumber', { number: instance.instanceNumber }), description: t('instance.auditDownloadDesc') })}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    disabled={downloading}
+                    onClick={async () => {
+                      setDownloading(true);
+                      try {
+                        await downloadInstanceAction(
+                          instance.id,
+                          `${formatPatientName(study?.patientName ?? 'instance')}_Instance${instance.instanceNumber}.dcm`,
+                        );
+                        audit({
+                          action: 'download',
+                          title: t('instance.auditDownloaded'),
+                          resource: t('instance.instanceNumber', { number: instance.instanceNumber }),
+                          description: t('instance.auditDownloadDesc'),
+                        });
+                        toast.success(t('instance.downloadSuccess'));
+                      } catch {
+                        toast.error(t('instance.downloadFailed'));
+                      } finally {
+                        setDownloading(false);
+                      }
+                    }}
+                  >
                     <Download className="h-3.5 w-3.5" /> {t('instance.download')}
                   </Button>
                 </TooltipTrigger>
@@ -187,7 +219,7 @@ export default function InstanceDetailPage() {
             <GitMerge className="h-3.5 w-3.5" /> {t('instance.migrate')}
           </Button>
           {canModify && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => audit({ action: 'modify', title: t('instance.auditModifyInitiated'), resource: t('instance.instanceNumber', { number: instance.instanceNumber }) })}>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setModifyOpen(true); audit({ action: 'modify', title: t('instance.auditModifyInitiated'), resource: t('instance.instanceNumber', { number: instance.instanceNumber }) }); }}>
               <Pencil className="h-3.5 w-3.5" /> {t('instance.modify')}
             </Button>
           )}
@@ -210,7 +242,28 @@ export default function InstanceDetailPage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => audit({ action: 'delete', title: t('instance.auditDeleted'), severity: 'warning', resource: t('instance.instanceNumber', { number: instance.instanceNumber }), description: t('instance.auditDeleteDesc', { size: formatDiskSize(instance.fileSize) }) })}>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={deleting}
+                    onClick={async () => {
+                      setDeleting(true);
+                      try {
+                        await deleteInstanceAction(instance.id);
+                        audit({
+                          action: 'delete',
+                          title: t('instance.auditDeleted'),
+                          severity: 'warning',
+                          resource: t('instance.instanceNumber', { number: instance.instanceNumber }),
+                          description: t('instance.auditDeleteDesc', { size: formatDiskSize(instance.fileSize) }),
+                        });
+                        toast.success(t('instance.deleteSuccess'));
+                        navigate(`/studies/${studyId}/series/${seriesId}`);
+                      } catch {
+                        toast.error(t('instance.deleteFailed'));
+                        setDeleting(false);
+                      }
+                    }}
+                  >
                     {t('instance.deletePermanently')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -414,6 +467,7 @@ export default function InstanceDetailPage() {
       <SendStudyDialog
         open={sendOpen}
         onOpenChange={setSendOpen}
+        level="instance"
         studies={[{
           id: instance.id,
           patientName: t('instance.instanceNumber', { number: instance.instanceNumber }),
@@ -427,14 +481,27 @@ export default function InstanceDetailPage() {
         resourceId={instance.id}
         resourceLabel={t('instance.instanceNumber', { number: instance.instanceNumber })}
       />
-      {seriesData && studyId && (
-        <MigrateSeriesDialog
+      {studyId && (
+        <MigrateInstanceDialog
           open={migrateOpen}
           onOpenChange={setMigrateOpen}
-          series={seriesData}
+          instanceId={instance.id}
+          instanceNumber={instance.instanceNumber}
           currentStudyId={studyId}
         />
       )}
+      <ModifyInstanceDialog
+        open={modifyOpen}
+        onOpenChange={setModifyOpen}
+        instanceId={instance.id}
+        instanceNumber={instance.instanceNumber}
+        tags={instance.tags.map((tag) => ({
+          tag: tag.tag,
+          vr: tag.vr,
+          name: tag.name,
+          value: tag.value,
+        }))}
+      />
     </div>
   );
 }
