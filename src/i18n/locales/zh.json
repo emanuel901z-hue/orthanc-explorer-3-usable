@@ -333,8 +333,7 @@
     "send": "发送系列",
     "migrate": "迁移",
     "modify": "修改",
-    "modifyTitle": "修改系列",
-    "modifyHint": "使用DICOM标签选项卡编辑系列级标签。",
+    "modifyTitle": "修改系列标签",
     "anonymize": "匿名化",
     "delete": "删除",
     "deleteTitle": "删除系列 #{{number}}",
@@ -377,7 +376,24 @@
     "metadata": {
       "seriesId": "系列ID",
       "instances": "实例"
-    }
+    },
+    "modifyEditHint": "双击任何标签值进行编辑。UID和像素数据为只读。",
+    "modifyReview": "审查更改",
+    "modifyReviewHint": "应用前请审查{{count}}个待处理修改。",
+    "modifyApplyInfo": "准备应用",
+    "modifyApplyDescription": "更改将应用于系列: {{series}}",
+    "modifySuccess": "成功修改{{count}}个标签",
+    "modifyError": "修改系列失败",
+    "reviewChanges": "审查更改 ({{count}})",
+    "applyChanges": "应用更改",
+    "applying": "应用中…",
+    "backToEditor": "返回编辑器",
+    "changes": "更改",
+    "tag": "标签",
+    "tagName": "名称",
+    "original": "原始值",
+    "newValue": "新值",
+    "empty": "空"
   },
   "instance": {
     "notFound": "未找到实例",

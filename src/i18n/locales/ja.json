@@ -333,8 +333,7 @@
     "send": "シリーズ送信",
     "migrate": "移行",
     "modify": "変更",
-    "modifyTitle": "シリーズ変更",
-    "modifyHint": "DICOM Tagsタブでシリーズレベルのタグを編集できます。",
+    "modifyTitle": "シリーズタグを変更",
     "anonymize": "匿名化",
     "delete": "削除",
     "deleteTitle": "シリーズ #{{number}} を削除",
@@ -377,7 +376,24 @@
     "metadata": {
       "seriesId": "シリーズID",
       "instances": "インスタンス"
-    }
+    },
+    "modifyEditHint": "タグ値をダブルクリックして編集します。UIDとピクセルデータは読み取り専用です。",
+    "modifyReview": "変更を確認",
+    "modifyReviewHint": "適用前に{{count}}件の保留中の変更を確認してください。",
+    "modifyApplyInfo": "適用準備完了",
+    "modifyApplyDescription": "変更をシリーズに適用します: {{series}}",
+    "modifySuccess": "{{count}}個のタグが正常に変更されました",
+    "modifyError": "シリーズの変更に失敗しました",
+    "reviewChanges": "変更を確認 ({{count}})",
+    "applyChanges": "変更を適用",
+    "applying": "適用中…",
+    "backToEditor": "エディタに戻る",
+    "changes": "変更",
+    "tag": "タグ",
+    "tagName": "名前",
+    "original": "元の値",
+    "newValue": "新しい値",
+    "empty": "空"
   },
   "instance": {
     "notFound": "インスタンスが見つかりません",

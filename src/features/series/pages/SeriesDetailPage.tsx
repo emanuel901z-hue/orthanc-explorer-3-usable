@@ -63,6 +63,7 @@ import {
   formatPatientName,
 } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
+import ModifySeriesDialog from '@/features/series/components/ModifySeriesDialog';
 import MigrateSeriesDialog from '@/features/series/components/MigrateSeriesDialog';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
@@ -171,6 +172,7 @@ export default function SeriesDetailPage() {
   const [sendOpen, setSendOpen] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);
+  const [modifyOpen, setModifyOpen] = useState(false);
   const [instanceView, setInstanceView] = useState<'grid' | 'table'>('grid');
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -329,7 +331,7 @@ export default function SeriesDetailPage() {
                   title: t('series.auditModifyInitiated', { number: series.seriesNumber }),
                   resource: series.seriesInstanceUID,
                 });
-                toast.info(t('series.modifyTitle'), { description: t('series.modifyHint') });
+                setModifyOpen(true);
               }}
             >
               <Pencil className="h-3.5 w-3.5" /> {t('series.modify')}
@@ -656,6 +658,14 @@ export default function SeriesDetailPage() {
           onOpenChange={setMigrateOpen}
           series={series}
           currentStudyId={studyId}
+        />
+      )}
+      {series && (
+        <ModifySeriesDialog
+          open={modifyOpen}
+          onOpenChange={setModifyOpen}
+          series={series}
+          tags={seriesTags ?? []}
         />
       )}
     </div>

@@ -333,8 +333,7 @@
     "send": "Envoyer Série",
     "migrate": "Migrer",
     "modify": "Modifier",
-    "modifyTitle": "Modifier série",
-    "modifyHint": "Utilisez l'onglet DICOM Tags pour modifier les tags de série.",
+    "modifyTitle": "Modifier les étiquettes de série",
     "anonymize": "Anonymiser",
     "delete": "Supprimer",
     "deleteTitle": "Supprimer Série #{{number}}",
@@ -377,7 +376,24 @@
     "metadata": {
       "seriesId": "ID Série",
       "instances": "Instances"
-    }
+    },
+    "modifyEditHint": "Double-cliquez sur une valeur d'étiquette pour la modifier. Les UID et données pixel sont en lecture seule.",
+    "modifyReview": "Réviser les modifications",
+    "modifyReviewHint": "Révisez {{count}} modification(s) en attente avant d'appliquer.",
+    "modifyApplyInfo": "Prêt à appliquer",
+    "modifyApplyDescription": "Les modifications seront appliquées à la série : {{series}}",
+    "modifySuccess": "{{count}} étiquette(s) modifiée(s) avec succès",
+    "modifyError": "Échec de la modification de la série",
+    "reviewChanges": "Réviser les modifications ({{count}})",
+    "applyChanges": "Appliquer les modifications",
+    "applying": "Application…",
+    "backToEditor": "Retour à l'éditeur",
+    "changes": "modifications",
+    "tag": "Étiquette",
+    "tagName": "Nom",
+    "original": "Original",
+    "newValue": "Nouvelle valeur",
+    "empty": "vide"
   },
   "instance": {
     "notFound": "Instance introuvable",

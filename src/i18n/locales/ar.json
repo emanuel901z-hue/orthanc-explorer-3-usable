@@ -374,8 +374,7 @@
     "send": "إرسال السلسلة",
     "migrate": "ترحيل",
     "modify": "تعديل",
-    "modifyTitle": "تعديل السلسلة",
-    "modifyHint": "استخدم تبويب علامات DICOM لتحرير علامات مستوى السلسلة.",
+    "modifyTitle": "تعديل علامات السلسلة",
     "anonymize": "إخفاء الهوية",
     "delete": "حذف",
     "deleteTitle": "حذف السلسلة #{{number}}",
@@ -418,7 +417,24 @@
     "metadata": {
       "seriesId": "معرف السلسلة",
       "instances": "المثيلات"
-    }
+    },
+    "modifyEditHint": "انقر نقراً مزدوجاً على أي قيمة علامة لتحريرها. المعرفات وبيانات البكسل للقراءة فقط.",
+    "modifyReview": "مراجعة التغييرات",
+    "modifyReviewHint": "راجع {{count}} تعديل معلق قبل التطبيق.",
+    "modifyApplyInfo": "جاهز للتطبيق",
+    "modifyApplyDescription": "سيتم تطبيق التغييرات على السلسلة: {{series}}",
+    "modifySuccess": "تم تعديل {{count}} علامة بنجاح",
+    "modifyError": "فشل في تعديل السلسلة",
+    "reviewChanges": "مراجعة التغييرات ({{count}})",
+    "applyChanges": "تطبيق التغييرات",
+    "applying": "جاري التطبيق…",
+    "backToEditor": "العودة إلى المحرر",
+    "changes": "تغييرات",
+    "tag": "علامة",
+    "tagName": "الاسم",
+    "original": "الأصلي",
+    "newValue": "القيمة الجديدة",
+    "empty": "فارغ"
   },
   "instance": {
     "notFound": "المثيل غير موجود",

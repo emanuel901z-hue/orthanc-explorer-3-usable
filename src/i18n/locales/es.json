@@ -333,8 +333,7 @@
     "send": "Enviar Serie",
     "migrate": "Migrar",
     "modify": "Modificar",
-    "modifyTitle": "Modificar serie",
-    "modifyHint": "Use la pestaña DICOM Tags para editar tags a nivel de serie.",
+    "modifyTitle": "Modificar etiquetas de serie",
     "anonymize": "Anonimizar",
     "delete": "Eliminar",
     "deleteTitle": "Eliminar Serie #{{number}}",
@@ -377,7 +376,24 @@
     "metadata": {
       "seriesId": "ID de Serie",
       "instances": "Instancias"
-    }
+    },
+    "modifyEditHint": "Doble clic en cualquier valor de etiqueta para editarlo. UIDs y datos de píxel son de solo lectura.",
+    "modifyReview": "Revisar cambios",
+    "modifyReviewHint": "Revise {{count}} modificación(es) pendiente(s) antes de aplicar.",
+    "modifyApplyInfo": "Listo para aplicar",
+    "modifyApplyDescription": "Los cambios se aplicarán a la serie: {{series}}",
+    "modifySuccess": "{{count}} etiqueta(s) modificada(s) correctamente",
+    "modifyError": "Error al modificar la serie",
+    "reviewChanges": "Revisar cambios ({{count}})",
+    "applyChanges": "Aplicar cambios",
+    "applying": "Aplicando…",
+    "backToEditor": "Volver al editor",
+    "changes": "cambios",
+    "tag": "Etiqueta",
+    "tagName": "Nombre",
+    "original": "Original",
+    "newValue": "Nuevo valor",
+    "empty": "vacío"
   },
   "instance": {
     "notFound": "Instancia no encontrada",

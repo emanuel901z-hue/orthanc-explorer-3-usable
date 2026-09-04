@@ -374,8 +374,7 @@
     "send": "Seri Gönder",
     "migrate": "Taşı",
     "modify": "Değiştir",
-    "modifyTitle": "Seri değiştir",
-    "modifyHint": "Seri düzeyindeki etiketleri düzenlemek için DICOM Etiketleri sekmesini kullanın.",
+    "modifyTitle": "Seri etiketlerini değiştir",
     "anonymize": "Anonimleştir",
     "delete": "Sil",
     "deleteTitle": "Seri #{{number}} Sil",
@@ -418,7 +417,24 @@
     "metadata": {
       "seriesId": "Seri ID",
       "instances": "Örnekler"
-    }
+    },
+    "modifyEditHint": "Düzenlemek için herhangi bir etiket değerine çift tıklayın. UID'ler ve piksel verileri salt okunur.",
+    "modifyReview": "Değişiklikleri incele",
+    "modifyReviewHint": "Uygulamadan önce {{count}} bekleyen değişikliği inceleyin.",
+    "modifyApplyInfo": "Uygulanmaya hazır",
+    "modifyApplyDescription": "Değişiklikler seriye uygulanacak: {{series}}",
+    "modifySuccess": "{{count}} etiket başarıyla değiştirildi",
+    "modifyError": "Seri değiştirilemedi",
+    "reviewChanges": "Değişiklikleri incele ({{count}})",
+    "applyChanges": "Değişiklikleri uygula",
+    "applying": "Uygulanıyor…",
+    "backToEditor": "Editöre dön",
+    "changes": "değişiklik",
+    "tag": "Etiket",
+    "tagName": "Ad",
+    "original": "Orijinal",
+    "newValue": "Yeni değer",
+    "empty": "boş"
   },
   "instance": {
     "notFound": "Örnek bulunamadı",

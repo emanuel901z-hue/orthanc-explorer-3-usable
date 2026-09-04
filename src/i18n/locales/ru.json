@@ -374,8 +374,7 @@
     "send": "Отправить серию",
     "migrate": "Мигрировать",
     "modify": "Изменить",
-    "modifyTitle": "Изменить серию",
-    "modifyHint": "Используйте вкладку DICOM-тегов для редактирования тегов серии.",
+    "modifyTitle": "Изменить теги серии",
     "anonymize": "Анонимизировать",
     "delete": "Удалить",
     "deleteTitle": "Удалить серию #{{number}}",
@@ -418,7 +417,24 @@
     "metadata": {
       "seriesId": "ID серии",
       "instances": "Экземпляры"
-    }
+    },
+    "modifyEditHint": "Дважды кликните по значению тега для редактирования. UID и пиксельные данные только для чтения.",
+    "modifyReview": "Проверить изменения",
+    "modifyReviewHint": "Проверьте {{count}} ожидающих изменений перед применением.",
+    "modifyApplyInfo": "Готово к применению",
+    "modifyApplyDescription": "Изменения будут применены к серии: {{series}}",
+    "modifySuccess": "{{count}} тег(ов) успешно изменено",
+    "modifyError": "Не удалось изменить серию",
+    "reviewChanges": "Проверить изменения ({{count}})",
+    "applyChanges": "Применить изменения",
+    "applying": "Применение…",
+    "backToEditor": "Вернуться к редактору",
+    "changes": "изменений",
+    "tag": "Тег",
+    "tagName": "Имя",
+    "original": "Оригинал",
+    "newValue": "Новое значение",
+    "empty": "пусто"
   },
   "instance": {
     "notFound": "Экземпляр не найден",
