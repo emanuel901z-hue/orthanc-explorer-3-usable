@@ -37,6 +37,8 @@ import { downloadStudyAction } from '@/actions/downloadStudy';
 import { OrthancError } from '@/lib/errors';
 import type { OrthancStudy } from '@/api/studies';
 import { useFeature } from '@/config/features';
+import { getConfig } from '@/config/runtime';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import type { Series } from '@/shared/types';
 import { toolsApi } from '@/api/tools';
 
@@ -94,6 +96,7 @@ export default function StudyDetailPage() {
   const [seriesSort, setSeriesSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'seriesNumber', dir: 'asc' });
   const [selectedSeriesIds, setSelectedSeriesIds] = useState<Set<string>>(new Set());
   const [bulkDownloading, setBulkDownloading] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   const deleteMutation = useMutation({
     mutationFn: (orthancStudy: OrthancStudy) => deleteStudyAction(orthancStudy),
@@ -403,7 +406,7 @@ export default function StudyDetailPage() {
             size="sm"
             className="gap-1.5"
             onClick={() => {
-              const orthancUrl = (window as any).__OE3_CONFIG__?.orthancUrl || '/orthanc-proxy';
+              const orthancUrl = getConfig().orthancUrl;
               window.open(`${orthancUrl}/studies/${studyId}`, '_blank');
             }}
           >
@@ -685,72 +688,117 @@ export default function StudyDetailPage() {
                           </div>
                         </div>
                       )}
-                      <div className="overflow-auto">
-                        <Table style={{ minWidth: '700px' }}>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="w-10">
-                                <Checkbox
-                                  checked={allSelected ? true : someSelected ? 'indeterminate' : false}
-                                  onCheckedChange={toggleSelectAll}
-                                  aria-label="Select all series"
-                                />
-                              </TableHead>
-                              <TableHead className="cursor-pointer select-none w-16" onClick={() => toggleSort('seriesNumber')}>
-                                #<SortIcon col="seriesNumber" />
-                              </TableHead>
-                              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('modality')}>
-                                Modality<SortIcon col="modality" />
-                              </TableHead>
-                              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('seriesDescription')}>
-                                Description<SortIcon col="seriesDescription" />
-                              </TableHead>
-                              <TableHead className="cursor-pointer select-none w-24" onClick={() => toggleSort('numberOfInstances')}>
-                                Images<SortIcon col="numberOfInstances" />
-                              </TableHead>
-                              <TableHead>Series Instance UID</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {filteredSortedSeries.length === 0 ? (
+                      {isMobile ? (
+                        /* ── Mobile Series Card View ── */
+                        <div className="divide-y">
+                          {filteredSortedSeries.length === 0 ? (
+                            <div className="text-center text-muted-foreground py-8 text-sm">
+                              No series match "{seriesSearch}"
+                            </div>
+                          ) : (
+                            filteredSortedSeries.map((s) => {
+                              const isSelected = selectedSeriesIds.has(s.id);
+                              return (
+                                <div
+                                  key={s.id}
+                                  className={`p-3 cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}
+                                  onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={() => toggleSelectSeries(s.id)}
+                                      aria-label={`Select series ${s.seriesNumber}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                    />
+                                    <span className="font-medium text-sm">#{s.seriesNumber}</span>
+                                    <ModalityBadge modality={s.modality} />
+                                    <span className="text-xs text-muted-foreground ml-auto">
+                                      {s.numberOfInstances} img
+                                    </span>
+                                  </div>
+                                  {s.seriesDescription && (
+                                    <div className="mt-1.5 text-xs text-muted-foreground pl-7">
+                                      {s.seriesDescription}
+                                    </div>
+                                  )}
+                                  <div className="mt-1 text-[10px] font-mono text-muted-foreground pl-7 truncate">
+                                    {s.seriesInstanceUID}
+                                  </div>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      ) : (
+                        /* ── Desktop Series Table ── */
+                        <div className="overflow-auto">
+                          <Table style={{ minWidth: '700px' }}>
+                            <TableHeader>
                               <TableRow>
-                                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                                  No series match "{seriesSearch}"
-                                </TableCell>
+                                <TableHead className="w-10">
+                                  <Checkbox
+                                    checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+                                    onCheckedChange={toggleSelectAll}
+                                    aria-label="Select all series"
+                                  />
+                                </TableHead>
+                                <TableHead className="cursor-pointer select-none w-16" onClick={() => toggleSort('seriesNumber')}>
+                                  #<SortIcon col="seriesNumber" />
+                                </TableHead>
+                                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('modality')}>
+                                  Modality<SortIcon col="modality" />
+                                </TableHead>
+                                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('seriesDescription')}>
+                                  Description<SortIcon col="seriesDescription" />
+                                </TableHead>
+                                <TableHead className="cursor-pointer select-none w-24" onClick={() => toggleSort('numberOfInstances')}>
+                                  Images<SortIcon col="numberOfInstances" />
+                                </TableHead>
+                                <TableHead>Series Instance UID</TableHead>
                               </TableRow>
-                            ) : (
-                              filteredSortedSeries.map((s) => {
-                                const isSelected = selectedSeriesIds.has(s.id);
-                                return (
-                                  <TableRow
-                                    key={s.id}
-                                    className={`cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}
-                                    onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
-                                  >
-                                    <TableCell onClick={(e) => { e.stopPropagation(); toggleSelectSeries(s.id); }}>
-                                      <Checkbox checked={isSelected} aria-label={`Select series ${s.seriesNumber}`} />
-                                    </TableCell>
-                                    <TableCell className="font-medium">{s.seriesNumber}</TableCell>
-                                    <TableCell><ModalityBadge modality={s.modality} /></TableCell>
-                                    <TableCell className="text-sm">{s.seriesDescription || '—'}</TableCell>
-                                    <TableCell className="text-sm text-muted-foreground">{s.numberOfInstances}</TableCell>
-                                    <TableCell className="font-mono text-xs text-muted-foreground max-w-[250px]">
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <span className="truncate block">{s.seriesInstanceUID}</span>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top" className="max-w-md font-mono text-xs break-all">
-                                          {s.seriesInstanceUID}
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
+                            </TableHeader>
+                            <TableBody>
+                              {filteredSortedSeries.length === 0 ? (
+                                <TableRow>
+                                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                                    No series match "{seriesSearch}"
+                                  </TableCell>
+                                </TableRow>
+                              ) : (
+                                filteredSortedSeries.map((s) => {
+                                  const isSelected = selectedSeriesIds.has(s.id);
+                                  return (
+                                    <TableRow
+                                      key={s.id}
+                                      className={`cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}
+                                      onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
+                                    >
+                                      <TableCell onClick={(e) => { e.stopPropagation(); toggleSelectSeries(s.id); }}>
+                                        <Checkbox checked={isSelected} aria-label={`Select series ${s.seriesNumber}`} />
+                                      </TableCell>
+                                      <TableCell className="font-medium">{s.seriesNumber}</TableCell>
+                                      <TableCell><ModalityBadge modality={s.modality} /></TableCell>
+                                      <TableCell className="text-sm">{s.seriesDescription || '—'}</TableCell>
+                                      <TableCell className="text-sm text-muted-foreground">{s.numberOfInstances}</TableCell>
+                                      <TableCell className="font-mono text-xs text-muted-foreground max-w-[250px]">
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <span className="truncate block">{s.seriesInstanceUID}</span>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top" className="max-w-md font-mono text-xs break-all">
+                                            {s.seriesInstanceUID}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })
+                              )}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
                     </>
                   )}
                 </CardContent>

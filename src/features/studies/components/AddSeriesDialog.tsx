@@ -18,6 +18,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { orthancFetch, JSON_CONTENT_HEADERS } from '@/lib/client';
+import { getConfig } from '@/config/runtime';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -61,7 +62,7 @@ export default function AddSeriesDialog({
       const reader = new FileReader();
       reader.onload = async () => {
         const base64 = (reader.result as string).split(',')[1];
-        const orthancUrl = (window as any).__OE3_CONFIG__?.orthancUrl || '/orthanc-proxy';
+        const orthancUrl = getConfig().orthancUrl;
 
         // Determine DICOM SOP Class based on file type
         const ext = selectedFile.name.split('.').pop()?.toLowerCase();

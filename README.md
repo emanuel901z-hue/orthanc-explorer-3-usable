@@ -57,6 +57,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Multi-Label AND/OR Toggle** | Switch between AND (`All`) and OR (`Any`) logic for label filtering. |
 | **Touch-Optimized Controls** | 44px minimum touch target size on `pointer:coarse` devices. |
 | **ApiView & Log Level** | Open Orthanc REST URL for any resource; change Orthanc log level from the UI. |
+| **Mobile Card Views** | Study list and series table switch to responsive card layouts on mobile (< 768px) — no more horizontal scrolling. Cards show all key info with touch-friendly tap targets. |
 
 ---
 

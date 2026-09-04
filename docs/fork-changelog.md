@@ -4,6 +4,33 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v1.6.0 — Mobile Responsive Card Views + Runtime Config Fix (2026-09-04)
+
+### Mobile Card Views (no more horizontal scroll)
+
+- **`useMediaQuery` hook** (`src/shared/hooks/use-media-query.ts`): Reactive CSS media query hook with `addEventListener` for real-time breakpoint switching. Used by StudyListPage and StudyDetailPage to switch between table (desktop) and card (mobile) layouts at the `md` breakpoint (768px).
+- **StudyListPage mobile cards**: On screens < 768px, studies render as vertical cards instead of a 1200px-wide scrollable table. Each card shows patient name + ID, status dot, study date, modality badges, accession number, image/series count, and description. Quick-viewer and quick-report buttons are inline. Checkbox for bulk selection is preserved.
+- **StudyDetailPage series cards**: On mobile, the series table (700px minWidth) switches to compact cards showing series number, modality badge, image count, description, and truncated SeriesInstanceUID. Checkbox for bulk selection preserved.
+
+### Runtime Config Fix (GAP-Test)
+
+- **3 files fixed**: `AddSeriesDialog.tsx`, `StudyDetailPage.tsx`, `SystemInfoTab.tsx` — replaced hardcoded `(window as any).__OE3_CONFIG__?.orthancUrl || '/orthanc-proxy'` with `getConfig().orthancUrl` from `@/config/runtime`. Consistent with `upload-store.ts` and `cornerstoneImageIds.ts` patterns.
+
+### Files Changed
+
+```
+Added:
+  src/shared/hooks/use-media-query.ts
+
+Modified:
+  src/features/studies/pages/StudyListPage.tsx
+  src/features/studies/pages/StudyDetailPage.tsx
+  src/features/studies/components/AddSeriesDialog.tsx
+  src/features/settings/components/SystemInfoTab.tsx
+```
+
+---
+
 ## v1.5.0 — Sprint 2: External Viewers, Remote Q/R, Sharing, Worklists, Custom Buttons, Add-Series (2026-09-04)
 
 ### Sprint 2A: External Viewers

@@ -181,6 +181,7 @@ features: {
 | `src/features/worklists/pages/WorklistsPage.tsx` | DICOM worklist management (list, upload, delete) |
 | `src/lib/custom-buttons.ts` | Configurable custom HTTP buttons with template tokens (`{studyId}`, `{patientId}`, etc.) |
 | `src/lib/filename-template.ts` | Filename template engine for downloads (`{patientName}_{studyDate}_{accession}`) |
+| `src/shared/hooks/use-media-query.ts` | Reactive CSS media query hook — used for mobile/desktop layout switching at 768px breakpoint |
 | `src/i18n/locales/` | 9 languages: en, es, fr, de, ja, zh, ru, tr, ar |
 | `Dockerfile` | Multi-stage build (bun + vite → nginx:alpine) |
 | `docker/oe3-nginx.conf` | SPA-aware nginx config (no-cache for config.js, try-files fallback) |

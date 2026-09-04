@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Users, BookOpen, Layers, Image, HardDrive, Copy, Check, CircleDot } from 'lucide-react';
 import { toast } from 'sonner';
+import { getConfig } from '@/config/runtime';
 import { useSystemInfo, useStats, usePlugins } from '@/features/settings/hooks/use-system-info';
 
 type VerbosityLevel = 'default' | 'verbose' | 'trace';
@@ -57,7 +58,7 @@ export default function SystemInfoTab() {
   const handleVerbosityChange = async (level: VerbosityLevel) => {
     setVerbosityLoading(true);
     try {
-      const orthancUrl = (window as any).__OE3_CONFIG__?.orthancUrl || '/orthanc-proxy';
+      const orthancUrl = getConfig().orthancUrl;
       const orthancLevel = level === 'default' ? 'warning' : level === 'verbose' ? 'info' : 'trace';
       await fetch(`${orthancUrl}/tools/log-level`, {
         method: 'PUT',

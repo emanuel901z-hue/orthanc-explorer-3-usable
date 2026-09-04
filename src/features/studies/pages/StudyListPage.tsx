@@ -64,6 +64,7 @@ import QuickReportDialog from '@/features/studies/components/QuickReportDialog';
 import { FileText } from 'lucide-react';
 import { useFeature } from '@/config/features';
 import { smartSearch } from '@/lib/smart-search';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { deleteStudyAction } from '@/actions/deleteStudy';
 import {
   AlertDialog,
@@ -165,6 +166,7 @@ export default function StudyListPage() {
   );
 
   const { data: studies = [], isLoading, isFetching } = useStudies(filters);
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   // P0.3: Labels with counts — fetch all labels and their study counts
   const { data: allLabels = [] } = useQuery({
@@ -773,11 +775,113 @@ export default function StudyListPage() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table (desktop) / Cards (mobile) */}
       <Card className="relative">
         {isFetching && !isLoading && (
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/40 rounded-t-lg z-10 animate-pulse" />
         )}
+        {isMobile ? (
+          /* ── Mobile Card View ── */
+          <div className="divide-y">
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="p-4 space-y-2">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+              ))
+            ) : table.getRowModel().rows.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                {t('studyList.empty')}
+              </div>
+            ) : (
+              table.getRowModel().rows.map((row) => {
+                const s = row.original;
+                return (
+                  <div
+                    key={row.id}
+                    data-testid="study-card"
+                    className={`p-4 cursor-pointer hover:bg-muted/50 transition-colors ${row.getIsSelected() ? 'bg-primary/5' : ''}`}
+                    onClick={() => navigate(`/studies/${s.id}`)}
+                  >
+                    {/* Top row: checkbox + patient name + status dot */}
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(v) => row.toggleSelected(!!v)}
+                        aria-label="Select row"
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm truncate">
+                            {formatPatientName(s.patientName)}
+                          </span>
+                          <div
+                            className={`h-2 w-2 rounded-full shrink-0 ${s.isStable ? 'bg-success' : 'bg-warning animate-pulse'}`}
+                          />
+                        </div>
+                        <div className="text-xs text-muted-foreground">{s.patientId}</div>
+                      </div>
+                      {/* Quick actions */}
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/viewer/${s.id}`); }}
+                          aria-label={t('studyList.quickViewer', { defaultValue: 'Open viewer' })}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={(e) => { e.stopPropagation(); setReportStudy(s); }}
+                          aria-label={t('studyList.quickReport', { defaultValue: 'Quick report' })}
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    {/* Meta grid: date, modality, accession, images */}
+                    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
+                      <div>
+                        <span className="text-muted-foreground">{t('studies.studyDate')}: </span>
+                        <span>{format(s.studyDate, 'MMM dd, yyyy')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-muted-foreground">{t('studyList.columns.modality')}: </span>
+                        {s.modalities.map((m) => (
+                          <ModalityBadge key={m} modality={m} />
+                        ))}
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">{t('studyList.columns.accession')}: </span>
+                        <span className="font-mono">{s.accessionNumber || '—'}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">{t('studyList.columns.images')}: </span>
+                        <span className="font-medium">{s.numberOfInstances ?? '—'}</span>
+                        <span className="text-muted-foreground"> ({t('studyList.columns.seriesCount', { count: s.numberOfSeries })})</span>
+                      </div>
+                    </div>
+                    {/* Description (if present) */}
+                    {s.studyDescription && (
+                      <div className="mt-2 text-xs text-muted-foreground truncate">
+                        {s.studyDescription}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : (
+        /* ── Desktop Table View ── */
         <div className="overflow-auto">
           <Table style={{ tableLayout: 'auto', minWidth: '1200px' }}>
             <TableHeader>
@@ -848,6 +952,7 @@ export default function StudyListPage() {
             </TableBody>
           </Table>
         </div>
+        )}
 
         {/* Pagination */}
         <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-2">
