@@ -36,4 +36,29 @@ export const toolsApi = {
       body: JSON.stringify({ Resources: resourceIds }),
       responseType: 'blob',
     }),
+
+  /**
+   * GET /labels — Returns all labels in the Orthanc database.
+   * Returns array of label names (strings).
+   */
+  getLabels: () =>
+    orthancFetch<string[]>('/labels'),
+
+  /**
+   * POST /tools/find — Count studies with a specific label.
+   * Returns the count of studies matching the label.
+   */
+  countStudiesByLabel: async (label: string): Promise<number> => {
+    const results = await orthancFetch<unknown[]>('/tools/find', {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify({
+        Level: 'Study',
+        Query: {},
+        Labels: [label],
+        Expand: false,
+      }),
+    });
+    return Array.isArray(results) ? results.length : 0;
+  },
 };

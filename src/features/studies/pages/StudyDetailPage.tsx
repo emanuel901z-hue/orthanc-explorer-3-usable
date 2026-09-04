@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2, GitMerge } from 'lucide-react';
+import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2, GitMerge, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -369,6 +369,14 @@ export default function StudyDetailPage() {
                       </>
                     )}
                   </div>
+                  {/* P0.4: Same patient studies link — navigate to study list filtered by PatientID */}
+                  <a
+                    href={`/oe3/studies?patientId=${encodeURIComponent(study.patientId)}`}
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2"
+                  >
+                    <BookOpen className="h-3 w-3" />
+                    {t('studyDetail.samePatientStudies', { defaultValue: 'Show all studies for this patient' })}
+                  </a>
                 </CardContent>
               </Card>
 

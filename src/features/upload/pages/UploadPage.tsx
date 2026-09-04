@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Upload,
@@ -31,6 +31,19 @@ export default function UploadPage() {
   const uploadJobs = jobs.filter((j) => j.type === 'upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+
+  // P0.6: Warn user when leaving the page while uploads are in progress
+  const hasRunningUploads = uploadJobs.some((j) => j.status === 'running' || j.status === 'pending');
+
+  useEffect(() => {
+    if (!hasRunningUploads) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [hasRunningUploads]);
 
   const collectFiles = useCallback(async (entries: DataTransferItem[]): Promise<File[]> => {
     const files: File[] = [];
