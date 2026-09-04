@@ -556,5 +556,43 @@
     "migrateButton": "ترحيل المثيل",
     "success": "تم ترحيل المثيل بنجاح",
     "error": "فشل الترحيل"
+  },
+  "study": {
+    "modifyTitle": "تعديل علامات الدراسة",
+    "modifyEditHint": "انقر نقراً مزدوجاً على أي قيمة علامة لتحريرها. المعرفات وبيانات البكسل للقراءة فقط.",
+    "modifyReview": "مراجعة التغييرات",
+    "modifyReviewHint": "راجع {{count}} تعديل معلق قبل التطبيق.",
+    "modifyJobNotice": "تعديل طويل المدى",
+    "modifyJobDescription": "تحتوي هذه الدراسة على {{count}} مثيل (العتبة: {{threshold}}). قد يستغرق التعديل وقتاً أطول.",
+    "modifyApplyInfo": "جاهز للتطبيق",
+    "modifyApplyDescription": "سيتم تطبيق التغييرات على {{patient}} ({{count}} مثيل).",
+    "modifySuccess": "تم تعديل {{count}} علامة بنجاح",
+    "modifyError": "فشل في تعديل الدراسة",
+    "reviewChanges": "مراجعة التغييرات ({{count}})",
+    "applyChanges": "تطبيق التغييرات",
+    "queueModificationJob": "إضافة التعديل إلى قائمة الانتظار",
+    "applying": "جاري التطبيق…",
+    "backToEditor": "العودة إلى المحرر",
+    "changes": "تغييرات",
+    "tag": "علامة",
+    "tagName": "الاسم",
+    "original": "الأصلي",
+    "newValue": "القيمة الجديدة",
+    "empty": "فارغ"
+  },
+  "dicomTagBrowser": {
+    "searchPlaceholder": "البحث عن العلامات بالاسم أو المعرّف أو القيمة…",
+    "doubleClickToEdit": "انقر نقراً مزدوجاً للتحرير",
+    "readOnlyTag": "علامة للقراءة فقط",
+    "revertTo": "إرجاع إلى",
+    "dblClick": "نقر مزدوج",
+    "doubleClickHint": "انقر نقراً مزدوجاً على قيمة لتحريرها",
+    "modifiedCount": "تم تعديل {{count}}",
+    "tagCount": "{{count}} علامة",
+    "colTag": "علامة",
+    "colVr": "VR",
+    "colName": "الاسم",
+    "colValue": "القيمة",
+    "empty": "فارغ"
   }
 }

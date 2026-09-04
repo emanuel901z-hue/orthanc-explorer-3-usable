@@ -556,5 +556,43 @@
       "receiving": "受信中",
       "stable": "安定"
     }
+  },
+  "study": {
+    "modifyTitle": "スタディタグを変更",
+    "modifyEditHint": "タグ値をダブルクリックして編集します。UIDとピクセルデータは読み取り専用です。",
+    "modifyReview": "変更を確認",
+    "modifyReviewHint": "適用前に{{count}}件の保留中の変更を確認してください。",
+    "modifyJobNotice": "長時間の変更",
+    "modifyJobDescription": "このスタディには{{count}}インスタンスがあります（しきい値: {{threshold}}）。変更に時間がかかる場合があります。",
+    "modifyApplyInfo": "適用準備完了",
+    "modifyApplyDescription": "変更を{{patient}}（{{count}}インスタンス）に適用します。",
+    "modifySuccess": "{{count}}個のタグが正常に変更されました",
+    "modifyError": "スタディの変更に失敗しました",
+    "reviewChanges": "変更を確認 ({{count}})",
+    "applyChanges": "変更を適用",
+    "queueModificationJob": "変更をキューに追加",
+    "applying": "適用中…",
+    "backToEditor": "エディタに戻る",
+    "changes": "変更",
+    "tag": "タグ",
+    "tagName": "名前",
+    "original": "元の値",
+    "newValue": "新しい値",
+    "empty": "空"
+  },
+  "dicomTagBrowser": {
+    "searchPlaceholder": "名前、タグID、または値でタグを検索…",
+    "doubleClickToEdit": "ダブルクリックで編集",
+    "readOnlyTag": "読み取り専用タグ",
+    "revertTo": "元に戻す",
+    "dblClick": "ダブルクリック",
+    "doubleClickHint": "値をダブルクリックして編集",
+    "modifiedCount": "{{count}}件変更",
+    "tagCount": "{{count}}タグ",
+    "colTag": "タグ",
+    "colVr": "VR",
+    "colName": "名前",
+    "colValue": "値",
+    "empty": "空"
   }
 }

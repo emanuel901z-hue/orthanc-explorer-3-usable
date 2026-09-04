@@ -646,6 +646,7 @@ export default function StudyDetailPage() {
           onOpenChange={setModifyOpen}
           study={study}
           instanceCount={study.numberOfInstances}
+          tags={sharedTags}
         />
       )}
       {study && (

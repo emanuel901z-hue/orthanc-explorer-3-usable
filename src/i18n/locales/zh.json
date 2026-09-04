@@ -556,5 +556,43 @@
       "receiving": "接收中",
       "stable": "稳定"
     }
+  },
+  "study": {
+    "modifyTitle": "修改研究标签",
+    "modifyEditHint": "双击任何标签值进行编辑。UID和像素数据为只读。",
+    "modifyReview": "审查更改",
+    "modifyReviewHint": "应用前请审查{{count}}个待处理修改。",
+    "modifyJobNotice": "长时间修改",
+    "modifyJobDescription": "此研究有{{count}}个实例（阈值：{{threshold}}）。修改可能需要更长时间。",
+    "modifyApplyInfo": "准备应用",
+    "modifyApplyDescription": "更改将应用于{{patient}}（{{count}}个实例）。",
+    "modifySuccess": "成功修改{{count}}个标签",
+    "modifyError": "修改研究失败",
+    "reviewChanges": "审查更改 ({{count}})",
+    "applyChanges": "应用更改",
+    "queueModificationJob": "排队修改",
+    "applying": "应用中…",
+    "backToEditor": "返回编辑器",
+    "changes": "更改",
+    "tag": "标签",
+    "tagName": "名称",
+    "original": "原始值",
+    "newValue": "新值",
+    "empty": "空"
+  },
+  "dicomTagBrowser": {
+    "searchPlaceholder": "按名称、标签ID或值搜索标签…",
+    "doubleClickToEdit": "双击编辑",
+    "readOnlyTag": "只读标签",
+    "revertTo": "还原为",
+    "dblClick": "双击",
+    "doubleClickHint": "双击值进行编辑",
+    "modifiedCount": "已修改{{count}}个",
+    "tagCount": "{{count}}个标签",
+    "colTag": "标签",
+    "colVr": "VR",
+    "colName": "名称",
+    "colValue": "值",
+    "empty": "空"
   }
 }

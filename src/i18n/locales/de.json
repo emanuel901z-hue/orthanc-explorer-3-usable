@@ -556,5 +556,43 @@
     "migrateButton": "Instanz migrieren",
     "success": "Instanz erfolgreich migriert",
     "error": "Migration fehlgeschlagen"
+  },
+  "study": {
+    "modifyTitle": "Studien-Tags ändern",
+    "modifyEditHint": "Doppelklicken Sie auf einen Tag-Wert, um ihn zu bearbeiten. UIDs und Pixel-Daten sind schreibgeschützt.",
+    "modifyReview": "Änderungen prüfen",
+    "modifyReviewHint": "Prüfen Sie {{count}} ausstehende Änderung(en) vor dem Anwenden.",
+    "modifyJobNotice": "Langlaufende Änderung",
+    "modifyJobDescription": "Diese Studie hat {{count}} Instanzen (Schwelle: {{threshold}}). Die Änderung kann länger dauern.",
+    "modifyApplyInfo": "Bereit zum Anwenden",
+    "modifyApplyDescription": "Änderungen werden auf {{patient}} ({{count}} Instanzen) angewendet.",
+    "modifySuccess": "{{count}} Tag(s) erfolgreich geändert",
+    "modifyError": "Änderung der Studie fehlgeschlagen",
+    "reviewChanges": "Änderungen prüfen ({{count}})",
+    "applyChanges": "Änderungen anwenden",
+    "queueModificationJob": "Änderung einreihen",
+    "applying": "Wird angewendet…",
+    "backToEditor": "Zurück zum Editor",
+    "changes": "Änderungen",
+    "tag": "Tag",
+    "tagName": "Name",
+    "original": "Original",
+    "newValue": "Neuer Wert",
+    "empty": "leer"
+  },
+  "dicomTagBrowser": {
+    "searchPlaceholder": "Tags nach Name, Tag-ID oder Wert durchsuchen…",
+    "doubleClickToEdit": "Doppelklick zum Bearbeiten",
+    "readOnlyTag": "Schreibgeschützter Tag",
+    "revertTo": "Zurücksetzen auf",
+    "dblClick": "Doppelklick",
+    "doubleClickHint": "Doppelklick auf einen Wert zum Bearbeiten",
+    "modifiedCount": "{{count}} geändert",
+    "tagCount": "{{count}} Tags",
+    "colTag": "Tag",
+    "colVr": "VR",
+    "colName": "Name",
+    "colValue": "Wert",
+    "empty": "leer"
   }
 }

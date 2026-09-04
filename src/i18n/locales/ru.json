@@ -556,5 +556,43 @@
     "migrateButton": "Мигрировать",
     "success": "Экземпляр успешно мигрирован",
     "error": "Миграция не удалась"
+  },
+  "study": {
+    "modifyTitle": "Изменить теги исследования",
+    "modifyEditHint": "Дважды кликните по значению тега для редактирования. UID и пиксельные данные только для чтения.",
+    "modifyReview": "Проверить изменения",
+    "modifyReviewHint": "Проверьте {{count}} ожидающих изменений перед применением.",
+    "modifyJobNotice": "Длительная модификация",
+    "modifyJobDescription": "Это исследование содержит {{count}} экземпляров (порог: {{threshold}}). Изменение может занять больше времени.",
+    "modifyApplyInfo": "Готово к применению",
+    "modifyApplyDescription": "Изменения будут применены к {{patient}} ({{count}} экземпляров).",
+    "modifySuccess": "{{count}} тег(ов) успешно изменено",
+    "modifyError": "Не удалось изменить исследование",
+    "reviewChanges": "Проверить изменения ({{count}})",
+    "applyChanges": "Применить изменения",
+    "queueModificationJob": "Поставить в очередь",
+    "applying": "Применение…",
+    "backToEditor": "Вернуться к редактору",
+    "changes": "изменений",
+    "tag": "Тег",
+    "tagName": "Имя",
+    "original": "Оригинал",
+    "newValue": "Новое значение",
+    "empty": "пусто"
+  },
+  "dicomTagBrowser": {
+    "searchPlaceholder": "Поиск тегов по имени, ID или значению…",
+    "doubleClickToEdit": "Двойной клик для редактирования",
+    "readOnlyTag": "Тег только для чтения",
+    "revertTo": "Вернуть к",
+    "dblClick": "двойной клик",
+    "doubleClickHint": "Двойной клик по значению для редактирования",
+    "modifiedCount": "{{count}} изменено",
+    "tagCount": "{{count}} тегов",
+    "colTag": "Тег",
+    "colVr": "VR",
+    "colName": "Имя",
+    "colValue": "Значение",
+    "empty": "пусто"
   }
 }

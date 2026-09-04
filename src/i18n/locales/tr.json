@@ -556,5 +556,43 @@
     "migrateButton": "Örneği taşı",
     "success": "Örnek başarıyla taşındı",
     "error": "Taşıma başarısız"
+  },
+  "study": {
+    "modifyTitle": "Çalışma etiketlerini değiştir",
+    "modifyEditHint": "Düzenlemek için herhangi bir etiket değerine çift tıklayın. UID'ler ve piksel verileri salt okunur.",
+    "modifyReview": "Değişiklikleri incele",
+    "modifyReviewHint": "Uygulamadan önce {{count}} bekleyen değişikliği inceleyin.",
+    "modifyJobNotice": "Uzun süreli değişiklik",
+    "modifyJobDescription": "Bu çalışma {{count}} örnek içeriyor (eşik: {{threshold}}). Değişiklik daha uzun sürebilir.",
+    "modifyApplyInfo": "Uygulanmaya hazır",
+    "modifyApplyDescription": "Değişiklikler {{patient}} ({{count}} örnek) üzerine uygulanacak.",
+    "modifySuccess": "{{count}} etiket başarıyla değiştirildi",
+    "modifyError": "Çalışma değiştirilemedi",
+    "reviewChanges": "Değişiklikleri incele ({{count}})",
+    "applyChanges": "Değişiklikleri uygula",
+    "queueModificationJob": "Değişikliği kuyruğa ekle",
+    "applying": "Uygulanıyor…",
+    "backToEditor": "Editöre dön",
+    "changes": "değişiklik",
+    "tag": "Etiket",
+    "tagName": "Ad",
+    "original": "Orijinal",
+    "newValue": "Yeni değer",
+    "empty": "boş"
+  },
+  "dicomTagBrowser": {
+    "searchPlaceholder": "Etiketleri ad, kimlik veya değere göre ara…",
+    "doubleClickToEdit": "Düzenlemek için çift tıklayın",
+    "readOnlyTag": "Salt okunur etiket",
+    "revertTo": "Geri al",
+    "dblClick": "çift tık",
+    "doubleClickHint": "Düzenlemek için bir değere çift tıklayın",
+    "modifiedCount": "{{count}} değiştirildi",
+    "tagCount": "{{count}} etiket",
+    "colTag": "Etiket",
+    "colVr": "VR",
+    "colName": "Ad",
+    "colValue": "Değer",
+    "empty": "boş"
   }
 }

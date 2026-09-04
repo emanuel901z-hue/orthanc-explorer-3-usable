@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, ChevronRight, ChevronDown, Undo2, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -150,6 +151,7 @@ function TagRow({
   modifications?: Map<string, string>;
   onModify?: (tag: string, name: string, originalValue: string, newValue: string) => void;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(entry.value);
@@ -227,9 +229,9 @@ function TagRow({
                   isModified ? 'text-amber-700 dark:text-amber-400 font-medium' : 'text-muted-foreground'
                 )}
                 onDoubleClick={handleStartEdit}
-                title={isEditable ? 'Double-click to edit' : 'Read-only tag'}
+                title={isEditable ? t('dicomTagBrowser.doubleClickToEdit') : t('dicomTagBrowser.readOnlyTag')}
               >
-                {displayValue || <span className="text-muted-foreground/40 italic">empty</span>}
+                {displayValue || <span className="text-muted-foreground/40 italic">{t('dicomTagBrowser.empty')}</span>}
               </span>
               {isModified && (
                 <Tooltip>
@@ -238,12 +240,12 @@ function TagRow({
                       <Undo2 className="h-3 w-3" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent className="text-xs">Revert to: {entry.value}</TooltipContent>
+                  <TooltipContent className="text-xs">{t('dicomTagBrowser.revertTo')}: {entry.value}</TooltipContent>
                 </Tooltip>
               )}
               {isEditable && !isModified && (
                 <span className="text-muted-foreground/0 group-hover:text-muted-foreground/40 text-[9px] transition-colors">
-                  dbl-click
+                  {t('dicomTagBrowser.dblClick')}
                 </span>
               )}
             </div>
@@ -275,6 +277,7 @@ interface DicomTagBrowserProps {
 }
 
 export default function DicomTagBrowser({ study, tags, editable, onModificationsChange }: DicomTagBrowserProps) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<'tag' | 'name' | 'vr' | 'value'>('tag');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
@@ -363,7 +366,7 @@ export default function DicomTagBrowser({ study, tags, editable, onModifications
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search tags by name, tag ID, or value…"
+            placeholder={t('dicomTagBrowser.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-8 h-8 text-xs"
@@ -371,29 +374,29 @@ export default function DicomTagBrowser({ study, tags, editable, onModifications
         </div>
         {editable && modifications.size > 0 && (
           <Badge variant="secondary" className="text-xs">
-            {modifications.size} modified
+            {t('dicomTagBrowser.modifiedCount', { count: modifications.size })}
           </Badge>
         )}
       </div>
       <div className="text-xs text-muted-foreground">
-        {filtered.length} tags
-        {editable && <span className="ml-2 text-muted-foreground/60">· Double-click a value to edit</span>}
+        {t('dicomTagBrowser.tagCount', { count: filtered.length })}
+        {editable && <span className="ml-2 text-muted-foreground/60">· {t('dicomTagBrowser.doubleClickHint')}</span>}
       </div>
       <div className="overflow-auto max-h-[600px] border rounded-md">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[140px] text-xs cursor-pointer select-none" onClick={() => toggleSort('tag')}>
-                Tag<SortIcon col="tag" />
+                {t('dicomTagBrowser.colTag')}<SortIcon col="tag" />
               </TableHead>
               <TableHead className="w-[50px] text-xs cursor-pointer select-none" onClick={() => toggleSort('vr')}>
-                VR<SortIcon col="vr" />
+                {t('dicomTagBrowser.colVr')}<SortIcon col="vr" />
               </TableHead>
               <TableHead className="text-xs cursor-pointer select-none" onClick={() => toggleSort('name')}>
-                Name<SortIcon col="name" />
+                {t('dicomTagBrowser.colName')}<SortIcon col="name" />
               </TableHead>
               <TableHead className="text-xs cursor-pointer select-none" onClick={() => toggleSort('value')}>
-                Value<SortIcon col="value" />
+                {t('dicomTagBrowser.colValue')}<SortIcon col="value" />
               </TableHead>
             </TableRow>
           </TableHeader>

@@ -556,5 +556,43 @@
     "migrateButton": "Migrate Instance",
     "success": "Instance migrated successfully",
     "error": "Migration failed"
+  },
+  "study": {
+    "modifyTitle": "Modify Study Tags",
+    "modifyEditHint": "Double-click any tag value to edit it. UIDs and pixel data tags are read-only.",
+    "modifyReview": "Review Changes",
+    "modifyReviewHint": "Review {{count}} pending modification(s) before applying.",
+    "modifyJobNotice": "Long-running modification",
+    "modifyJobDescription": "This study has {{count}} instances (threshold: {{threshold}}). The modification may take longer to complete.",
+    "modifyApplyInfo": "Ready to apply",
+    "modifyApplyDescription": "Changes will be applied to {{patient}} ({{count}} instances).",
+    "modifySuccess": "{{count}} tag(s) modified successfully",
+    "modifyError": "Failed to modify study",
+    "reviewChanges": "Review Changes ({{count}})",
+    "applyChanges": "Apply Changes",
+    "queueModificationJob": "Queue Modification",
+    "applying": "Applying…",
+    "backToEditor": "Back to Editor",
+    "changes": "changes",
+    "tag": "Tag",
+    "tagName": "Name",
+    "original": "Original",
+    "newValue": "New Value",
+    "empty": "empty"
+  },
+  "dicomTagBrowser": {
+    "searchPlaceholder": "Search tags by name, tag ID, or value…",
+    "doubleClickToEdit": "Double-click to edit",
+    "readOnlyTag": "Read-only tag",
+    "revertTo": "Revert to",
+    "dblClick": "dbl-click",
+    "doubleClickHint": "Double-click a value to edit",
+    "modifiedCount": "{{count}} modified",
+    "tagCount": "{{count}} tags",
+    "colTag": "Tag",
+    "colVr": "VR",
+    "colName": "Name",
+    "colValue": "Value",
+    "empty": "empty"
   }
 }

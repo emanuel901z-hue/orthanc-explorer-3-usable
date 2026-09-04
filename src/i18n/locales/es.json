@@ -556,5 +556,43 @@
       "receiving": "Recibiendo",
       "stable": "Estable"
     }
+  },
+  "study": {
+    "modifyTitle": "Modificar etiquetas del estudio",
+    "modifyEditHint": "Doble clic en cualquier valor de etiqueta para editarlo. Los UID y datos de píxel son de solo lectura.",
+    "modifyReview": "Revisar cambios",
+    "modifyReviewHint": "Revise {{count}} modificación(es) pendiente(s) antes de aplicar.",
+    "modifyJobNotice": "Modificación de larga duración",
+    "modifyJobDescription": "Este estudio tiene {{count}} instancias (umbral: {{threshold}}). La modificación puede tardar más.",
+    "modifyApplyInfo": "Listo para aplicar",
+    "modifyApplyDescription": "Los cambios se aplicarán a {{patient}} ({{count}} instancias).",
+    "modifySuccess": "{{count}} etiqueta(s) modificada(s) correctamente",
+    "modifyError": "Error al modificar el estudio",
+    "reviewChanges": "Revisar cambios ({{count}})",
+    "applyChanges": "Aplicar cambios",
+    "queueModificationJob": "Encolar modificación",
+    "applying": "Aplicando…",
+    "backToEditor": "Volver al editor",
+    "changes": "cambios",
+    "tag": "Etiqueta",
+    "tagName": "Nombre",
+    "original": "Original",
+    "newValue": "Nuevo valor",
+    "empty": "vacío"
+  },
+  "dicomTagBrowser": {
+    "searchPlaceholder": "Buscar etiquetas por nombre, ID o valor…",
+    "doubleClickToEdit": "Doble clic para editar",
+    "readOnlyTag": "Etiqueta de solo lectura",
+    "revertTo": "Revertir a",
+    "dblClick": "doble clic",
+    "doubleClickHint": "Doble clic en un valor para editarlo",
+    "modifiedCount": "{{count}} modificada(s)",
+    "tagCount": "{{count}} etiquetas",
+    "colTag": "Etiqueta",
+    "colVr": "VR",
+    "colName": "Nombre",
+    "colValue": "Valor",
+    "empty": "vacío"
   }
 }

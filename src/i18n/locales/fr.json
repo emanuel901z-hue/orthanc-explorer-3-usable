@@ -556,5 +556,43 @@
       "receiving": "Réception",
       "stable": "Stable"
     }
+  },
+  "study": {
+    "modifyTitle": "Modifier les étiquettes de l'étude",
+    "modifyEditHint": "Double-cliquez sur une valeur d'étiquette pour la modifier. Les UID et données pixel sont en lecture seule.",
+    "modifyReview": "Réviser les modifications",
+    "modifyReviewHint": "Révisez {{count}} modification(s) en attente avant d'appliquer.",
+    "modifyJobNotice": "Modification longue durée",
+    "modifyJobDescription": "Cette étude comporte {{count}} instances (seuil : {{threshold}}). La modification peut prendre plus de temps.",
+    "modifyApplyInfo": "Prêt à appliquer",
+    "modifyApplyDescription": "Les modifications seront appliquées à {{patient}} ({{count}} instances).",
+    "modifySuccess": "{{count}} étiquette(s) modifiée(s) avec succès",
+    "modifyError": "Échec de la modification de l'étude",
+    "reviewChanges": "Réviser les modifications ({{count}})",
+    "applyChanges": "Appliquer les modifications",
+    "queueModificationJob": "Mettre en file d'attente",
+    "applying": "Application…",
+    "backToEditor": "Retour à l'éditeur",
+    "changes": "modifications",
+    "tag": "Étiquette",
+    "tagName": "Nom",
+    "original": "Original",
+    "newValue": "Nouvelle valeur",
+    "empty": "vide"
+  },
+  "dicomTagBrowser": {
+    "searchPlaceholder": "Rechercher des étiquettes par nom, ID ou valeur…",
+    "doubleClickToEdit": "Double-cliquez pour modifier",
+    "readOnlyTag": "Étiquette en lecture seule",
+    "revertTo": "Rétablir à",
+    "dblClick": "double-clic",
+    "doubleClickHint": "Double-cliquez sur une valeur pour la modifier",
+    "modifiedCount": "{{count}} modifiée(s)",
+    "tagCount": "{{count}} étiquettes",
+    "colTag": "Étiquette",
+    "colVr": "VR",
+    "colName": "Nom",
+    "colValue": "Valeur",
+    "empty": "vide"
   }
 }
