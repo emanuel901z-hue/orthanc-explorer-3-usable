@@ -60,6 +60,8 @@ export function ModifyStudyDialog({ open, onOpenChange, study, instanceCount, ta
   const [step, setStep] = useState<Step>('edit');
   const [modifications, setModifications] = useState<TagModification[]>([]);
   const [applying, setApplying] = useState(false);
+  // P0: Modification mode — 'modify' (in-place, default), 'duplicate' (keep source)
+  const [modifyMode, setModifyMode] = useState<'modify' | 'duplicate'>('modify');
 
   const handleModificationsChange = useCallback((mods: TagModification[]) => {
     setModifications(mods);
@@ -91,6 +93,9 @@ export function ModifyStudyDialog({ open, onOpenChange, study, instanceCount, ta
     try {
       await modifyStudyAction({ ID: study.id } as Parameters<typeof modifyStudyAction>[0], {
         Replace: replace,
+        // 'duplicate' mode = KeepSource: true (creates a copy with new UIDs)
+        // 'modify' mode = KeepSource: false (in-place modification, preserves UIDs)
+        KeepSource: modifyMode === 'duplicate',
       });
       toast.success(t('study.modifySuccess', { count: modifications.length }));
       queryClient.invalidateQueries({ queryKey: ['study', study.id] });
@@ -160,6 +165,30 @@ export function ModifyStudyDialog({ open, onOpenChange, study, instanceCount, ta
                     </div>
                   </>
                 )}
+              </div>
+
+              {/* Modification mode selector (OE2: modify-new-uids / modify-keep-uids / duplicate) */}
+              <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/50">
+                <span className="text-sm font-medium text-muted-foreground">{t('study.modifyMode', { defaultValue: 'Mode' })}:</span>
+                <Button
+                  variant={modifyMode === 'modify' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setModifyMode('modify')}
+                >
+                  {t('study.modifyModeInPlace', { defaultValue: 'Modify in-place' })}
+                </Button>
+                <Button
+                  variant={modifyMode === 'duplicate' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setModifyMode('duplicate')}
+                >
+                  {t('study.modifyModeDuplicate', { defaultValue: 'Create duplicate' })}
+                </Button>
+                <span className="text-xs text-muted-foreground ml-2">
+                  {modifyMode === 'modify'
+                    ? t('study.modifyModeInPlaceDesc', { defaultValue: 'Overwrites the study in-place (preserves UIDs)' })
+                    : t('study.modifyModeDuplicateDesc', { defaultValue: 'Creates a new copy with new UIDs' })}
+                </span>
               </div>
 
               {/* Changes table */}

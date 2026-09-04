@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2, GitMerge, BookOpen, FolderArchive, Code } from 'lucide-react';
+import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -21,6 +21,9 @@ import { useStudy, useStudySeries, useInstancePreview, useStudySharedTags } from
 import { ModalityBadge, formatPatientName, formatDiskSize } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import MigrateStudyDialog from '@/features/studies/components/MigrateStudyDialog';
+import ShareStudyDialog from '@/features/studies/components/ShareStudyDialog';
+import AddSeriesDialog from '@/features/studies/components/AddSeriesDialog';
+import { loadCustomButtons, executeButton } from '@/lib/custom-buttons';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
 import DicomTagBrowser from '@/features/studies/components/DicomTagBrowser';
@@ -84,6 +87,8 @@ export default function StudyDetailPage() {
   const [anonOpen, setAnonOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [addSeriesOpen, setAddSeriesOpen] = useState(false);
   const [seriesView, setSeriesView] = useState<'grid' | 'table'>('table');
   const [seriesSearch, setSeriesSearch] = useState('');
   const [seriesSort, setSeriesSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'seriesNumber', dir: 'asc' });
@@ -312,6 +317,36 @@ export default function StudyDetailPage() {
           >
             <Eye className="h-3.5 w-3.5" /> {t('actions.openInOhif')}
           </Button>
+          {/* External Viewers: VolView, MedDream, Weasis (configurable in Settings) */}
+          {(() => {
+            const viewers = JSON.parse(localStorage.getItem('oe3-viewers') || '[]') as Array<{id: string; url: string; enabled: boolean; type: string}>;
+            return viewers
+              .filter((v) => v.enabled && v.id !== 'ohif' && v.id !== 'stone')
+              .map((v) => (
+                <Button
+                  key={v.id}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 capitalize"
+                  onClick={async () => {
+                    // Set viewer session cookie first
+                    try {
+                      await fetch('/api/v1/pacs/viewer-session', { method: 'POST', credentials: 'include' });
+                    } catch { /* cookie may already be valid */ }
+                    if (v.type === 'desktop') {
+                      // Weasis uses custom protocol: weasis://$dicom:get -w "rsid:..." ...
+                      window.location.href = `${v.url}$dicom:get -r "http://10.0.1.46:3080/api/v1/pacs/orthanc/wado-rs/studies/${study.studyInstanceUID}"`;
+                    } else {
+                      // Web viewers (VolView, MedDream) — pass study UID
+                      const sep = v.url.includes('?') ? '&' : '?';
+                      window.open(`${v.url}${sep}StudyInstanceUIDs=${study.studyInstanceUID}`, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" /> {v.id}
+                </Button>
+              ));
+          })()}
           {canDownload && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -374,6 +409,39 @@ export default function StudyDetailPage() {
           >
             <Code className="h-3.5 w-3.5" /> {t('studyDetail.apiView', { defaultValue: 'API' })}
           </Button>
+          {/* Share Study — create shareable link */}
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShareOpen(true)}>
+            <Share2 className="h-3.5 w-3.5" /> {t('actions.share', { defaultValue: 'Share' })}
+          </Button>
+          {/* Custom Buttons (configurable via Settings) */}
+          {(() => {
+            const buttons = loadCustomButtons().filter((b) => !b.level || b.level === 'study');
+            return buttons.map((btn) => (
+              <Button
+                key={btn.id}
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => {
+                  executeButton(btn, {
+                    studyId: studyId!,
+                    studyInstanceUID: study.studyInstanceUID,
+                    patientId: study.patientId,
+                    patientName: study.patientName,
+                    accessionNumber: study.accessionNumber,
+                  }).catch((e) => toast.error(`Custom button failed: ${e.message}`));
+                }}
+              >
+                {btn.label}
+              </Button>
+            ));
+          })()}
+          {/* Add Series (PDF/Image/STL) */}
+          {canModify && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAddSeriesOpen(true)}>
+              <Plus className="h-3.5 w-3.5" /> {t('study.addSeries', { defaultValue: 'Add Series' })}
+            </Button>
+          )}
           {canDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -803,6 +871,28 @@ export default function StudyDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Share Study Dialog */}
+      {study && (
+        <ShareStudyDialog
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          studyId={study.id}
+          studyInstanceUID={study.studyInstanceUID}
+          patientName={formatPatientName(study.patientName)}
+        />
+      )}
+
+      {/* Add Series Dialog (PDF/Image/STL) */}
+      {study && (
+        <AddSeriesDialog
+          open={addSeriesOpen}
+          onOpenChange={setAddSeriesOpen}
+          studyId={study.id}
+          patientId={study.patientId}
+          patientName={study.patientName}
+        />
+      )}
     </div>
   );
 }

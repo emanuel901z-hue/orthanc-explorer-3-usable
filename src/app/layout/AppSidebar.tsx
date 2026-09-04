@@ -10,6 +10,7 @@ import {
   PanelLeftOpen,
   Info,
   Shield,
+  ClipboardList,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -40,6 +41,7 @@ export function AppSidebar() {
     { title: t('nav.upload'), url: '/upload', icon: Upload },
     { title: t('nav.activity'), url: '/activity', icon: ActivityIcon },
     { title: t('nav.auditLogs', { defaultValue: 'Audit Logs' }), url: '/audit-logs', icon: Shield },
+    { title: t('nav.worklists', { defaultValue: 'Worklists' }), url: '/worklists', icon: ClipboardList },
     { title: t('nav.remoteSources'), url: '/remote-sources', icon: Globe },
     { title: t('nav.settings'), url: '/settings', icon: Settings },
   ];

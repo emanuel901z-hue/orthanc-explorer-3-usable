@@ -43,4 +43,24 @@ export const modalitiesApi = {
       headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify({}),
     }),
+
+  /** POST /modalities/:name/query — DICOM C-FIND query. Body: { Level, Query }. Returns array of answers. */
+  query: (name: string, body: { Level: string; Query: Record<string, string> }) =>
+    orthancFetch<unknown[]>(`/modalities/${name}/query`, {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify(body),
+    }),
+
+  /** POST /modalities/:name/query/:id/retrieve — C-MOVE/C-GET retrieve for a query answer. */
+  retrieve: (name: string, queryId: string) =>
+    orthancFetch<Record<string, unknown>>(`/modalities/${name}/query/${queryId}/retrieve`, {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify({}),
+    }),
+
+  /** DELETE /modalities/:name/query/:id — Remove a query and its answers. */
+  deleteQuery: (name: string, queryId: string) =>
+    orthancFetch<void>(`/modalities/${name}/query/${queryId}`, { method: 'DELETE' }),
 };

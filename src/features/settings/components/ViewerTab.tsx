@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, RefreshCw, Pencil, Globe, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -53,7 +53,16 @@ const statusConfig = {
 export default function ViewerTab() {
   const { t } = useTranslation();
 
-  const [viewers, setViewers] = useState<ViewerConfig[]>([
+  // Load viewers from localStorage (persisted) or use defaults
+  const [viewers, setViewers] = useState<ViewerConfig[]>(() => {
+    const saved = localStorage.getItem('oe3-viewers');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch { /* use defaults */ }
+    }
+    return [
     {
       id: 'ohif',
       name: 'OHIF Viewer',
@@ -94,7 +103,23 @@ export default function ViewerTab() {
       enabled: false,
       defaultViewer: false,
     },
-  ]);
+    {
+      id: 'meddream',
+      name: 'MedDream',
+      url: '/meddream/',
+      status: 'not configured',
+      type: 'web',
+      description: t('viewer.meddreamDescription', { defaultValue: 'MedDream DICOM Viewer — advanced viewing and post-processing' }),
+      enabled: false,
+      defaultViewer: false,
+    },
+  ];
+  });
+
+  // Persist viewers to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('oe3-viewers', JSON.stringify(viewers));
+  }, [viewers]);
 
   const [editViewer, setEditViewer] = useState<ViewerConfig | null>(null);
   const [editUrl, setEditUrl] = useState('');
