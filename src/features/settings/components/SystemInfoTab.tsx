@@ -51,6 +51,27 @@ function CopyButton({ value }: { value: string }) {
 
 export default function SystemInfoTab() {
   const [verbosity, setVerbosity] = useState<VerbosityLevel>('default');
+  const [verbosityLoading, setVerbosityLoading] = useState(false);
+
+  // P0: Make log level control functional via Orthanc /tools/log-level
+  const handleVerbosityChange = async (level: VerbosityLevel) => {
+    setVerbosityLoading(true);
+    try {
+      const orthancUrl = (window as any).__OE3_CONFIG__?.orthancUrl || '/orthanc-proxy';
+      const orthancLevel = level === 'default' ? 'warning' : level === 'verbose' ? 'info' : 'trace';
+      await fetch(`${orthancUrl}/tools/log-level`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'text/plain' },
+        body: orthancLevel,
+      });
+      setVerbosity(level);
+    } catch {
+      // Silently fail — non-critical setting
+    } finally {
+      setVerbosityLoading(false);
+    }
+  };
   const { data: system } = useSystemInfo();
   const { data: stats } = useStats();
   const { data: pluginNames = [] } = usePlugins();
@@ -188,7 +209,8 @@ export default function SystemInfoTab() {
                       <Button
                         variant={isActive ? 'default' : 'outline'}
                         size="sm"
-                        onClick={() => setVerbosity(level)}
+                        onClick={() => handleVerbosityChange(level)}
+                        disabled={verbosityLoading}
                         className={`capitalize gap-1.5 ${isActive ? 'ring-2 ring-primary/30 ring-offset-1 ring-offset-background' : ''}`}
                       >
                         {isActive && <CircleDot className="h-3 w-3" />}
@@ -221,17 +243,27 @@ export default function SystemInfoTab() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pluginNames.map((name) => (
-                  <TableRow key={name}>
-                    <TableCell className="font-medium">{name}</TableCell>
-                  </TableRow>
-                ))}
+                {pluginNames.map((name) => {
+                  // Show status badges for known plugins
+                  const isKnown = ['gdcm', 'dicomweb', 'postgresql', 'nifti', 'housekeeper', 'advanced-storage', 'transfers', 'wsi', 'ohif', 'multitenant', 'auth-service', 'delayed-deletion'].includes(name.toLowerCase());
+                  return (
+                    <TableRow key={name}>
+                      <TableCell className="font-medium">{name}</TableCell>
+                      <TableCell>
+                        <Badge variant={isKnown ? 'default' : 'secondary'} className="text-xs">
+                          {isKnown ? 'Active' : 'Loaded'}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                 {pluginNames.length === 0 && (
                   <TableRow>
-                    <TableCell className="text-muted-foreground text-sm">
+                    <TableCell className="text-muted-foreground text-sm" colSpan={2}>
                       No plugins loaded
                     </TableCell>
                   </TableRow>

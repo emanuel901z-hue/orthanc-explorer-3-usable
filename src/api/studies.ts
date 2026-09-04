@@ -94,6 +94,9 @@ export const studiesApi = {
   /** GET /studies/:id/archive — Downloads a ZIP archive of the study. Returns Blob (application/zip). */
   archive: (id: string) => orthancFetch<Blob>(`/studies/${id}/archive`, { responseType: 'blob' }),
 
+  /** GET /studies/:id/media — Downloads a ZIP archive with DICOMDIR. Returns Blob (application/zip). */
+  media: (id: string) => orthancFetch<Blob>(`/studies/${id}/media`, { responseType: 'blob' }),
+
   /** GET /studies/:id/statistics — Returns { CountInstances, CountSeries, DiskSize (string!), DiskSizeMB, ... }. */
   getStatistics: (id: string) =>
     orthancFetch<{

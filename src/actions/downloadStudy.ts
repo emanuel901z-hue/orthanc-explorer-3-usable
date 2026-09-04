@@ -9,17 +9,24 @@
  *
  * @param studyId   The Orthanc study ID to download.
  * @param filename  Optional filename for the downloaded file (defaults to `{studyId}.zip`).
+ * @param options   Optional: { dicomDir?: boolean } — if true, downloads with DICOMDIR index.
  */
 import { studiesApi } from "@/api/studies";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
 import { makeAuditBase } from "@/actions/audit-base";
 
-export async function downloadStudyAction(studyId: string, filename?: string): Promise<void> {
+export async function downloadStudyAction(
+  studyId: string,
+  filename?: string,
+  options?: { dicomDir?: boolean },
+): Promise<void> {
   const base = makeAuditBase("study.download", "study", studyId);
 
   try {
-    const blob = await studiesApi.archive(studyId);
+    const blob = options?.dicomDir
+      ? await studiesApi.media(studyId)
+      : await studiesApi.archive(studyId);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

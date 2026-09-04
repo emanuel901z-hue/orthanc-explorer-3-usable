@@ -38,6 +38,19 @@ export const toolsApi = {
     }),
 
   /**
+   * POST /tools/create-dicom-dir — Creates a ZIP archive with a DICOMDIR file.
+   * Body: { Resources: [id1, id2, ...] } where IDs can be studies, series, or instances.
+   * Returns a Blob (application/zip) containing DICOM files + DICOMDIR index.
+   */
+  createDicomDir: (resourceIds: string[]) =>
+    orthancFetch<Blob>('/tools/create-dicom-dir', {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify({ Resources: resourceIds }),
+      responseType: 'blob',
+    }),
+
+  /**
    * GET /labels — Returns all labels in the Orthanc database.
    * Returns array of label names (strings).
    */

@@ -55,6 +55,10 @@ export const instancesApi = {
   archive: (id: string) =>
     orthancFetch<Blob>(`/instances/${id}/archive`, { responseType: "blob" }),
 
+  /** GET /instances/:id/nifti — Exports instance as NIfTI file (requires NIfTI plugin). Returns Blob. */
+  nifti: (id: string) =>
+    orthancFetch<Blob>(`/instances/${id}/nifti`, { responseType: "blob" }),
+
   /** POST /instances/:id/modify — Creates a modified copy. Body: { Replace, Remove }. Returns { ID, Path }. */
   modify: (id: string, body: Record<string, unknown>) =>
     orthancFetch<{ ID: string; Path: string }>(`/instances/${id}/modify`, {

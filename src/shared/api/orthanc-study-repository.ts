@@ -156,10 +156,17 @@ export class OrthancStudyRepository implements IStudyRepository {
       ],
     };
 
-    // Orthanc supports Labels filtering in /tools/find (AND logic: all labels must match)
+    // Orthanc supports Labels filtering in /tools/find
+    // LabelsConstraint: 'All' (AND), 'Any' (OR), 'None' (NOT)
     if (filters?.labels?.length) {
       findBody['Labels'] = filters.labels;
-      findBody['LabelsConstraint'] = 'All';
+      findBody['LabelsConstraint'] = filters.labelsConstraint === 'Any' ? 'Any' : 'All';
+    }
+
+    // "Without labels" filter — find studies that have NO labels
+    if (filters?.withoutLabels) {
+      findBody['Labels'] = [];
+      findBody['LabelsConstraint'] = 'None';
     }
 
     const results = await studiesApi.find(findBody as Parameters<typeof studiesApi.find>[0]);

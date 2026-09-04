@@ -12,6 +12,7 @@ import ViewerPage from "@/features/viewer/pages/ViewerPage";
 import UploadPage from "@/features/upload/pages/UploadPage";
 import RemoteSourcesPage from "@/features/servers/pages/RemoteSourcesPage";
 import ActivityPage from "@/features/activity/pages/ActivityPage";
+import AuditLogsPage from "@/features/audit/pages/AuditLogsPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="studies/:studyId/series/:seriesId/instances/:instanceId" element={<InstanceDetailPage />} />
               <Route path="upload" element={<UploadPage />} />
               <Route path="activity" element={<ActivityPage />} />
+              <Route path="audit-logs" element={<AuditLogsPage />} />
               <Route path="remote-sources" element={<RemoteSourcesPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>

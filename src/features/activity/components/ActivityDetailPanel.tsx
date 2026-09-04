@@ -300,6 +300,27 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
           </>
         )}
 
+        {/* Job Resources (parsed from Content) */}
+        {event.category === 'job' && event.metadata?.['__rawContent'] && (() => {
+          try {
+            const content = JSON.parse(event.metadata['__rawContent'] as string);
+            const resources = content?.Resources;
+            if (!Array.isArray(resources) || resources.length === 0) return null;
+            return (
+              <>
+                <Separator className="my-4" />
+                <p className="text-xs font-medium text-muted-foreground mb-2">{t('activity.detail.jobResources', { defaultValue: 'Resources' })}</p>
+                <div className="flex flex-wrap gap-1">
+                  {resources.slice(0, 20).map((r: string, i: number) => (
+                    <code key={i} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{r}</code>
+                  ))}
+                  {resources.length > 20 && <span className="text-[10px] text-muted-foreground">+{resources.length - 20} more</span>}
+                </div>
+              </>
+            );
+          } catch { return null; }
+        })()}
+
         {/* Raw Content (Orthanc job Content as JSON) */}
         {event.metadata?.['__rawContent'] && (
           <>

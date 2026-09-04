@@ -210,6 +210,43 @@ export default function InstanceDetailPage() {
               </Tooltip>
             </TooltipProvider>
           )}
+          {canDownload && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    disabled={downloading}
+                    onClick={async () => {
+                      setDownloading(true);
+                      try {
+                        await downloadInstanceAction(
+                          instance.id,
+                          `${formatPatientName(study?.patientName ?? 'instance')}_Instance${instance.instanceNumber}.nii`,
+                          { nifti: true },
+                        );
+                        audit({
+                          action: 'download',
+                          title: t('instance.auditNiftiDownloaded', { defaultValue: 'Instance exported as NIfTI' }),
+                          resource: t('instance.instanceNumber', { number: instance.instanceNumber }),
+                        });
+                        toast.success(t('instance.niftiDownloadSuccess', { defaultValue: 'NIfTI file downloaded' }));
+                      } catch {
+                        toast.error(t('instance.niftiDownloadFailed', { defaultValue: 'NIfTI export failed (plugin not installed?)' }));
+                      } finally {
+                        setDownloading(false);
+                      }
+                    }}
+                  >
+                    <FileText className="h-3.5 w-3.5" /> {t('instance.nifti', { defaultValue: 'NIfTI' })}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('instance.niftiTooltip', { defaultValue: 'Export as NIfTI (requires NIfTI plugin)' })}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           {canSend && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setSendOpen(true); audit({ action: 'send', title: t('instance.auditSendInitiated'), resource: t('instance.instanceNumber', { number: instance.instanceNumber }) }); }}>
               <Send className="h-3.5 w-3.5" /> {t('instance.send')}

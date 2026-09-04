@@ -11,6 +11,7 @@ import {
   type ColumnDef,
   type SortingState,
   type ColumnSizingState,
+  type VisibilityState,
 } from '@tanstack/react-table';
 import {
   Search,
@@ -26,6 +27,7 @@ import {
   HelpCircle,
   Eye,
   Loader2,
+  Settings2,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -58,6 +60,8 @@ import { useStudies } from '@/features/studies/hooks/use-studies';
 import { Study, StudyFilters } from '@/shared/types';
 import { ModalityBadge, formatPatientName } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
+import QuickReportDialog from '@/features/studies/components/QuickReportDialog';
+import { FileText } from 'lucide-react';
 import { useFeature } from '@/config/features';
 import { smartSearch } from '@/lib/smart-search';
 import { deleteStudyAction } from '@/actions/deleteStudy';
@@ -75,7 +79,13 @@ import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { toolsApi } from '@/api/tools';
 
-const MODALITY_OPTIONS = ['CT', 'MR', 'US', 'CR', 'DX', 'PT', 'NM'];
+// OE2 has 21 modality filter options; OE3 now matches
+const MODALITY_OPTIONS = [
+  'CR', 'CT', 'MR', 'US', 'OT', 'BI', 'CD', 'DD', 'DG', 'DM',
+  'DX', 'ES', 'ECG', 'HD', 'IO', 'LP', 'LS', 'MG', 'NM', 'PT',
+  'RF', 'RG', 'RTDOSE', 'RTIMAGE', 'RTPLAN', 'RTRECORD', 'SR',
+  'ST', 'TG', 'VA', 'XA',
+];
 const DEFAULT_PAGE_SIZE = 25;
 
 /** Sortable header button — renders sort direction indicator. */
@@ -113,13 +123,26 @@ export default function StudyListPage() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'studyDate', desc: true }]);
+  // Default ordering from URL param `order-by` (e.g. "studyDate:desc" or "patientName:asc")
+  const orderParam = searchParams.get('order-by') || '';
+  const initialSorting: SortingState = orderParam
+    ? [{ id: orderParam.split(':')[0], desc: orderParam.split(':')[1] === 'desc' }]
+    : [{ id: 'studyDate', desc: true }];
+
+  const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [rowSelection, setRowSelection] = useState({});
   const [showFilters, setShowFilters] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
+  const [reportStudy, setReportStudy] = useState<Study | null>(null);
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    studyInstanceUID: false, // hidden by default (long UID)
+    lastUpdate: false,       // hidden by default
+    referringPhysician: false, // hidden by default
+  });
+  const [showColumnConfig, setShowColumnConfig] = useState(false);
 
   // RBAC feature flags — controlled by config.js (deployment-time)
   const canDownload = useFeature('download');
@@ -135,6 +158,8 @@ export default function StudyListPage() {
       studyDescription: searchParams.get('description') || undefined,
       modalities: searchParams.get('modality') ? [searchParams.get('modality')!] : undefined,
       labels: searchParams.get('labels') ? searchParams.get('labels')!.split(',').filter(Boolean) : undefined,
+      labelsConstraint: (searchParams.get('labelMode') as 'All' | 'Any') || 'All',
+      withoutLabels: searchParams.get('withoutLabels') === 'true',
     }),
     [searchParams],
   );
@@ -371,32 +396,53 @@ export default function StudyListPage() {
           return ia - ib;
         },
       },
-      // P0.1: Quick-Viewer button — opens the built-in Cornerstone viewer directly from the list
+      // P0.1: Quick-Viewer button + Quick-Report button
       {
         id: 'quickViewer',
         header: () => <span className="text-xs font-semibold">{t('studyList.columns.view', { defaultValue: 'View' })}</span>,
         cell: ({ row }) => (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/viewer/${row.original.id}`);
-                  }}
-                  aria-label={t('studyList.quickViewer', { defaultValue: 'Open viewer' })}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('studyList.quickViewer', { defaultValue: 'Open viewer' })}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex items-center gap-0.5">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/viewer/${row.original.id}`);
+                    }}
+                    aria-label={t('studyList.quickViewer', { defaultValue: 'Open viewer' })}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('studyList.quickViewer', { defaultValue: 'Open viewer' })}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setReportStudy(row.original);
+                    }}
+                    aria-label={t('studyList.quickReport', { defaultValue: 'Quick report' })}
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('studyList.quickReport', { defaultValue: 'Quick report' })}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         ),
-        size: 60,
+        size: 90,
         enableSorting: false,
       },
       {
@@ -427,10 +473,11 @@ export default function StudyListPage() {
   const table = useReactTable({
     data: filteredStudies,
     columns,
-    state: { sorting, rowSelection, columnSizing },
+    state: { sorting, rowSelection, columnSizing, columnVisibility },
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
     onColumnSizingChange: setColumnSizing,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -525,6 +572,42 @@ export default function StudyListPage() {
                 className={`h-3 w-3 transition-transform ${showFilters ? 'rotate-180' : ''}`}
               />
             </Button>
+            {/* Column configuration dropdown */}
+            <div className="relative">
+              <Button
+                variant="outline"
+                onClick={() => setShowColumnConfig(!showColumnConfig)}
+                className="gap-2"
+              >
+                <Settings2 className="h-4 w-4" />
+                {t('studyList.columns.config', { defaultValue: 'Columns' })}
+                <ChevronDown
+                  className={`h-3 w-3 transition-transform ${showColumnConfig ? 'rotate-180' : ''}`}
+                />
+              </Button>
+              {showColumnConfig && (
+                <div className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">
+                    {t('studyList.columns.toggle', { defaultValue: 'Toggle columns' })}
+                  </p>
+                  <div className="space-y-1">
+                    {table.getAllLeafColumns()
+                      .filter((col) => col.id !== 'select' && col.id !== 'quickViewer')
+                      .map((col) => (
+                        <label key={col.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 px-2 py-1 rounded">
+                          <Checkbox
+                            checked={col.getIsVisible()}
+                            onCheckedChange={(v) => col.toggleVisibility(!!v)}
+                          />
+                          <span>{col.columnDef.header && typeof col.columnDef.header === 'function'
+                            ? col.id
+                            : String(col.columnDef.header || col.id)}</span>
+                        </label>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Search hint */}
@@ -619,6 +702,33 @@ export default function StudyListPage() {
               </button>
             );
           })}
+          {/* Multi-Label AND/OR toggle (only when >1 label active) */}
+          {activeLabels.length > 1 && (
+            <button
+              onClick={() => updateFilter('labelMode', searchParams.get('labelMode') === 'Any' ? '' : 'Any')}
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${
+                searchParams.get('labelMode') === 'Any'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {searchParams.get('labelMode') === 'Any'
+                ? t('studyList.labelModeAny', { defaultValue: 'OR' })
+                : t('studyList.labelModeAll', { defaultValue: 'AND' })}
+            </button>
+          )}
+          {/* "Without labels" filter toggle */}
+          <button
+            onClick={() => updateFilter('withoutLabels', searchParams.get('withoutLabels') === 'true' ? '' : 'true')}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${
+              searchParams.get('withoutLabels') === 'true'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            }`}
+          >
+            <Tag className="h-3 w-3" />
+            {t('studyList.withoutLabels', { defaultValue: 'Without labels' })}
+          </button>
         </div>
       )}
 
@@ -813,6 +923,13 @@ export default function StudyListPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Quick Report Dialog */}
+      <QuickReportDialog
+        open={!!reportStudy}
+        onOpenChange={(o) => !o && setReportStudy(null)}
+        study={reportStudy}
+      />
     </div>
   );
 }

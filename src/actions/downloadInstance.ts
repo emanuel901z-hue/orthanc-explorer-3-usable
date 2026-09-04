@@ -15,15 +15,18 @@ import { makeAuditBase } from '@/actions/audit-base';
 export async function downloadInstanceAction(
   instanceId: string,
   filename?: string,
+  options?: { nifti?: boolean },
 ): Promise<void> {
   const base = makeAuditBase('instance.download', 'instance', instanceId);
 
   try {
-    const blob = await instancesApi.archive(instanceId);
+    const blob = options?.nifti
+      ? await instancesApi.nifti(instanceId)
+      : await instancesApi.archive(instanceId);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename ?? `${instanceId}.dcm`;
+    a.download = filename ?? (options?.nifti ? `${instanceId}.nii` : `${instanceId}.dcm`);
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

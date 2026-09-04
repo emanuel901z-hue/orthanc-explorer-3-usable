@@ -46,6 +46,10 @@ export interface StudyFilters {
   modalities?: string[];
   /** Filter by Orthanc labels (AND logic — all labels must be present). */
   labels?: string[];
+  /** Labels constraint: 'All' (AND, default) or 'Any' (OR). */
+  labelsConstraint?: 'All' | 'Any';
+  /** Filter studies that have NO labels (LabelsConstraint: None). */
+  withoutLabels?: boolean;
 }
 
 // ===== Series =====

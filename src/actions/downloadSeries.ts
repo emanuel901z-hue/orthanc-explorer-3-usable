@@ -15,11 +15,14 @@ import { makeAuditBase } from '@/actions/audit-base';
 export async function downloadSeriesAction(
   seriesId: string,
   filename?: string,
+  options?: { dicomDir?: boolean },
 ): Promise<void> {
   const base = makeAuditBase('series.download', 'series', seriesId);
 
   try {
-    const blob = await seriesApi.archive(seriesId);
+    const blob = options?.dicomDir
+      ? await seriesApi.media(seriesId)
+      : await seriesApi.archive(seriesId);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

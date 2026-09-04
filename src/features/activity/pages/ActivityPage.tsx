@@ -22,6 +22,7 @@ import {
   FileDown,
   CalendarIcon,
   Loader2,
+  User,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -458,6 +459,7 @@ export default function ActivityPage() {
   const { data: orthancJobs = [] } = useOrthancJobs();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('job');
+  const [myJobsOnly, setMyJobsOnly] = useState(false);
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
@@ -491,6 +493,8 @@ export default function ActivityPage() {
   const filtered = useMemo(() => {
     let result = allEvents;
     if (categoryFilter !== 'all') result = result.filter((e) => e.category === categoryFilter);
+    // "My Jobs" filter — show only client-side jobs (uploads, downloads started from this browser)
+    if (myJobsOnly) result = result.filter((e) => e.id.startsWith('client-'));
     if (severityFilter !== 'all') result = result.filter((e) => e.severity === severityFilter);
     if (dateFrom) result = result.filter((e) => e.timestamp >= startOfDay(dateFrom).getTime());
     if (dateTo) result = result.filter((e) => e.timestamp <= endOfDay(dateTo).getTime());
@@ -505,7 +509,7 @@ export default function ActivityPage() {
       );
     }
     return result;
-  }, [allEvents, categoryFilter, severityFilter, dateFrom, dateTo, search]);
+  }, [allEvents, categoryFilter, myJobsOnly, severityFilter, dateFrom, dateTo, search]);
 
   const counts = useMemo(
     () => ({
@@ -624,6 +628,15 @@ export default function ActivityPage() {
                     </Button>
                   )}
                 </div>
+                <Button
+                  variant={myJobsOnly ? 'secondary' : 'outline'}
+                  size="sm"
+                  className="h-9 gap-1.5"
+                  onClick={() => setMyJobsOnly(!myJobsOnly)}
+                >
+                  <User className="h-3.5 w-3.5" />
+                  {t('activity.myJobs', { defaultValue: 'My Jobs' })}
+                </Button>
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-[140px] h-9">
                     <Filter className="h-3.5 w-3.5 mr-1.5" />

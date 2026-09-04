@@ -62,6 +62,10 @@ export const seriesApi = {
   archive: (id: string) =>
     orthancFetch<Blob>(`/series/${id}/archive`, { responseType: "blob" }),
 
+  /** GET /series/:id/media — Downloads a ZIP archive with DICOMDIR. Returns Blob (application/zip). */
+  media: (id: string) =>
+    orthancFetch<Blob>(`/series/${id}/media`, { responseType: "blob" }),
+
   /** POST /series/:id/modify — Creates a modified copy. Body: { Replace, Remove }. Returns { ID, Path }. */
   modify: (id: string, body: Record<string, unknown>) =>
     orthancFetch<{ ID: string; Path: string }>(`/series/${id}/modify`, {

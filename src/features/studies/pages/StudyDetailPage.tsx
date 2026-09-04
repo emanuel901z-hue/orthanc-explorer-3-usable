@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2, GitMerge, BookOpen } from 'lucide-react';
+import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2, GitMerge, BookOpen, FolderArchive, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -29,6 +29,7 @@ import { ModifyStudyDialog } from '@/features/studies/components/ModifyStudyDial
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
 import { toast } from 'sonner';
 import { deleteStudyAction } from '@/actions/deleteStudy';
+import { deleteSeriesAction } from '@/actions/deleteSeries';
 import { downloadStudyAction } from '@/actions/downloadStudy';
 import { OrthancError } from '@/lib/errors';
 import type { OrthancStudy } from '@/api/studies';
@@ -77,6 +78,9 @@ export default function StudyDetailPage() {
   const { data: sharedTags } = useStudySharedTags(studyId!);
   const { audit } = useAuditLog();
   const [sendOpen, setSendOpen] = useState(false);
+  const [bulkSendOpen, setBulkSendOpen] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);
@@ -104,6 +108,21 @@ export default function StudyDetailPage() {
     onError: (err) => {
       const ref = err instanceof OrthancError ? ` (Ref: ${err.correlationId})` : '';
       toast.error(`Download failed.${ref}`);
+    },
+  });
+
+  // P0: DICOM-DIR download (ZIP with DICOMDIR index)
+  const downloadDicomDirMutation = useMutation({
+    mutationFn: (id: string) =>
+      downloadStudyAction(
+        id,
+        study ? `${formatPatientName(study.patientName)}_DICOMDIR.zip` : `${id}_dicomdir.zip`,
+        { dicomDir: true },
+      ),
+    onSuccess: () => toast.success(t('studyDetail.dicomDirDownloaded', { defaultValue: 'DICOM-DIR ZIP downloaded' })),
+    onError: (err) => {
+      const ref = err instanceof OrthancError ? ` (Ref: ${err.correlationId})` : '';
+      toast.error(`DICOM-DIR download failed.${ref}`);
     },
   });
 
@@ -212,6 +231,30 @@ export default function StudyDetailPage() {
     }
   };
 
+  // P0: Bulk delete selected series
+  const handleBulkDeleteSeries = async () => {
+    const ids = Array.from(selectedSeriesIds);
+    if (ids.length === 0) return;
+    setBulkDeleting(true);
+    let ok = 0;
+    let fail = 0;
+    for (const id of ids) {
+      try {
+        await deleteSeriesAction(id);
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    setBulkDeleting(false);
+    setBulkDeleteOpen(false);
+    setSelectedSeriesIds(new Set());
+    if (ok > 0) toast.success(t('studyDetail.bulkDeleteSuccess', { count: ok, defaultValue: `${ok} series deleted` }));
+    if (fail > 0) toast.error(t('studyDetail.bulkDeleteError', { count: fail, defaultValue: `${fail} series could not be deleted` }));
+    queryClient.invalidateQueries({ queryKey: ['study', studyId] });
+    queryClient.invalidateQueries({ queryKey: ['studies'] });
+  };
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-4">
@@ -288,6 +331,25 @@ export default function StudyDetailPage() {
               <TooltipContent>Download as DICOM ZIP archive</TooltipContent>
             </Tooltip>
           )}
+          {canDownload && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  disabled={downloadDicomDirMutation.isPending}
+                  onClick={() => {
+                    audit({ action: 'download', title: `Study DICOM-DIR downloaded: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'info', metadata: { 'Study ID': studyId!, 'Format': 'DICOM-DIR ZIP' } });
+                    downloadDicomDirMutation.mutate(studyId!);
+                  }}
+                >
+                  <FolderArchive className="h-3.5 w-3.5" /> {t('studyDetail.dicomDir', { defaultValue: 'DICOM-DIR' })}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Download as ZIP with DICOMDIR index</TooltipContent>
+            </Tooltip>
+          )}
           {canSend && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('actions.send')}</Button>
           )}
@@ -300,6 +362,18 @@ export default function StudyDetailPage() {
           {canAnonymize && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAnonOpen(true)}><Shield className="h-3.5 w-3.5" /> {t('actions.anonymize')}</Button>
           )}
+          {/* ApiView — open the Orthanc REST API URL for this study in a new tab */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => {
+              const orthancUrl = (window as any).__OE3_CONFIG__?.orthancUrl || '/orthanc-proxy';
+              window.open(`${orthancUrl}/studies/${studyId}`, '_blank');
+            }}
+          >
+            <Code className="h-3.5 w-3.5" /> {t('studyDetail.apiView', { defaultValue: 'API' })}
+          </Button>
           {canDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -513,6 +587,26 @@ export default function StudyDetailPage() {
                               {bulkDownloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
                               Download {selectedSeriesIds.size} as ZIP
                             </Button>
+                            {canSend && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5"
+                                onClick={() => setBulkSendOpen(true)}
+                              >
+                                <Send className="h-3.5 w-3.5" /> {t('studyDetail.bulkSend', { defaultValue: 'Send' })}
+                              </Button>
+                            )}
+                            {canDelete && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5 text-destructive"
+                                onClick={() => setBulkDeleteOpen(true)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" /> {t('studyDetail.bulkDelete', { defaultValue: 'Delete' })}
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -670,6 +764,45 @@ export default function StudyDetailPage() {
           targetStudy={study}
         />
       )}
+
+      {/* Bulk Send Series Dialog */}
+      {study && (
+        <SendStudyDialog
+          open={bulkSendOpen}
+          onOpenChange={setBulkSendOpen}
+          studies={Array.from(selectedSeriesIds).map((sid) => ({
+            id: sid,
+            patientName: formatPatientName(study.patientName),
+            studyDescription: `${study.studyDescription} (series)`,
+          }))}
+        />
+      )}
+
+      {/* Bulk Delete Series Confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('studyDetail.bulkDeleteTitle', { defaultValue: 'Delete selected series?' })}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('studyDetail.bulkDeleteConfirm', {
+                count: selectedSeriesIds.size,
+                defaultValue: `You are about to permanently delete ${selectedSeriesIds.size} series. This action cannot be undone.`,
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleting}>{t('common.cancel', { defaultValue: 'Cancel' })}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDeleteSeries}
+              disabled={bulkDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {bulkDeleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+              {t('studyDetail.bulkDelete', { defaultValue: 'Delete' })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

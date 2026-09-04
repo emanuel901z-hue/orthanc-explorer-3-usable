@@ -64,6 +64,7 @@ interface UiState {
   hideHeader: boolean;
   appName: string;
   logoUrl: string;
+  dateFormat: string; // date-fns format string, default 'MMM dd, yyyy'
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   toggleSidebar: () => void;
   setPrimaryColor: (color: string) => void;
@@ -76,6 +77,7 @@ interface UiState {
   setHideHeader: (value: boolean) => void;
   setAppName: (name: string) => void;
   setLogoUrl: (url: string) => void;
+  setDateFormat: (format: string) => void;
   resetTheming: () => void;
   applyTheming: () => void;
 }
@@ -129,6 +131,7 @@ export const useUiStore = create<UiState>()(
       hideHeader: false,
       appName: 'Orthanc Explorer 3',
       logoUrl: `${import.meta.env.BASE_URL}logo/oe3-logo-128.png`,
+      dateFormat: 'MMM dd, yyyy',
 
       setTheme: (theme) => {
         set({ theme });
@@ -176,6 +179,7 @@ export const useUiStore = create<UiState>()(
       setHideSidebar: (value) => set({ hideSidebar: value }),
       setHideHeader: (value) => set({ hideHeader: value }),
       setAppName: (name) => set({ appName: name }),
+      setDateFormat: (dateFormat) => set({ dateFormat }),
       setLogoUrl: (url) => set({ logoUrl: url }),
 
       resetTheming: () => {

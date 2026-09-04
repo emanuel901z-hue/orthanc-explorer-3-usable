@@ -145,3 +145,25 @@
   .modality-nm { @apply bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300; }
   .modality-default { @apply bg-gray-100 text-gray-800 dark:bg-gray-800/40 dark:text-gray-300; }
 }
+
+/* Touch-optimized controls — ensure minimum 44px touch targets on mobile */
+@media (pointer: coarse) {
+  button:not(.touch-exempt),
+  [role="button"]:not(.touch-exempt),
+  a.btn:not(.touch-exempt) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Table rows: increase height for easier touch selection */
+  table tbody tr {
+    min-height: 48px;
+  }
+
+  /* Checkbox/radio: larger touch target */
+  button[role="checkbox"],
+  [role="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
