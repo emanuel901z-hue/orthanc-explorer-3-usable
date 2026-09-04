@@ -154,10 +154,20 @@ features: {
 | `src/lib/health.ts` | Global health tracking singleton |
 | `src/app/providers/AuthGate.tsx` | SPA-level auth gate — blocks rendering until `/oe3-me` confirms authentication |
 | `src/app/providers/auth-context.tsx` | AuthProvider — calls `/oe3-me` on boot, manages `isAuthenticated` state |
-| `src/features/studies/pages/StudyListPage.tsx` | Study list with custom columns, resizing, label filter |
-| `src/features/studies/pages/StudyDetailPage.tsx` | Study detail with OHIF button, RBAC-gated actions, sortable/filterable series table with multi-select bulk download |
-| `src/features/series/pages/SeriesDetailPage.tsx` | Series detail with functional download/send/delete, instance grid/table view |
+| `src/features/studies/pages/StudyListPage.tsx` | Study list with custom columns, resizing, label filter, smart multi-token search |
+| `src/features/studies/pages/StudyDetailPage.tsx` | Study detail with OHIF button, RBAC-gated actions, sortable/filterable series table with multi-select bulk download, merge/migrate |
+| `src/features/series/pages/SeriesDetailPage.tsx` | Series detail with functional download/send/delete/migrate, instance grid/table view |
+| `src/features/studies/components/MigrateStudyDialog.tsx` | Merge source studies into target via Orthanc `/merge` — searchable source list, same-SIUID highlighting, optional source deletion |
+| `src/features/series/components/MigrateSeriesDialog.tsx` | Migrate a series to a different study via Orthanc `/merge` |
 | `src/features/studies/components/DicomTagBrowser.tsx` | DICOM tag browser with search, sortable columns, inline editing |
+| `src/features/activity/pages/ActivityPage.tsx` | Unified activity timeline — merges audit events, live Orthanc jobs (3s polling), client jobs, and change events |
+| `src/features/activity/components/ActivityDetailPanel.tsx` | Activity event detail panel with action icons, severity, navigation |
+| `src/features/activity/hooks/useOrthancJobs.ts` | Live Orthanc job polling (expanded, 3s interval, sorted by CreationTime desc) |
+| `src/features/settings/components/ViewerTab.tsx` | External viewer configuration (OHIF, Stone, VolView) — add/edit/remove, default, enable/disable |
+| `src/features/settings/components/DicomWebTab.tsx` | DICOMweb server management with auth type indicators, external PACS QIDO/WADO config |
+| `src/features/settings/components/EmbeddedThemingCard.tsx` | White-labeling: app name, colors, fonts, border radius, compact mode, sidebar/header visibility |
+| `src/lib/smart-search.ts` | Multi-token search with umlaut tolerance and date pattern matching |
+| `src/actions/mergeStudy.ts` | Audit-seam wrapper for study merge — emits `study.merge` audit event |
 | `src/shared/api/orthanc-study-repository.ts` | Repository with label-based `/tools/find` filtering, RequestedTags for computed tags |
 | `src/api/series.ts` | Series API: get, getInstances, getSharedTags, delete, archive, modify, anonymize, sendToModality |
 | `src/api/tools.ts` | Tools API: lookup, createArchive (multi-resource ZIP) |

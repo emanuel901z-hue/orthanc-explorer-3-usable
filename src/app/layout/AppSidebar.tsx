@@ -110,7 +110,7 @@ export function AppSidebar() {
           <Info className="h-3 w-3 shrink-0" />
           {!isCollapsed && (
             <span className="text-[10px] leading-tight">
-              v0.1.0 · © 2026 OrthancExplorer
+              v1.3.0 · © 2026 OE3 Usable Fork
               <br />
               MIT License
             </span>

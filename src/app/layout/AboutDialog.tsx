@@ -7,27 +7,51 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useUiStore } from '@/store/ui-store';
+import { useSystemInfo, useStats, usePlugins } from '@/features/settings/hooks/use-system-info';
+
+const APP_VERSION = '1.3.0';
 
 interface AboutDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const systemInfo = [
-  { label: 'App Version', value: '0.1.0' },
-  { label: 'Orthanc Version', value: '1.12.4 (demo)' },
-  { label: 'DICOM Protocol', value: '3.0' },
-  { label: 'Storage Backend', value: 'In-Memory (Demo)' },
-  { label: 'Platform', value: typeof navigator !== 'undefined' ? navigator.platform : 'Unknown' },
-  { label: 'User Agent', value: typeof navigator !== 'undefined' ? navigator.userAgent.split(' ').slice(-1)[0] : 'Unknown' },
-];
-
 export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
   const { logoUrl, appName } = useUiStore();
+  const { data: system } = useSystemInfo();
+  const { data: stats } = useStats();
+  const { data: plugins = [] } = usePlugins();
+
+  const systemInfo = [
+    { label: 'App Version', value: APP_VERSION },
+    { label: 'Orthanc Version', value: system?.Version ?? '—' },
+    { label: 'Orthanc API', value: system ? `v${system.ApiVersion}` : '—' },
+    { label: 'DICOM AET', value: system?.DicomAet ?? '—' },
+    { label: 'Database Version', value: system ? String(system.DatabaseVersion) : '—' },
+    { label: 'Plugins', value: plugins.length > 0 ? `${plugins.length} loaded` : '—' },
+    {
+      label: 'Storage',
+      value: stats ? `${stats.CountStudies} studies · ${stats.CountSeries} series · ${stats.CountInstances} instances` : '—',
+    },
+    { label: 'Platform', value: typeof navigator !== 'undefined' ? navigator.platform : 'Unknown' },
+  ];
+
+  const forkFeatures = [
+    'Backend-proxy auth mode',
+    'AuthGate (SPA-level)',
+    'Study/Series merge (migrate)',
+    'Smart multi-token search',
+    'RBAC feature flags',
+    'Custom branding/logo',
+    'Live Orthanc jobs in activity',
+    'Viewer configuration',
+    'DICOMweb server management',
+    '9-language i18n',
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <img
@@ -36,13 +60,15 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
               className="h-10 w-10 rounded object-contain"
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
             />
-            Orthanc Explorer
-            <Badge variant="secondary" className="text-[10px]">v0.1.0</Badge>
+            <span className="flex-1">{appName || 'Orthanc Explorer 3'}</span>
+            <Badge variant="secondary" className="text-[10px]">v{APP_VERSION}</Badge>
           </DialogTitle>
         </DialogHeader>
 
         <p className="text-sm text-muted-foreground">
           A modern web-based DICOM viewer and PACS management interface built on Orthanc.
+          Community fork with production enhancements for backend-proxy auth, RBAC, merge/migrate,
+          smart search, and custom branding.
         </p>
 
         <Separator />
@@ -61,8 +87,30 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
 
         <Separator />
 
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium">Fork Features</h4>
+          <div className="flex flex-wrap gap-1.5">
+            {forkFeatures.map((feature) => (
+              <Badge key={feature} variant="outline" className="text-[10px] font-normal">
+                {feature}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
         <p className="text-[11px] text-muted-foreground text-center">
-          © 2026 OrthancExplorer · MIT License
+          © 2026 Orthanc Explorer 3 Usable Fork · MIT License ·
+          {' '}
+          <a
+            href="https://github.com/emanuel901z-hue/orthanc-explorer-3-usable"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-foreground"
+          >
+            GitHub
+          </a>
         </p>
       </DialogContent>
     </Dialog>

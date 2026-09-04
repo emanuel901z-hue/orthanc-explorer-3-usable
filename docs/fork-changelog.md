@@ -56,6 +56,70 @@ Removed:
 
 ---
 
+## v1.2.1 — Study/Series Merge, Smart Search, Activity & Settings Enhancements (2026-09-04)
+
+### Study/Series Merge (Migrate)
+
+- **MigrateStudyDialog** (`src/features/studies/components/MigrateStudyDialog.tsx`): Merge one or more source studies into a target study via Orthanc `POST /studies/:id/merge`. Searchable source list with patient name, ID, description, accession, SIUID, and modality filtering. Highlights studies with the same StudyInstanceUID (likely merge candidates). Optional `KeepSource` checkbox — when unchecked, source studies are deleted after merge.
+- **MigrateSeriesDialog** (`src/features/series/components/MigrateSeriesDialog.tsx`): Move a single series from its current study into a target study. Same merge endpoint with series ID as resource. Searchable target study list.
+- **mergeStudyAction** (`src/actions/mergeStudy.ts`): Audit-seam wrapper for merge operations. Emits `study.merge` audit event with source IDs, keepSource flag, and merged count.
+- **studiesApi.merge()**: New API method — `POST /studies/:id/merge` with `{ Resources, KeepSource }` body.
+- **StudyDetailPage**: "Migrate" button (GitMerge icon) opens MigrateStudyDialog.
+- **SeriesDetailPage**: "Migrate" button opens MigrateSeriesDialog.
+
+### Smart Multi-Token Search
+
+- **smartSearch** (`src/lib/smart-search.ts`): Client-side multi-token search with umlaut tolerance and date pattern matching. Splits query by comma/whitespace, requires every token to match at least one field (AND across tokens, OR across fields). Enables combined searches like "Müller, CT, 29.08" or "Muell ct 2908".
+- **Umlaut normalization**: "ü" matches "ue", "ä" matches "ae", "ö" matches "oe", "ß" matches "ss" (and vice versa).
+- **Date patterns**: "2908", "290826", "29.08.2026", "29082026" all match "2026-08-29". Supports ISO and locale (DD.MM.YYYY) formats.
+- **StudyListPage**: Smart search runs client-side on top of Orthanc results — fetches all studies, then filters with `smartSearch()` across patient name, ID, accession, description, modality, SIUID, and study date.
+
+### Activity Page Enhancements
+
+- **useOrthancJobs** (`src/features/activity/hooks/useOrthancJobs.ts`): Live polling of Orthanc jobs (expanded) every 3 seconds. Sorted by CreationTime descending.
+- **ActivityDetailPanel** (`src/features/activity/components/ActivityDetailPanel.tsx`): Detail panel for activity events with action icons, severity indicators, navigation to related resources, and metadata display.
+- **ActivityPage**: Merges live audit events, Orthanc jobs, client-side jobs, and change events into a unified timeline. Deduplicates by event ID. Job type icons for merge, transcode, split, archive, move, and standard operations.
+
+### Settings: Viewer Configuration
+
+- **ViewerTab** (`src/features/settings/components/ViewerTab.tsx`): Manage external viewer integrations (OHIF, Stone Web Viewer, VolView, etc.). Add/edit/remove viewer configs with URL, type (web/desktop), default viewer selection, and enable/disable toggle. Status indicators (connected/configured/not configured).
+
+### Settings: DICOMweb Server Management
+
+- **DicomWebTab** (`src/features/settings/components/DicomWebTab.tsx`): Enhanced DICOMweb server management with auth type indicators (bearer/basic/oauth2/none). Fetches and displays external PACS QIDO/WADO configuration from the backend proxy. Add/edit/remove servers with URL, auth type, and API key management.
+
+### Settings: Embedded Theming
+
+- **EmbeddedThemingCard** (`src/features/settings/components/EmbeddedThemingCard.tsx`): White-labeling card for embedded deployments. Configure app name, primary/accent colors, font presets, border radius, compact mode, and sidebar/header visibility. Settings persist to `localStorage` and apply via CSS custom properties.
+
+### Files Changed
+
+```
+Added:
+  src/actions/mergeStudy.ts
+  src/features/activity/hooks/useOrthancJobs.ts
+  src/features/activity/components/ActivityDetailPanel.tsx
+  src/features/series/components/MigrateSeriesDialog.tsx
+  src/features/studies/components/MigrateStudyDialog.tsx
+  src/features/settings/components/ViewerTab.tsx
+  src/lib/smart-search.ts
+
+Modified:
+  src/api/jobs.ts
+  src/api/studies.ts
+  src/features/activity/pages/ActivityPage.tsx
+  src/features/instances/pages/InstanceDetailPage.tsx
+  src/features/series/pages/SeriesDetailPage.tsx
+  src/features/settings/components/DicomWebTab.tsx
+  src/features/settings/components/EmbeddedThemingCard.tsx
+  src/features/settings/pages/SettingsPage.tsx
+  src/features/studies/pages/StudyDetailPage.tsx
+  src/features/studies/pages/StudyListPage.tsx
+  src/i18n/locales/*.json (9 languages — merge/migrate/smart-search keys)
+```
+
+---
+
 ## v1.0.0 — Production Deployment Enhancements (2026-09-03)
 
 ### Docker + Nginx

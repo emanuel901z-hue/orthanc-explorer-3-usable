@@ -36,6 +36,12 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **i18n: 9 Languages** | English, Spanish, French, German, Japanese, Chinese, **Russian**, **Turkish**, **Arabic**. |
 | **Orthanc API Schema Alignment** | Type definitions match Orthanc 1.13.0 (API v31) — `DiskSize` as string, `ModifiedFrom`, `ExpectedNumberOfInstances`, `IndexInSeries`, `Capabilities`, etc. |
 | **Custom Branding/Logo** | Configurable app name and logo via `branding.title` + `branding.logoUrl` in `config.js`. Logo appears in header, sidebar, and About dialog. Bundled default logo in `public/logo/`. |
+| **Study/Series Merge** | Merge source studies into a target study, or migrate a series to a different study, via Orthanc `POST /studies/:id/merge`. Searchable source/target lists with same-SIUID highlighting. Optional source deletion after merge. |
+| **Smart Multi-Token Search** | Client-side search with umlaut tolerance ("ü" matches "ue") and date pattern matching ("2908" matches "2026-08-29"). Combined queries like "Müller, CT, 29.08" work across all study fields. |
+| **Live Activity Timeline** | Unified timeline merging audit events, live Orthanc jobs (3s polling), client-side jobs, and change events. Detail panel with action icons and navigation to related resources. |
+| **Viewer Configuration** | Manage external viewer integrations (OHIF, Stone, VolView) in settings — add/edit/remove viewers, set default, enable/disable, with status indicators. |
+| **DICOMweb Server Management** | Enhanced DICOMweb server config with auth type indicators (bearer/basic/oauth2/none) and external PACS QIDO/WADO configuration display. |
+| **Embedded Theming** | White-labeling card for embedded deployments — app name, primary/accent colors, font presets, border radius, compact mode, sidebar/header visibility. Persists to `localStorage`. |
 
 ---
 
@@ -46,15 +52,20 @@ Orthanc Explorer 2 (the official UI) is a Vue.js plugin compiled into C++ — up
 **Key capabilities:**
 
 - Browse studies by Patient Name, Patient ID, Accession Number, Study Date, Modality, Description, and **Orthanc Labels**
+- **Smart search**: multi-token queries with umlaut tolerance and date pattern matching ("Müller, CT, 29.08")
 - Upload DICOM files via drag-and-drop with per-file progress tracking
 - Manage DICOM modalities and DICOMweb servers in-app (no config file edits, no restart)
-- Monitor jobs, ingestion activity, and system health in real time
+- **Merge/migrate studies and series** via Orthanc `/merge` — consolidate duplicate studies or move series between studies
+- Monitor jobs, ingestion activity, and system health in real time with a **unified activity timeline** (audit events + live Orthanc jobs)
 - Anonymize, modify, send, download, and delete studies and series via an audit-backed action layer
 - Open studies in OHIF, Stone Web Viewer, VolView, or any configured external viewer
+- **Configure external viewers** in settings — add/edit/remove, set default, enable/disable
 - **AuthGate**: SPA-level authentication check on boot — prevents unauthenticated API calls
 - **Backend-proxy auth mode**: OE3 behind a JWT-authenticated reverse proxy with httpOnly cookies
 - **RBAC feature flags**: selectively enable/disable UI actions via `config.js`
-- **Series-level operations**: download, send, modify, anonymize, delete — not just study-level
+- **Custom branding**: configurable app name and logo via `branding` in `config.js`
+- **Embedded theming**: white-label colors, fonts, border radius, compact mode for embedded deployments
+- **Series-level operations**: download, send, modify, anonymize, delete, migrate — not just study-level
 - **Sortable tables**: study list, series table, and DICOM tag browser all support click-to-sort
 - **Multi-select bulk actions**: select multiple studies or series for bulk download/delete
 - One build artifact runs in four modes: Docker sidecar, Orthanc plugin (`ServeFolders`), SMART on FHIR EHR embed, or **backend-proxy behind JWT auth**
@@ -355,16 +366,17 @@ orthanc-explorer-3-usable/
     ├── config/
     │   ├── runtime.ts         # Boot config loader (Zod schema, window.__OE3_CONFIG__)
     │   └── features.ts        # Layered feature flag resolver (useFeature hook)
-    ├── lib/                   # Cross-cutting singletons (client, health, logger, audit, errors, correlation)
+    ├── lib/                   # Cross-cutting singletons (client, health, logger, audit, errors, correlation, smart-search)
     ├── api/                   # Typed Orthanc endpoint wrappers (one file per resource)
-    ├── actions/               # Audit seam — write actions only
+    ├── actions/               # Audit seam — write actions only (delete, send, download, merge, modify, anonymize, upload, labels)
     ├── features/              # React UI grouped by domain
-    │   ├── studies/           # StudyListPage, StudyDetailPage (sortable series table, multi-select)
-    │   ├── series/            # SeriesDetailPage (download, send, modify, delete)
+    │   ├── studies/           # StudyListPage (smart search), StudyDetailPage (sortable series table, multi-select, merge/migrate)
+    │   ├── series/            # SeriesDetailPage (download, send, modify, delete, migrate)
     │   ├── instances/         # InstanceDetailPage, DicomTagBrowser (sortable columns)
     │   ├── viewer/            # Cornerstone3D viewer integration
     │   ├── upload/            # Drag-and-drop DICOM upload
-    │   └── settings/          # Modality + DICOMweb server management
+    │   ├── activity/          # Unified activity timeline (audit events + live Orthanc jobs)
+    │   └── settings/          # Modality + DICOMweb + viewer config + embedded theming + system info
     ├── i18n/
     │   └── locales/           # 9 languages: en, es, fr, de, ja, zh, ru, tr, ar
     ├── store/                 # Zustand stores (ui, session, upload, jobs, tabs)
