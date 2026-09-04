@@ -66,9 +66,10 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
         </DialogHeader>
 
         <p className="text-sm text-muted-foreground">
-          A modern web-based DICOM viewer and PACS management interface built on Orthanc.
-          Community fork with production enhancements for backend-proxy auth, RBAC, merge/migrate,
-          smart search, and custom branding.
+          Modern React/TypeScript frontend for the Orthanc DICOM server. Standalone SPA that
+          connects to Orthanc's REST API — deploy as a Docker sidecar, Orthanc plugin, or behind
+          a JWT-authenticated backend proxy. Study management, merge/migrate, smart search, upload,
+          modality and DICOMweb configuration, viewer integration, and audit-backed actions.
         </p>
 
         <Separator />
