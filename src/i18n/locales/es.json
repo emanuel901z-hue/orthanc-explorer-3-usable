@@ -177,7 +177,17 @@
       "patientId": "ID de Paciente",
       "studyInstanceUid": "Study Instance UID",
       "totalItems": "Total Ítems",
-      "completedItems": "Ítems Completados"
+      "completedItems": "Ítems Completados",
+      "patientName": "Nombre del paciente",
+      "studyDescription": "Descripción del estudio",
+      "jobType": "Tipo de trabajo",
+      "resources": "Recursos",
+      "keepSource": "Mantener origen",
+      "targetStudy": "Estudio destino",
+      "replacedTags": "Etiquetas reemplazadas",
+      "userEmail": "Usuario (correo)",
+      "origin": "Origen",
+      "webUi": "Interfaz web"
     },
     "detail": {
       "timestamp": "Marca de tiempo",
@@ -198,6 +208,16 @@
       "goToUpload": "Ir a Subir",
       "viewRemoteSources": "Ver Fuentes Remotas",
       "openSettings": "Abrir Configuración"
+    },
+    "jobContext": {
+      "store": "Enviado a {{target}}",
+      "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
+      "move": "Recuperado de {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
+      "modify": "{{patient}} — {{count}} etiqueta(s): {{tags}}",
+      "merge": "{{count}} fuente(s) → estudio {{target}}",
+      "archive": "Creación de archivo",
+      "split": "División de serie"
     }
   },
   "remote": {
@@ -221,7 +241,8 @@
     "send": "Enviar",
     "modify": "Modificar",
     "anonymize": "Anonimizar",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "openInOhif": "Abrir en OHIF"
   },
   "common": {
     "save": "Guardar",
@@ -495,5 +516,45 @@
     "migrateButton": "Migrar instancia",
     "success": "Instancia migrada correctamente",
     "error": "Migración fallida"
+  },
+  "studyList": {
+    "actions": {
+      "delete": "Eliminar",
+      "export": "Exportar",
+      "label": "Etiqueta",
+      "send": "Enviar"
+    },
+    "columns": {
+      "accession": "Acceso",
+      "description": "Descripción",
+      "images": "Imágenes",
+      "labels": "Etiquetas",
+      "lastUpdate": "Última actualización",
+      "modality": "Modalidad",
+      "referring": "Médico remitente",
+      "seriesCount": "Series",
+      "status": "Estado",
+      "studyInstanceUID": "UID de estudio"
+    },
+    "empty": "No se encontraron estudios",
+    "filters": {
+      "accession": "Nº de acceso",
+      "allModalities": "Todas las modalidades",
+      "description": "Descripción",
+      "labels": "Etiquetas",
+      "labelsHint": "Separe varias etiquetas con comas",
+      "modality": "Modalidad",
+      "patientId": "ID del paciente"
+    },
+    "pagination": {
+      "next": "Siguiente",
+      "previous": "Anterior",
+      "showing": "Mostrando {{from}}–{{to}} de {{total}}"
+    },
+    "selected": "{{count}} seleccionado(s)",
+    "status": {
+      "receiving": "Recibiendo",
+      "stable": "Estable"
+    }
   }
 }

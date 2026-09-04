@@ -31,8 +31,8 @@ const authColors: Record<string, string> = {
   none: 'text-muted-foreground',
 };
 
-/** Fetches HST PACS QIDO/WADO config from the backend proxy. */
-async function fetchHstPacsConfig(): Promise<{
+/** Fetches backend-configured external DICOMweb endpoints (QIDO-RS / WADO-RS). */
+async function fetchExternalDicomWebConfig(): Promise<{
   qidoUrl: string | null;
   wadoRsUrl: string | null;
   qidoApiKeyMasked: string | null;
@@ -53,10 +53,11 @@ interface DicomWebTabProps {
 export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProps) {
   const { t } = useTranslation();
   const { data: serverNames = [] } = useDicomWebServers();
-  const { data: hstConfig, isLoading: hstLoading } = useQuery({
-    queryKey: ['hst-dicomweb-config'],
-    queryFn: fetchHstPacsConfig,
+  const { data: extConfig, isLoading: extLoading } = useQuery({
+    queryKey: ['external-dicomweb-config'],
+    queryFn: fetchExternalDicomWebConfig,
     staleTime: 60 * 1000,
+    retry: false,
   });
 
   const dicomwebServers: DicomWebServer[] = serverNames.map((name) => ({
@@ -72,40 +73,41 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
   return (
     <TooltipProvider>
       <div className="space-y-4">
-        {/* HST PACS QIDO/WADO Config */}
+        {/* External DICOMweb endpoints (QIDO-RS / WADO-RS), configured at deployment */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Globe className="h-4 w-4" />
-              HST PACS — QIDO-RS / WADO-RS
+              External PACS — QIDO-RS / WADO-RS
             </CardTitle>
             <p className="text-xs text-muted-foreground">
-              DICOMweb endpoints for the Carestream HST PACS. Configured in the PP Portal admin PACS tab.
+              Backend-configured DICOMweb endpoints for querying (QIDO-RS) and retrieving (WADO-RS)
+              studies from an external PACS.
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
-            {hstLoading ? (
+            {extLoading ? (
               <div className="text-sm text-muted-foreground">Loading...</div>
-            ) : hstConfig ? (
+            ) : extConfig ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* QIDO-RS */}
                 <div className="space-y-2 rounded-lg border p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Badge variant={hstConfig.hasQido ? 'secondary' : 'outline'} className="text-xs">
+                      <Badge variant={extConfig.hasQido ? 'secondary' : 'outline'} className="text-xs">
                         QIDO-RS
                       </Badge>
                       <span className="text-sm font-medium">Query</span>
                     </div>
-                    {hstConfig.hasQido ? (
+                    {extConfig.hasQido ? (
                       <ShieldCheck className="h-4 w-4 text-emerald-500" />
                     ) : (
                       <ShieldAlert className="h-4 w-4 text-muted-foreground" />
                     )}
                   </div>
-                  {hstConfig.qidoUrl ? (
+                  {extConfig.qidoUrl ? (
                     <code className="block bg-muted px-2 py-1.5 rounded text-xs font-mono break-all">
-                      {hstConfig.qidoUrl}
+                      {extConfig.qidoUrl}
                     </code>
                   ) : (
                     <p className="text-xs text-muted-foreground">Not configured</p>
@@ -116,20 +118,20 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                 <div className="space-y-2 rounded-lg border p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Badge variant={hstConfig.hasWado ? 'secondary' : 'outline'} className="text-xs">
+                      <Badge variant={extConfig.hasWado ? 'secondary' : 'outline'} className="text-xs">
                         WADO-RS
                       </Badge>
                       <span className="text-sm font-medium">Retrieve</span>
                     </div>
-                    {hstConfig.hasWado ? (
+                    {extConfig.hasWado ? (
                       <ShieldCheck className="h-4 w-4 text-emerald-500" />
                     ) : (
                       <ShieldAlert className="h-4 w-4 text-muted-foreground" />
                     )}
                   </div>
-                  {hstConfig.wadoRsUrl ? (
+                  {extConfig.wadoRsUrl ? (
                     <code className="block bg-muted px-2 py-1.5 rounded text-xs font-mono break-all">
-                      {hstConfig.wadoRsUrl}
+                      {extConfig.wadoRsUrl}
                     </code>
                   ) : (
                     <p className="text-xs text-muted-foreground">Not configured</p>
@@ -142,9 +144,9 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                     <KeyRound className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">API Key</span>
                   </div>
-                  {hstConfig.qidoApiKeyMasked ? (
+                  {extConfig.qidoApiKeyMasked ? (
                     <code className="block bg-muted px-2 py-1.5 rounded text-xs font-mono">
-                      {hstConfig.qidoApiKeyMasked}
+                      {extConfig.qidoApiKeyMasked}
                     </code>
                   ) : (
                     <p className="text-xs text-muted-foreground">No API key configured</p>
@@ -152,12 +154,18 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Failed to load config</p>
+              <div className="flex items-start gap-2 p-3 rounded-lg border bg-muted/30">
+                <Server className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  No external DICOMweb configuration available. These endpoints are managed by your
+                  deployment administrator (backend configuration), not in this UI.
+                </p>
+              </div>
             )}
             <div className="flex items-center gap-2 pt-2 border-t">
               <Server className="h-3.5 w-3.5 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">
-                Configure QIDO-RS and WADO-RS endpoints in the PP Portal under Admin → PACS → Temp. PACS Config.
+                QIDO-RS and WADO-RS endpoints are configured server-side by your administrator.
               </p>
             </div>
           </CardContent>

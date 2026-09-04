@@ -217,7 +217,17 @@
       "patientId": "معرف المريض",
       "studyInstanceUid": "Study Instance UID",
       "totalItems": "إجمالي العناصر",
-      "completedItems": "العناصر المكتملة"
+      "completedItems": "العناصر المكتملة",
+      "patientName": "اسم المريض",
+      "studyDescription": "وصف الدراسة",
+      "jobType": "نوع المهمة",
+      "resources": "الموارد",
+      "keepSource": "الاحتفاظ بالمصدر",
+      "targetStudy": "الدراسة المستهدفة",
+      "replacedTags": "العلامات المستبدلة",
+      "userEmail": "المستخدم (البريد)",
+      "origin": "المصدر",
+      "webUi": "واجهة الويب"
     },
     "detail": {
       "timestamp": "الطابع الزمني",
@@ -238,6 +248,16 @@
       "goToUpload": "الذهاب إلى الرفع",
       "viewRemoteSources": "عرض المصادر البعيدة",
       "openSettings": "فتح الإعدادات"
+    },
+    "jobContext": {
+      "store": "أُرسل إلى {{target}}",
+      "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
+      "move": "تم الاسترجاع من {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
+      "modify": "{{patient}} — {{count}} علامة: {{tags}}",
+      "merge": "{{count}} مصدر → دراسة {{target}}",
+      "archive": "إنشاء أرشيف",
+      "split": "تقسيم السلسلة"
     }
   },
   "remote": {

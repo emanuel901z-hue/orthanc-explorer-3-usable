@@ -217,7 +217,17 @@
       "patientId": "ID пациента",
       "studyInstanceUid": "Study Instance UID",
       "totalItems": "Всего элементов",
-      "completedItems": "Завершено элементов"
+      "completedItems": "Завершено элементов",
+      "patientName": "Имя пациента",
+      "studyDescription": "Описание исследования",
+      "jobType": "Тип задания",
+      "resources": "Ресурсы",
+      "keepSource": "Сохранить источник",
+      "targetStudy": "Целевое исследование",
+      "replacedTags": "Заменённые теги",
+      "userEmail": "Пользователь (email)",
+      "origin": "Источник",
+      "webUi": "Веб-интерфейс"
     },
     "detail": {
       "timestamp": "Метка времени",
@@ -238,6 +248,16 @@
       "goToUpload": "Перейти к загрузке",
       "viewRemoteSources": "Просмотр удалённых источников",
       "openSettings": "Открыть настройки"
+    },
+    "jobContext": {
+      "store": "Отправлено на {{target}}",
+      "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
+      "move": "Получено с {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
+      "modify": "{{patient}} — {{count}} тег(ов): {{tags}}",
+      "merge": "{{count}} источник(ов) → исследование {{target}}",
+      "archive": "Создание архива",
+      "split": "Разделение серии"
     }
   },
   "remote": {

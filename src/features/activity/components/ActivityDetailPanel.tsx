@@ -213,7 +213,7 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
   }
 
   return (
-    <div className="w-[340px] shrink-0 border-l bg-card animate-slide-in-right flex flex-col h-full">
+    <div className="fixed inset-x-0 bottom-0 top-16 z-40 border-t bg-card animate-slide-in-right flex flex-col h-auto md:static md:inset-auto md:top-auto md:bottom-auto md:z-auto md:w-[340px] md:shrink-0 md:border-l md:border-t-0 md:h-full">
       {/* Header */}
       <div className="flex items-start justify-between p-4 border-b">
         <div className="flex items-start gap-3 min-w-0 flex-1">

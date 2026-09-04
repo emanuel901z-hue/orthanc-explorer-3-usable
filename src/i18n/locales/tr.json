@@ -217,7 +217,17 @@
       "patientId": "Hasta ID",
       "studyInstanceUid": "Study Instance UID",
       "totalItems": "Toplam Öğe",
-      "completedItems": "Tamamlanan Öğe"
+      "completedItems": "Tamamlanan Öğe",
+      "patientName": "Hasta adı",
+      "studyDescription": "Çalışma açıklaması",
+      "jobType": "İş türü",
+      "resources": "Kaynaklar",
+      "keepSource": "Kaynağı koru",
+      "targetStudy": "Hedef çalışma",
+      "replacedTags": "Değiştirilen etiketler",
+      "userEmail": "Kullanıcı (e-posta)",
+      "origin": "Kaynak",
+      "webUi": "Web arayüzü"
     },
     "detail": {
       "timestamp": "Zaman Damgası",
@@ -238,6 +248,16 @@
       "goToUpload": "Yüklemeye Git",
       "viewRemoteSources": "Uzak Kaynakları Görüntüle",
       "openSettings": "Ayarları Aç"
+    },
+    "jobContext": {
+      "store": "{{target}} hedefine gönderildi",
+      "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
+      "move": "{{source}} kaynağından alındı",
+      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
+      "modify": "{{patient}} — {{count}} etiket: {{tags}}",
+      "merge": "{{count}} kaynak → çalışma {{target}}",
+      "archive": "Arşiv oluşturma",
+      "split": "Seri bölme"
     }
   },
   "remote": {

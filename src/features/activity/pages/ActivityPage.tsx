@@ -115,8 +115,9 @@ const JOB_TYPE_LABEL_MAP: Record<string, string> = {
 
 function parseOrthancDate(dateStr?: string): number {
   if (!dateStr) return 0;
-  // Orthanc format: "20240101T120000" (YYYYMMDDTHHMMSS)
-  const m = dateStr.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/);
+  // Orthanc format: "20240101T120000,123456" (boost::posix_time ISO with microseconds)
+  // Also tolerate "20240101T120000" (no fraction) and "." as fraction separator
+  const m = dateStr.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(?:[.,]\d+)?/);
   if (!m) return 0;
   return new Date(
     parseInt(m[1]),
@@ -126,6 +127,16 @@ function parseOrthancDate(dateStr?: string): number {
     parseInt(m[5]),
     parseInt(m[6]),
   ).getTime();
+}
+
+/** Formats a DICOM PatientName ("LAST^FIRST^MIDDLE") into readable form. */
+function formatDicomPatientName(raw: string): string {
+  if (!raw) return raw;
+  const parts = raw.split('^');
+  if (parts.length < 2) return raw.trim();
+  const last = parts[0]?.trim() ?? '';
+  const first = parts[1]?.trim() ?? '';
+  return first ? `${first} ${last}` : last;
 }
 
 function changeToActivity(change: Change, t: (key: string, opts?: any) => string): ActivityEvent {
@@ -188,33 +199,127 @@ function orthancJobToActivity(
 
   const createdAt = parseOrthancDate(job.CreationTime) || Date.now();
   const completedAt = parseOrthancDate(job.CompletionTime);
-  const duration = completedAt && completedAt > createdAt ? completedAt - createdAt : undefined;
+  // Duration: completed jobs use CreationTime→CompletionTime; running jobs show elapsed
+  const isDone = job.State === 'Success' || job.State === 'Failure';
+  const duration = isDone
+    ? completedAt && completedAt > createdAt
+      ? completedAt - createdAt
+      : undefined
+    : job.State === 'Running'
+      ? Date.now() - createdAt
+      : undefined;
 
   const stateLabel = t(`activity.jobStates.${job.State.toLowerCase()}`, {
     defaultValue: job.State,
   });
 
+  // Deep-extract useful fields from Content (top-level + nested Replace/Query)
+  const content = (job.Content || {}) as Record<string, unknown>;
+  const replaceDict =
+    content['Replace'] && typeof content['Replace'] === 'object'
+      ? (content['Replace'] as Record<string, unknown>)
+      : {};
+  const queryList = Array.isArray(content['Query'])
+    ? (content['Query'] as Record<string, unknown>[])
+    : [];
+  const query0 = query0Of(queryList);
+
+  const patientId =
+    str(content['PatientID']) || str(replaceDict['PatientID']) || str(query0['PatientID']);
+  const patientName =
+    str(content['PatientName']) || str(replaceDict['PatientName']) || str(query0['PatientName']);
+  const studyDescription =
+    str(content['StudyDescription']) || str(replaceDict['StudyDescription']);
+  const studyInstanceUid =
+    str(content['StudyInstanceUID']) || str(query0['StudyInstanceUID']);
+  const remoteAet = str(content['RemoteAet']);
+  const localAet = str(content['LocalAet']);
+  const resources = Array.isArray(content['Resources']) ? content['Resources'].length : undefined;
+  const keepSource = typeof content['KeepSource'] === 'boolean' ? content['KeepSource'] : undefined;
+  const targetStudy = str(content['TargetStudy']);
+  const description = str(content['Description']);
+  const seriesDescription = str(content['SeriesDescription']);
+
+  // Build a type-specific, human-readable summary
+  const contextLabel = (() => {
+    switch (job.Type) {
+      case 'orthanc-store': {
+        const target = remoteAet || description || '?';
+        return patientName
+          ? t('activity.jobContext.storeWithPatient', {
+              target,
+              patient: formatDicomPatientName(patientName),
+              id: patientId || '—',
+            })
+          : t('activity.jobContext.store', { target });
+      }
+      case 'orthanc-move': {
+        const source = remoteAet || description || '?';
+        return patientName
+          ? t('activity.jobContext.moveWithPatient', {
+              source,
+              patient: formatDicomPatientName(patientName),
+              id: patientId || '—',
+            })
+          : t('activity.jobContext.move', { source });
+      }
+      case 'orthanc-modify': {
+        const replacedKeys = Object.keys(replaceDict);
+        return t('activity.jobContext.modify', {
+          patient: patientId
+            ? `${formatDicomPatientName(patientName || '')} (${patientId})`
+            : studyDescription || studyInstanceUid?.substring(0, 16) || 'resource',
+          count: replacedKeys.length,
+          tags: replacedKeys.slice(0, 5).join(', ') + (replacedKeys.length > 5 ? ', …' : ''),
+        });
+      }
+      case 'orthanc-merge': {
+        return t('activity.jobContext.merge', {
+          count: resources ?? 0,
+          target: targetStudy ? targetStudy.substring(0, 16) + '…' : '?',
+        });
+      }
+      case 'orthanc-archive':
+      case 'orthanc-media': {
+        return seriesDescription || studyDescription || t('activity.jobContext.archive');
+      }
+      case 'orthanc-split': {
+        return seriesDescription || studyDescription || t('activity.jobContext.split');
+      }
+      default:
+        return description || studyDescription || '';
+    }
+  })();
+
   const title =
     job.State === 'Running'
-      ? `${typeLabel} — ${stateLabel} (${job.Progress}%)`
-      : job.State === 'Failure'
-        ? `${typeLabel} — ${stateLabel}`
-        : `${typeLabel} — ${stateLabel}`;
+      ? `${typeLabel} — ${stateLabel} (${job.Progress}%)${contextLabel ? ` · ${contextLabel}` : ''}`
+      : `${typeLabel} — ${stateLabel}${contextLabel ? ` · ${contextLabel}` : ''}`;
 
-  // Extract useful info from Content
-  const content = job.Content || {};
   const metadata: Record<string, string> = {
     [t('activity.metadata.jobId')]: job.ID,
     [t('activity.metadata.state')]: job.State,
     [t('activity.metadata.progress')]: `${job.Progress}%`,
+    [t('activity.metadata.jobType')]: job.Type,
   };
 
-  // Add content fields if available
-  if (content['Description']) metadata[t('activity.metadata.description')] = String(content['Description']);
-  if (content['LocalAet']) metadata[t('activity.metadata.localAet')] = String(content['LocalAet']);
-  if (content['RemoteAet']) metadata[t('activity.metadata.remoteAet')] = String(content['RemoteAet']);
-  if (content['PatientID']) metadata[t('activity.metadata.patientId')] = String(content['PatientID']);
-  if (content['StudyInstanceUID']) metadata[t('activity.metadata.studyInstanceUid')] = String(content['StudyInstanceUID']);
+  if (patientName) metadata[t('activity.metadata.patientName')] = formatDicomPatientName(patientName);
+  if (patientId) metadata[t('activity.metadata.patientId')] = patientId;
+  if (studyDescription) metadata[t('activity.metadata.studyDescription')] = studyDescription;
+  if (studyInstanceUid) metadata[t('activity.metadata.studyInstanceUid')] = studyInstanceUid;
+  if (remoteAet) metadata[t('activity.metadata.remoteAet')] = remoteAet;
+  if (localAet) metadata[t('activity.metadata.localAet')] = localAet;
+  if (resources !== undefined) metadata[t('activity.metadata.resources')] = String(resources);
+  if (keepSource !== undefined) metadata[t('activity.metadata.keepSource')] = keepSource ? 'yes' : 'no';
+  if (targetStudy) metadata[t('activity.metadata.targetStudy')] = targetStudy;
+  if (description) metadata[t('activity.metadata.description')] = description;
+  // Replaced tags for modify jobs (up to 8, then ellipsis)
+  const replaceEntries = Object.entries(replaceDict).slice(0, 8);
+  if (replaceEntries.length > 0) {
+    metadata[t('activity.metadata.replacedTags')] = replaceEntries
+      .map(([k, v]) => `${k}=${String(v)}`)
+      .join(', ') + (Object.keys(replaceDict).length > 8 ? ', …' : '');
+  }
 
   return {
     id: `orthanc-job-${job.ID}`,
@@ -223,10 +328,18 @@ function orthancJobToActivity(
     severity,
     title,
     action,
-    description: job.ErrorMessage || undefined,
+    description: job.ErrorMessage || contextLabel || undefined,
     duration,
     metadata,
   };
+}
+
+function query0Of(queryList: Record<string, unknown>[]): Record<string, unknown> {
+  return queryList.length > 0 && typeof queryList[0] === 'object' ? queryList[0] : {};
+}
+
+function str(v: unknown): string | undefined {
+  return typeof v === 'string' && v.length > 0 ? v : undefined;
 }
 
 function jobToActivity(job: import('@/shared/types/job').Job, t: (key: string, opts?: any) => string): ActivityEvent {

@@ -177,7 +177,17 @@
       "patientId": "患者ID",
       "studyInstanceUid": "Study Instance UID",
       "totalItems": "総アイテム数",
-      "completedItems": "完了アイテム数"
+      "completedItems": "完了アイテム数",
+      "patientName": "患者名",
+      "studyDescription": "検査説明",
+      "jobType": "ジョブタイプ",
+      "resources": "リソース",
+      "keepSource": "ソースを保持",
+      "targetStudy": "対象スタディ",
+      "replacedTags": "置換タグ",
+      "userEmail": "ユーザー（メール）",
+      "origin": "起点",
+      "webUi": "ウェブUI"
     },
     "detail": {
       "timestamp": "タイムスタンプ",
@@ -198,6 +208,16 @@
       "goToUpload": "アップロードへ移動",
       "viewRemoteSources": "リモートソースを表示",
       "openSettings": "設定を開く"
+    },
+    "jobContext": {
+      "store": "{{target}}へ送信",
+      "storeWithPatient": "{{patient}}（{{id}}）→ {{target}}",
+      "move": "{{source}}から取得",
+      "moveWithPatient": "{{patient}}（{{id}}）← {{source}}",
+      "modify": "{{patient}} — {{count}}件のタグ: {{tags}}",
+      "merge": "{{count}}件のソース → スタディ {{target}}",
+      "archive": "アーカイブ作成",
+      "split": "シリーズ分割"
     }
   },
   "remote": {
@@ -221,7 +241,8 @@
     "send": "送信",
     "modify": "修正",
     "anonymize": "匿名化",
-    "delete": "削除"
+    "delete": "削除",
+    "openInOhif": "OHIFで開く"
   },
   "common": {
     "save": "保存",
@@ -495,5 +516,45 @@
     "migrateButton": "インスタンスを移行",
     "success": "インスタンスが正常に移行されました",
     "error": "移行に失敗しました"
+  },
+  "studyList": {
+    "actions": {
+      "delete": "削除",
+      "export": "エクスポート",
+      "label": "ラベル",
+      "send": "送信"
+    },
+    "columns": {
+      "accession": "アクセッション番号",
+      "description": "説明",
+      "images": "画像数",
+      "labels": "ラベル",
+      "lastUpdate": "最終更新",
+      "modality": "モダリティ",
+      "referring": "依頼医",
+      "seriesCount": "シリーズ数",
+      "status": "ステータス",
+      "studyInstanceUID": "スタディUID"
+    },
+    "empty": "スタディが見つかりません",
+    "filters": {
+      "accession": "アクセッション番号",
+      "allModalities": "すべてのモダリティ",
+      "description": "説明",
+      "labels": "ラベル",
+      "labelsHint": "複数のラベルはカンマで区切ってください",
+      "modality": "モダリティ",
+      "patientId": "患者ID"
+    },
+    "pagination": {
+      "next": "次へ",
+      "previous": "前へ",
+      "showing": "{{total}}件中{{from}}–{{to}}件を表示"
+    },
+    "selected": "{{count}}件選択中",
+    "status": {
+      "receiving": "受信中",
+      "stable": "安定"
+    }
   }
 }

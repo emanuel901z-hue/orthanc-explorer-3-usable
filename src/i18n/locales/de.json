@@ -217,7 +217,17 @@
       "patientId": "Patienten-ID",
       "studyInstanceUid": "Study Instance UID",
       "totalItems": "Gesamtanzahl",
-      "completedItems": "Abgeschlossen"
+      "completedItems": "Abgeschlossen",
+      "patientName": "Patientenname",
+      "studyDescription": "Studienbeschreibung",
+      "jobType": "Job-Typ",
+      "resources": "Ressourcen",
+      "keepSource": "Quelle behalten",
+      "targetStudy": "Ziel-Studie",
+      "replacedTags": "Ersetzte Tags",
+      "userEmail": "Benutzer (E-Mail)",
+      "origin": "Ursprung",
+      "webUi": "Web-UI"
     },
     "detail": {
       "timestamp": "Zeitstempel",
@@ -238,6 +248,16 @@
       "goToUpload": "Zum Upload",
       "viewRemoteSources": "Remote-Quellen anzeigen",
       "openSettings": "Einstellungen öffnen"
+    },
+    "jobContext": {
+      "store": "Gesendet an {{target}}",
+      "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
+      "move": "Abgerufen von {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
+      "modify": "{{patient}} — {{count}} Tag(s): {{tags}}",
+      "merge": "{{count}} Quelle(n) → Studie {{target}}",
+      "archive": "Archiv-Erstellung",
+      "split": "Serien-Split"
     }
   },
   "remote": {

@@ -177,7 +177,17 @@
       "patientId": "患者ID",
       "studyInstanceUid": "Study Instance UID",
       "totalItems": "总项目数",
-      "completedItems": "已完成项目数"
+      "completedItems": "已完成项目数",
+      "patientName": "患者姓名",
+      "studyDescription": "检查描述",
+      "jobType": "作业类型",
+      "resources": "资源",
+      "keepSource": "保留源",
+      "targetStudy": "目标研究",
+      "replacedTags": "替换的标签",
+      "userEmail": "用户（邮箱）",
+      "origin": "来源",
+      "webUi": "网页界面"
     },
     "detail": {
       "timestamp": "时间戳",
@@ -198,6 +208,16 @@
       "goToUpload": "转到上传",
       "viewRemoteSources": "查看远程源",
       "openSettings": "打开设置"
+    },
+    "jobContext": {
+      "store": "已发送至{{target}}",
+      "storeWithPatient": "{{patient}}（{{id}}）→ {{target}}",
+      "move": "从{{source}}检索",
+      "moveWithPatient": "{{patient}}（{{id}}）← {{source}}",
+      "modify": "{{patient}} — {{count}}个标签：{{tags}}",
+      "merge": "{{count}}个源 → 研究 {{target}}",
+      "archive": "创建归档",
+      "split": "系列拆分"
     }
   },
   "remote": {
@@ -221,7 +241,8 @@
     "send": "发送",
     "modify": "修改",
     "anonymize": "匿名化",
-    "delete": "删除"
+    "delete": "删除",
+    "openInOhif": "在OHIF中打开"
   },
   "common": {
     "save": "保存",
@@ -495,5 +516,45 @@
     "migrateButton": "迁移实例",
     "success": "实例迁移成功",
     "error": "迁移失败"
+  },
+  "studyList": {
+    "actions": {
+      "delete": "删除",
+      "export": "导出",
+      "label": "标签",
+      "send": "发送"
+    },
+    "columns": {
+      "accession": "检查号",
+      "description": "描述",
+      "images": "图像数",
+      "labels": "标签",
+      "lastUpdate": "最后更新",
+      "modality": "检查类型",
+      "referring": "申请医生",
+      "seriesCount": "系列数",
+      "status": "状态",
+      "studyInstanceUID": "研究UID"
+    },
+    "empty": "未找到研究",
+    "filters": {
+      "accession": "检查号",
+      "allModalities": "所有检查类型",
+      "description": "描述",
+      "labels": "标签",
+      "labelsHint": "多个标签用逗号分隔",
+      "modality": "检查类型",
+      "patientId": "患者ID"
+    },
+    "pagination": {
+      "next": "下一页",
+      "previous": "上一页",
+      "showing": "显示 {{from}}–{{to}}，共 {{total}}"
+    },
+    "selected": "已选择 {{count}} 项",
+    "status": {
+      "receiving": "接收中",
+      "stable": "稳定"
+    }
   }
 }

@@ -177,7 +177,17 @@
       "patientId": "ID Patient",
       "studyInstanceUid": "Study Instance UID",
       "totalItems": "Total Items",
-      "completedItems": "Items Terminés"
+      "completedItems": "Items Terminés",
+      "patientName": "Nom du patient",
+      "studyDescription": "Description de l'étude",
+      "jobType": "Type de tâche",
+      "resources": "Ressources",
+      "keepSource": "Garder la source",
+      "targetStudy": "Étude cible",
+      "replacedTags": "Étiquettes remplacées",
+      "userEmail": "Utilisateur (courriel)",
+      "origin": "Origine",
+      "webUi": "Interface web"
     },
     "detail": {
       "timestamp": "Horodatage",
@@ -198,6 +208,16 @@
       "goToUpload": "Aller au Téléversement",
       "viewRemoteSources": "Voir les Sources Distantes",
       "openSettings": "Ouvrir les Paramètres"
+    },
+    "jobContext": {
+      "store": "Envoyé vers {{target}}",
+      "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
+      "move": "Récupéré depuis {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
+      "modify": "{{patient}} — {{count}} étiquette(s) : {{tags}}",
+      "merge": "{{count}} source(s) → étude {{target}}",
+      "archive": "Création d'archive",
+      "split": "Division de série"
     }
   },
   "remote": {
@@ -221,7 +241,8 @@
     "send": "Envoyer",
     "modify": "Modifier",
     "anonymize": "Anonymiser",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "openInOhif": "Ouvrir dans OHIF"
   },
   "common": {
     "save": "Enregistrer",
@@ -495,5 +516,45 @@
     "migrateButton": "Migrer l'instance",
     "success": "Instance migrée avec succès",
     "error": "Migration échouée"
+  },
+  "studyList": {
+    "actions": {
+      "delete": "Supprimer",
+      "export": "Exporter",
+      "label": "Étiquette",
+      "send": "Envoyer"
+    },
+    "columns": {
+      "accession": "N° d'accès",
+      "description": "Description",
+      "images": "Images",
+      "labels": "Étiquettes",
+      "lastUpdate": "Dernière màj",
+      "modality": "Modalité",
+      "referring": "Médecin prescripteur",
+      "seriesCount": "Séries",
+      "status": "Statut",
+      "studyInstanceUID": "UID d'étude"
+    },
+    "empty": "Aucune étude trouvée",
+    "filters": {
+      "accession": "N° d'accès",
+      "allModalities": "Toutes modalités",
+      "description": "Description",
+      "labels": "Étiquettes",
+      "labelsHint": "Séparez plusieurs étiquettes par des virgules",
+      "modality": "Modalité",
+      "patientId": "ID patient"
+    },
+    "pagination": {
+      "next": "Suivant",
+      "previous": "Précédent",
+      "showing": "{{from}}–{{to}} sur {{total}}"
+    },
+    "selected": "{{count}} sélectionné(s)",
+    "status": {
+      "receiving": "Réception",
+      "stable": "Stable"
+    }
   }
 }

@@ -217,7 +217,17 @@
       "patientId": "Patient ID",
       "studyInstanceUid": "Study Instance UID",
       "totalItems": "Total Items",
-      "completedItems": "Completed Items"
+      "completedItems": "Completed Items",
+      "patientName": "Patient Name",
+      "studyDescription": "Study Description",
+      "jobType": "Job Type",
+      "resources": "Resources",
+      "keepSource": "Keep Source",
+      "targetStudy": "Target Study",
+      "replacedTags": "Replaced Tags",
+      "userEmail": "User (Email)",
+      "origin": "Origin",
+      "webUi": "Web UI"
     },
     "detail": {
       "timestamp": "Timestamp",
@@ -238,6 +248,16 @@
       "goToUpload": "Go to Upload",
       "viewRemoteSources": "View Remote Sources",
       "openSettings": "Open Settings"
+    },
+    "jobContext": {
+      "store": "Sent to {{target}}",
+      "storeWithPatient": "{{patient}} ({{id}}) → {{target}}",
+      "move": "Retrieved from {{source}}",
+      "moveWithPatient": "{{patient}} ({{id}}) ← {{source}}",
+      "modify": "{{patient}} — {{count}} tag(s): {{tags}}",
+      "merge": "{{count}} source(s) → study {{target}}",
+      "archive": "Archive creation",
+      "split": "Series split"
     }
   },
   "remote": {
