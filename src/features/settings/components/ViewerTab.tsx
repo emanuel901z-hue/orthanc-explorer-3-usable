@@ -176,8 +176,8 @@ export default function ViewerTab() {
   return (
     <TooltipProvider>
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <p className="text-sm text-muted-foreground">
               {t('viewer.description')}
             </p>
@@ -201,17 +201,19 @@ export default function ViewerTab() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5"
+                className="gap-1.5 shrink-0"
                 onClick={testAll}
               >
-                <RefreshCw className="h-3.5 w-3.5" /> {t('viewer.testAll')}
+                <RefreshCw className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{t('viewer.testAll')}</span>
+                <span className="sm:hidden">Test</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>{t('viewer.testAllTooltip')}</TooltipContent>
           </Tooltip>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {viewers.map((v) => {
             const sc = statusConfig[v.status];
             return (
@@ -273,7 +275,7 @@ export default function ViewerTab() {
                   <Separator className="my-3" />
 
                   <div className="flex items-center justify-between">
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-wrap">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -283,7 +285,8 @@ export default function ViewerTab() {
                             disabled={!v.enabled}
                             onClick={() => testConnection(v)}
                           >
-                            <RefreshCw className="h-3 w-3" /> {t('viewer.test')}
+                            <RefreshCw className="h-3 w-3" />
+                            <span className="hidden sm:inline">{t('viewer.test')}</span>
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>{t('viewer.testTooltip')}</TooltipContent>
@@ -296,7 +299,8 @@ export default function ViewerTab() {
                             className="h-7 gap-1 text-xs"
                             onClick={() => openEdit(v)}
                           >
-                            <Pencil className="h-3 w-3" /> {t('viewer.edit')}
+                            <Pencil className="h-3 w-3" />
+                            <span className="hidden sm:inline">{t('viewer.edit')}</span>
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>{t('viewer.editTooltip')}</TooltipContent>
@@ -310,7 +314,8 @@ export default function ViewerTab() {
                               className="h-7 text-xs"
                               onClick={() => setDefault(v.id)}
                             >
-                              {t('viewer.setDefault')}
+                              <span className="hidden sm:inline">{t('viewer.setDefault')}</span>
+                              <span className="sm:hidden">★</span>
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -319,7 +324,7 @@ export default function ViewerTab() {
                         </Tooltip>
                       )}
                     </div>
-                    <Badge variant={sc.badgeVariant} className="text-xs">
+                    <Badge variant={sc.badgeVariant} className="text-xs shrink-0">
                       {t(sc.labelKey)}
                     </Badge>
                   </div>

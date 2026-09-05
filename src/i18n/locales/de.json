@@ -73,7 +73,10 @@
       "images": "Bilder",
       "labels": "Labels",
       "status": "Status",
-      "seriesCount": "{{count}} Serien"
+      "seriesCount": "{{count}} Serien",
+      "config": "Spalten",
+      "toggle": "Spalten umschalten",
+      "view": "Ansicht"
     },
     "filters": {
       "patientId": "Patienten-ID",
@@ -100,7 +103,11 @@
       "label": "Label",
       "send": "Senden",
       "delete": "Löschen"
-    }
+    },
+    "labels": "Labels",
+    "labelModeAny": "ODER",
+    "labelModeAll": "UND",
+    "withoutLabels": "Ohne Labels"
   },
   "upload": {
     "subtitle": "DICOM-Dateien oder Ordner per Drag & Drop hochladen",
@@ -656,10 +663,10 @@
     "description": "DICOM-Modalität für C-STORE-, C-FIND- und C-MOVE-Operationen konfigurieren.",
     "name": "Name",
     "namePlaceholder": "CT-Scanner Haupt",
-    "aet": "AET (Application Entity Title)",
+    "aet": "AET",
     "aetPlaceholder": "CT_MAIN",
     "port": "Port",
-    "host": "Host / IP-Adresse",
+    "host": "Host",
     "hostPlaceholder": "192.168.1.10",
     "manufacturer": "Hersteller",
     "manufacturerPlaceholder": "Hersteller auswählen (optional)",
@@ -670,7 +677,23 @@
       "aetMax": "AET darf max. 16 Zeichen lang sein",
       "aetPattern": "Nur Buchstaben, Zahlen, Unterstriche",
       "portRange": "Port muss zwischen 1 und 65535 liegen"
-    }
+    },
+    "health": "Status",
+    "lastEcho": "Letztes Echo",
+    "actions": "Aktionen",
+    "echoAll": "Alle testen",
+    "addModality": "Modalität hinzufügen",
+    "online": "online",
+    "offline": "offline",
+    "notEchoed": "Nicht getestet",
+    "echoSuccess": "C-ECHO an {{name}} erfolgreich",
+    "echoFailed": "C-ECHO an {{name}} fehlgeschlagen",
+    "deleted": "Modalität \"{{name}}\" gelöscht",
+    "deleteFailed": "Löschen von \"{{name}}\" fehlgeschlagen",
+    "deleteTitle": "Modalität löschen",
+    "deleteDescription": "\"{{name}}\" aus Orthanc entfernen? Dies kann nicht rückgängig gemacht werden.",
+    "noModalities": "Keine Modalitäten konfiguriert. Klicken Sie auf \"Modalität hinzufügen\" um eine hinzuzufügen.",
+    "summary": "DICOM-Modalitäten für C-STORE, C-FIND und C-MOVE Operationen."
   },
   "dicomweb": {
     "editTitle": "DICOMweb-Server bearbeiten",
@@ -691,7 +714,7 @@
     "clientIdPlaceholder": "ihre-client-id",
     "clientSecret": "Client-Secret",
     "clientSecretPlaceholder": "ihr-client-secret",
-    "capabilities": "Fähigkeiten",
+    "capabilities": "Funktionen",
     "qidoDesc": "DICOM-Objekte abfragen/suchen",
     "wadoDesc": "DICOM-Objekte abrufen",
     "stowDesc": "DICOM-Objekte speichern/senden",
@@ -707,6 +730,53 @@
     "deleteError": "Löschen des Servers \"{{name}}\" fehlgeschlagen",
     "saveSuccessEdit": "Server \"{{name}}\" aktualisiert",
     "saveSuccessAdd": "Server \"{{name}}\" hinzugefügt",
-    "saveError": "Speichern des Servers \"{{name}}\" fehlgeschlagen"
+    "saveError": "Speichern des Servers \"{{name}}\" fehlgeschlagen",
+    "status": "Status",
+    "url": "URL",
+    "auth": "Auth",
+    "addServer": "Server hinzufügen",
+    "connected": "Verbunden",
+    "serverCount": "{{count}} Server",
+    "noServers": "Keine Orthanc DICOMweb-Server konfiguriert",
+    "summary": "Orthanc DICOMweb-Server für WADO-RS, QIDO-RS und STOW-RS Operationen.",
+    "extTitle": "Externes PACS — QIDO-RS / WADO-RS",
+    "extDesc": "Backend-konfigurierte DICOMweb-Endpunkte für Abfragen (QIDO-RS) und Abruf (WADO-RS) von Studien aus einem externen PACS.",
+    "query": "Abfrage",
+    "retrieve": "Abruf",
+    "notConfigured": "Nicht konfiguriert",
+    "apiKey": "API-Schlüssel",
+    "noApiKey": "Kein API-Schlüssel konfiguriert",
+    "extNotAvailable": "Keine externe DICOMweb-Konfiguration verfügbar. Diese Endpunkte werden von Ihrem Deployment-Administrator verwaltet (Backend-Konfiguration), nicht in dieser UI.",
+    "extFooter": "QIDO-RS und WADO-RS Endpunkte werden serverseitig von Ihrem Administrator konfiguriert.",
+    "testConnection": "Verbindung testen"
+  },
+  "auditLogs": {
+    "title": "Audit-Logs",
+    "subtitle": "Clientseitige Audit-Ereignisse (Sitzungsbereich)",
+    "export": "JSON exportieren",
+    "clear": "Leeren",
+    "search": "Audit-Ereignisse suchen...",
+    "allActions": "Alle Aktionen",
+    "events": "{{count}} Ereignisse",
+    "timestamp": "Zeitstempel",
+    "action": "Aktion",
+    "event": "Ereignis",
+    "severity": "Schweregrad",
+    "empty": "Keine Audit-Ereignisse in dieser Sitzung aufgezeichnet"
+  },
+  "worklists": {
+    "title": "Worklists",
+    "subtitle": "DICOM Modality Worklist-Verwaltung",
+    "upload": "Worklist hochladen",
+    "deleted": "Worklist gelöscht",
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "uploaded": "Worklist hochgeladen",
+    "uploadFailed": "Upload fehlgeschlagen (Plugin nicht installiert?)",
+    "pluginNotInstalled": "Worklists-Plugin nicht installiert. Installieren Sie das Orthanc Worklists-Plugin, um diese Funktion zu nutzen.",
+    "count": "{{count}} Worklists",
+    "empty": "Keine Worklists gefunden",
+    "actions": "Aktionen",
+    "type": "Typ",
+    "worklist": "Worklist"
   }
 }

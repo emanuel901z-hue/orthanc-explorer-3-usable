@@ -559,7 +559,10 @@
       "referring": "Médecin prescripteur",
       "seriesCount": "Séries",
       "status": "Statut",
-      "studyInstanceUID": "UID d'étude"
+      "studyInstanceUID": "UID d'étude",
+      "config": "Colonnes",
+      "toggle": "Basculer les colonnes",
+      "view": "Voir"
     },
     "empty": "Aucune étude trouvée",
     "filters": {
@@ -580,7 +583,11 @@
     "status": {
       "receiving": "Réception",
       "stable": "Stable"
-    }
+    },
+    "labels": "Étiquettes",
+    "labelModeAny": "OU",
+    "labelModeAll": "ET",
+    "withoutLabels": "Sans étiquettes"
   },
   "study": {
     "modifyTitle": "Modifier les étiquettes de l'étude",
@@ -654,14 +661,14 @@
     "editTitle": "Edit Modality",
     "addTitle": "Add DICOM Modality",
     "description": "Configure a DICOM modality for C-STORE, C-FIND, and C-MOVE operations.",
-    "name": "Name",
+    "name": "Nom",
     "namePlaceholder": "CT Scanner Main",
-    "aet": "AET (Application Entity Title)",
+    "aet": "AET",
     "aetPlaceholder": "CT_MAIN",
     "port": "Port",
-    "host": "Host / IP Address",
+    "host": "Hôte",
     "hostPlaceholder": "192.168.1.10",
-    "manufacturer": "Manufacturer",
+    "manufacturer": "Fabricant",
     "manufacturerPlaceholder": "Select manufacturer (optional)",
     "saveChanges": "Save Changes",
     "addButton": "Add Modality",
@@ -670,7 +677,23 @@
       "aetMax": "AET must be ≤16 characters",
       "aetPattern": "Only letters, numbers, underscores",
       "portRange": "Port must be between 1 and 65535"
-    }
+    },
+    "health": "État",
+    "lastEcho": "Dernier Echo",
+    "actions": "Actions",
+    "echoAll": "Tester Tout",
+    "addModality": "Ajouter Modalité",
+    "online": "en ligne",
+    "offline": "hors ligne",
+    "notEchoed": "Non testé",
+    "echoSuccess": "C-ECHO vers {{name}} réussi",
+    "echoFailed": "C-ECHO vers {{name}} échoué",
+    "deleted": "Modalité \"{{name}}\" supprimée",
+    "deleteFailed": "Échec de suppression de \"{{name}}\"",
+    "deleteTitle": "Supprimer Modalité",
+    "deleteDescription": "Supprimer \"{{name}}\" d'Orthanc ? Cette action est irréversible.",
+    "noModalities": "Aucune modalité configurée. Cliquez sur \"Ajouter Modalité\" pour en ajouter une.",
+    "summary": "Modalités DICOM configurées pour les opérations C-STORE, C-FIND et C-MOVE."
   },
   "dicomweb": {
     "editTitle": "Edit DICOMweb Server",
@@ -691,7 +714,7 @@
     "clientIdPlaceholder": "your-client-id",
     "clientSecret": "Client Secret",
     "clientSecretPlaceholder": "your-client-secret",
-    "capabilities": "Capabilities",
+    "capabilities": "Capacités",
     "qidoDesc": "Query/search for DICOM objects",
     "wadoDesc": "Retrieve DICOM objects",
     "stowDesc": "Store/send DICOM objects",
@@ -707,6 +730,53 @@
     "deleteError": "Failed to delete server \"{{name}}\"",
     "saveSuccessEdit": "Server \"{{name}}\" updated",
     "saveSuccessAdd": "Server \"{{name}}\" added",
-    "saveError": "Failed to save server \"{{name}}\""
+    "saveError": "Failed to save server \"{{name}}\"",
+    "status": "Statut",
+    "url": "URL",
+    "auth": "Auth",
+    "addServer": "Ajouter Serveur",
+    "connected": "Connecté",
+    "serverCount": "{{count}} serveurs",
+    "noServers": "Aucun serveur DICOMweb Orthanc configuré",
+    "summary": "Serveurs DICOMweb Orthanc pour les opérations WADO-RS, QIDO-RS et STOW-RS.",
+    "extTitle": "PACS Externe — QIDO-RS / WADO-RS",
+    "extDesc": "Points de terminaison DICOMweb configurés backend pour interroger (QIDO-RS) et récupérer (WADO-RS) des études d'un PACS externe.",
+    "query": "Requête",
+    "retrieve": "Récupération",
+    "notConfigured": "Non configuré",
+    "apiKey": "Clé API",
+    "noApiKey": "Clé API non configurée",
+    "extNotAvailable": "Aucune configuration DICOMweb externe disponible. Ces points de terminaison sont gérés par l'administrateur de déploiement (configuration backend), pas dans cette UI.",
+    "extFooter": "Les points de terminaison QIDO-RS et WADO-RS sont configurés côté serveur par l'administrateur.",
+    "testConnection": "Tester la connexion"
+  },
+  "auditLogs": {
+    "title": "Journaux d'Audit",
+    "subtitle": "Événements d'audit côté client (portée de session)",
+    "export": "Exporter JSON",
+    "clear": "Effacer",
+    "search": "Rechercher des événements d'audit...",
+    "allActions": "Toutes les actions",
+    "events": "{{count}} événements",
+    "timestamp": "Horodatage",
+    "action": "Action",
+    "event": "Événement",
+    "severity": "Gravité",
+    "empty": "Aucun événement d'audit enregistré dans cette session"
+  },
+  "worklists": {
+    "title": "Listes de travail",
+    "subtitle": "Gestion des listes de travail de modalité DICOM",
+    "upload": "Télécharger la liste de travail",
+    "deleted": "Liste de travail supprimée",
+    "deleteFailed": "Échec de la suppression",
+    "uploaded": "Liste de travail téléchargée",
+    "uploadFailed": "Échec du téléchargement (plugin non installé ?)",
+    "pluginNotInstalled": "Plugin de listes de travail non installé. Installez le plugin Orthanc Worklists pour utiliser cette fonctionnalité.",
+    "count": "{{count}} listes de travail",
+    "empty": "Aucune liste de travail trouvée",
+    "actions": "Actions",
+    "type": "Type",
+    "worklist": "Liste de travail"
   }
 }

@@ -559,7 +559,10 @@
       "referring": "申请医生",
       "seriesCount": "系列数",
       "status": "状态",
-      "studyInstanceUID": "研究UID"
+      "studyInstanceUID": "研究UID",
+      "config": "列",
+      "toggle": "切换列",
+      "view": "查看"
     },
     "empty": "未找到研究",
     "filters": {
@@ -580,7 +583,11 @@
     "status": {
       "receiving": "接收中",
       "stable": "稳定"
-    }
+    },
+    "labels": "标签",
+    "labelModeAny": "或",
+    "labelModeAll": "与",
+    "withoutLabels": "无标签"
   },
   "study": {
     "modifyTitle": "修改研究标签",
@@ -654,14 +661,14 @@
     "editTitle": "Edit Modality",
     "addTitle": "Add DICOM Modality",
     "description": "Configure a DICOM modality for C-STORE, C-FIND, and C-MOVE operations.",
-    "name": "Name",
+    "name": "名称",
     "namePlaceholder": "CT Scanner Main",
-    "aet": "AET (Application Entity Title)",
+    "aet": "AET",
     "aetPlaceholder": "CT_MAIN",
-    "port": "Port",
-    "host": "Host / IP Address",
+    "port": "端口",
+    "host": "主机",
     "hostPlaceholder": "192.168.1.10",
-    "manufacturer": "Manufacturer",
+    "manufacturer": "制造商",
     "manufacturerPlaceholder": "Select manufacturer (optional)",
     "saveChanges": "Save Changes",
     "addButton": "Add Modality",
@@ -670,7 +677,23 @@
       "aetMax": "AET must be ≤16 characters",
       "aetPattern": "Only letters, numbers, underscores",
       "portRange": "Port must be between 1 and 65535"
-    }
+    },
+    "health": "状态",
+    "lastEcho": "最后Echo",
+    "actions": "操作",
+    "echoAll": "全部测试",
+    "addModality": "添加模态",
+    "online": "在线",
+    "offline": "离线",
+    "notEchoed": "未测试",
+    "echoSuccess": "C-ECHO 到 {{name}} 成功",
+    "echoFailed": "C-ECHO 到 {{name}} 失败",
+    "deleted": "模态\"{{name}}\"已删除",
+    "deleteFailed": "删除\"{{name}}\"失败",
+    "deleteTitle": "删除模态",
+    "deleteDescription": "从 Orthanc 中删除\"{{name}}\"？此操作不可撤销。",
+    "noModalities": "未配置模态。点击\"添加模态\"来添加一个。",
+    "summary": "为 C-STORE、C-FIND 和 C-MOVE 操作配置的 DICOM 模态。"
   },
   "dicomweb": {
     "editTitle": "Edit DICOMweb Server",
@@ -691,7 +714,7 @@
     "clientIdPlaceholder": "your-client-id",
     "clientSecret": "Client Secret",
     "clientSecretPlaceholder": "your-client-secret",
-    "capabilities": "Capabilities",
+    "capabilities": "功能",
     "qidoDesc": "Query/search for DICOM objects",
     "wadoDesc": "Retrieve DICOM objects",
     "stowDesc": "Store/send DICOM objects",
@@ -707,6 +730,53 @@
     "deleteError": "Failed to delete server \"{{name}}\"",
     "saveSuccessEdit": "Server \"{{name}}\" updated",
     "saveSuccessAdd": "Server \"{{name}}\" added",
-    "saveError": "Failed to save server \"{{name}}\""
+    "saveError": "Failed to save server \"{{name}}\"",
+    "status": "状态",
+    "url": "URL",
+    "auth": "认证",
+    "addServer": "添加服务器",
+    "connected": "已连接",
+    "serverCount": "{{count}} 个服务器",
+    "noServers": "未配置 Orthanc DICOMweb 服务器",
+    "summary": "用于 WADO-RS、QIDO-RS 和 STOW-RS 操作的 Orthanc DICOMweb 服务器。",
+    "extTitle": "外部 PACS — QIDO-RS / WADO-RS",
+    "extDesc": "后端配置的 DICOMweb 端点，用于从外部 PACS 查询 (QIDO-RS) 和检索 (WADO-RS) 研究。",
+    "query": "查询",
+    "retrieve": "检索",
+    "notConfigured": "未配置",
+    "apiKey": "API 密钥",
+    "noApiKey": "未配置 API 密钥",
+    "extNotAvailable": "无外部 DICOMweb 配置可用。这些端点由部署管理员（后端配置）管理，而非此 UI。",
+    "extFooter": "QIDO-RS 和 WADO-RS 端点由管理员在服务器端配置。",
+    "testConnection": "测试连接"
+  },
+  "auditLogs": {
+    "title": "审计日志",
+    "subtitle": "客户端审计事件（会话范围）",
+    "export": "导出 JSON",
+    "clear": "清除",
+    "search": "搜索审计事件...",
+    "allActions": "所有操作",
+    "events": "{{count}} 个事件",
+    "timestamp": "时间戳",
+    "action": "操作",
+    "event": "事件",
+    "severity": "严重性",
+    "empty": "本次会话未记录审计事件"
+  },
+  "worklists": {
+    "title": "工作列表",
+    "subtitle": "DICOM 模态工作列表管理",
+    "upload": "上传工作列表",
+    "deleted": "工作列表已删除",
+    "deleteFailed": "删除失败",
+    "uploaded": "工作列表已上传",
+    "uploadFailed": "上传失败（插件未安装？）",
+    "pluginNotInstalled": "未安装工作列表插件。请安装 Orthanc Worklists 插件以使用此功能。",
+    "count": "{{count}} 个工作列表",
+    "empty": "未找到工作列表",
+    "actions": "操作",
+    "type": "类型",
+    "worklist": "工作列表"
   }
 }

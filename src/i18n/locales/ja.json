@@ -559,7 +559,10 @@
       "referring": "依頼医",
       "seriesCount": "シリーズ数",
       "status": "ステータス",
-      "studyInstanceUID": "スタディUID"
+      "studyInstanceUID": "スタディUID",
+      "config": "列",
+      "toggle": "列の切り替え",
+      "view": "表示"
     },
     "empty": "スタディが見つかりません",
     "filters": {
@@ -580,7 +583,11 @@
     "status": {
       "receiving": "受信中",
       "stable": "安定"
-    }
+    },
+    "labels": "ラベル",
+    "labelModeAny": "いずれか",
+    "labelModeAll": "すべて",
+    "withoutLabels": "ラベルなし"
   },
   "study": {
     "modifyTitle": "スタディタグを変更",
@@ -654,14 +661,14 @@
     "editTitle": "Edit Modality",
     "addTitle": "Add DICOM Modality",
     "description": "Configure a DICOM modality for C-STORE, C-FIND, and C-MOVE operations.",
-    "name": "Name",
+    "name": "名前",
     "namePlaceholder": "CT Scanner Main",
-    "aet": "AET (Application Entity Title)",
+    "aet": "AET",
     "aetPlaceholder": "CT_MAIN",
-    "port": "Port",
-    "host": "Host / IP Address",
+    "port": "ポート",
+    "host": "ホスト",
     "hostPlaceholder": "192.168.1.10",
-    "manufacturer": "Manufacturer",
+    "manufacturer": "メーカー",
     "manufacturerPlaceholder": "Select manufacturer (optional)",
     "saveChanges": "Save Changes",
     "addButton": "Add Modality",
@@ -670,7 +677,23 @@
       "aetMax": "AET must be ≤16 characters",
       "aetPattern": "Only letters, numbers, underscores",
       "portRange": "Port must be between 1 and 65535"
-    }
+    },
+    "health": "状態",
+    "lastEcho": "最終Echo",
+    "actions": "アクション",
+    "echoAll": "すべてテスト",
+    "addModality": "モダリティ追加",
+    "online": "オンライン",
+    "offline": "オフライン",
+    "notEchoed": "未テスト",
+    "echoSuccess": "{{name}}へのC-ECHO成功",
+    "echoFailed": "{{name}}へのC-ECHO失敗",
+    "deleted": "モダリティ「{{name}}」を削除しました",
+    "deleteFailed": "「{{name}}」の削除に失敗しました",
+    "deleteTitle": "モダリティ削除",
+    "deleteDescription": "Orthancから「{{name}}」を削除します？この操作は取り消せません。",
+    "noModalities": "モダリティが設定されていません。「モダリティ追加」をクリックして追加してください。",
+    "summary": "C-STORE、C-FIND、C-MOVE操作用に設定されたDICOMモダリティ。"
   },
   "dicomweb": {
     "editTitle": "Edit DICOMweb Server",
@@ -691,7 +714,7 @@
     "clientIdPlaceholder": "your-client-id",
     "clientSecret": "Client Secret",
     "clientSecretPlaceholder": "your-client-secret",
-    "capabilities": "Capabilities",
+    "capabilities": "機能",
     "qidoDesc": "Query/search for DICOM objects",
     "wadoDesc": "Retrieve DICOM objects",
     "stowDesc": "Store/send DICOM objects",
@@ -707,6 +730,53 @@
     "deleteError": "Failed to delete server \"{{name}}\"",
     "saveSuccessEdit": "Server \"{{name}}\" updated",
     "saveSuccessAdd": "Server \"{{name}}\" added",
-    "saveError": "Failed to save server \"{{name}}\""
+    "saveError": "Failed to save server \"{{name}}\"",
+    "status": "ステータス",
+    "url": "URL",
+    "auth": "認証",
+    "addServer": "サーバー追加",
+    "connected": "接続済み",
+    "serverCount": "{{count}}サーバー",
+    "noServers": "Orthanc DICOMwebサーバーが設定されていません",
+    "summary": "WADO-RS、QIDO-RS、STOW-RS操作用のOrthanc DICOMwebサーバー。",
+    "extTitle": "外部PACS — QIDO-RS / WADO-RS",
+    "extDesc": "外部PACSからのクエリ（QIDO-RS）と取得（WADO-RS）のためのバックエンド設定DICOMwebエンドポイント。",
+    "query": "クエリ",
+    "retrieve": "取得",
+    "notConfigured": "未設定",
+    "apiKey": "APIキー",
+    "noApiKey": "APIキーが設定されていません",
+    "extNotAvailable": "外部DICOMweb設定が利用できません。これらのエンドポイントはデプロイ管理者（バックエンド設定）によって管理され、このUIでは管理されません。",
+    "extFooter": "QIDO-RSおよびWADO-RSエンドポイントは管理者によってサーバー側で設定されます。",
+    "testConnection": "接続テスト"
+  },
+  "auditLogs": {
+    "title": "監査ログ",
+    "subtitle": "クライアント側の監査イベント（セッションスコープ）",
+    "export": "JSONエクスポート",
+    "clear": "クリア",
+    "search": "監査イベントを検索...",
+    "allActions": "すべてのアクション",
+    "events": "{{count}}イベント",
+    "timestamp": "タイムスタンプ",
+    "action": "アクション",
+    "event": "イベント",
+    "severity": "重要度",
+    "empty": "このセッションで記録された監査イベントはありません"
+  },
+  "worklists": {
+    "title": "ワークリスト",
+    "subtitle": "DICOMモダリティワークリスト管理",
+    "upload": "ワークリストをアップロード",
+    "deleted": "ワークリストが削除されました",
+    "deleteFailed": "削除に失敗しました",
+    "uploaded": "ワークリストがアップロードされました",
+    "uploadFailed": "アップロードに失敗しました（プラグインがインストールされていません？）",
+    "pluginNotInstalled": "ワークリストプラグインがインストールされていません。この機能を使用するにはOrthanc Worklistsプラグインをインストールしてください。",
+    "count": "{{count}}ワークリスト",
+    "empty": "ワークリストが見つかりません",
+    "actions": "アクション",
+    "type": "タイプ",
+    "worklist": "ワークリスト"
   }
 }

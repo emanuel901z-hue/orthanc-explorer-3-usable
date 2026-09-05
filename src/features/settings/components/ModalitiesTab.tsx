@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   Plus, Pencil, Trash2, Wifi, CheckCircle2, XCircle,
@@ -49,6 +50,7 @@ function ModalityTableRow({
   onEdit: (m: DicomModality) => void;
   onDelete: (name: string) => void;
 }) {
+  const { t } = useTranslation();
   const { data: config } = useModalityConfig(name);
 
   const modality: DicomModality = {
@@ -93,9 +95,9 @@ function ModalityTableRow({
           <TooltipContent>
             {hasEchoResult
               ? isOnline
-                ? 'Online — Last echo successful'
-                : 'Offline — Last echo failed'
-              : 'Not echoed yet'}
+                ? t('modality.online') + ' — ' + t('modality.lastEcho')
+                : t('modality.offline')
+              : t('modality.notEchoed')}
           </TooltipContent>
         </Tooltip>
       </TableCell>
@@ -195,6 +197,7 @@ function ModalityTableRow({
 }
 
 export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTabProps) {
+  const { t } = useTranslation();
   const { data: modalityNames = [] } = useModalities();
   const echo = useEchoModality();
   const del = useDeleteModality();
@@ -214,7 +217,7 @@ export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTab
           if (next.size === 0) setIsEchoingAll(false);
           return next;
         });
-        toast.success(`C-ECHO to ${name} succeeded`);
+        toast.success(t('modality.echoSuccess', { name }));
       },
       onError: () => {
         setEchoResults((prev) => ({ ...prev, [name]: { status: 'failure', at: new Date() } }));
@@ -224,7 +227,7 @@ export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTab
           if (next.size === 0) setIsEchoingAll(false);
           return next;
         });
-        toast.error(`C-ECHO to ${name} failed`);
+        toast.error(t('modality.echoFailed', { name }));
       },
     });
   };
@@ -239,9 +242,9 @@ export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTab
     del.mutate(name, {
       onSuccess: () => {
         setEchoResults((prev) => { const { [name]: _, ...rest } = prev; return rest; });
-        toast.success(`Modality "${name}" deleted`);
+        toast.success(t('modality.deleted', { name }));
       },
-      onError: () => toast.error(`Failed to delete "${name}"`),
+      onError: () => toast.error(t('modality.deleteFailed', { name })),
     });
     setPendingDelete(null);
   };
@@ -253,27 +256,27 @@ export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTab
     <TooltipProvider>
       <div className="space-y-4">
         {/* Summary bar */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <p className="text-sm text-muted-foreground">
-              DICOM modalities configured for C-STORE, C-FIND, and C-MOVE operations.
+              {t('modality.summary')}
             </p>
             <div className="flex items-center gap-3 text-xs">
               {onlineCount > 0 && (
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  {onlineCount} online
+                  {onlineCount} {t('modality.online')}
                 </span>
               )}
               {offlineCount > 0 && (
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-destructive" />
-                  {offlineCount} offline
+                  {offlineCount} {t('modality.offline')}
                 </span>
               )}
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -288,36 +291,40 @@ export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTab
                     ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     : <RefreshCw className="h-3.5 w-3.5" />
                   }
-                  Echo All
+                  <span className="hidden sm:inline">{t('modality.echoAll')}</span>
+                  <span className="sm:hidden">Echo</span>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Send C-ECHO to all modalities</TooltipContent>
+              <TooltipContent>{t('modality.echoAll')}</TooltipContent>
             </Tooltip>
             <Button type="button" size="sm" className="gap-1.5" onClick={onAddClick}>
-              <Plus className="h-3.5 w-3.5" /> Add Modality
+              <Plus className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{t('modality.addModality')}</span>
+              <span className="sm:hidden">+</span>
             </Button>
           </div>
         </div>
 
-        <Card>
+        {/* Desktop table */}
+        <Card className="hidden md:block">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">Health</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>AET</TableHead>
-                <TableHead>Host</TableHead>
-                <TableHead>Port</TableHead>
-                <TableHead>Manufacturer</TableHead>
-                <TableHead>Last Echo</TableHead>
-                <TableHead className="w-28">Actions</TableHead>
+                <TableHead className="w-10">{t('modality.health')}</TableHead>
+                <TableHead>{t('modality.name')}</TableHead>
+                <TableHead>{t('modality.aet')}</TableHead>
+                <TableHead>{t('modality.host')}</TableHead>
+                <TableHead>{t('modality.port')}</TableHead>
+                <TableHead>{t('modality.manufacturer')}</TableHead>
+                <TableHead>{t('modality.lastEcho')}</TableHead>
+                <TableHead className="w-28">{t('modality.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {modalityNames.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground text-sm">
-                    No modalities configured. Click "Add Modality" to add one.
+                    {t('modality.noModalities')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -336,6 +343,29 @@ export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTab
             </TableBody>
           </Table>
         </Card>
+
+        {/* Mobile cards */}
+        <div className="md:hidden space-y-2">
+          {modalityNames.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground text-sm">
+                {t('modality.noModalities')}
+              </CardContent>
+            </Card>
+          ) : (
+            modalityNames.map((name) => (
+              <ModalityMobileCard
+                key={name}
+                name={name}
+                echoResult={echoResults[name]}
+                isEchoing={echoingNames.has(name)}
+                onEcho={handleEcho}
+                onEdit={onEditClick}
+                onDelete={setPendingDelete}
+              />
+            ))
+          )}
+        </div>
       </div>
 
       {/* Delete confirmation dialog */}
@@ -345,22 +375,103 @@ export default function ModalitiesTab({ onAddClick, onEditClick }: ModalitiesTab
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Modality</AlertDialogTitle>
+            <AlertDialogTitle>{t('modality.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Remove &quot;{pendingDelete}&quot; from Orthanc? This cannot be undone.
+              {t('modality.deleteDescription', { name: pendingDelete })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => pendingDelete && handleDelete(pendingDelete)}
             >
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </TooltipProvider>
+  );
+}
+
+function ModalityMobileCard({
+  name,
+  echoResult,
+  isEchoing,
+  onEcho,
+  onEdit,
+  onDelete,
+}: {
+  name: string;
+  echoResult: EchoResult | undefined;
+  isEchoing: boolean;
+  onEcho: (name: string) => void;
+  onEdit: (m: DicomModality) => void;
+  onDelete: (name: string) => void;
+}) {
+  const { t } = useTranslation();
+  const { data: config } = useModalityConfig(name);
+  const modality: DicomModality = {
+    id: name,
+    name,
+    aet: config?.AET ?? name,
+    host: config?.Host ?? '—',
+    port: config?.Port ?? 0,
+    manufacturer: config?.Manufacturer,
+  };
+  const isOnline = echoResult?.status === 'success';
+  const hasEchoResult = !!echoResult;
+
+  return (
+    <Card>
+      <CardContent className="p-3 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                'inline-flex items-center justify-center h-6 w-6 rounded-full',
+                hasEchoResult
+                  ? isOnline ? 'bg-emerald-500/10' : 'bg-destructive/10'
+                  : 'bg-muted',
+              )}
+            >
+              <span
+                className={cn(
+                  'h-2.5 w-2.5 rounded-full',
+                  hasEchoResult
+                    ? isOnline ? 'bg-emerald-500' : 'bg-destructive'
+                    : 'bg-muted-foreground/30',
+                )}
+              />
+            </span>
+            <p className="font-medium">{modality.name}</p>
+          </div>
+          <div className="flex gap-1">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={isEchoing} onClick={() => onEcho(name)}>
+              {isEchoing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => onEdit(modality)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => onDelete(name)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-1 text-xs">
+          <div><span className="text-muted-foreground">{t('modality.aet')}: </span><code className="bg-muted px-1 rounded font-mono">{modality.aet}</code></div>
+          <div><span className="text-muted-foreground">{t('modality.host')}: </span>{modality.host}</div>
+          <div><span className="text-muted-foreground">{t('modality.port')}: </span>{modality.port > 0 ? modality.port : '—'}</div>
+          <div><span className="text-muted-foreground">{t('modality.manufacturer')}: </span>{modality.manufacturer || '—'}</div>
+        </div>
+        {echoResult && (
+          <div className="flex items-center gap-1.5 text-xs">
+            {isOnline ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : <XCircle className="h-3 w-3 text-destructive" />}
+            <span className="text-muted-foreground">{formatDistanceToNow(echoResult.at, { addSuffix: true })}</span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

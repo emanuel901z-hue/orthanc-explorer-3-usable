@@ -81,19 +81,24 @@ export default function SettingsPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="system" className="gap-1.5">
-            <Server className="h-3.5 w-3.5" /> {t('settings.system')}
+            <Server className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t('settings.system')}</span>
           </TabsTrigger>
           <TabsTrigger value="modalities" className="gap-1.5">
-            <Radio className="h-3.5 w-3.5" /> {t('settings.modalities')}
+            <Radio className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t('settings.modalities')}</span>
           </TabsTrigger>
           <TabsTrigger value="dicomweb" className="gap-1.5">
-            <Globe className="h-3.5 w-3.5" /> {t('settings.dicomweb')}
+            <Globe className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t('settings.dicomweb')}</span>
           </TabsTrigger>
           <TabsTrigger value="viewer" className="gap-1.5">
-            <Eye className="h-3.5 w-3.5" /> {t('settings.viewer')}
+            <Eye className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t('settings.viewer')}</span>
           </TabsTrigger>
           <TabsTrigger value="preferences" className="gap-1.5">
-            <Sliders className="h-3.5 w-3.5" /> {t('settings.preferences')}
+            <Sliders className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t('settings.preferences')}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -211,7 +216,7 @@ export default function SettingsPage() {
               <p className="text-xs text-muted-foreground">{t('settings.appearanceDesc')}</p>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 sm:gap-3 gap-2">
                 {[
                   {
                     value: 'light' as const,

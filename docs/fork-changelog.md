@@ -4,6 +4,65 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v1.7.0 — Comprehensive Mobile + i18n Audit (2026-09-05)
+
+### Mobile Card Views (all tables)
+
+- **ActivityPage**: Desktop table hidden on mobile (`hidden md:block`); mobile cards show severity icon, category badge, title, description, timestamp, duration, actor. Export CSV button label shortened to "CSV" on mobile. Subtitle hidden on mobile to save space.
+- **AuditLogsPage**: Desktop table hidden on mobile; mobile cards show action badge, severity badge, title, timestamp. Filter Select full-width on mobile.
+- **WorklistsPage**: Desktop table hidden on mobile (`hidden sm:table`); mobile cards show worklist badge + full ID + delete button. Header switches to column layout on mobile. Upload button label shortened on mobile.
+- **ModalitiesTab**: Desktop table hidden on mobile; mobile cards show health indicator, name, action buttons (echo/edit/delete), AET/host/port/manufacturer grid, last echo time. Echo All / Add Modality buttons show icon-only on mobile. Summary bar wraps vertically on mobile.
+- **DicomWebTab**: Desktop table hidden on mobile; mobile cards show status, name, action buttons, URL (break-all), auth type, capability badges. Add Server button icon-only on mobile. Summary bar wraps vertically on mobile.
+- **ViewerTab**: Grid changed from `md:grid-cols-2` to single column always (cards are too wide for 2-col on mobile). Test All button icon-only on mobile. Per-card buttons (Test/Edit/Set Default) show icon-only on mobile. Status badge `shrink-0` to prevent overflow.
+
+### i18n — Missing translations added (all 9 locales)
+
+- **auditLogs namespace**: Added `title`, `subtitle`, `export`, `clear`, `search`, `allActions`, `events`, `timestamp`, `action`, `event`, `severity`, `empty` to all 9 locales (ar, de, en, es, fr, ja, ru, tr, zh). Removed all `defaultValue` fallbacks from AuditLogsPage.
+- **worklists namespace**: Added `title`, `subtitle`, `upload`, `deleted`, `deleteFailed`, `uploaded`, `uploadFailed`, `pluginNotInstalled`, `count`, `empty`, `actions`, `type`, `worklist` to all 9 locales. Removed all `defaultValue` fallbacks and hardcoded "ID"/"Type"/"Worklist" strings from WorklistsPage.
+- **studyList.columns**: Added `config` ("Columns"/"Spalten"/...), `toggle`, `view` to all 9 locales. Removed `defaultValue` fallbacks from StudyListPage.
+- **studyList top-level**: Added `labels`, `labelModeAny`, `labelModeAll`, `withoutLabels` to all 9 locales. Removed `defaultValue` fallbacks.
+- **modality namespace**: Added `health`, `name`, `aet`, `host`, `port`, `manufacturer`, `lastEcho`, `actions`, `echoAll`, `addModality`, `online`, `offline`, `notEchoed`, `echoSuccess`, `echoFailed`, `deleted`, `deleteFailed`, `deleteTitle`, `deleteDescription`, `noModalities`, `summary` to all 9 locales. Replaced all hardcoded English strings in ModalitiesTab (tooltips, toast messages, table headers, dialog text, summary bar).
+- **dicomweb namespace**: Added `status`, `url`, `auth`, `capabilities`, `addServer`, `connected`, `serverCount`, `noServers`, `summary`, `extTitle`, `extDesc`, `query`, `retrieve`, `notConfigured`, `apiKey`, `noApiKey`, `extNotAvailable`, `extFooter`, `testConnection` to all 9 locales. Replaced all hardcoded English strings in DicomWebTab.
+
+### Shared component fixes
+
+- **Switch component**: Fixed thumb positioning — `translate-x-5` → `translate-x-[22px]` and added `translate-x-0.5` for unchecked state. `shadow-lg` → `shadow-md`. Ensures the toggle knob is properly positioned within the track on all viewports.
+- **Select component**: Added `w-[var(--radix-select-trigger-width)]` to SelectContent so dropdown matches trigger width on mobile (prevents oversized dropdowns when trigger is `w-full` in a grid).
+- **SettingsPage tabs**: Tab labels hidden on mobile (`hidden sm:inline`), showing only icons. Prevents tab overflow on narrow screens.
+- **SettingsPage appearance grid**: Reduced gap on mobile (`gap-2` vs `sm:gap-3`).
+- **StudyListPage buttons**: Filters and Columns buttons show icon-only on mobile, full label on desktop. Added `shrink-0` to prevent button compression.
+
+### Files Changed
+
+```
+Modified:
+  src/components/ui/select.tsx
+  src/components/ui/switch.tsx
+  src/features/activity/pages/ActivityPage.tsx
+  src/features/audit/pages/AuditLogsPage.tsx
+  src/features/settings/components/DicomWebTab.tsx
+  src/features/settings/components/ModalitiesTab.tsx
+  src/features/settings/components/ViewerTab.tsx
+  src/features/settings/pages/SettingsPage.tsx
+  src/features/studies/pages/StudyListPage.tsx
+  src/features/worklists/pages/WorklistsPage.tsx
+  src/i18n/locales/ar.json
+  src/i18n/locales/de.json
+  src/i18n/locales/en.json
+  src/i18n/locales/es.json
+  src/i18n/locales/fr.json
+  src/i18n/locales/ja.json
+  src/i18n/locales/ru.json
+  src/i18n/locales/tr.json
+  src/i18n/locales/zh.json
+  docs/fork-changelog.md
+
+Added:
+  scripts/add-missing-i18n.py
+```
+
+---
+
 ## v1.6.0 — Mobile Responsive Card Views + Runtime Config Fix (2026-09-04)
 
 ### Mobile Card Views (no more horizontal scroll)

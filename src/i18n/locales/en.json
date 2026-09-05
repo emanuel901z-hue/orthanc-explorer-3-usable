@@ -73,7 +73,10 @@
       "images": "Images",
       "labels": "Labels",
       "status": "Status",
-      "seriesCount": "{{count}} series"
+      "seriesCount": "{{count}} series",
+      "config": "Columns",
+      "toggle": "Toggle columns",
+      "view": "View"
     },
     "filters": {
       "patientId": "Patient ID",
@@ -100,7 +103,11 @@
       "label": "Label",
       "send": "Send",
       "delete": "Delete"
-    }
+    },
+    "labels": "Labels",
+    "labelModeAny": "OR",
+    "labelModeAll": "AND",
+    "withoutLabels": "Without labels"
   },
   "upload": {
     "subtitle": "Drag and drop DICOM files or folders to upload",
@@ -656,10 +663,10 @@
     "description": "Configure a DICOM modality for C-STORE, C-FIND, and C-MOVE operations.",
     "name": "Name",
     "namePlaceholder": "CT Scanner Main",
-    "aet": "AET (Application Entity Title)",
+    "aet": "AET",
     "aetPlaceholder": "CT_MAIN",
     "port": "Port",
-    "host": "Host / IP Address",
+    "host": "Host",
     "hostPlaceholder": "192.168.1.10",
     "manufacturer": "Manufacturer",
     "manufacturerPlaceholder": "Select manufacturer (optional)",
@@ -670,7 +677,23 @@
       "aetMax": "AET must be ≤16 characters",
       "aetPattern": "Only letters, numbers, underscores",
       "portRange": "Port must be between 1 and 65535"
-    }
+    },
+    "health": "Health",
+    "lastEcho": "Last Echo",
+    "actions": "Actions",
+    "echoAll": "Echo All",
+    "addModality": "Add Modality",
+    "online": "online",
+    "offline": "offline",
+    "notEchoed": "Not echoed yet",
+    "echoSuccess": "C-ECHO to {{name}} succeeded",
+    "echoFailed": "C-ECHO to {{name}} failed",
+    "deleted": "Modality \"{{name}}\" deleted",
+    "deleteFailed": "Failed to delete \"{{name}}\"",
+    "deleteTitle": "Delete Modality",
+    "deleteDescription": "Remove \"{{name}}\" from Orthanc? This cannot be undone.",
+    "noModalities": "No modalities configured. Click \"Add Modality\" to add one.",
+    "summary": "DICOM modalities configured for C-STORE, C-FIND, and C-MOVE operations."
   },
   "dicomweb": {
     "editTitle": "Edit DICOMweb Server",
@@ -707,6 +730,53 @@
     "deleteError": "Failed to delete server \"{{name}}\"",
     "saveSuccessEdit": "Server \"{{name}}\" updated",
     "saveSuccessAdd": "Server \"{{name}}\" added",
-    "saveError": "Failed to save server \"{{name}}\""
+    "saveError": "Failed to save server \"{{name}}\"",
+    "status": "Status",
+    "url": "URL",
+    "auth": "Auth",
+    "addServer": "Add Server",
+    "connected": "Connected",
+    "serverCount": "{{count}} servers",
+    "noServers": "No Orthanc DICOMweb servers configured",
+    "summary": "Orthanc DICOMweb servers for WADO-RS, QIDO-RS, and STOW-RS operations.",
+    "extTitle": "External PACS — QIDO-RS / WADO-RS",
+    "extDesc": "Backend-configured DICOMweb endpoints for querying (QIDO-RS) and retrieving (WADO-RS) studies from an external PACS.",
+    "query": "Query",
+    "retrieve": "Retrieve",
+    "notConfigured": "Not configured",
+    "apiKey": "API Key",
+    "noApiKey": "No API key configured",
+    "extNotAvailable": "No external DICOMweb configuration available. These endpoints are managed by your deployment administrator (backend configuration), not in this UI.",
+    "extFooter": "QIDO-RS and WADO-RS endpoints are configured server-side by your administrator.",
+    "testConnection": "Test connection"
+  },
+  "auditLogs": {
+    "title": "Audit Logs",
+    "subtitle": "Client-side audit events (session scope)",
+    "export": "Export JSON",
+    "clear": "Clear",
+    "search": "Search audit events...",
+    "allActions": "All actions",
+    "events": "{{count}} events",
+    "timestamp": "Timestamp",
+    "action": "Action",
+    "event": "Event",
+    "severity": "Severity",
+    "empty": "No audit events recorded in this session"
+  },
+  "worklists": {
+    "title": "Worklists",
+    "subtitle": "DICOM Modality Worklist Management",
+    "upload": "Upload Worklist",
+    "deleted": "Worklist deleted",
+    "deleteFailed": "Delete failed",
+    "uploaded": "Worklist uploaded",
+    "uploadFailed": "Upload failed (plugin not installed?)",
+    "pluginNotInstalled": "Worklists plugin not installed. Install the Orthanc Worklists plugin to use this feature.",
+    "count": "{{count}} worklists",
+    "empty": "No worklists found",
+    "actions": "Actions",
+    "type": "Type",
+    "worklist": "Worklist"
   }
 }

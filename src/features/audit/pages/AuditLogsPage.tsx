@@ -73,18 +73,18 @@ export default function AuditLogsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Shield className="h-6 w-6" />
-            {t('auditLogs.title', { defaultValue: 'Audit Logs' })}
+            {t('auditLogs.title')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {t('auditLogs.subtitle', { defaultValue: 'Client-side audit events (session scope)' })}
+            {t('auditLogs.subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExport} disabled={filtered.length === 0}>
-            <Download className="h-3.5 w-3.5" /> {t('auditLogs.export', { defaultValue: 'Export JSON' })}
+            <Download className="h-3.5 w-3.5" /> {t('auditLogs.export')}
           </Button>
           <Button variant="outline" size="sm" onClick={clear} disabled={events.length === 0}>
-            <Trash2 className="h-3.5 w-3.5" /> {t('auditLogs.clear', { defaultValue: 'Clear' })}
+            <Trash2 className="h-3.5 w-3.5" /> {t('auditLogs.clear')}
           </Button>
         </div>
       </div>
@@ -95,18 +95,18 @@ export default function AuditLogsPage() {
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t('auditLogs.search', { defaultValue: 'Search audit events...' })}
+                placeholder={t('auditLogs.search')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 h-9"
               />
             </div>
             <Select value={actionFilter} onValueChange={setActionFilter}>
-              <SelectTrigger className="w-[180px] h-9">
+              <SelectTrigger className="w-full sm:w-[180px] h-9">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('auditLogs.allActions', { defaultValue: 'All actions' })}</SelectItem>
+                <SelectItem value="all">{t('auditLogs.allActions')}</SelectItem>
                 {actions.map((a) => (
                   <SelectItem key={a} value={a}>{a}</SelectItem>
                 ))}
@@ -119,25 +119,26 @@ export default function AuditLogsPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium">
-            {t('auditLogs.events', { count: filtered.length, defaultValue: `${filtered.length} events` })}
+            {t('auditLogs.events', { count: filtered.length })}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-auto max-h-[600px]">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-auto max-h-[600px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[160px]">{t('auditLogs.timestamp', { defaultValue: 'Timestamp' })}</TableHead>
-                  <TableHead className="w-[120px]">{t('auditLogs.action', { defaultValue: 'Action' })}</TableHead>
-                  <TableHead>{t('auditLogs.title', { defaultValue: 'Event' })}</TableHead>
-                  <TableHead className="w-[100px]">{t('auditLogs.severity', { defaultValue: 'Severity' })}</TableHead>
+                  <TableHead className="w-[160px]">{t('auditLogs.timestamp')}</TableHead>
+                  <TableHead className="w-[120px]">{t('auditLogs.action')}</TableHead>
+                  <TableHead>{t('auditLogs.event')}</TableHead>
+                  <TableHead className="w-[100px]">{t('auditLogs.severity')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
-                      {t('auditLogs.empty', { defaultValue: 'No audit events recorded in this session' })}
+                      {t('auditLogs.empty')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -167,6 +168,34 @@ export default function AuditLogsPage() {
                 )}
               </TableBody>
             </Table>
+          </div>
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y max-h-[600px] overflow-auto">
+            {filtered.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">{t('auditLogs.empty')}</div>
+            ) : (
+              filtered.map((event) => (
+                <div key={event.id} className="p-3 space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant="outline" className="text-xs">{event.action}</Badge>
+                    <Badge
+                      variant={
+                        event.severity === 'error' ? 'destructive' :
+                        event.severity === 'warning' ? 'default' :
+                        'secondary'
+                      }
+                      className="text-xs"
+                    >
+                      {event.severity}
+                    </Badge>
+                  </div>
+                  <p className="text-sm font-medium">{event.title}</p>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {format(new Date(event.timestamp), 'MMM dd, yyyy HH:mm:ss')}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

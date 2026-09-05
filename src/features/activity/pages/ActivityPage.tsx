@@ -563,9 +563,11 @@ export default function ActivityPage() {
       <div className="flex-1 overflow-auto p-4 md:p-6 space-y-4 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">{t('activity.subtitle')}</p>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={exportCsv}>
-            <FileDown className="h-3.5 w-3.5" /> {t('activity.exportCsv')}
+          <p className="text-sm text-muted-foreground hidden sm:block">{t('activity.subtitle')}</p>
+          <Button variant="outline" size="sm" className="gap-1.5 ml-auto" onClick={exportCsv}>
+            <FileDown className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t('activity.exportCsv')}</span>
+            <span className="sm:hidden">CSV</span>
           </Button>
         </div>
 
@@ -724,8 +726,8 @@ export default function ActivityPage() {
           </CardContent>
         </Card>
 
-        {/* Timeline table */}
-        <Card>
+        {/* Timeline table — desktop */}
+        <Card className="hidden md:block">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
@@ -747,7 +749,6 @@ export default function ActivityPage() {
                   </TableRow>
                 ) : (
                   filtered.slice(0, 200).map((event) => {
-                    // Check if this is a running Orthanc job
                     const isRunningJob =
                       event.category === 'job' &&
                       event.metadata?.[t('activity.metadata.state')] === 'Running';
@@ -833,6 +834,84 @@ export default function ActivityPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Mobile card view */}
+        <div className="md:hidden space-y-2">
+          {filtered.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                {t('activity.noEvents')}
+              </CardContent>
+            </Card>
+          ) : (
+            filtered.slice(0, 100).map((event) => {
+              const isRunningJob =
+                event.category === 'job' &&
+                event.metadata?.[t('activity.metadata.state')] === 'Running';
+              const progress = isRunningJob
+                ? parseInt(event.metadata?.[t('activity.metadata.progress')] || '0')
+                : null;
+              return (
+                <Card
+                  key={event.id}
+                  className={cn(
+                    'cursor-pointer transition-colors',
+                    selectedEvent?.id === event.id && 'ring-2 ring-primary',
+                  )}
+                  onClick={() =>
+                    setSelectedEvent(selectedEvent?.id === event.id ? null : event)
+                  }
+                >
+                  <CardContent className="p-3 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {isRunningJob ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-primary shrink-0" />
+                        ) : (
+                          <span className="shrink-0">{SEVERITY_ICON[event.severity]}</span>
+                        )}
+                        <Badge
+                          variant="outline"
+                          className={cn('text-[10px] h-5 gap-1 shrink-0', CATEGORY_COLORS[event.category])}
+                        >
+                          {ACTION_ICONS[event.action] || <Info className="h-3 w-3" />}
+                          {categoryLabel(event.category)}
+                        </Badge>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground shrink-0">
+                        {formatRelativeTime(event.timestamp, t)}
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium">{event.title}</p>
+                    {event.description && (
+                      <p className="text-xs text-muted-foreground">{event.description}</p>
+                    )}
+                    {isRunningJob && progress !== null && (
+                      <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full transition-all"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                      <span>{format(new Date(event.timestamp), 'HH:mm:ss')}</span>
+                      {event.duration !== undefined && (
+                        <span className="font-mono">{formatDuration(event.duration)}</span>
+                      )}
+                      {event.actor && <span>{event.actor}</span>}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+          {filtered.length > 100 && (
+            <div className="text-center py-3 text-xs text-muted-foreground">
+              {t('activity.showingOf', { shown: 100, total: filtered.length })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Detail panel */}

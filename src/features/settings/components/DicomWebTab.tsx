@@ -82,16 +82,15 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Globe className="h-4 w-4" />
-              External PACS — QIDO-RS / WADO-RS
+              {t('dicomweb.extTitle')}
             </CardTitle>
             <p className="text-xs text-muted-foreground">
-              Backend-configured DICOMweb endpoints for querying (QIDO-RS) and retrieving (WADO-RS)
-              studies from an external PACS.
+              {t('dicomweb.extDesc')}
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
             {extLoading ? (
-              <div className="text-sm text-muted-foreground">Loading...</div>
+              <div className="text-sm text-muted-foreground">{t('common.loading', { defaultValue: 'Loading...' })}</div>
             ) : extConfig ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* QIDO-RS */}
@@ -101,7 +100,7 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                       <Badge variant={extConfig.hasQido ? 'secondary' : 'outline'} className="text-xs">
                         QIDO-RS
                       </Badge>
-                      <span className="text-sm font-medium">Query</span>
+                      <span className="text-sm font-medium">{t('dicomweb.query')}</span>
                     </div>
                     {extConfig.hasQido ? (
                       <ShieldCheck className="h-4 w-4 text-emerald-500" />
@@ -114,7 +113,7 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                       {extConfig.qidoUrl}
                     </code>
                   ) : (
-                    <p className="text-xs text-muted-foreground">Not configured</p>
+                    <p className="text-xs text-muted-foreground">{t('dicomweb.notConfigured')}</p>
                   )}
                 </div>
 
@@ -125,7 +124,7 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                       <Badge variant={extConfig.hasWado ? 'secondary' : 'outline'} className="text-xs">
                         WADO-RS
                       </Badge>
-                      <span className="text-sm font-medium">Retrieve</span>
+                      <span className="text-sm font-medium">{t('dicomweb.retrieve')}</span>
                     </div>
                     {extConfig.hasWado ? (
                       <ShieldCheck className="h-4 w-4 text-emerald-500" />
@@ -138,7 +137,7 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                       {extConfig.wadoRsUrl}
                     </code>
                   ) : (
-                    <p className="text-xs text-muted-foreground">Not configured</p>
+                    <p className="text-xs text-muted-foreground">{t('dicomweb.notConfigured')}</p>
                   )}
                 </div>
 
@@ -146,14 +145,14 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                 <div className="md:col-span-2 space-y-2 rounded-lg border p-3">
                   <div className="flex items-center gap-2">
                     <KeyRound className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">API Key</span>
+                    <span className="text-sm font-medium">{t('dicomweb.apiKey')}</span>
                   </div>
                   {extConfig.qidoApiKeyMasked ? (
                     <code className="block bg-muted px-2 py-1.5 rounded text-xs font-mono">
                       {extConfig.qidoApiKeyMasked}
                     </code>
                   ) : (
-                    <p className="text-xs text-muted-foreground">No API key configured</p>
+                    <p className="text-xs text-muted-foreground">{t('dicomweb.noApiKey')}</p>
                   )}
                 </div>
               </div>
@@ -161,61 +160,61 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
               <div className="flex items-start gap-2 p-3 rounded-lg border bg-muted/30">
                 <Server className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <p className="text-xs text-muted-foreground">
-                  No external DICOMweb configuration available. These endpoints are managed by your
-                  deployment administrator (backend configuration), not in this UI.
+                  {t('dicomweb.extNotAvailable')}
                 </p>
               </div>
             )}
             <div className="flex items-center gap-2 pt-2 border-t">
               <Server className="h-3.5 w-3.5 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">
-                QIDO-RS and WADO-RS endpoints are configured server-side by your administrator.
+                {t('dicomweb.extFooter')}
               </p>
             </div>
           </CardContent>
         </Card>
 
         {/* Orthanc DICOMweb Servers */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <p className="text-sm text-muted-foreground">
-              Orthanc DICOMweb servers for WADO-RS, QIDO-RS, and STOW-RS operations.
+              {t('dicomweb.summary')}
             </p>
-            <Badge variant="secondary" className="text-xs">
-              {dicomwebServers.length} servers
+            <Badge variant="secondary" className="text-xs w-fit">
+              {t('dicomweb.serverCount', { count: dicomwebServers.length })}
             </Badge>
           </div>
-          <Button size="sm" className="gap-1.5" onClick={onAddClick}>
-            <Plus className="h-3.5 w-3.5" /> Add Server
+          <Button size="sm" className="gap-1.5 shrink-0" onClick={onAddClick}>
+            <Plus className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t('dicomweb.addServer')}</span>
+            <span className="sm:hidden">+</span>
           </Button>
         </div>
 
-        <Card>
+        {/* Desktop table */}
+        <Card className="hidden md:block">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">Status</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>URL</TableHead>
-                <TableHead>Auth</TableHead>
-                <TableHead>Capabilities</TableHead>
-                <TableHead className="w-28">Actions</TableHead>
+                <TableHead className="w-10">{t('dicomweb.status')}</TableHead>
+                <TableHead>{t('modality.name')}</TableHead>
+                <TableHead>{t('dicomweb.url')}</TableHead>
+                <TableHead>{t('dicomweb.auth')}</TableHead>
+                <TableHead>{t('dicomweb.capabilities')}</TableHead>
+                <TableHead className="w-28">{t('modality.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {dicomwebServers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground text-sm">
-                    No Orthanc DICOMweb servers configured
+                    {t('dicomweb.noServers')}
                   </TableCell>
                 </TableRow>
               ) : (
                 dicomwebServers.map((s) => {
                   const AuthIcon = authIcons[s.authType] || Shield;
                   const authColor = authColors[s.authType] || 'text-muted-foreground';
-                  const capCount = [s.hasQidoSupport, s.hasWadoSupport, s.hasStowSupport].filter(
-                    Boolean,
-                  ).length;
+                  const capCount = [s.hasQidoSupport, s.hasWadoSupport, s.hasStowSupport].filter(Boolean).length;
 
                   return (
                     <TableRow key={s.id}>
@@ -226,13 +225,13 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                             </span>
                           </TooltipTrigger>
-                          <TooltipContent>Connected</TooltipContent>
+                          <TooltipContent>{t('dicomweb.connected')}</TooltipContent>
                         </Tooltip>
                       </TableCell>
                       <TableCell>
                         <div>
                           <p className="font-medium">{s.name}</p>
-                          <p className="text-xs text-muted-foreground">{capCount}/3 capabilities</p>
+                          <p className="text-xs text-muted-foreground">{capCount}/3</p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -257,8 +256,7 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                           </TooltipTrigger>
                           <TooltipContent>
                             {s.authType === 'bearer' && 'Bearer token authentication'}
-                            {s.authType === 'basic' &&
-                              `Basic auth (user: ${(s as { username?: string }).username || 'configured'})`}
+                            {s.authType === 'basic' && `Basic auth (user: ${(s as { username?: string }).username || 'configured'})`}
                             {s.authType === 'oauth' && 'OAuth 2.0 authentication'}
                             {s.authType === 'none' && 'No authentication'}
                           </TooltipContent>
@@ -266,90 +264,22 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Badge
-                                variant={s.hasQidoSupport ? 'secondary' : 'outline'}
-                                className={`text-xs h-5 ${s.hasQidoSupport ? '' : 'opacity-40'}`}
-                              >
-                                QIDO
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {s.hasQidoSupport ? 'QIDO-RS query enabled' : 'QIDO-RS not available'}
-                            </TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Badge
-                                variant={s.hasWadoSupport ? 'secondary' : 'outline'}
-                                className={`text-xs h-5 ${s.hasWadoSupport ? '' : 'opacity-40'}`}
-                              >
-                                WADO
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {s.hasWadoSupport
-                                ? 'WADO-RS retrieval enabled'
-                                : 'WADO-RS not available'}
-                            </TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Badge
-                                variant={s.hasStowSupport ? 'secondary' : 'outline'}
-                                className={`text-xs h-5 ${s.hasStowSupport ? '' : 'opacity-40'}`}
-                              >
-                                STOW
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {s.hasStowSupport ? 'STOW-RS storage enabled' : 'STOW-RS not available'}
-                            </TooltipContent>
-                          </Tooltip>
+                          <Badge variant={s.hasQidoSupport ? 'secondary' : 'outline'} className={`text-xs h-5 ${s.hasQidoSupport ? '' : 'opacity-40'}`}>QIDO</Badge>
+                          <Badge variant={s.hasWadoSupport ? 'secondary' : 'outline'} className={`text-xs h-5 ${s.hasWadoSupport ? '' : 'opacity-40'}`}>WADO</Badge>
+                          <Badge variant={s.hasStowSupport ? 'secondary' : 'outline'} className={`text-xs h-5 ${s.hasStowSupport ? '' : 'opacity-40'}`}>STOW</Badge>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                onClick={() => toast.success(`Testing connection to ${s.name}`)}
-                              >
-                                <RefreshCw className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Test connection</TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                onClick={() => onEditClick(s)}
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Edit</TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 text-destructive"
-                                onClick={() => setServerToDelete(s)}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>{t('common.delete')}</TooltipContent>
-                          </Tooltip>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => toast.success(t('dicomweb.testConnection'))}>
+                            <RefreshCw className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onEditClick(s)}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => setServerToDelete(s)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -359,6 +289,57 @@ export default function DicomWebTab({ onAddClick, onEditClick }: DicomWebTabProp
             </TableBody>
           </Table>
         </Card>
+
+        {/* Mobile cards */}
+        <div className="md:hidden space-y-2">
+          {dicomwebServers.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground text-sm">
+                {t('dicomweb.noServers')}
+              </CardContent>
+            </Card>
+          ) : (
+            dicomwebServers.map((s) => {
+              const AuthIcon = authIcons[s.authType] || Shield;
+              const authColor = authColors[s.authType] || 'text-muted-foreground';
+              return (
+                <Card key={s.id}>
+                  <CardContent className="p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-500/10">
+                          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                        </span>
+                        <p className="font-medium">{s.name}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => toast.success(t('dicomweb.testConnection'))}>
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => onEditClick(s)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => setServerToDelete(s)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <code className="block bg-muted px-2 py-1 rounded text-xs font-mono break-all">{s.url}</code>
+                    <div className="flex items-center gap-1.5">
+                      <AuthIcon className={`h-3.5 w-3.5 ${authColor}`} />
+                      <span className="text-sm capitalize">{s.authType}</span>
+                    </div>
+                    <div className="flex gap-1">
+                      <Badge variant={s.hasQidoSupport ? 'secondary' : 'outline'} className={`text-xs h-5 ${s.hasQidoSupport ? '' : 'opacity-40'}`}>QIDO</Badge>
+                      <Badge variant={s.hasWadoSupport ? 'secondary' : 'outline'} className={`text-xs h-5 ${s.hasWadoSupport ? '' : 'opacity-40'}`}>WADO</Badge>
+                      <Badge variant={s.hasStowSupport ? 'secondary' : 'outline'} className={`text-xs h-5 ${s.hasStowSupport ? '' : 'opacity-40'}`}>STOW</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* Delete confirmation */}

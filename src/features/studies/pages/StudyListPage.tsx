@@ -401,7 +401,7 @@ export default function StudyListPage() {
       // P0.1: Quick-Viewer button + Quick-Report button
       {
         id: 'quickViewer',
-        header: () => <span className="text-xs font-semibold">{t('studyList.columns.view', { defaultValue: 'View' })}</span>,
+        header: () => <span className="text-xs font-semibold">{t('studyList.columns.view')}</span>,
         cell: ({ row }) => (
           <div className="flex items-center gap-0.5">
             <TooltipProvider>
@@ -566,10 +566,10 @@ export default function StudyListPage() {
             <Button
               variant={showFilters ? 'secondary' : 'outline'}
               onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
+              className="gap-2 shrink-0"
             >
               <Filter className="h-4 w-4" />
-              {t('studies.filters')}
+              <span className="hidden sm:inline">{t('studies.filters')}</span>
               <ChevronDown
                 className={`h-3 w-3 transition-transform ${showFilters ? 'rotate-180' : ''}`}
               />
@@ -579,10 +579,10 @@ export default function StudyListPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowColumnConfig(!showColumnConfig)}
-                className="gap-2"
+                className="gap-2 shrink-0"
               >
                 <Settings2 className="h-4 w-4" />
-                {t('studyList.columns.config', { defaultValue: 'Columns' })}
+                <span className="hidden sm:inline">{t('studyList.columns.config')}</span>
                 <ChevronDown
                   className={`h-3 w-3 transition-transform ${showColumnConfig ? 'rotate-180' : ''}`}
                 />
@@ -590,7 +590,7 @@ export default function StudyListPage() {
               {showColumnConfig && (
                 <div className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
                   <p className="text-xs font-semibold text-muted-foreground mb-2">
-                    {t('studyList.columns.toggle', { defaultValue: 'Toggle columns' })}
+                    {t('studyList.columns.toggle')}
                   </p>
                   <div className="space-y-1">
                     {table.getAllLeafColumns()
@@ -682,7 +682,7 @@ export default function StudyListPage() {
       {/* P0.3: Labels panel with study counts */}
       {allLabels.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 px-1">
-          <span className="text-xs font-semibold text-muted-foreground mr-1">{t('studyList.labels', { defaultValue: 'Labels' })}:</span>
+          <span className="text-xs font-semibold text-muted-foreground mr-1">{t('studyList.labels')}:</span>
           {allLabels.map((label) => {
             const isActive = activeLabels.includes(label);
             const count = labelCounts[label];
@@ -715,8 +715,8 @@ export default function StudyListPage() {
               }`}
             >
               {searchParams.get('labelMode') === 'Any'
-                ? t('studyList.labelModeAny', { defaultValue: 'OR' })
-                : t('studyList.labelModeAll', { defaultValue: 'AND' })}
+                ? t('studyList.labelModeAny')
+                : t('studyList.labelModeAll')}
             </button>
           )}
           {/* "Without labels" filter toggle */}
