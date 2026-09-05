@@ -79,6 +79,7 @@ import {
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { toolsApi } from '@/api/tools';
+import { systemApi } from '@/api/system';
 
 // OE2 has 21 modality filter options; OE3 now matches
 const MODALITY_OPTIONS = [
@@ -168,11 +169,23 @@ export default function StudyListPage() {
   const { data: studies = [], isLoading, isFetching } = useStudies(filters);
   const isMobile = useMediaQuery('(max-width: 767px)');
 
+  // Check if Orthanc supports labels (1.13.0+ with has-labels capability)
+  const { data: systemInfo } = useQuery({
+    queryKey: ['orthanc-system'],
+    queryFn: () => systemApi.get(),
+    staleTime: 300_000, // system info rarely changes
+    retry: false,
+  });
+  const labelsSupported = systemInfo?.Capabilities?.['has-labels'] === true || systemInfo?.HasLabels === true;
+
   // P0.3: Labels with counts — fetch all labels and their study counts
+  // Only query if Orthanc supports labels (avoids 404 spam on older/no-labels setups)
   const { data: allLabels = [] } = useQuery({
     queryKey: ['orthanc-labels'],
     queryFn: () => toolsApi.getLabels(),
-    staleTime: 60_000, // labels don't change often
+    staleTime: 60_000,
+    enabled: labelsSupported,
+    retry: false, // 404 means labels not supported — don't retry
   });
 
   const { data: labelCounts = {} } = useQuery({
@@ -186,7 +199,7 @@ export default function StudyListPage() {
       );
       return counts;
     },
-    enabled: allLabels.length > 0,
+    enabled: labelsSupported && allLabels.length > 0,
     staleTime: 60_000,
   });
 
