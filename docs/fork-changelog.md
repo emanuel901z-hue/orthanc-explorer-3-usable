@@ -4,6 +4,58 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v1.8.0 — Keyboard Shortcuts Expansion + i18n (2026-09-05)
+
+### New keyboard shortcuts
+
+| Key | Action | Scope |
+|-----|--------|-------|
+| `G → L` | Go to Audit Logs | Global |
+| `G → W` | Go to Worklists | Global |
+| `E` | Export data (CSV/JSON) | Activity, Audit Logs |
+| `R` | Refresh data | Any view with refresh button |
+| `N` | New / Add | Settings (add modality/server), Worklists (upload) |
+| `T` | Toggle filters | Studies |
+| `C` | Toggle columns | Studies |
+| `Esc` | Close dialog / dropdown / blur | Global (enhanced) |
+
+### Enhanced existing shortcuts
+
+- **Escape** now also closes Radix dialog overlays and the studies column-config dropdown (via `data-col-config-open` attribute)
+- **`/` focus search** now matches placeholders in all 9 languages (German "Suche", Russian "Поиск", Chinese "搜索", Japanese "検索", etc.)
+
+### i18n — Shortcuts dialog translated (all 9 locales)
+
+- Added `shortcuts` namespace with `nav.*`, `actions.*`, `general.*`, `categories.*`, `dialogTitle`, `dialogHint` keys
+- `KeyboardShortcutsDialog` now uses `useTranslation()` for all labels
+- `AppLayout` tooltip for keyboard button now translated
+- Shortcut descriptions in the help dialog are now fully localized
+
+### Files Changed
+
+```
+Modified:
+  src/app/layout/AppLayout.tsx
+  src/features/studies/pages/StudyListPage.tsx
+  src/shared/components/KeyboardShortcutsDialog.tsx
+  src/shared/hooks/use-keyboard-shortcuts.ts
+  src/i18n/locales/ar.json
+  src/i18n/locales/de.json
+  src/i18n/locales/en.json
+  src/i18n/locales/es.json
+  src/i18n/locales/fr.json
+  src/i18n/locales/ja.json
+  src/i18n/locales/ru.json
+  src/i18n/locales/tr.json
+  src/i18n/locales/zh.json
+  docs/fork-changelog.md
+
+Added:
+  scripts/add-shortcuts-i18n.py
+```
+
+---
+
 ## v1.7.0 — Comprehensive Mobile + i18n Audit (2026-09-05)
 
 ### Mobile Card Views (all tables)

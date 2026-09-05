@@ -778,5 +778,35 @@
     "actions": "Actions",
     "type": "Type",
     "worklist": "Liste de travail"
+  },
+  "shortcuts": {
+    "nav": {
+      "studies": "Aller aux Études",
+      "upload": "Aller au Téléversement",
+      "activity": "Aller à l'Activité",
+      "auditLogs": "Aller aux Journaux d'Audit",
+      "worklists": "Aller aux Listes de Travail",
+      "remoteSources": "Aller aux Sources Distantes",
+      "settings": "Aller aux Paramètres"
+    },
+    "actions": {
+      "focusSearch": "Focus sur la recherche",
+      "escape": "Fermer le dialogue / désélectionner",
+      "export": "Exporter les données",
+      "refresh": "Actualiser les données",
+      "new": "Nouveau / Ajouter",
+      "toggleFilters": "Basculer les filtres",
+      "toggleColumns": "Basculer les colonnes"
+    },
+    "general": {
+      "showHelp": "Afficher les raccourcis clavier"
+    },
+    "categories": {
+      "navigation": "Navigation",
+      "actions": "Actions",
+      "general": "Général"
+    },
+    "dialogTitle": "Raccourcis Clavier",
+    "dialogHint": "Appuyez sur {key} n'importe où pour ouvrir ce dialogue"
   }
 }

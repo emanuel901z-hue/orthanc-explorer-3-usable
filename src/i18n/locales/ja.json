@@ -778,5 +778,35 @@
     "actions": "アクション",
     "type": "タイプ",
     "worklist": "ワークリスト"
+  },
+  "shortcuts": {
+    "nav": {
+      "studies": "研究へ",
+      "upload": "アップロードへ",
+      "activity": "アクティビティへ",
+      "auditLogs": "監査ログへ",
+      "worklists": "ワークリストへ",
+      "remoteSources": "リモートソースへ",
+      "settings": "設定へ"
+    },
+    "actions": {
+      "focusSearch": "検索にフォーカス",
+      "escape": "ダイアログを閉じる / 選択解除",
+      "export": "データをエクスポート",
+      "refresh": "データを更新",
+      "new": "新規 / 追加",
+      "toggleFilters": "フィルターの切り替え",
+      "toggleColumns": "列の切り替え"
+    },
+    "general": {
+      "showHelp": "キーボードショートカットを表示"
+    },
+    "categories": {
+      "navigation": "ナビゲーション",
+      "actions": "アクション",
+      "general": "一般"
+    },
+    "dialogTitle": "キーボードショートカット",
+    "dialogHint": "どこでも{key}を押してこのダイアログを開く"
   }
 }

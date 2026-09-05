@@ -778,5 +778,35 @@
     "actions": "Actions",
     "type": "Type",
     "worklist": "Worklist"
+  },
+  "shortcuts": {
+    "nav": {
+      "studies": "Go to Studies",
+      "upload": "Go to Upload",
+      "activity": "Go to Activity",
+      "auditLogs": "Go to Audit Logs",
+      "worklists": "Go to Worklists",
+      "remoteSources": "Go to Remote Sources",
+      "settings": "Go to Settings"
+    },
+    "actions": {
+      "focusSearch": "Focus search",
+      "escape": "Close dialog / deselect",
+      "export": "Export data",
+      "refresh": "Refresh data",
+      "new": "New / Add",
+      "toggleFilters": "Toggle filters",
+      "toggleColumns": "Toggle columns"
+    },
+    "general": {
+      "showHelp": "Show keyboard shortcuts"
+    },
+    "categories": {
+      "navigation": "Navigation",
+      "actions": "Actions",
+      "general": "General"
+    },
+    "dialogTitle": "Keyboard Shortcuts",
+    "dialogHint": "Press {key} anywhere to toggle this dialog"
   }
 }

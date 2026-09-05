@@ -778,5 +778,35 @@
     "actions": "操作",
     "type": "类型",
     "worklist": "工作列表"
+  },
+  "shortcuts": {
+    "nav": {
+      "studies": "转到研究",
+      "upload": "转到上传",
+      "activity": "转到活动",
+      "auditLogs": "转到审计日志",
+      "worklists": "转到工作列表",
+      "remoteSources": "转到远程源",
+      "settings": "转到设置"
+    },
+    "actions": {
+      "focusSearch": "聚焦搜索",
+      "escape": "关闭对话框 / 取消选择",
+      "export": "导出数据",
+      "refresh": "刷新数据",
+      "new": "新建 / 添加",
+      "toggleFilters": "切换筛选器",
+      "toggleColumns": "切换列"
+    },
+    "general": {
+      "showHelp": "显示键盘快捷键"
+    },
+    "categories": {
+      "navigation": "导航",
+      "actions": "操作",
+      "general": "常规"
+    },
+    "dialogTitle": "键盘快捷键",
+    "dialogHint": "在任何地方按 {key} 打开此对话框"
   }
 }

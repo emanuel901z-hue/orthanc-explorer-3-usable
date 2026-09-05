@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppSidebar } from './AppSidebar';
 import { TabBar } from './TabBar';
 import { JobStatusBar } from './JobStatusBar';
@@ -16,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 export function AppLayout() {
   const location = useLocation();
+  const { t } = useTranslation();
   const { tabs, openTab } = useTabStore();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const { appName, logoUrl, hideSidebar, hideHeader, applyTheming } = useUiStore();
@@ -74,7 +76,7 @@ export function AppLayout() {
                     <Keyboard className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Keyboard shortcuts (?)</TooltipContent>
+                <TooltipContent>{t('shortcuts.general.showHelp')} (?)</TooltipContent>
               </Tooltip>
               <LanguageSwitcher />
               <UserBadge />

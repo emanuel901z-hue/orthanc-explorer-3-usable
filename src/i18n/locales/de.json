@@ -778,5 +778,35 @@
     "actions": "Aktionen",
     "type": "Typ",
     "worklist": "Worklist"
+  },
+  "shortcuts": {
+    "nav": {
+      "studies": "Zu Studien",
+      "upload": "Zu Upload",
+      "activity": "Zu Aktivität",
+      "auditLogs": "Zu Audit-Logs",
+      "worklists": "Zu Worklists",
+      "remoteSources": "Zu Remote-Quellen",
+      "settings": "Zu Einstellungen"
+    },
+    "actions": {
+      "focusSearch": "Suche fokussieren",
+      "escape": "Dialog schließen / Auswahl aufheben",
+      "export": "Daten exportieren",
+      "refresh": "Daten aktualisieren",
+      "new": "Neu / Hinzufügen",
+      "toggleFilters": "Filter umschalten",
+      "toggleColumns": "Spalten umschalten"
+    },
+    "general": {
+      "showHelp": "Tastenkürzel anzeigen"
+    },
+    "categories": {
+      "navigation": "Navigation",
+      "actions": "Aktionen",
+      "general": "Allgemein"
+    },
+    "dialogTitle": "Tastenkürzel",
+    "dialogHint": "{key} überall drücken um diesen Dialog zu öffnen"
   }
 }

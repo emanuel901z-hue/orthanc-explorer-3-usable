@@ -778,5 +778,35 @@
     "actions": "Acciones",
     "type": "Tipo",
     "worklist": "Lista de trabajo"
+  },
+  "shortcuts": {
+    "nav": {
+      "studies": "Ir a Estudios",
+      "upload": "Ir a Carga",
+      "activity": "Ir a Actividad",
+      "auditLogs": "Ir a Registros de Auditoría",
+      "worklists": "Ir a Listas de Trabajo",
+      "remoteSources": "Ir a Fuentes Remotas",
+      "settings": "Ir a Configuración"
+    },
+    "actions": {
+      "focusSearch": "Enfocar búsqueda",
+      "escape": "Cerrar diálogo / deseleccionar",
+      "export": "Exportar datos",
+      "refresh": "Actualizar datos",
+      "new": "Nuevo / Añadir",
+      "toggleFilters": "Alternar filtros",
+      "toggleColumns": "Alternar columnas"
+    },
+    "general": {
+      "showHelp": "Mostrar atajos de teclado"
+    },
+    "categories": {
+      "navigation": "Navegación",
+      "actions": "Acciones",
+      "general": "General"
+    },
+    "dialogTitle": "Atajos de Teclado",
+    "dialogHint": "Presiona {key} en cualquier lugar para abrir este diálogo"
   }
 }

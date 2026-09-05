@@ -778,5 +778,35 @@
     "actions": "إجراءات",
     "type": "النوع",
     "worklist": "قائمة العمل"
+  },
+  "shortcuts": {
+    "nav": {
+      "studies": "إلى الدراسات",
+      "upload": "إلى التحميل",
+      "activity": "إلى النشاط",
+      "auditLogs": "إلى سجلات التدقيق",
+      "worklists": "إلى قوائم العمل",
+      "remoteSources": "إلى المصادر البعيدة",
+      "settings": "إلى الإعدادات"
+    },
+    "actions": {
+      "focusSearch": "تركيز البحث",
+      "escape": "إغلاق الحوار / إلغاء التحديد",
+      "export": "تصدير البيانات",
+      "refresh": "تحديث البيانات",
+      "new": "جديد / إضافة",
+      "toggleFilters": "تبديل المرشحات",
+      "toggleColumns": "تبديل الأعمدة"
+    },
+    "general": {
+      "showHelp": "إظهار اختصارات لوحة المفاتيح"
+    },
+    "categories": {
+      "navigation": "التنقل",
+      "actions": "إجراءات",
+      "general": "عام"
+    },
+    "dialogTitle": "اختصارات لوحة المفاتيح",
+    "dialogHint": "اضغط على {key} في أي مكان لفتح هذا الحوار"
   }
 }

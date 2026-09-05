@@ -588,7 +588,7 @@ export default function StudyListPage() {
                 />
               </Button>
               {showColumnConfig && (
-                <div className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
+                <div data-col-config-open className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
                   <p className="text-xs font-semibold text-muted-foreground mb-2">
                     {t('studyList.columns.toggle')}
                   </p>

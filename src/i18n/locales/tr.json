@@ -778,5 +778,35 @@
     "actions": "Eylemler",
     "type": "Tür",
     "worklist": "İş listesi"
+  },
+  "shortcuts": {
+    "nav": {
+      "studies": "Çalışmalara git",
+      "upload": "Yüklemeye git",
+      "activity": "Etkinliğe git",
+      "auditLogs": "Denetim Günlüklerine git",
+      "worklists": "İş Listelerine git",
+      "remoteSources": "Uzak Kaynaklara git",
+      "settings": "Ayarlarına git"
+    },
+    "actions": {
+      "focusSearch": "Aramaya odaklan",
+      "escape": "Diyalog kapat / seçimi kaldır",
+      "export": "Verileri dışa aktar",
+      "refresh": "Verileri yenile",
+      "new": "Yeni / Ekle",
+      "toggleFilters": "Filtreleri değiştir",
+      "toggleColumns": "Sütunları değiştir"
+    },
+    "general": {
+      "showHelp": "Klavye kısayollarını göster"
+    },
+    "categories": {
+      "navigation": "Navigasyon",
+      "actions": "Eylemler",
+      "general": "Genel"
+    },
+    "dialogTitle": "Klavye Kısayolları",
+    "dialogHint": "Bu diyaloğu açmak için herhangi bir yerde {key} tuşuna basın"
   }
 }
