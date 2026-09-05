@@ -402,7 +402,7 @@ export default function StudyDetailPage() {
           )}
           {/* ApiView — open the Orthanc REST API URL for this study in a new tab */}
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             className="gap-1.5"
             onClick={() => {
