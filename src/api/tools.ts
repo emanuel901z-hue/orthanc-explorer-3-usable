@@ -7,6 +7,7 @@
  */
 // src/api/tools.ts
 import { orthancFetch, JSON_CONTENT_HEADERS } from '@/lib/client';
+import { OrthancError } from '@/lib/errors';
 
 export type LookupResult = {
   ID: string;
@@ -53,9 +54,16 @@ export const toolsApi = {
   /**
    * GET /labels — Returns all labels in the Orthanc database.
    * Returns array of label names (strings).
+   * Returns empty array on 404 (labels not supported by this Orthanc version/config).
    */
-  getLabels: () =>
-    orthancFetch<string[]>('/labels'),
+  getLabels: async (): Promise<string[]> => {
+    try {
+      return await orthancFetch<string[]>('/labels', { silent404: true });
+    } catch (e) {
+      if (e instanceof OrthancError && e.status === 404) return [];
+      throw e;
+    }
+  },
 
   /**
    * POST /tools/find — Count studies with a specific label.

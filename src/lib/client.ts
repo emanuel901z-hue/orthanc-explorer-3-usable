@@ -39,7 +39,7 @@ async function attachAuthHeaders(headers: Headers, cfg: OE3Config): Promise<void
 
 export async function orthancFetch<T>(
   path: string,
-  init: RequestInit & { responseType?: 'blob' | 'text' } = {},
+  init: RequestInit & { responseType?: 'blob' | 'text'; silent404?: boolean } = {},
 ): Promise<T> {
   const cfg = getConfig();
   const correlationId = newCorrelationId();
@@ -55,11 +55,14 @@ export async function orthancFetch<T>(
     healthTracker.record(res.ok, res.status);
     if (!res.ok) {
       const err = await OrthancError.from(res, correlationId);
-      logger.error('orthanc.fetch.failed', {
-        path,
-        status: err.status,
-        correlationId,
-      });
+      // Suppress logging for expected 404s (e.g. labels not supported)
+      if (!(init.silent404 && err.status === 404)) {
+        logger.error('orthanc.fetch.failed', {
+          path,
+          status: err.status,
+          correlationId,
+        });
+      }
       throw err;
     }
     if (res.status === 204) return undefined as T;
