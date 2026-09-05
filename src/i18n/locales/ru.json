@@ -333,10 +333,10 @@
     "size": "Размер"
   },
   "search": {
-    "hintText": "Разделяйте термины запятой или пробелом. Дата: 29.08, 2908, 290826. Умлауты: Müller=Muehler. Пример: Müller, CT, 29.08",
+    "hintText": "Разделяйте термины запятой или пробелом. Дата: 29.08, 2908, 290826. Умлауты: Müller=Mueller. Пример: Müller, CT, 29.08",
     "helpTitle": "Умный поиск",
     "helpDescription": "Поиск по всем столбцам с терминами через запятую или пробел:",
-    "helpName": "Имя пациента (умлаут-толерантный: Müller=Muehler)",
+    "helpName": "Имя пациента (умлаут-толерантный: Müller=Mueller)",
     "helpDate": "Дата: 29.08, 2908, 290826, 29.08.2026",
     "helpModality": "Модальность: CT, MR, US...",
     "helpAccession": "Номер доступа или Study Instance UID",
@@ -808,5 +808,36 @@
     },
     "dialogTitle": "Горячие клавиши",
     "dialogHint": "Нажмите {key} где угодно, чтобы открыть этот диалог"
+  },
+  "about": {
+    "description": "Современный React/TypeScript интерфейс для DICOM-сервера Orthanc. Автономное SPA, подключающееся к REST API Orthanc — развёртывание как Docker sidecar, плагин Orthanc или за JWT-аутентифицированным прокси-сервером. Управление исследованиями, слияние/миграция, умный поиск, загрузка, конфигурация модальностей и DICOMweb, интеграция просмотрщиков и действия с аудитом.",
+    "systemInfo": "Системная информация",
+    "appVersion": "Версия приложения",
+    "orthancVersion": "Версия Orthanc",
+    "orthancApi": "API Orthanc",
+    "dicomAet": "DICOM AET",
+    "databaseVersion": "Версия БД",
+    "plugins": "Плагины",
+    "pluginsLoaded": "{{count}} загружено",
+    "storage": "Хранилище",
+    "storageStats": "{{studies}} исследований · {{series}} серий · {{instances}} экземпляров",
+    "platform": "Платформа",
+    "forkFeatures": "Возможности форка",
+    "features": {
+      "backendProxy": "Аутентификация через прокси",
+      "authGate": "AuthGate (уровень SPA)",
+      "merge": "Слияние исследований/серий",
+      "smartSearch": "Умный мульти-токен поиск",
+      "rbac": "RBAC флаги",
+      "branding": "Кастомный брендинг/логотип",
+      "activity": "Живая лента активности",
+      "viewerConfig": "Настройка просмотрщиков",
+      "dicomweb": "Управление DICOMweb",
+      "i18n": "9 языков i18n",
+      "mobileCards": "Мобильные карточки",
+      "keyboardShortcuts": "Горячие клавиши",
+      "worklists": "Списки работ",
+      "auditLogs": "Журнал аудита"
+    }
   }
 }

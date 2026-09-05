@@ -286,10 +286,10 @@
     "size": "Taille"
   },
   "search": {
-    "hintText": "Séparez les termes par virgule ou espace. Date: 29.08, 2908, 290826. Umlauts: Müller=Muehler. Exemple: Müller, CT, 29.08",
+    "hintText": "Séparez les termes par virgule ou espace. Date: 29.08, 2908, 290826. Umlauts: Müller=Mueller. Exemple: Müller, CT, 29.08",
     "helpTitle": "Recherche Intelligente",
     "helpDescription": "Recherche dans toutes les colonnes avec des termes séparés par virgule ou espace:",
-    "helpName": "Nom du patient (tolérant aux umlauts: Müller=Muehler)",
+    "helpName": "Nom du patient (tolérant aux umlauts: Müller=Mueller)",
     "helpDate": "Date: 29.08, 2908, 290826, 29.08.2026",
     "helpModality": "Modalité: CT, MR, US...",
     "helpAccession": "Numéro d'accès ou Study Instance UID",
@@ -808,5 +808,36 @@
     },
     "dialogTitle": "Raccourcis Clavier",
     "dialogHint": "Appuyez sur {key} n'importe où pour ouvrir ce dialogue"
+  },
+  "about": {
+    "description": "Interface React/TypeScript moderne pour le serveur DICOM Orthanc. SPA autonome qui se connecte à l'API REST d'Orthanc — déployable comme sidecar Docker, plugin Orthanc, ou derrière un proxy backend authentifié par JWT. Gestion des études, fusion/migration, recherche intelligente, téléversement, configuration des modalités et DICOMweb, intégration de visualiseurs et actions auditées.",
+    "systemInfo": "Informations Système",
+    "appVersion": "Version App",
+    "orthancVersion": "Version Orthanc",
+    "orthancApi": "API Orthanc",
+    "dicomAet": "AET DICOM",
+    "databaseVersion": "Version BD",
+    "plugins": "Plugins",
+    "pluginsLoaded": "{{count}} chargés",
+    "storage": "Stockage",
+    "storageStats": "{{studies}} études · {{series}} séries · {{instances}} instances",
+    "platform": "Plateforme",
+    "forkFeatures": "Fonctionnalités du Fork",
+    "features": {
+      "backendProxy": "Auth proxy backend",
+      "authGate": "AuthGate (niveau SPA)",
+      "merge": "Fusion études/séries",
+      "smartSearch": "Recherche multi-token intelligente",
+      "rbac": "Flags RBAC",
+      "branding": "Marque/logo personnalisé",
+      "activity": "Timeline d'activité en direct",
+      "viewerConfig": "Configuration des visualiseurs",
+      "dicomweb": "Gestion DICOMweb",
+      "i18n": "i18n 9 langues",
+      "mobileCards": "Vues cartographiques mobiles",
+      "keyboardShortcuts": "Raccourcis clavier",
+      "worklists": "Listes de travail",
+      "auditLogs": "Journaux d'audit"
+    }
   }
 }

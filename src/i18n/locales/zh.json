@@ -286,10 +286,10 @@
     "size": "大小"
   },
   "search": {
-    "hintText": "用逗号或空格分隔。日期: 29.08, 2908, 290826。变音符号: Müller=Muehler。示例: Müller, CT, 29.08",
+    "hintText": "用逗号或空格分隔。日期: 29.08, 2908, 290826。变音符号: Müller=Mueller。示例: Müller, CT, 29.08",
     "helpTitle": "智能搜索",
     "helpDescription": "用逗号或空格分隔的词搜索所有列:",
-    "helpName": "患者姓名（变音符号容忍: Müller=Muehler）",
+    "helpName": "患者姓名（变音符号容忍: Müller=Mueller）",
     "helpDate": "日期: 29.08, 2908, 290826, 29.08.2026",
     "helpModality": "模态: CT, MR, US...",
     "helpAccession": "Accession号或Study Instance UID",
@@ -808,5 +808,36 @@
     },
     "dialogTitle": "键盘快捷键",
     "dialogHint": "在任何地方按 {key} 打开此对话框"
+  },
+  "about": {
+    "description": "用于 Orthanc DICOM 服务器的现代 React/TypeScript 前端。连接到 Orthanc REST API 的独立 SPA — 可部署为 Docker 边车、Orthanc 插件，或在 JWT 认证的后端代理之后。研究管理、合并/迁移、智能搜索、上传、模态和 DICOMweb 配置、查看器集成以及审计支持的操作。",
+    "systemInfo": "系统信息",
+    "appVersion": "应用版本",
+    "orthancVersion": "Orthanc 版本",
+    "orthancApi": "Orthanc API",
+    "dicomAet": "DICOM AET",
+    "databaseVersion": "数据库版本",
+    "plugins": "插件",
+    "pluginsLoaded": "已加载 {{count}} 个",
+    "storage": "存储",
+    "storageStats": "{{studies}} 项研究 · {{series}} 个序列 · {{instances}} 个实例",
+    "platform": "平台",
+    "forkFeatures": "分叉功能",
+    "features": {
+      "backendProxy": "后端代理认证",
+      "authGate": "AuthGate (SPA级)",
+      "merge": "研究/序列合并",
+      "smartSearch": "智能多令牌搜索",
+      "rbac": "RBAC 功能标志",
+      "branding": "自定义品牌/徽标",
+      "activity": "实时活动时间线",
+      "viewerConfig": "查看器配置",
+      "dicomweb": "DICOMweb 管理",
+      "i18n": "9种语言 i18n",
+      "mobileCards": "移动卡片视图",
+      "keyboardShortcuts": "键盘快捷键",
+      "worklists": "工作列表",
+      "auditLogs": "审计日志"
+    }
   }
 }

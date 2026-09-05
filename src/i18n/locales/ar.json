@@ -333,10 +333,10 @@
     "size": "الحجم"
   },
   "search": {
-    "hintText": "افصل المصطلحات بفاصلة أو مسافة. التاريخ: 29.08، 2908، 290826. Umlauts: Müller=Muehler. مثال: Müller, CT, 29.08",
+    "hintText": "افصل المصطلحات بفاصلة أو مسافة. التاريخ: 29.08، 2908، 290826. Umlauts: Müller=Mueller. مثال: Müller, CT, 29.08",
     "helpTitle": "بحث ذكي",
     "helpDescription": "البحث في جميع الأعمدة بمصطلحات مفصولة بفاصلة أو مسافة:",
-    "helpName": "اسم المريض (متسامح مع Umlaut: Müller=Muehler)",
+    "helpName": "اسم المريض (متسامح مع Umlaut: Müller=Mueller)",
     "helpDate": "التاريخ: 29.08، 2908، 290826، 29.08.2026",
     "helpModality": "الطريقة: CT، MR، US...",
     "helpAccession": "رقم الوصول أو Study Instance UID",
@@ -808,5 +808,36 @@
     },
     "dialogTitle": "اختصارات لوحة المفاتيح",
     "dialogHint": "اضغط على {key} في أي مكان لفتح هذا الحوار"
+  },
+  "about": {
+    "description": "واجهة حديثة React/TypeScript لخادم Orthanc DICOM. تطبيق SPA مستقل يتصل بواجهة برمجة تطبيقات Orthanc REST — انشره كحاوية Docker مساعدة أو إضافة Orthanc أو خلف وكيل خلفية مصادق عليه بـ JWT. إدارة الدراسات، الدمج/الترحيل، البحث الذكي، التحميل، تكوين الأنماط وDICOMweb، تكامل العارض، والإجراءات المدعومة بالتدقيق.",
+    "systemInfo": "معلومات النظام",
+    "appVersion": "إصدار التطبيق",
+    "orthancVersion": "إصدار Orthanc",
+    "orthancApi": "واجهة Orthanc API",
+    "dicomAet": "DICOM AET",
+    "databaseVersion": "إصدار قاعدة البيانات",
+    "plugins": "الإضافات",
+    "pluginsLoaded": "{{count}} محملة",
+    "storage": "التخزين",
+    "storageStats": "{{studies}} دراسة · {{series}} سلسلة · {{instances}} مثيل",
+    "platform": "المنصة",
+    "forkFeatures": "ميزات النسخة المشتقة",
+    "features": {
+      "backendProxy": "مصادقة الوكيل الخلفي",
+      "authGate": "AuthGate (مستوى SPA)",
+      "merge": "دمج الدراسات/السلاسل",
+      "smartSearch": "بحث ذكي متعدد الرموز",
+      "rbac": "أعلام ميزات RBAC",
+      "branding": "علامة تجارية/شعار مخصص",
+      "activity": "جدول زمني للنشاط المباشر",
+      "viewerConfig": "تكوين العارض",
+      "dicomweb": "إدارة DICOMweb",
+      "i18n": "9 لغات i18n",
+      "mobileCards": "عروض البطاقات المحمولة",
+      "keyboardShortcuts": "اختصارات لوحة المفاتيح",
+      "worklists": "قوائم العمل",
+      "auditLogs": "سجلات التدقيق"
+    }
   }
 }

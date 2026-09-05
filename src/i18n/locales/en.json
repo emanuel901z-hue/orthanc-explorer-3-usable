@@ -333,10 +333,10 @@
     "size": "Size"
   },
   "search": {
-    "hintText": "Separate terms with comma or space. Date: 29.08, 2908, 290826. Umlauts: Müller=Muehler. Example: Müller, CT, 29.08",
+    "hintText": "Separate terms with comma or space. Date: 29.08, 2908, 290826. Umlauts: Müller=Mueller. Example: Müller, CT, 29.08",
     "helpTitle": "Smart Search",
     "helpDescription": "Search across all columns with comma or space separated terms:",
-    "helpName": "Patient name (umlaut-tolerant: Müller=Muehler)",
+    "helpName": "Patient name (umlaut-tolerant: Müller=Mueller)",
     "helpDate": "Date: 29.08, 2908, 290826, 29.08.2026",
     "helpModality": "Modality: CT, MR, US...",
     "helpAccession": "Accession number or Study Instance UID",
@@ -808,5 +808,36 @@
     },
     "dialogTitle": "Keyboard Shortcuts",
     "dialogHint": "Press {key} anywhere to toggle this dialog"
+  },
+  "about": {
+    "description": "Modern React/TypeScript frontend for the Orthanc DICOM server. Standalone SPA that connects to Orthanc's REST API — deploy as a Docker sidecar, Orthanc plugin, or behind a JWT-authenticated backend proxy. Study management, merge/migrate, smart search, upload, modality and DICOMweb configuration, viewer integration, and audit-backed actions.",
+    "systemInfo": "System Information",
+    "appVersion": "App Version",
+    "orthancVersion": "Orthanc Version",
+    "orthancApi": "Orthanc API",
+    "dicomAet": "DICOM AET",
+    "databaseVersion": "Database Version",
+    "plugins": "Plugins",
+    "pluginsLoaded": "{{count}} loaded",
+    "storage": "Storage",
+    "storageStats": "{{studies}} studies · {{series}} series · {{instances}} instances",
+    "platform": "Platform",
+    "forkFeatures": "Fork Features",
+    "features": {
+      "backendProxy": "Backend-proxy auth",
+      "authGate": "AuthGate (SPA-level)",
+      "merge": "Study/Series merge",
+      "smartSearch": "Smart multi-token search",
+      "rbac": "RBAC feature flags",
+      "branding": "Custom branding/logo",
+      "activity": "Live activity timeline",
+      "viewerConfig": "Viewer configuration",
+      "dicomweb": "DICOMweb management",
+      "i18n": "9-language i18n",
+      "mobileCards": "Mobile card views",
+      "keyboardShortcuts": "Keyboard shortcuts",
+      "worklists": "Worklists",
+      "auditLogs": "Audit logs"
+    }
   }
 }

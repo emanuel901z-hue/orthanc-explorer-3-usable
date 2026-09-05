@@ -37,7 +37,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Orthanc API Schema Alignment** | Type definitions match Orthanc 1.13.0 (API v31) — `DiskSize` as string, `ModifiedFrom`, `ExpectedNumberOfInstances`, `IndexInSeries`, `Capabilities`, etc. |
 | **Custom Branding/Logo** | Configurable app name and logo via `branding.title` + `branding.logoUrl` in `config.js`. Logo appears in header, sidebar, and About dialog. Bundled default logo in `public/logo/`. |
 | **Study/Series Merge** | Merge source studies into a target study, or migrate a series to a different study, via Orthanc `POST /studies/:id/merge`. Searchable source/target lists with same-SIUID highlighting. Optional source deletion after merge. |
-| **Smart Multi-Token Search** | Client-side search with umlaut tolerance ("ü" matches "ue") and date pattern matching ("2908" matches "2026-08-29"). Combined queries like "Müller, CT, 29.08" work across all study fields. |
+| **Smart Multi-Token Search** | Client-side search with umlaut tolerance ("ü" matches "ue", "ä" matches "ae", "ö" matches "oe", "ß" matches "ss") and date pattern matching ("2908" matches "2026-08-29"). Combined queries like "Müller, CT, 29.08" or "Mueller ct 2908" work across all study fields. |
 | **Live Activity Timeline** | Unified timeline merging audit events, live Orthanc jobs (3s polling), client-side jobs, and change events. Detail panel with action icons and navigation to related resources. |
 | **Viewer Configuration** | Manage external viewer integrations (OHIF, Stone, VolView) in settings — add/edit/remove viewers, set default, enable/disable, with status indicators. |
 | **DICOMweb Server Management** | Enhanced DICOMweb server config with auth type indicators (bearer/basic/oauth2/none) and external PACS QIDO/WADO configuration display. |
@@ -57,7 +57,9 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Multi-Label AND/OR Toggle** | Switch between AND (`All`) and OR (`Any`) logic for label filtering. |
 | **Touch-Optimized Controls** | 44px minimum touch target size on `pointer:coarse` devices. |
 | **ApiView & Log Level** | Open Orthanc REST URL for any resource; change Orthanc log level from the UI. |
-| **Mobile Card Views** | Study list and series table switch to responsive card layouts on mobile (< 768px) — no more horizontal scrolling. Cards show all key info with touch-friendly tap targets. |
+| **Mobile Card Views** | Study list, series table, activity, audit logs, worklists, modalities, and DICOMweb tables all switch to responsive card layouts on mobile (< 768px) — no more horizontal scrolling. Cards show all key info with touch-friendly tap targets. Button labels shorten to icons on narrow screens. |
+| **Keyboard Shortcuts** | Global `g` prefix navigation (studies, upload, activity, audit logs, worklists, remote sources, settings), `/` focus search, `e` export, `r` refresh, `n` new/add, `t` toggle filters, `c` toggle columns, `?` help dialog. Fully translated help dialog in all 9 languages. |
+| **Mobile Sidebar Navigation** | Hamburger menu (visible below `md` breakpoint) opens the sidebar drawer on mobile — Settings, Activity, Jobs, Upload, Servers all reachable without desktop sidebar. |
 
 ---
 
@@ -68,7 +70,7 @@ Orthanc Explorer 2 (the official UI) is a Vue.js plugin compiled into C++ — up
 **Key capabilities:**
 
 - Browse studies by Patient Name, Patient ID, Accession Number, Study Date, Modality, Description, and **Orthanc Labels**
-- **Smart search**: multi-token queries with umlaut tolerance and date pattern matching ("Müller, CT, 29.08")
+- **Smart search**: multi-token queries with umlaut tolerance ("ü"→"ue", "ä"→"ae", "ö"→"oe", "ß"→"ss") and date pattern matching ("Müller, CT, 29.08" or "Mueller ct 2908")
 - Upload DICOM files via drag-and-drop with per-file progress tracking
 - Manage DICOM modalities and DICOMweb servers in-app (no config file edits, no restart)
 - **Merge/migrate studies and series** via Orthanc `/merge` — consolidate duplicate studies or move series between studies
@@ -91,6 +93,8 @@ Orthanc Explorer 2 (the official UI) is a Vue.js plugin compiled into C++ — up
 - **Custom HTTP buttons**: configurable external links with template tokens
 - **Quick-report**: printable study summary via browser print/PDF
 - **Audit logs page**: global audit log viewer with search, filter, JSON export
+- **Keyboard shortcuts**: `g` prefix navigation, `/` search, `e` export, `r` refresh, `n` add, `t` filters, `c` columns, `?` help — all translated
+- **Mobile responsive**: card views for all tables on mobile, hamburger sidebar, icon-only buttons on narrow screens
 - One build artifact runs in four modes: Docker sidecar, Orthanc plugin (`ServeFolders`), SMART on FHIR EHR embed, or **backend-proxy behind JWT auth**
 
 ## Tech Stack

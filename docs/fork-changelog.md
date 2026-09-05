@@ -4,6 +4,50 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v1.9.0 — About Dialog i18n + Umlaut Description Fix (2026-09-05)
+
+### Bug fix: Umlaut normalization description
+
+- **Incorrect "Müller=Muehler"** in all 9 locale files (`search.hintText`, `search.helpName`) — the actual code normalizes `ü` → `ue` (correct German transcription), not `ü` → `ueh`. Fixed to "Müller=Mueller" in all locales.
+- README.md umlaut description expanded to show all 4 rules: `ü`→`ue`, `ä`→`ae`, `ö`→`oe`, `ß`→`ss`.
+
+### About dialog — fully translated (all 9 locales)
+
+- Added `about` namespace with `description`, `systemInfo`, `appVersion`, `orthancVersion`, `orthancApi`, `dicomAet`, `databaseVersion`, `plugins`, `pluginsLoaded`, `storage`, `storageStats`, `platform`, `forkFeatures`, and `features.*` keys.
+- AboutDialog now uses `useTranslation()` for all labels and descriptions.
+- Version bumped from `1.3.0` → `1.8.0`.
+- Added new fork feature badges: Mobile card views, Keyboard shortcuts, Worklists, Audit logs.
+- System info labels (App Version, Orthanc Version, etc.) now localized.
+
+### README.md updates
+
+- Smart Multi-Token Search description now lists all 4 umlaut rules and both example formats.
+- Added Keyboard Shortcuts, Mobile Card Views, and Mobile Sidebar Navigation to fork enhancements table.
+- Key capabilities list updated with keyboard shortcuts and mobile responsive entries.
+
+### Files Changed
+
+```
+Modified:
+  README.md
+  docs/fork-changelog.md
+  src/app/layout/AboutDialog.tsx
+  src/i18n/locales/ar.json
+  src/i18n/locales/de.json
+  src/i18n/locales/en.json
+  src/i18n/locales/es.json
+  src/i18n/locales/fr.json
+  src/i18n/locales/ja.json
+  src/i18n/locales/ru.json
+  src/i18n/locales/tr.json
+  src/i18n/locales/zh.json
+
+Added:
+  scripts/add-about-i18n.py
+```
+
+---
+
 ## v1.8.0 — Keyboard Shortcuts Expansion + i18n (2026-09-05)
 
 ### New keyboard shortcuts

@@ -286,10 +286,10 @@
     "size": "サイズ"
   },
   "search": {
-    "hintText": "コンマまたはスペースで区切る。日付: 29.08, 2908, 290826。ウムラウト: Müller=Muehler。例: Müller, CT, 29.08",
+    "hintText": "コンマまたはスペースで区切る。日付: 29.08, 2908, 290826。ウムラウト: Müller=Mueller。例: Müller, CT, 29.08",
     "helpTitle": "スマート検索",
     "helpDescription": "すべての列をコンマまたはスペース区切りで検索:",
-    "helpName": "患者名（ウムラウト許容: Müller=Muehler）",
+    "helpName": "患者名（ウムラウト許容: Müller=Mueller）",
     "helpDate": "日付: 29.08, 2908, 290826, 29.08.2026",
     "helpModality": "モダリティ: CT, MR, US...",
     "helpAccession": "アクセッション番号またはStudy Instance UID",
@@ -808,5 +808,36 @@
     },
     "dialogTitle": "キーボードショートカット",
     "dialogHint": "どこでも{key}を押してこのダイアログを開く"
+  },
+  "about": {
+    "description": "Orthanc DICOMサーバー用のモダンなReact/TypeScriptフロントエンド。OrthancのREST APIに接続するスタンドアロンSPA — Dockerサイドカー、Orthancプラグイン、またはJWT認証バックエンドプロキシの背後としてデプロイ。研究管理、マージ/移行、スマート検索、アップロード、モダリティおよびDICOMweb設定、ビューア統合、監査付きアクション。",
+    "systemInfo": "システム情報",
+    "appVersion": "アプリバージョン",
+    "orthancVersion": "Orthancバージョン",
+    "orthancApi": "Orthanc API",
+    "dicomAet": "DICOM AET",
+    "databaseVersion": "DBバージョン",
+    "plugins": "プラグイン",
+    "pluginsLoaded": "{{count}}ロード済み",
+    "storage": "ストレージ",
+    "storageStats": "{{studies}}研究 · {{series}}シリーズ · {{instances}}インスタンス",
+    "platform": "プラットフォーム",
+    "forkFeatures": "フォーク機能",
+    "features": {
+      "backendProxy": "バックエンドプロキシ認証",
+      "authGate": "AuthGate (SPAレベル)",
+      "merge": "研究/シリーズマージ",
+      "smartSearch": "スマートマルチトークン検索",
+      "rbac": "RBAC機能フラグ",
+      "branding": "カスタムブランディング/ロゴ",
+      "activity": "ライブアクティビティタイムライン",
+      "viewerConfig": "ビューア設定",
+      "dicomweb": "DICOMweb管理",
+      "i18n": "9言語i18n",
+      "mobileCards": "モバイルカードビュー",
+      "keyboardShortcuts": "キーボードショートカット",
+      "worklists": "ワークリスト",
+      "auditLogs": "監査ログ"
+    }
   }
 }

@@ -333,10 +333,10 @@
     "size": "Boyut"
   },
   "search": {
-    "hintText": "Terimleri virgül veya boşlukla ayırın. Tarih: 29.08, 2908, 290826. Umlauts: Müller=Muehler. Örnek: Müller, CT, 29.08",
+    "hintText": "Terimleri virgül veya boşlukla ayırın. Tarih: 29.08, 2908, 290826. Umlauts: Müller=Mueller. Örnek: Müller, CT, 29.08",
     "helpTitle": "Akıllı Arama",
     "helpDescription": "Tüm sütunlarda virgül veya boşlukla ayrılmış terimlerle ara:",
-    "helpName": "Hasta adı (umlaut-toleranslı: Müller=Muehler)",
+    "helpName": "Hasta adı (umlaut-toleranslı: Müller=Mueller)",
     "helpDate": "Tarih: 29.08, 2908, 290826, 29.08.2026",
     "helpModality": "Modalite: CT, MR, US...",
     "helpAccession": "Erişim numarası veya Study Instance UID",
@@ -808,5 +808,36 @@
     },
     "dialogTitle": "Klavye Kısayolları",
     "dialogHint": "Bu diyaloğu açmak için herhangi bir yerde {key} tuşuna basın"
+  },
+  "about": {
+    "description": "Orthanc DICOM sunucusu için modern React/TypeScript arayüzü. Orthanc'ın REST API'sine bağlanan bağımsız SPA — Docker sidecar, Orthanc eklentisi veya JWT kimlik doğrulamalı arka uç proxy'si arkasında dağıtın. Çalışma yönetimi, birleştirme/taşıma, akıllı arama, yükleme, modalite ve DICOMweb yapılandırması, görüntüleyici entegrasyonu ve denetim destekli eylemler.",
+    "systemInfo": "Sistem Bilgileri",
+    "appVersion": "Uygulama Sürümü",
+    "orthancVersion": "Orthanc Sürümü",
+    "orthancApi": "Orthanc API",
+    "dicomAet": "DICOM AET",
+    "databaseVersion": "Veritabanı Sürümü",
+    "plugins": "Eklentiler",
+    "pluginsLoaded": "{{count}} yüklü",
+    "storage": "Depolama",
+    "storageStats": "{{studies}} çalışma · {{series}} seri · {{instances}} örnek",
+    "platform": "Platform",
+    "forkFeatures": "Fork Özellikleri",
+    "features": {
+      "backendProxy": "Arka uç proxy kimlik doğrulama",
+      "authGate": "AuthGate (SPA düzeyinde)",
+      "merge": "Çalışma/Seri birleştirme",
+      "smartSearch": "Akıllı çoklu token arama",
+      "rbac": "RBAC özellik bayrakları",
+      "branding": "Özel marka/logo",
+      "activity": "Canlı etkinlik zaman çizelgesi",
+      "viewerConfig": "Görüntüleyici yapılandırması",
+      "dicomweb": "DICOMweb yönetimi",
+      "i18n": "9 dil i18n",
+      "mobileCards": "Mobil kart görünümleri",
+      "keyboardShortcuts": "Klavye kısayolları",
+      "worklists": "İş listeleri",
+      "auditLogs": "Denetim günlükleri"
+    }
   }
 }
