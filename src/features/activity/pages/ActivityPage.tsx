@@ -571,29 +571,48 @@ export default function ActivityPage() {
           </Button>
         </div>
 
-        {/* Summary badges */}
+        {/* Summary badges — clickable filters */}
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="gap-1.5">
+          <Badge
+            variant="outline"
+            className={cn(
+              'gap-1.5 cursor-pointer select-none transition-colors hover:bg-muted',
+              categoryFilter === 'all' && 'border-primary bg-primary/5',
+            )}
+            onClick={() => setCategoryFilter('all')}
+          >
             <Clock className="h-3 w-3" />
             {t('activity.events', { count: counts.total })}
           </Badge>
           <Badge
             variant="outline"
-            className={cn('gap-1.5', categoryFilter === 'job' && 'border-primary bg-primary/5')}
+            className={cn(
+              'gap-1.5 cursor-pointer select-none transition-colors hover:bg-muted',
+              categoryFilter === 'job' && 'border-primary bg-primary/5',
+            )}
+            onClick={() => setCategoryFilter('job')}
           >
             <Upload className="h-3 w-3" />
             {t('activity.jobs', { count: counts.job })}
           </Badge>
           <Badge
             variant="outline"
-            className={cn('gap-1.5', categoryFilter === 'audit' && 'border-accent bg-accent/5')}
+            className={cn(
+              'gap-1.5 cursor-pointer select-none transition-colors hover:bg-muted',
+              categoryFilter === 'audit' && 'border-accent bg-accent/5',
+            )}
+            onClick={() => setCategoryFilter('audit')}
           >
             <ShieldCheck className="h-3 w-3" />
             {t('activity.audit', { count: counts.audit })}
           </Badge>
           <Badge
             variant="outline"
-            className={cn('gap-1.5', categoryFilter === 'log' && 'border-muted-foreground')}
+            className={cn(
+              'gap-1.5 cursor-pointer select-none transition-colors hover:bg-muted',
+              categoryFilter === 'log' && 'border-muted-foreground',
+            )}
+            onClick={() => setCategoryFilter('log')}
           >
             <Server className="h-3 w-3" />
             {t('activity.system', { count: counts.log })}
