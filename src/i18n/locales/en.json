@@ -60,7 +60,9 @@
     "deleteSeriesDesc": "This will permanently delete Series #{{number}} with {{instances}} instance(s). This action cannot be undone.",
     "deleteInstance": "Delete Instance",
     "deleteInstanceDesc": "This will permanently delete Instance #{{number}} ({{size}}). This action cannot be undone.",
-    "searchPlaceholderSmart": "Search: name, date, modality, accession, SIUID, physician..."
+    "searchPlaceholderSmart": "Search: name, date, modality, accession, SIUID, physician...",
+    "notFound": "Study not found",
+    "backToList": "Back to Studies"
   },
   "studyList": {
     "columns": {
@@ -107,7 +109,8 @@
     "labels": "Labels",
     "labelModeAny": "OR",
     "labelModeAll": "AND",
-    "withoutLabels": "Without labels"
+    "withoutLabels": "Without labels",
+    "selectRow": "Select row"
   },
   "upload": {
     "subtitle": "Drag and drop DICOM files or folders to upload",
@@ -290,7 +293,9 @@
       "webUi": "Web UI (User)",
       "luaScript": "Lua Script",
       "system": "System"
-    }
+    },
+    "title": "Activity",
+    "clearSearch": "Clear search"
   },
   "remote": {
     "title": "Remote Sources",
@@ -610,7 +615,13 @@
     "tagName": "Name",
     "original": "Original",
     "newValue": "New Value",
-    "empty": "empty"
+    "empty": "empty",
+    "patient": "Patient",
+    "deleteConfirmPrefix": "This will permanently delete",
+    "deleteConfirmSuffix": "and all {{series}} series ({{instances}} instances). This action cannot be undone.",
+    "bulkDownloadSuccess": "{{count}} series downloaded",
+    "bulkDownloadFailed": "Bulk download failed.",
+    "apiView": "API"
   },
   "dicomTagBrowser": {
     "searchPlaceholder": "Search tags by name, tag ID, or value…",

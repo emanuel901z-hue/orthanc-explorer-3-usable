@@ -4,7 +4,7 @@
  * Side effects:
  *   1. Calls dicomWebServersApi.put(name, config) — upserts the server in Orthanc.
  *   2. Persists UI-only metadata (auth type, capabilities) in localStorage sidecar.
- *   3. Emits an audit event (outcome: success | failure) via auditClient.
+ *   3. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   4. Always rethrows on failure — callers must handle OrthancError.
  */
 import { dicomWebServersApi, dicomWebServersMeta, type DicomWebServerConfig, type DicomWebServerMeta } from '@/api/dicomWebServers';
@@ -37,17 +37,19 @@ function buildOrthancConfig(input: SaveDicomWebServerInput): DicomWebServerConfi
     // (Dynamic OAuth token refresh is not supported by the Orthanc DICOMweb plugin.)
     if (input.clientSecret) headers['Authorization'] = `Bearer ${input.clientSecret}`;
   } else if (input.authType === 'basic' && input.username) {
-    // Basic auth header value is "user:secret" base64 — but Orthanc expects
-    // the username/password as separate HttpHeaders keys for its plugin.
-    // The DICOMweb plugin accepts arbitrary HttpHeaders; we pass the encoded value.
-    headers['Authorization'] = `Basic ${btoa(input.username + ':')}`;
+    // RFC 7617 Basic auth: "username:password" base64-encoded.
+    // `clientSecret` is repurposed as the basic-auth password for DICOMweb servers
+    // (the OAuth `clientSecret` field is not used in basic-auth mode).
+    const password = input.clientSecret ?? '';
+    headers['Authorization'] = `Basic ${btoa(`${input.username}:${password}`)}`;
   }
   if (Object.keys(headers).length > 0) config.HttpHeaders = headers;
   return config;
 }
 
 export async function saveDicomWebServerAction(input: SaveDicomWebServerInput): Promise<void> {
-  const base = makeAuditBase('dicomweb.save', 'dicomweb-server', input.name);
+  const base = makeAuditBase('dicomweb.save', 'dicomWebServer', input.name);
+  auditClient.emit({ ...base, outcome: 'started' });
   try {
     await dicomWebServersApi.put(input.name, buildOrthancConfig(input));
     dicomWebServersMeta.put(input.name, {

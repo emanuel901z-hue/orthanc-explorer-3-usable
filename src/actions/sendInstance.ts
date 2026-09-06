@@ -4,7 +4,7 @@
  * Side effects:
  *   1. Calls instancesApi.sendToModality(instanceId, modalityId) — POSTs to
  *      /modalities/{name}/store with { Resources: [instanceId] }.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  */
 import { instancesApi } from '@/api/instances';
@@ -17,6 +17,7 @@ export async function sendInstanceAction(
   modalityId: string,
 ): Promise<void> {
   const base = makeAuditBase('instance.send', 'instance', instanceId);
+  auditClient.emit({ ...base, outcome: 'started', destinationId: modalityId });
   try {
     await instancesApi.sendToModality(instanceId, modalityId);
     auditClient.emit({ ...base, outcome: 'success', destinationId: modalityId });

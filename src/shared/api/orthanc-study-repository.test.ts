@@ -26,6 +26,9 @@ vi.mock("@/actions/studyLabel", () => ({
 
 const makeStudy = (id = "abc") => ({
   ID: id,
+  IsStable: true,
+  Labels: [],
+  LastUpdate: "20230101T000000",
   MainDicomTags: {
     StudyDate: "20230101",
     StudyInstanceUID: "1.2.3",

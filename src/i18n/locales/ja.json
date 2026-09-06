@@ -60,7 +60,9 @@
     "deleteSeriesDesc": "シリーズ #{{number}}（{{instances}}インスタンス）を完全に削除します。この操作は元に戻せません。",
     "deleteInstance": "インスタンスを削除",
     "deleteInstanceDesc": "インスタンス #{{number}}（{{size}}）を完全に削除します。この操作は元に戻せません。",
-    "searchPlaceholderSmart": "検索: 名前、日付、モダリティ、アクセッション、SIUID、医師..."
+    "searchPlaceholderSmart": "検索: 名前、日付、モダリティ、アクセッション、SIUID、医師...",
+    "notFound": "Study not found",
+    "backToList": "Back to Studies"
   },
   "upload": {
     "subtitle": "DICOMファイルまたはフォルダをドラッグ＆ドロップしてアップロード",
@@ -243,7 +245,9 @@
       "webUi": "ウェブUI（ユーザー）",
       "luaScript": "Luaスクリプト",
       "system": "システム"
-    }
+    },
+    "title": "Activity",
+    "clearSearch": "Clear search"
   },
   "remote": {
     "title": "リモートソース",
@@ -587,7 +591,8 @@
     "labels": "ラベル",
     "labelModeAny": "いずれか",
     "labelModeAll": "すべて",
-    "withoutLabels": "ラベルなし"
+    "withoutLabels": "ラベルなし",
+    "selectRow": "Select row"
   },
   "study": {
     "modifyTitle": "スタディタグを変更",
@@ -610,7 +615,13 @@
     "tagName": "名前",
     "original": "元の値",
     "newValue": "新しい値",
-    "empty": "空"
+    "empty": "空",
+    "patient": "Patient",
+    "deleteConfirmPrefix": "This will permanently delete",
+    "deleteConfirmSuffix": "and all {{series}} series ({{instances}} instances). This action cannot be undone.",
+    "bulkDownloadSuccess": "{{count}} series downloaded",
+    "bulkDownloadFailed": "Bulk download failed.",
+    "apiView": "API"
   },
   "dicomTagBrowser": {
     "searchPlaceholder": "名前、タグID、または値でタグを検索…",

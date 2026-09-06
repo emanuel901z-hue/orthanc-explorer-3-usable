@@ -8,7 +8,7 @@ export function makeAuditBase(
   action: string,
   resourceType: AuditEvent['resourceType'],
   resourceId: string,
-): Omit<AuditEvent, 'outcome' | 'errorCode' | 'reason'> {
+): Omit<AuditEvent, 'outcome' | 'errorCode'> {
   return {
     action,
     resourceType,

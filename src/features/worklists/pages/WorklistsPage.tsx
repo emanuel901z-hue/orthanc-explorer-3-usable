@@ -71,7 +71,7 @@ export default function WorklistsPage() {
         >
           {uploadMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
           <span className="hidden sm:inline">{t('worklists.upload')}</span>
-          <span className="sm:hidden">Upload</span>
+          <span className="sm:hidden">{t('worklists.upload')}</span>
         </Button>
         <input
           ref={fileInputRef}
@@ -87,8 +87,8 @@ export default function WorklistsPage() {
       </div>
 
       {error && (
-        <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/30">
-          <CardContent className="p-3 text-sm text-amber-700 dark:text-amber-400">
+        <Card className="border-warning/30 bg-warning/5">
+          <CardContent className="p-3 text-sm text-warning">
             {t('worklists.pluginNotInstalled')}
           </CardContent>
         </Card>
@@ -133,11 +133,12 @@ export default function WorklistsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 w-7 p-0 text-destructive"
+                          className="h-9 w-9 p-0 text-destructive"
+                          aria-label={t('common.delete')}
                           onClick={() => deleteMutation.mutate(id)}
                           disabled={deleteMutation.isPending}
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -157,7 +158,8 @@ export default function WorklistsPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 text-destructive shrink-0"
+                      className="h-10 w-10 p-0 text-destructive shrink-0"
+                      aria-label={t('common.delete')}
                       onClick={() => deleteMutation.mutate(id)}
                       disabled={deleteMutation.isPending}
                     >

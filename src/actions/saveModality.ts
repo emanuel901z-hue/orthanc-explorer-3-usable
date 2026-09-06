@@ -3,7 +3,7 @@
  *
  * Side effects:
  *   1. Calls modalitiesApi.put(name, config) — upserts the modality in Orthanc.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  */
 import { modalitiesApi, type ModalityConfig } from "@/api/modalities";
@@ -16,6 +16,7 @@ export async function saveModalityAction(
   config: ModalityConfig,
 ): Promise<void> {
   const base = makeAuditBase('modality.save', 'modality', name);
+  auditClient.emit({ ...base, outcome: "started" });
   try {
     await modalitiesApi.put(name, config);
     auditClient.emit({ ...base, outcome: "success" });

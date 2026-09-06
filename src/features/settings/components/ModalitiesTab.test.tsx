@@ -25,6 +25,20 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) => {
+      if (opts && typeof opts === 'object') {
+        return Object.entries(opts).reduce(
+          (acc, [k, v]) => acc.replace(`{{${k}}}`, String(v)),
+          key,
+        );
+      }
+      return key;
+    },
+  }),
+}));
+
 describe('ModalitiesTab — Echo All', () => {
   beforeEach(() => {
     mutateMock.mockClear();
@@ -32,7 +46,8 @@ describe('ModalitiesTab — Echo All', () => {
 
   it('calls echo.mutate for each modality (not echoModalityAction directly)', () => {
     render(<ModalitiesTab onAddClick={vi.fn()} onEditClick={vi.fn()} />);
-    fireEvent.click(screen.getByText(/echo all/i));
+    // i18n keys returned as-is in test env (react-i18next mocked): t('modality.echoAll')
+    fireEvent.click(screen.getByText(/modality\.echoAll/i));
 
     expect(mutateMock).toHaveBeenCalledWith('PACS1', expect.any(Object));
     expect(mutateMock).toHaveBeenCalledWith('PACS2', expect.any(Object));

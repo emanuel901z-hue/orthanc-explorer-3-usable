@@ -7,11 +7,15 @@ import { OrthancError } from "@/lib/errors";
 describe("anonymizeStudyAction", () => {
   beforeEach(() => vi.restoreAllMocks());
 
-  it("calls studiesApi.anonymize and emits success audit", async () => {
+  it("calls studiesApi.anonymize and emits started+success audit", async () => {
     vi.spyOn(studiesApi, "anonymize").mockResolvedValue({ ID: "new", Path: "/studies/new" });
     const auditSpy = vi.spyOn(auditClient, "emit").mockImplementation(() => {});
-    const study = { ID: "abc", MainDicomTags: {}, PatientMainDicomTags: {}, ParentPatient: "", Series: [], Type: "Study" as const };
-    await anonymizeStudyAction(study, {});
+    await anonymizeStudyAction("abc", {});
+    expect(auditSpy).toHaveBeenCalledWith(expect.objectContaining({
+      action: "study.anonymize",
+      resourceId: "abc",
+      outcome: "started",
+    }));
     expect(auditSpy).toHaveBeenCalledWith(expect.objectContaining({
       action: "study.anonymize",
       resourceId: "abc",
@@ -22,9 +26,7 @@ describe("anonymizeStudyAction", () => {
   it("emits failure audit and rethrows on error", async () => {
     vi.spyOn(studiesApi, "anonymize").mockRejectedValue(new OrthancError(500, "c", "boom"));
     const auditSpy = vi.spyOn(auditClient, "emit").mockImplementation(() => {});
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const study = { ID: "abc" } as any;
-    await expect(anonymizeStudyAction(study, {})).rejects.toBeInstanceOf(OrthancError);
+    await expect(anonymizeStudyAction("abc", {})).rejects.toBeInstanceOf(OrthancError);
     expect(auditSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "failure", errorCode: 500 }));
   });
 });

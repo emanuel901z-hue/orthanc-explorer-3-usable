@@ -60,7 +60,9 @@
     "deleteSeriesDesc": "Esto eliminará permanentemente la Serie #{{number}} con {{instances}} instancia(s). Esta acción no se puede deshacer.",
     "deleteInstance": "Eliminar Instancia",
     "deleteInstanceDesc": "Esto eliminará permanentemente la Instancia #{{number}} ({{size}}). Esta acción no se puede deshacer.",
-    "searchPlaceholderSmart": "Buscar: nombre, fecha, modalidad, acceso, SIUID, médico..."
+    "searchPlaceholderSmart": "Buscar: nombre, fecha, modalidad, acceso, SIUID, médico...",
+    "notFound": "Study not found",
+    "backToList": "Back to Studies"
   },
   "upload": {
     "subtitle": "Arrastra y suelta archivos o carpetas DICOM para subir",
@@ -243,7 +245,9 @@
       "webUi": "Interfaz web (Usuario)",
       "luaScript": "Script Lua",
       "system": "Sistema"
-    }
+    },
+    "title": "Activity",
+    "clearSearch": "Clear search"
   },
   "remote": {
     "title": "Fuentes Remotas",
@@ -587,7 +591,8 @@
     "labels": "Etiquetas",
     "labelModeAny": "O",
     "labelModeAll": "Y",
-    "withoutLabels": "Sin etiquetas"
+    "withoutLabels": "Sin etiquetas",
+    "selectRow": "Select row"
   },
   "study": {
     "modifyTitle": "Modificar etiquetas del estudio",
@@ -610,7 +615,13 @@
     "tagName": "Nombre",
     "original": "Original",
     "newValue": "Nuevo valor",
-    "empty": "vacío"
+    "empty": "vacío",
+    "patient": "Patient",
+    "deleteConfirmPrefix": "This will permanently delete",
+    "deleteConfirmSuffix": "and all {{series}} series ({{instances}} instances). This action cannot be undone.",
+    "bulkDownloadSuccess": "{{count}} series downloaded",
+    "bulkDownloadFailed": "Bulk download failed.",
+    "apiView": "API"
   },
   "dicomTagBrowser": {
     "searchPlaceholder": "Buscar etiquetas por nombre, ID o valor…",

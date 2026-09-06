@@ -24,7 +24,7 @@ describe('useAnonymizeJob', () => {
     vi.mocked(useJobStore.getState).mockReturnValue({
       addJob: vi.fn(),
       updateJob: vi.fn(),
-    } as ReturnType<typeof useJobStore.getState>);
+    } as unknown as ReturnType<typeof useJobStore.getState>);
     vi.mocked(anonymizeStudyAction).mockResolvedValue({ ID: 'new-study-789', Path: '/studies/new-study-789' });
   });
 
@@ -37,7 +37,7 @@ describe('useAnonymizeJob', () => {
       );
     });
     expect(anonymizeStudyAction).toHaveBeenCalledWith(
-      { ID: 'study-123' },
+      'study-123',
       { Keep: ['StudyDescription'] },
     );
   });

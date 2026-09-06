@@ -3,7 +3,7 @@
  *
  * Side effects:
  *   1. Calls instancesApi.delete(instanceId) — DELETE /instances/:id.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  */
 import { instancesApi } from '@/api/instances';
@@ -15,6 +15,7 @@ export async function deleteInstanceAction(
   instanceId: string,
 ): Promise<void> {
   const base = makeAuditBase('instance.delete', 'instance', instanceId);
+  auditClient.emit({ ...base, outcome: 'started' });
   try {
     await instancesApi.delete(instanceId);
     auditClient.emit({ ...base, outcome: 'success' });

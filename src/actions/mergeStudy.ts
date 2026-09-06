@@ -3,7 +3,7 @@
  *
  * Side effects:
  *   1. Calls studiesApi.merge(targetId, sourceIds, keepSource) — merges sources into target.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  *
  * @param targetId   Orthanc UUID of the target study (receives merged series).
@@ -21,6 +21,7 @@ export async function mergeStudyAction(
   keepSource = false,
 ): Promise<{ TargetStudy: string; MergedStudies: string[] }> {
   const base = makeAuditBase("study.merge", "study", targetId);
+  auditClient.emit({ ...base, outcome: "started", detail: { sourceIds, keepSource } });
   try {
     const result = await studiesApi.merge(targetId, sourceIds, keepSource);
     auditClient.emit({

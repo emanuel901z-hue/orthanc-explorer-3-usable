@@ -4,6 +4,162 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.1.0 — UX/Accessibility/i18n Optimization Sprint (2026-09-06)
+
+### Critical: Accessibility (A11y)
+
+- **H1 page titles added** to `StudyDetailPage`, `SeriesDetailPage`, `ActivityPage` — these pages previously had no `<h1>` heading, breaking screen-reader navigation. Each page now has an `sr-only` H1 (visible title remains the breadcrumb/summary badges).
+- **`aria-label` added** to ActivityPage search input (was missing — screen readers could not identify the search field).
+- **`aria-label` added** to ActivityPage clear-search button (was a bare icon button with no accessible name).
+- **Mobile checkbox `aria-label`** on StudyListPage changed from hardcoded `"Select row"` to i18n key `studyList.selectRow` (9 locales).
+
+### High: i18n — keyboard shortcut selector refactor
+
+- **`/` keyboard shortcut selector** in `use-keyboard-shortcuts.ts` replaced from locale-specific placeholder matching (`input[placeholder*="Search"], input[placeholder*="Such"], input[placeholder*="Поиск"]` — only 6/9 languages) to an **i18n-agnostic `data-shortcut="search"` attribute**. The `/` shortcut now works in all 9 supported languages without maintaining a selector list.
+- `data-shortcut="search"` attribute added to search inputs on StudyListPage, ActivityPage, AuditLogsPage.
+
+### High: i18n — hardcoded English strings eliminated
+
+- **StudyDetailPage**: 6 hardcoded English strings replaced with i18n keys:
+  - `"Study not found"` → `t('studies.notFound')`
+  - `"Back to Studies"` → `t('studies.backToList')`
+  - `"This will permanently delete..."` delete confirmation → `t('study.deleteConfirmPrefix')` + `t('study.deleteConfirmSuffix', { series, instances })`
+  - `"Patient"` CardTitle → `t('study.patient')`
+  - `"{{count}} series downloaded"` toast → `t('study.bulkDownloadSuccess')`
+  - `"Bulk download failed."` toast → `t('study.bulkDownloadFailed')`
+- **WorklistsPage**: hardcoded `"Upload"` (mobile span) → `t('worklists.upload')`.
+- **11 new i18n keys** added to all 9 locales (en/es/fr/de/ja/zh/ru/tr/ar): `studies.notFound`, `studies.backToList`, `study.patient`, `study.deleteConfirmPrefix`, `study.deleteConfirmSuffix`, `study.bulkDownloadSuccess`, `study.bulkDownloadFailed`, `study.apiView`, `activity.title`, `studyList.selectRow`, `activity.clearSearch`. All locales now at 799 keys (was 788).
+
+### Medium: Touch target sizes (WCAG 2.5.5)
+
+- **ModalitiesTab** echo/edit/delete icon buttons: `h-7 w-7` (28px) → `h-9 w-9` (36px) with icon size `h-4 w-4`.
+- **WorklistsPage** delete button (desktop table): `h-7 w-7` (28px) → `h-9 w-9` (36px) + `aria-label` added.
+- **WorklistsPage** delete button (mobile card): `h-8 w-8` (32px) → `h-10 w-10` (40px) + `aria-label` added.
+- **ActivityPage** clear-search button: `h-7 w-7` (28px) → `h-9 w-9` (36px) + `aria-label` added.
+- **AppLayout** keyboard help button: `h-8 w-8` (32px) → `h-9 w-9` (36px).
+
+### Medium: Embedded theming compliance
+
+- **WorklistsPage** warning card: hardcoded `border-amber-200 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400` replaced with theming-system CSS variables: `border-warning/30 bg-warning/5 text-warning` (uses `--warning` CSS var from `index.css`, respects white-labeling).
+
+### Tests added
+
+- `StudyDetailPage.test.tsx`: H1 accessibility test (verifies sr-only H1 with patient name).
+- `use-keyboard-shortcuts.test.tsx` (new, 4 tests): `/` focuses `[data-shortcut="search"]` input, does not focus when already in input, `?` opens help, ctrl/cmd suppression.
+- E2E `prod-viewport.spec.ts`: A11y regression block (H1 presence, data-shortcut + aria-label on search, icon-only button aria-labels, img alt text) + touch target size block (mobile 375x812, icon-only buttons >= 36px).
+
+### Files Changed
+
+```
+Modified:
+  docs/fork-changelog.md
+  e2e/prod/prod-viewport.spec.ts
+  src/app/layout/AppLayout.tsx
+  src/features/activity/pages/ActivityPage.tsx
+  src/features/audit/pages/AuditLogsPage.tsx
+  src/features/series/pages/SeriesDetailPage.tsx
+  src/features/settings/components/ModalitiesTab.tsx
+  src/features/studies/pages/StudyDetailPage.test.tsx
+  src/features/studies/pages/StudyDetailPage.tsx
+  src/features/studies/pages/StudyListPage.tsx
+  src/features/worklists/pages/WorklistsPage.tsx
+  src/i18n/locales/{ar,de,en,es,fr,ja,ru,tr,zh}.json
+  src/shared/hooks/use-keyboard-shortcuts.ts
+
+Added:
+  src/shared/hooks/use-keyboard-shortcuts.test.tsx
+```
+
+---
+
+## v2.0.0 — Bugfix Sprint: RBAC, Audit, PHI, Type Safety (2026-09-06)
+
+### Critical: Feature-flag RBAC security fix
+
+- **`features.ts` resolver ignored legacy `enableX` config.js keys** — `config.prod.js` sets `enableDelete: false`, `enableModify: false`, `enableAnonymize: false`, `enableSendTo: false`, but the resolver looked up `features['delete']` (not `features['enableDelete']`), so all dangerous write actions stayed **enabled in production** despite the disable flag. Fix: `FEATURE_ALIASES` map (`enableDelete`→`delete`, `enableSendTo`→`send`, `enableModalityConfig`→`modalityManagement`, etc.). + 4 regression tests.
+
+### High: Audit trail — BEFORE+AFTER events for all 17 write actions
+
+- All 17 write actions (`deleteStudy`, `deleteSeries`, `deleteInstance`, `modifyStudy/Series/Instance`, `anonymizeStudy/Series/Instance`, `sendStudy/Series/Instance`, `mergeStudy`, `uploadInstances`, `saveModality`, `deleteModality`, `saveDicomWebServer`, `deleteDicomWebServer`, `addLabel`, `removeLabel`) now emit a `started` audit event BEFORE the API call, followed by `success`/`failure` after. Previously only a single AFTER event was emitted — a crash between API call and callback left no audit trail.
+
+### High: PHI leak fix in upload audit
+
+- `uploadInstancesAction` used `file.name` as audit `resourceId` — DICOM filenames can carry patient names/MRN/DOB. Fix: non-PHI `batchId` for the `started` event, Orthanc-assigned UUID (`result.ID`) for the `success` event.
+
+### High: Smart search 4-digit date parser
+
+- `smart-search.ts` 4-digit date token parser read `"2908"` as `dd=2, mm=9` (single digits) instead of `dd=29, mm=08`. Fix: `tokenDigits.slice(0,2)` / `slice(2,4)`. + 24 regression tests in new `smart-search.test.ts`.
+
+### High: Audit system gaps
+
+- `AuditEvent` type extended with `detail?: Record<string, unknown>` (for merge/modify metadata, server-side only — never client-logged).
+- `auditClient.emit()` now logs `destinationId` (was silently dropped by logger allowlist).
+- `outcome` union extended with `'started'`.
+- `logger.ts` ALLOWLIST extended with `destinationId`.
+- `deleteDicomWebServer`/`saveDicomWebServer` `resourceType` normalized from `'dicomweb-server'` (not in union) to `'dicomWebServer'`.
+
+### Medium: Logic bugs
+
+- `AuditLogsPage.tsx`: search filter used `e.user` (non-existent property) instead of `e.actor` — user search never matched.
+- `RemoteSourcesPage.tsx`: modality selector accessed `lastEchoStatus`/`lastEcho` not in the inline type — Wifi icon always showed offline.
+- `orthanc-study-repository.ts`: `result.map(mapOrthancInstance)` passed Array `index` as `rawTags` argument (silent logic bug). Fix: arrow wrapper.
+- `saveDicomWebServer.ts`: Basic auth header `btoa(user + ':')` missing password (RFC 7617 violation). Fix: `btoa(user + ':' + (clientSecret ?? ''))`.
+
+### Low: Transport/Correlation
+
+- `client.ts`: raw `TypeError` from `fetch` network failures now wrapped into PHI-safe `OrthancError(0, correlationId, 'Network error...')`.
+- `correlation.ts`: `Math.random` fallback branch documented as unreachable (getRandomValues available in all contexts).
+
+### Type safety — 18 tsc errors fixed
+
+- `deleteStudyAction`, `modifyStudyAction`, `anonymizeStudyAction` signatures simplified from `(study: Study)` to `(studyId: string)` — eliminates caller-side `as any` casts.
+- Test stubs: `OrthancStudy` mocks updated with `IsStable`/`Labels`/`LastUpdate`, `ChangesResponse.First`, `OrthancStats.TotalDiskSizeMB/TotalUncompressedSize`, `JobState` cast.
+- `StudyListPage` `getResizeOffset()` (v7 API) removed for `@tanstack/react-table` v8.21.
+- `CornerstoneViewport` `WADORSMetaData` cast for `@cornerstonejs/core` v4.22.
+
+### Test suite
+
+- **213 tests** (was 189, 1 failing) → **218 tests**, all passing.
+- `tsc --noEmit -p tsconfig.app.json`: **0 errors** (was 18).
+- New: `smart-search.test.ts` (24 tests), `use-keyboard-shortcuts.test.tsx` (4 tests), `correlation.test.ts` (getRandomValues branch), `features.test.tsx` (enableX aliases), `deleteStudy/anonymizeStudy/modifyStudy.test.ts` (started+success audit).
+
+### Files Changed
+
+```
+Modified (47 files):
+  src/actions/*.ts (17 action files — BEFORE+AFTER audit + signatures)
+  src/actions/*.test.ts (test updates for new signatures + audit events)
+  src/config/features.ts (+ FEATURE_ALIASES)
+  src/config/features.test.tsx (+ enableX alias tests)
+  src/lib/audit.ts (+ detail field, destinationId logging)
+  src/lib/logger.ts (+ destinationId allowlist)
+  src/lib/client.ts (network error wrapping)
+  src/lib/correlation.ts (Math.random comment)
+  src/lib/correlation.test.ts (getRandomValues branch tests)
+  src/lib/smart-search.ts (4-digit parser fix)
+  src/features/audit/pages/AuditLogsPage.tsx (user→actor)
+  src/features/servers/pages/RemoteSourcesPage.tsx (lastEcho type)
+  src/features/studies/pages/StudyDetailPage.tsx (deleteMutation signature)
+  src/features/studies/pages/StudyListPage.tsx (deleteStudyAction signature)
+  src/features/studies/components/ModifyStudyDialog.tsx (modifyStudyAction signature)
+  src/features/tasks/hooks/use-anonymize-job.ts (anonymizeStudyAction signature)
+  src/shared/api/orthanc-study-repository.ts (mapOrthancInstance wrapper)
+  src/features/settings/components/ModalitiesTab.test.tsx (i18n mock fix)
+  src/features/activity/hooks/useChanges.test.tsx (First field)
+  src/features/settings/hooks/use-system-info.test.tsx (OrthancStats)
+  src/features/tasks/hooks/use-anonymize-job.test.ts (JobState cast)
+  src/features/viewer/components/CornerstoneViewport.tsx (WADORSMetaData cast)
+  src/features/studies/pages/StudyListPage.tsx (getResizeOffset removal)
+  e2e/prod/prod-viewport.spec.ts (RBAC + smart-search E2E)
+  src/i18n/locales/*.json (9 locales, +9 keys each)
+
+Added:
+  src/lib/smart-search.test.ts (24 tests)
+  src/shared/hooks/use-keyboard-shortcuts.test.tsx (4 tests)
+```
+
+---
+
 ## v1.9.0 — About Dialog i18n + Umlaut Description Fix (2026-09-05)
 
 ### Bug fix: Umlaut normalization description

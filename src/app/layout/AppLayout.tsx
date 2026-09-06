@@ -70,7 +70,7 @@ export function AppLayout() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                    className="h-9 w-9 p-0 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                     onClick={toggleShortcuts}
                   >
                     <Keyboard className="h-4 w-4" />

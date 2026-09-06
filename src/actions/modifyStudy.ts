@@ -2,25 +2,26 @@
  * modifyStudyAction — audit-seam wrapper for study modification.
  *
  * Side effects:
- *   1. Calls studiesApi.modify(study.ID, body) — creates a modified copy.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   1. Calls studiesApi.modify(studyId, body) — creates a modified copy.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  *
- * @param study  The Study object to modify (ID is used for API call and audit).
- * @param body   Modification parameters passed to the Orthanc API.
+ * @param studyId  Orthanc UUID of the study to modify.
+ * @param body     Modification parameters passed to the Orthanc API.
  */
-import { studiesApi, type Study } from "@/api/studies";
+import { studiesApi } from "@/api/studies";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
 import { makeAuditBase } from "@/actions/audit-base";
 
 export async function modifyStudyAction(
-  study: Study,
+  studyId: string,
   body: Record<string, unknown>,
 ): Promise<{ ID: string; Path: string }> {
-  const base = makeAuditBase("study.modify", "study", study.ID);
+  const base = makeAuditBase("study.modify", "study", studyId);
+  auditClient.emit({ ...base, outcome: "started" });
   try {
-    const result = await studiesApi.modify(study.ID, body);
+    const result = await studiesApi.modify(studyId, body);
     auditClient.emit({ ...base, outcome: "success" });
     return result;
   } catch (e) {

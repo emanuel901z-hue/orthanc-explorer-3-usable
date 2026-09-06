@@ -60,7 +60,9 @@
     "deleteSeriesDesc": "Это навсегда удалит Серию #{{number}} с {{instances}} экземпляром(ами). Это действие нельзя отменить.",
     "deleteInstance": "Удалить экземпляр",
     "deleteInstanceDesc": "Это навсегда удалит Экземпляр #{{number}} ({{size}}). Это действие нельзя отменить.",
-    "searchPlaceholderSmart": "Поиск: имя, дата, модальность, доступ, SIUID, врач..."
+    "searchPlaceholderSmart": "Поиск: имя, дата, модальность, доступ, SIUID, врач...",
+    "notFound": "Study not found",
+    "backToList": "Back to Studies"
   },
   "studyList": {
     "columns": {
@@ -107,7 +109,8 @@
     "labels": "Метки",
     "labelModeAny": "ИЛИ",
     "labelModeAll": "И",
-    "withoutLabels": "Без меток"
+    "withoutLabels": "Без меток",
+    "selectRow": "Select row"
   },
   "upload": {
     "subtitle": "Перетащите DICOM-файлы или папки для загрузки",
@@ -290,7 +293,9 @@
       "webUi": "Веб-интерфейс (Пользователь)",
       "luaScript": "Скрипт Lua",
       "system": "Система"
-    }
+    },
+    "title": "Activity",
+    "clearSearch": "Clear search"
   },
   "remote": {
     "title": "Удалённые источники",
@@ -610,7 +615,13 @@
     "tagName": "Имя",
     "original": "Оригинал",
     "newValue": "Новое значение",
-    "empty": "пусто"
+    "empty": "пусто",
+    "patient": "Patient",
+    "deleteConfirmPrefix": "This will permanently delete",
+    "deleteConfirmSuffix": "and all {{series}} series ({{instances}} instances). This action cannot be undone.",
+    "bulkDownloadSuccess": "{{count}} series downloaded",
+    "bulkDownloadFailed": "Bulk download failed.",
+    "apiView": "API"
   },
   "dicomTagBrowser": {
     "searchPlaceholder": "Поиск тегов по имени, ID или значению…",

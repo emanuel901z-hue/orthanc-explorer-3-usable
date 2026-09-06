@@ -4,7 +4,7 @@
  * Side effects:
  *   1. Calls seriesApi.modify(seriesId, body) — POSTs to /series/:id/modify
  *      with { Replace: { ...tags } }.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  *
  * @param seriesId  Orthanc UUID of the series to modify.
@@ -20,6 +20,7 @@ export async function modifySeriesAction(
   replace: Record<string, string>,
 ): Promise<{ ID: string; Path: string }> {
   const base = makeAuditBase('series.modify', 'series', seriesId);
+  auditClient.emit({ ...base, outcome: 'started' });
   try {
     const result = await seriesApi.modify(seriesId, { Replace: replace });
     auditClient.emit({

@@ -207,6 +207,8 @@ export default function SeriesDetailPage() {
 
   return (
     <div className="p-4 md:p-6 space-y-4 animate-fade-in">
+      {/* Screen-reader-only H1 for accessibility — visible title is the breadcrumb */}
+      <h1 className="sr-only">{t('series.seriesNumber', { number: series.seriesNumber })}</h1>
       {/* Breadcrumb + actions */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <Breadcrumb>

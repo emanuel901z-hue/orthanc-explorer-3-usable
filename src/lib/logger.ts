@@ -13,6 +13,7 @@ const ALLOWLIST = new Set([
   "studyId", "seriesId", "instanceId",
   "status", "correlationId", "path", "action",
   "resourceType", "resourceId", "outcome", "errorCode",
+  "destinationId",
   "durationMs", "count",
 ]);
 

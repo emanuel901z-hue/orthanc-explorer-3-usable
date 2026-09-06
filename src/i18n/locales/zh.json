@@ -60,7 +60,9 @@
     "deleteSeriesDesc": "这将永久删除系列 #{{number}}及其{{instances}}个实例。此操作无法撤销。",
     "deleteInstance": "删除实例",
     "deleteInstanceDesc": "这将永久删除实例 #{{number}}（{{size}}）。此操作无法撤销。",
-    "searchPlaceholderSmart": "搜索: 姓名、日期、模态、 accession、SIUID、医师..."
+    "searchPlaceholderSmart": "搜索: 姓名、日期、模态、 accession、SIUID、医师...",
+    "notFound": "Study not found",
+    "backToList": "Back to Studies"
   },
   "upload": {
     "subtitle": "拖放DICOM文件或文件夹进行上传",
@@ -243,7 +245,9 @@
       "webUi": "网页界面（用户）",
       "luaScript": "Lua脚本",
       "system": "系统"
-    }
+    },
+    "title": "Activity",
+    "clearSearch": "Clear search"
   },
   "remote": {
     "title": "远程源",
@@ -587,7 +591,8 @@
     "labels": "标签",
     "labelModeAny": "或",
     "labelModeAll": "与",
-    "withoutLabels": "无标签"
+    "withoutLabels": "无标签",
+    "selectRow": "Select row"
   },
   "study": {
     "modifyTitle": "修改研究标签",
@@ -610,7 +615,13 @@
     "tagName": "名称",
     "original": "原始值",
     "newValue": "新值",
-    "empty": "空"
+    "empty": "空",
+    "patient": "Patient",
+    "deleteConfirmPrefix": "This will permanently delete",
+    "deleteConfirmSuffix": "and all {{series}} series ({{instances}} instances). This action cannot be undone.",
+    "bulkDownloadSuccess": "{{count}} series downloaded",
+    "bulkDownloadFailed": "Bulk download failed.",
+    "apiView": "API"
   },
   "dicomTagBrowser": {
     "searchPlaceholder": "按名称、标签ID或值搜索标签…",

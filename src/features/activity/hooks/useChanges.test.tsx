@@ -33,6 +33,7 @@ describe("useChanges", () => {
     const spy = vi.spyOn(changesApi, "list").mockResolvedValue({
       Changes: [],
       Done: true,
+      First: 0,
       Last: 0,
     });
     const { result } = renderHook(() => useChanges(), { wrapper });
@@ -44,6 +45,7 @@ describe("useChanges", () => {
     const spy = vi.spyOn(changesApi, "list").mockResolvedValue({
       Changes: [],
       Done: true,
+      First: 0,
       Last: 10,
     });
     const { result } = renderHook(() => useChanges(5, 50), { wrapper });

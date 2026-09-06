@@ -231,11 +231,14 @@ export class OrthancStudyRepository implements IStudyRepository {
     if (isInstanceIdArray(result)) {
       // Older Orthanc: array of ID strings — fetch each individually
       const instances = await Promise.all(result.map((id) => instancesApi.get(id)));
-      return instances.map(mapOrthancInstance);
+      // Wrap in arrow function — Array.map passes (value, index, array),
+      // but mapOrthancInstance expects (inst, rawTags?). Without the wrapper,
+      // the numeric index would be passed as `rawTags` and silently mis-typed.
+      return instances.map((i) => mapOrthancInstance(i));
     }
 
     // Newer Orthanc: array of full instance objects — map directly
-    return result.map(mapOrthancInstance);
+    return result.map((i) => mapOrthancInstance(i));
   }
 
   /** Returns a single instance by Orthanc UUID, including all DICOM tags. */

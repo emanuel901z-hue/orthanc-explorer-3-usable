@@ -512,7 +512,7 @@ export default function StudyListPage() {
     let failCount = 0;
     for (const row of selectedRows) {
       try {
-        await deleteStudyAction(row.original);
+        await deleteStudyAction(row.original.id);
         successCount++;
       } catch {
         failCount++;
@@ -551,6 +551,7 @@ export default function StudyListPage() {
               <Input
                 placeholder={t('studies.searchPlaceholderSmart')}
                 aria-label={t('studies.searchPlaceholderSmart')}
+                data-shortcut="search"
                 value={smartQuery}
                 onChange={(e) => updateFilter('q', e.target.value)}
                 className="pl-9"
@@ -823,7 +824,7 @@ export default function StudyListPage() {
                       <Checkbox
                         checked={row.getIsSelected()}
                         onCheckedChange={(v) => row.toggleSelected(!!v)}
-                        aria-label="Select row"
+                        aria-label={t('studyList.selectRow')}
                         onClick={(e) => e.stopPropagation()}
                         className="mt-0.5"
                       />
@@ -914,9 +915,13 @@ export default function StudyListPage() {
                           onTouchStart={header.getResizeHandler()}
                           className="absolute right-0 top-0 h-full w-1 cursor-col-resize bg-border/0 hover:bg-primary/40 active:bg-primary/60 transition-colors"
                           style={{
-                            transform: header.column.getIsResizing()
-                              ? `translateX(${header.column.getResizeOffset()}px)`
-                              : '',
+                            // columnResizeMode is 'onChange' (see useReactTable
+                            // config above), so column size is updated live during
+                            // drag — no extra translate offset is needed. The
+                            // previous `getResizeOffset()` call referenced a
+                            // @tanstack/react-table v7 API that no longer exists
+                            // in v8.21+ and produced a type error.
+                            transform: '',
                           }}
                         />
                       )}

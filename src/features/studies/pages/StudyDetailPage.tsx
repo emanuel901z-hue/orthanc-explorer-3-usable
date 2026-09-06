@@ -32,10 +32,8 @@ import { ModifyStudyDialog } from '@/features/studies/components/ModifyStudyDial
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
 import { toast } from 'sonner';
 import { deleteStudyAction } from '@/actions/deleteStudy';
-import { deleteSeriesAction } from '@/actions/deleteSeries';
-import { downloadStudyAction } from '@/actions/downloadStudy';
+import { deleteSeriesAction } from '@/actions/deleteSeries';import { downloadStudyAction } from '@/actions/downloadStudy';
 import { OrthancError } from '@/lib/errors';
-import type { OrthancStudy } from '@/api/studies';
 import { useFeature } from '@/config/features';
 import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
@@ -99,7 +97,7 @@ export default function StudyDetailPage() {
   const isMobile = useMediaQuery('(max-width: 767px)');
 
   const deleteMutation = useMutation({
-    mutationFn: (orthancStudy: OrthancStudy) => deleteStudyAction(orthancStudy),
+    mutationFn: (studyId: string) => deleteStudyAction(studyId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studies'] });
       navigate('/studies');
@@ -229,11 +227,11 @@ export default function StudyDetailPage() {
         severity: 'info',
         metadata: { 'Study ID': studyId!, 'Series Count': String(ids.length), 'Series IDs': ids.join(', ') },
       });
-      toast.success(`${ids.length} series downloaded`);
+      toast.success(t('study.bulkDownloadSuccess', { count: ids.length }));
       setSelectedSeriesIds(new Set());
     } catch (e) {
       const ref = e instanceof OrthancError ? ` (Ref: ${e.correlationId})` : '';
-      toast.error(`Bulk download failed.${ref}`);
+      toast.error(`${t('study.bulkDownloadFailed')}${ref}`);
     } finally {
       setBulkDownloading(false);
     }
@@ -278,14 +276,16 @@ export default function StudyDetailPage() {
   if (!study) {
     return (
       <div className="p-6 text-center py-20">
-        <p className="text-muted-foreground">Study not found</p>
-        <Button variant="outline" className="mt-4" onClick={() => navigate('/studies')}>Back to Studies</Button>
+        <p className="text-muted-foreground">{t('studies.notFound')}</p>
+        <Button variant="outline" className="mt-4" onClick={() => navigate('/studies')}>{t('studies.backToList')}</Button>
       </div>
     );
   }
 
   return (
     <div className="p-4 md:p-6 space-y-4 animate-fade-in">
+      {/* Screen-reader-only H1 for accessibility — visible title is the breadcrumb patient name */}
+      <h1 className="sr-only">{formatPatientName(study.patientName)}</h1>
       {/* Breadcrumb + actions */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <Breadcrumb>
@@ -457,7 +457,7 @@ export default function StudyDetailPage() {
                     {t('studies.deleteStudy')}
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete <strong>{formatPatientName(study.patientName)}</strong> and all {study.numberOfSeries} series ({study.numberOfInstances} instances). This action cannot be undone.
+                    {t('study.deleteConfirmPrefix')} <strong>{formatPatientName(study.patientName)}</strong> {t('study.deleteConfirmSuffix', { series: study.numberOfSeries, instances: study.numberOfInstances })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -467,7 +467,7 @@ export default function StudyDetailPage() {
                     disabled={deleteMutation.isPending}
                     onClick={() => {
                     audit({ action: 'delete', title: `Study deleted: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'warning', metadata: { 'Study ID': studyId!, 'Series': String(study.numberOfSeries), 'Instances': String(study.numberOfInstances) } });
-                    deleteMutation.mutate({ ID: studyId!, MainDicomTags: {}, PatientMainDicomTags: {}, ParentPatient: '', Series: [], Type: 'Study' });
+                    deleteMutation.mutate(studyId!);
                   }}
                 >
                   {t('studies.deletePermanently')}
@@ -492,7 +492,7 @@ export default function StudyDetailPage() {
             <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Patient</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t('study.patient')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div>

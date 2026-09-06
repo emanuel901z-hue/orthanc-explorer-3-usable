@@ -60,7 +60,9 @@
     "deleteSeriesDesc": "Bu işlem {{instances}} örneği olan #{{number}} Serisini kalıcı olarak silecektir. Bu işlem geri alınamaz.",
     "deleteInstance": "Örneği Sil",
     "deleteInstanceDesc": "Bu işlem #{{number}} Örneğini ({{size}}) kalıcı olarak silecektir. Bu işlem geri alınamaz.",
-    "searchPlaceholderSmart": "Ara: isim, tarih, modalite, erişim, SIUID, doktor..."
+    "searchPlaceholderSmart": "Ara: isim, tarih, modalite, erişim, SIUID, doktor...",
+    "notFound": "Study not found",
+    "backToList": "Back to Studies"
   },
   "studyList": {
     "columns": {
@@ -107,7 +109,8 @@
     "labels": "Etiketler",
     "labelModeAny": "VEYA",
     "labelModeAll": "VE",
-    "withoutLabels": "Etiketsiz"
+    "withoutLabels": "Etiketsiz",
+    "selectRow": "Select row"
   },
   "upload": {
     "subtitle": "Yüklemek için DICOM dosyalarını veya klasörlerini sürükleyip bırakın",
@@ -290,7 +293,9 @@
       "webUi": "Web arayüzü (Kullanıcı)",
       "luaScript": "Lua betiği",
       "system": "Sistem"
-    }
+    },
+    "title": "Activity",
+    "clearSearch": "Clear search"
   },
   "remote": {
     "title": "Uzak Kaynaklar",
@@ -610,7 +615,13 @@
     "tagName": "Ad",
     "original": "Orijinal",
     "newValue": "Yeni değer",
-    "empty": "boş"
+    "empty": "boş",
+    "patient": "Patient",
+    "deleteConfirmPrefix": "This will permanently delete",
+    "deleteConfirmSuffix": "and all {{series}} series ({{instances}} instances). This action cannot be undone.",
+    "bulkDownloadSuccess": "{{count}} series downloaded",
+    "bulkDownloadFailed": "Bulk download failed.",
+    "apiView": "API"
   },
   "dicomTagBrowser": {
     "searchPlaceholder": "Etiketleri ad, kimlik veya değere göre ara…",

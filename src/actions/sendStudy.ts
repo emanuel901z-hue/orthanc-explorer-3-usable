@@ -4,7 +4,7 @@
  * Side effects:
  *   1. Calls studiesApi.sendToModality(studyId, modalityId) — POSTs to
  *      /modalities/{name}/store with { Resources: [studyId] }.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *      Sending a study transfers PHI-bearing data to another system,
  *      so full audit trail is required.
  *   3. Always rethrows on failure — callers must handle OrthancError.
@@ -19,6 +19,7 @@ export async function sendStudyAction(
   modalityId: string,
 ): Promise<void> {
   const base = makeAuditBase('study.send', 'study', studyId);
+  auditClient.emit({ ...base, outcome: 'started', destinationId: modalityId });
   try {
     await studiesApi.sendToModality(studyId, modalityId);
     auditClient.emit({ ...base, outcome: 'success', destinationId: modalityId });

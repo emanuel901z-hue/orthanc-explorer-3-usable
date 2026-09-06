@@ -54,7 +54,7 @@ export function useAnonymizeJob() {
 
       try {
         if (level === 'study') {
-          await anonymizeStudyAction({ ID: id } as Parameters<typeof anonymizeStudyAction>[0], body);
+          await anonymizeStudyAction(id, body);
         } else if (level === 'series') {
           await anonymizeSeriesAction(id, body);
         } else {

@@ -87,10 +87,12 @@ export function useKeyboardShortcuts(onToggleHelp: () => void) {
         return;
       }
 
-      // / → focus search
+      // / → focus search — uses data-shortcut="search" attribute instead of
+      // locale-specific placeholder matching. This is i18n-agnostic and works
+      // across all 9 supported languages without maintaining a selector list.
       if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
         const searchInput = document.querySelector<HTMLInputElement>(
-          'input[placeholder*="Search"], input[placeholder*="search"], input[placeholder*="Such"], input[placeholder*="Поиск"], input[placeholder*="搜索"], input[placeholder*="検索"]'
+          '[data-shortcut="search"]'
         );
         if (searchInput) {
           e.preventDefault();

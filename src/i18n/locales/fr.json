@@ -60,7 +60,9 @@
     "deleteSeriesDesc": "Ceci supprimera définitivement la Série #{{number}} avec {{instances}} instance(s). Cette action est irréversible.",
     "deleteInstance": "Supprimer l'Instance",
     "deleteInstanceDesc": "Ceci supprimera définitivement l'Instance #{{number}} ({{size}}). Cette action est irréversible.",
-    "searchPlaceholderSmart": "Rechercher: nom, date, modalité, accès, SIUID, médecin..."
+    "searchPlaceholderSmart": "Rechercher: nom, date, modalité, accès, SIUID, médecin...",
+    "notFound": "Study not found",
+    "backToList": "Back to Studies"
   },
   "upload": {
     "subtitle": "Glissez-déposez des fichiers ou dossiers DICOM pour télécharger",
@@ -243,7 +245,9 @@
       "webUi": "Interface web (Utilisateur)",
       "luaScript": "Script Lua",
       "system": "Système"
-    }
+    },
+    "title": "Activity",
+    "clearSearch": "Clear search"
   },
   "remote": {
     "title": "Sources Distantes",
@@ -587,7 +591,8 @@
     "labels": "Étiquettes",
     "labelModeAny": "OU",
     "labelModeAll": "ET",
-    "withoutLabels": "Sans étiquettes"
+    "withoutLabels": "Sans étiquettes",
+    "selectRow": "Select row"
   },
   "study": {
     "modifyTitle": "Modifier les étiquettes de l'étude",
@@ -610,7 +615,13 @@
     "tagName": "Nom",
     "original": "Original",
     "newValue": "Nouvelle valeur",
-    "empty": "vide"
+    "empty": "vide",
+    "patient": "Patient",
+    "deleteConfirmPrefix": "This will permanently delete",
+    "deleteConfirmSuffix": "and all {{series}} series ({{instances}} instances). This action cannot be undone.",
+    "bulkDownloadSuccess": "{{count}} series downloaded",
+    "bulkDownloadFailed": "Bulk download failed.",
+    "apiView": "API"
   },
   "dicomTagBrowser": {
     "searchPlaceholder": "Rechercher des étiquettes par nom, ID ou valeur…",

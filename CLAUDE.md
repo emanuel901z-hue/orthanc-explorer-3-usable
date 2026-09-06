@@ -2,7 +2,7 @@
 
 A React SPA wired to a local Orthanc DICOM server with healthcare-grade architecture: typed API layer, audit seam, PHI-safe logging, runtime deployment mode config, and global health tracking.
 
-> **Fork of [rhavekost/orthanc-explorer-3](https://github.com/rhavekost/orthanc-explorer-3)** with production enhancements for backend-proxy auth mode, RBAC feature flags, custom columns, label filtering, OHIF integration, and 9-language i18n. See [docs/fork-changelog.md](docs/fork-changelog.md) for details.
+> **Fork of [rhavekost/orthanc-explorer-3](https://github.com/rhavekost/orthanc-explorer-3)** with production enhancements for backend-proxy auth mode, RBAC feature flags, custom columns, label filtering, OHIF integration, 9-language i18n, full A11y compliance, and BEFORE+AFTER audit events on all write actions. See [docs/fork-changelog.md](docs/fork-changelog.md) for details.
 
 ## Commands
 
@@ -26,7 +26,7 @@ npm run preview
 
 ### Testing
 ```bash
-# Run all unit tests (single pass, 191 tests)
+# Run all unit tests (single pass, 218 tests)
 npm run test
 
 # Watch mode
@@ -78,7 +78,7 @@ npx tsc --noEmit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (191 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (218 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -200,3 +200,8 @@ features: {
 - `src/api/` files must not log PHI; route through `src/lib/logger.ts` which scrubs identifiers
 - `crypto.randomUUID()` is NOT available in non-secure HTTP contexts — `lib/correlation.ts` has a fallback chain; never call `crypto.randomUUID()` directly outside that module
 - AuthGate wraps the entire app — no API calls fire until `/oe3-me` confirms authentication. Do not bypass AuthGate in new components.
+- **Feature flags use two key forms**: the canonical form (`delete`, `modify`, `anonymize`, `send`) AND the legacy `enableX` form (`enableDelete`, `enableModify`, etc. shipped in `config.prod.js`). The `FEATURE_ALIASES` map in `features.ts` maps both — never remove it or production RBAC breaks.
+- **Search inputs must carry `data-shortcut="search"`** — the `/` keyboard shortcut in `use-keyboard-shortcuts.ts` uses this i18n-agnostic attribute selector (not locale-specific placeholder matching). Add it to any new search input.
+- **Every page must have exactly one `<h1>`** — use `className="sr-only"` if the visible title is a breadcrumb/badge. Verified by E2E A11y regression tests.
+- **Write actions must emit BEFORE+AFTER audit events** — `auditClient.emit({ ...base, outcome: 'started' })` before the API call, `success`/`failure` after. See any action in `src/actions/` for the pattern.
+- **`AuditEvent.resourceId` must not carry PHI** — for uploads, use a non-PHI batch ID (not the filename); for other actions, use the Orthanc UUID.

@@ -34,9 +34,40 @@ function scopeAllows(scopes: string[], key: FeatureKey): boolean {
   );
 }
 
+/**
+ * Aliases for the legacy `enableX` config.js key form (documented in CLAUDE.md /
+ * AGENTS.md and used by `public/config.prod.js` and the PP backend deployment).
+ * Without this mapping, `cfg.features?.[key] === false` would never match the
+ * `enableDelete` / `enableSendTo` / `enableModalityConfig` keys actually shipped
+ * in production, leaving all dangerous write actions (delete/modify/anonymize/send)
+ * enabled regardless of the disable flag.
+ */
+const FEATURE_ALIASES: Record<FeatureKey, string[]> = {
+  upload: ['enableUpload'],
+  delete: ['enableDelete'],
+  anonymize: ['enableAnonymize'],
+  modify: ['enableModify'],
+  send: ['enableSendTo'],
+  download: ['enableDownload'],
+  editLabels: ['enableEditLabels'],
+  modalityManagement: ['enableModalityConfig', 'enableModalityManagement'],
+  dicomWebManagement: ['enableDicomWebConfig', 'enableDicomWebManagement'],
+};
+
+function isFeatureDisabled(cfg: ReturnType<typeof getConfig>, key: FeatureKey): boolean {
+  if (cfg.features?.[key] === false) return true;
+  const aliases = FEATURE_ALIASES[key];
+  if (aliases) {
+    for (const alias of aliases) {
+      if (cfg.features?.[alias] === false) return true;
+    }
+  }
+  return false;
+}
+
 export function resolveFeature(key: FeatureKey, layers: Layers): boolean {
   const cfg = getConfig();
-  if (cfg.features?.[key] === false) return false;
+  if (isFeatureDisabled(cfg, key)) return false;
   if (layers.profile && !layers.profile.permissions.includes(key)) return false;
   if (layers.scopes && !scopeAllows(layers.scopes, key)) return false;
   return true;

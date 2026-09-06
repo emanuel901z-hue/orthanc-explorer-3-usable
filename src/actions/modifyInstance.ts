@@ -4,7 +4,7 @@
  * Side effects:
  *   1. Calls instancesApi.modify(instanceId, body) — POST /instances/:id/modify
  *      with { Replace: { ...tags } }.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  *
  * @param instanceId  Orthanc UUID of the instance to modify.
@@ -20,6 +20,7 @@ export async function modifyInstanceAction(
   replace: Record<string, string>,
 ): Promise<{ ID: string; Path: string }> {
   const base = makeAuditBase('instance.modify', 'instance', instanceId);
+  auditClient.emit({ ...base, outcome: 'started' });
   try {
     const result = await instancesApi.modify(instanceId, { Replace: replace });
     auditClient.emit({

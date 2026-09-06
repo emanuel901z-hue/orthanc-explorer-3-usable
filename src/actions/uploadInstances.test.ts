@@ -13,7 +13,13 @@ describe("uploadInstancesAction", () => {
     const files = [new File(["a"], "a.dcm"), new File(["b"], "b.dcm")];
     const result = await uploadInstancesAction(files);
     expect(result).toEqual({ succeeded: 2, failed: 0 });
-    expect(auditSpy).toHaveBeenCalledTimes(2);
+    // BEFORE+AFTER audit: each file emits a "started" event before the upload
+    // and a "success" event after — 2 files × 2 events = 4 calls.
+    expect(auditSpy).toHaveBeenCalledTimes(4);
+    // Verify the started/success pairing and that the success resourceId is
+    // the Orthanc UUID (not the PHI-bearing filename).
+    expect(auditSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "started" }));
+    expect(auditSpy).toHaveBeenCalledWith(expect.objectContaining({ outcome: "success", resourceId: "x" }));
   });
 
   it("counts failures without rethrowing", async () => {

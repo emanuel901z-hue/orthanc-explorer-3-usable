@@ -91,7 +91,7 @@ export function ModifyStudyDialog({ open, onOpenChange, study, instanceCount, ta
 
     setApplying(true);
     try {
-      await modifyStudyAction({ ID: study.id } as Parameters<typeof modifyStudyAction>[0], {
+      await modifyStudyAction(study.id, {
         Replace: replace,
         // 'duplicate' mode = KeepSource: true (creates a copy with new UIDs)
         // 'modify' mode = KeepSource: false (in-place modification, preserves UIDs)

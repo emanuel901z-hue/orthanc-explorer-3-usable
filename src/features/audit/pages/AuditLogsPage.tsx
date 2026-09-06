@@ -50,7 +50,7 @@ export default function AuditLogsPage() {
           e.title.toLowerCase().includes(q) ||
           e.action.toLowerCase().includes(q) ||
           e.resource?.toLowerCase().includes(q) ||
-          e.user?.toLowerCase().includes(q),
+          e.actor?.toLowerCase().includes(q),
       );
     }
     return result;
@@ -96,6 +96,8 @@ export default function AuditLogsPage() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={t('auditLogs.search')}
+                aria-label={t('auditLogs.search')}
+                data-shortcut="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 h-9"

@@ -55,6 +55,9 @@ describe("useSystemInfo", () => {
       CountSeries: 307,
       CountInstances: 46539,
       TotalDiskSize: "18.48 GB",
+      TotalDiskSizeMB: 18480,
+      TotalUncompressedSize: "36.96 GB",
+      TotalUncompressedSizeMB: 36960,
     };
     const spy = vi.spyOn(systemApi, "stats").mockResolvedValue(mockStats);
     const { result } = renderHook(() => useStats(), { wrapper });

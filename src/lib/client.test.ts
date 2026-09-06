@@ -62,7 +62,9 @@ describe("orthancFetch", () => {
 
   it("records failure and rethrows on network error", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("Failed to fetch"));
-    await expect(orthancFetch("/system")).rejects.toBeInstanceOf(TypeError);
+    // Network errors are wrapped into a PHI-safe OrthancError so callers see a
+    // uniform error type and raw network diagnostics never bubble to the UI.
+    await expect(orthancFetch("/system")).rejects.toBeInstanceOf(OrthancError);
     expect(healthTracker.getState().consecutiveFailures).toBeGreaterThan(0);
   });
 

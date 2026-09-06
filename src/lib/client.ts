@@ -75,10 +75,15 @@ export async function orthancFetch<T>(
     if (!text) return undefined as T;
     return JSON.parse(text) as T;
   } catch (e) {
-    if (!(e instanceof OrthancError)) {
-      healthTracker.recordFailure();
-      logger.error('orthanc.fetch.failed', { path, correlationId });
+    if (e instanceof OrthancError) {
+      // Already classified by the response-handling block above — rethrow as-is.
+      throw e;
     }
-    throw e;
+    // Raw network failure (TypeError from fetch) or other unexpected exception.
+    // Wrap into a PHI-safe OrthancError so callers see a uniform error type and
+    // the UI never surfaces raw network diagnostics that could leak details.
+    healthTracker.recordFailure();
+    logger.error('orthanc.fetch.failed', { path, correlationId });
+    throw new OrthancError(0, correlationId, 'Network error. Please try again.');
   }
 }

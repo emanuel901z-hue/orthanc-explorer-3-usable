@@ -3,7 +3,7 @@
  *
  * Side effects:
  *   1. Calls instancesApi.anonymize(instanceId, body) — POST /instances/:id/anonymize.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  *
  * @param instanceId  Orthanc UUID of the instance to anonymize.
@@ -19,6 +19,7 @@ export async function anonymizeInstanceAction(
   body: Record<string, unknown> = {},
 ): Promise<{ ID: string; Path: string }> {
   const base = makeAuditBase("instance.anonymize", "instance", instanceId);
+  auditClient.emit({ ...base, outcome: "started" });
   try {
     const result = await instancesApi.anonymize(instanceId, body);
     auditClient.emit({ ...base, outcome: "success" });

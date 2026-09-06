@@ -6,7 +6,7 @@
  *
  * Side effects per action:
  *   1. Calls studiesApi.addLabel / studiesApi.removeLabel
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  */
 import { studiesApi } from '@/api/studies';
@@ -16,6 +16,7 @@ import { makeAuditBase } from '@/actions/audit-base';
 
 export async function addLabelAction(studyId: string, label: string): Promise<void> {
   const base = makeAuditBase('study.label.add', 'study', studyId);
+  auditClient.emit({ ...base, outcome: 'started' });
   try {
     await studiesApi.addLabel(studyId, label);
     auditClient.emit({ ...base, outcome: 'success' });
@@ -31,6 +32,7 @@ export async function addLabelAction(studyId: string, label: string): Promise<vo
 
 export async function removeLabelAction(studyId: string, label: string): Promise<void> {
   const base = makeAuditBase('study.label.remove', 'study', studyId);
+  auditClient.emit({ ...base, outcome: 'started' });
   try {
     await studiesApi.removeLabel(studyId, label);
     auditClient.emit({ ...base, outcome: 'success' });

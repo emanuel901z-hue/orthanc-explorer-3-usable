@@ -46,12 +46,18 @@ export default function RemoteSourcesPage() {
   const { t } = useTranslation();
   const { data: modalityNames = [] } = useModalities();
   const { data: dicomwebServers = [] } = useDicomWebServers();
+  // Inline type intentionally widens the modality row with optional echo-status
+  // fields — without them, the SelectItem status icon would always render the
+  // "offline" variant even for reachable modalities. Defaults to undefined so
+  // the UI falls back to WifiOff until an explicit C-ECHO updates the state.
   const modalities = modalityNames.map((name) => ({
     id: name,
     name,
     aet: name,
     host: '—',
     port: 0,
+    lastEchoStatus: undefined as 'success' | 'failure' | undefined,
+    lastEcho: undefined as Date | undefined,
   }));
   const [selectedModality, setSelectedModality] = useState('');
   const [selectedServer, setSelectedServer] = useState('');

@@ -129,6 +129,25 @@ function renderPage() {
 
 /* ── Tests ─────────────────────────────────────────────────────── */
 
+describe('StudyDetailPage — accessibility', () => {
+  beforeEach(() => {
+    mockDeleteStudyAction.mockReset();
+    mockDownloadStudyAction.mockReset();
+  });
+
+  it('renders an H1 for screen readers (sr-only) with the patient name', () => {
+    renderPage();
+    // A11y: every page must have exactly one H1 for screen-reader navigation.
+    // The H1 is visually hidden (sr-only) — the visible title is the breadcrumb.
+    const h1 = screen.getByRole('heading', { level: 1 });
+    expect(h1).toBeInTheDocument();
+    expect(h1).toHaveClass('sr-only');
+    // formatPatientName("Doe^John") => "Doe, John" (Last, First format)
+    expect(h1.textContent).toContain('Doe');
+    expect(h1.textContent).toContain('John');
+  });
+});
+
 describe('StudyDetailPage — mutation error handlers', () => {
   beforeEach(() => {
     mockDeleteStudyAction.mockReset();

@@ -561,7 +561,8 @@ export default function ActivityPage() {
   return (
     <div className="flex h-full">
       <div className="flex-1 overflow-auto p-4 md:p-6 space-y-4 animate-fade-in">
-        {/* Header */}
+        {/* Header — H1 for accessibility (screen-reader-only, visible title is the summary badges) */}
+        <h1 className="sr-only">{t('activity.title')}</h1>
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground hidden sm:block">{t('activity.subtitle')}</p>
           <Button variant="outline" size="sm" className="gap-1.5 ml-auto" onClick={exportCsv}>
@@ -634,6 +635,8 @@ export default function ActivityPage() {
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder={t('activity.searchPlaceholder')}
+                    aria-label={t('activity.searchPlaceholder')}
+                    data-shortcut="search"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="pl-9 h-9"
@@ -642,10 +645,11 @@ export default function ActivityPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="absolute right-1 top-1 h-7 w-7 p-0"
+                      className="absolute right-1 top-1 h-9 w-9 p-0"
+                      aria-label={t('activity.clearSearch', { defaultValue: 'Clear search' })}
                       onClick={() => setSearch('')}
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <X className="h-4 w-4" />
                     </Button>
                   )}
                 </div>

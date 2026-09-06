@@ -60,7 +60,9 @@
     "deleteSeriesDesc": "سيؤدي هذا إلى حذف السلسلة رقم {{number}} مع {{instances}} نسخة نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
     "deleteInstance": "حذف النسخة",
     "deleteInstanceDesc": "سيؤدي هذا إلى حذف النسخة رقم {{number}} ({{size}}) نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
-    "searchPlaceholderSmart": "بحث: الاسم، التاريخ، الطريقة، الوصول، SIUID، الطبيب..."
+    "searchPlaceholderSmart": "بحث: الاسم، التاريخ، الطريقة، الوصول، SIUID، الطبيب...",
+    "notFound": "Study not found",
+    "backToList": "Back to Studies"
   },
   "studyList": {
     "columns": {
@@ -107,7 +109,8 @@
     "labels": "العلامات",
     "labelModeAny": "أو",
     "labelModeAll": "و",
-    "withoutLabels": "بدون علامات"
+    "withoutLabels": "بدون علامات",
+    "selectRow": "Select row"
   },
   "upload": {
     "subtitle": "اسحب وأفلت ملفات أو مجلدات DICOM لرفعها",
@@ -290,7 +293,9 @@
       "webUi": "واجهة الويب (المستخدم)",
       "luaScript": "برنامج Lua",
       "system": "النظام"
-    }
+    },
+    "title": "Activity",
+    "clearSearch": "Clear search"
   },
   "remote": {
     "title": "المصادر البعيدة",
@@ -610,7 +615,13 @@
     "tagName": "الاسم",
     "original": "الأصلي",
     "newValue": "القيمة الجديدة",
-    "empty": "فارغ"
+    "empty": "فارغ",
+    "patient": "Patient",
+    "deleteConfirmPrefix": "This will permanently delete",
+    "deleteConfirmSuffix": "and all {{series}} series ({{instances}} instances). This action cannot be undone.",
+    "bulkDownloadSuccess": "{{count}} series downloaded",
+    "bulkDownloadFailed": "Bulk download failed.",
+    "apiView": "API"
   },
   "dicomTagBrowser": {
     "searchPlaceholder": "البحث عن العلامات بالاسم أو المعرّف أو القيمة…",

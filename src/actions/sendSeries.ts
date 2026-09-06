@@ -4,7 +4,7 @@
  * Side effects:
  *   1. Calls seriesApi.sendToModality(seriesId, modalityId) — POSTs to
  *      /modalities/{name}/store with { Resources: [seriesId] }.
- *   2. Emits an audit event (outcome: success | failure) via auditClient.
+ *   2. Emits an audit event (outcome: started | success | failure) via auditClient.
  *   3. Always rethrows on failure — callers must handle OrthancError.
  */
 import { seriesApi } from '@/api/series';
@@ -17,6 +17,7 @@ export async function sendSeriesAction(
   modalityId: string,
 ): Promise<void> {
   const base = makeAuditBase('series.send', 'series', seriesId);
+  auditClient.emit({ ...base, outcome: 'started', destinationId: modalityId });
   try {
     await seriesApi.sendToModality(seriesId, modalityId);
     auditClient.emit({ ...base, outcome: 'success', destinationId: modalityId });

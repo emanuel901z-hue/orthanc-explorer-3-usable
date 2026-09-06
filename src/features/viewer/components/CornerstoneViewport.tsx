@@ -162,7 +162,14 @@ export function CornerstoneViewport({
             seriesUID: seriesInstanceUID,
             instanceUID: sopUID,
           });
-          cornerstoneDICOMImageLoader.wadors.metaDataManager.add(imageId, meta);
+          // Cast through unknown — DICOM+JSON metadata is structurally compatible
+          // with WADORSMetaData but the cornerstonejs v4.22 type signature is
+          // stricter (PerInstanceFunctional / SOPClassUID map). The runtime
+          // contract is unaffected; the cast only relaxes the static check.
+          cornerstoneDICOMImageLoader.wadors.metaDataManager.add(
+            imageId,
+            meta as unknown as Parameters<typeof cornerstoneDICOMImageLoader.wadors.metaDataManager.add>[1],
+          );
         });
       })
       .then(() =>
