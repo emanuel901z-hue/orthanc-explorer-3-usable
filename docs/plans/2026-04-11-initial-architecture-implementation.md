@@ -11,12 +11,14 @@
 **Reference design:** [`docs/plans/2026-04-11-initial-architecture-design.md`](./2026-04-11-initial-architecture-design.md)
 
 **Existing scaffolding to preserve (do not delete):**
+
 - `src/config/env.ts`, `src/config/feature-flags.ts` — Lovable-generated; wrap or replace carefully in Task 3.
 - `src/features/{studies,series,instances,activity,audit,servers,settings,tasks,upload,viewer}` — Lovable UI shells, currently on mock data.
 - `src/store/{ui-store,job-store,tab-store,upload-store,audit-store,activity-ui-store}.ts` — keep UI stores; audit the store list in Task 9 for the `uiStore`/`sessionStore` PHI split.
 - `src/test/setup.ts` — Vitest setup lives here.
 
 **Conventions:**
+
 - TDD always: test first (RED), implement (GREEN), commit. No exceptions.
 - One task = one logical commit. Conventional commits (`feat:`, `test:`, `chore:`, `refactor:`).
 - Use `@/` path alias for all imports under `src/`.
@@ -31,6 +33,7 @@
 ### Task 0.1: Create docker-compose.dev.yml for local stack
 
 **Files:**
+
 - Create: `docker-compose.dev.yml`
 - Create: `docker/oe3-dev.md` (brief usage notes)
 
@@ -82,6 +85,7 @@ volumes:
 **Step 2: Bring the stack up and verify Orthanc responds**
 
 Run:
+
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 sleep 5
@@ -93,6 +97,7 @@ Expected: JSON output with `"Name":"OE3 Dev"` and `"Version"` fields. If this fa
 **Step 3: Verify DICOMweb and CORS**
 
 Run:
+
 ```bash
 curl -s -i http://localhost:8042/dicom-web/studies | head -20
 curl -s -i -X OPTIONS http://localhost:8042/studies \
@@ -114,12 +119,14 @@ git commit -m "chore: add local docker-compose dev stack (orthanc + oauth plugin
 ### Task 0.2: Seed test data profile
 
 **Files:**
+
 - Create: `test-data/README.md` (instructions to drop a public DICOM sample)
 - Modify: `docker-compose.dev.yml` (add `seeder` service under `profiles: ["seed"]`)
 
 **Step 1: Download a public DICOM sample**
 
 Use a small pydicom test file. Run:
+
 ```bash
 mkdir -p test-data
 curl -L -o test-data/sample.dcm \
@@ -132,6 +139,7 @@ Expected: file present, ~40KB.
 **Step 2: Add seeder service to docker-compose.dev.yml**
 
 Append:
+
 ```yaml
   seeder:
     image: curlimages/curl:latest
@@ -150,6 +158,7 @@ Append:
 **Step 3: Run seeder and verify study exists**
 
 Run:
+
 ```bash
 docker compose -f docker-compose.dev.yml --profile seed up seeder
 curl -s http://localhost:8042/studies | head
@@ -175,6 +184,7 @@ git commit -m "chore: add dicom test data seeder profile"
 ### Task 1.1: Define OE3Config Zod schema with test
 
 **Files:**
+
 - Create: `src/config/runtime.ts`
 - Test: `src/config/runtime.test.ts`
 
@@ -295,6 +305,7 @@ git commit -m "feat(config): add runtime OE3Config loader with zod validation"
 ### Task 1.2: Wire /config.js to public + boot loader
 
 **Files:**
+
 - Create: `public/config.js`
 - Modify: `index.html` (add `<script src="/config.js">` before the bundle)
 - Modify: `src/main.tsx` (call `loadConfig()` before `createRoot`)
@@ -314,6 +325,7 @@ window.__OE3_CONFIG__ = {
 **Step 2: Add script tag to index.html**
 
 Add **before** the main bundle script in `index.html`:
+
 ```html
 <script src="/config.js"></script>
 ```
@@ -321,6 +333,7 @@ Add **before** the main bundle script in `index.html`:
 **Step 3: Call loadConfig in main.tsx**
 
 At the top of `src/main.tsx`, after imports and before the first React render call:
+
 ```ts
 import { loadConfig } from "@/config/runtime";
 loadConfig();
@@ -345,6 +358,7 @@ git commit -m "feat(config): load window.__OE3_CONFIG__ at boot via public/confi
 ### Task 1.3: Layered useFeature resolver
 
 **Files:**
+
 - Create: `src/config/features.ts`
 - Test: `src/config/features.test.ts`
 - Audit: `src/config/feature-flags.ts` (Lovable file — decide to wrap or replace)
@@ -463,6 +477,7 @@ git commit -m "feat(config): add layered resolveFeature (runtime + profile + sma
 ### Task 1.4: useFeature React hook
 
 **Files:**
+
 - Modify: `src/config/features.ts` (add `useFeature` hook)
 - Test: `src/config/features.test.tsx`
 
@@ -504,6 +519,7 @@ Expected: FAIL (`useFeature` not exported).
 **Step 3: Add the hook**
 
 Append to `src/config/features.ts`:
+
 ```ts
 export function useUserProfile(): UserProfile {
   return null; // Phase 2: fetch from Authorization plugin
@@ -539,6 +555,7 @@ git commit -m "feat(config): add useFeature hook with profile/scope stubs"
 ### Task 2.1: Correlation ID generator
 
 **Files:**
+
 - Create: `src/lib/correlation.ts`
 - Test: `src/lib/correlation.test.ts`
 
@@ -586,6 +603,7 @@ git commit -m "feat(lib): add correlation id generator"
 ### Task 2.2: PHI-allowlist structured logger
 
 **Files:**
+
 - Create: `src/lib/logger.ts`
 - Test: `src/lib/logger.test.ts`
 
@@ -673,6 +691,7 @@ git commit -m "feat(lib): add PHI-allowlist structured logger"
 ### Task 2.3: OrthancError class + error helpers
 
 **Files:**
+
 - Create: `src/lib/errors.ts`
 - Test: `src/lib/errors.test.ts`
 
@@ -749,6 +768,7 @@ git commit -m "feat(lib): add OrthancError with scrubbed user messages"
 ### Task 2.4: Health tracker singleton
 
 **Files:**
+
 - Create: `src/lib/health.ts`
 - Test: `src/lib/health.test.ts`
 
@@ -844,6 +864,7 @@ git commit -m "feat(lib): add healthTracker with subscriber pattern"
 ### Task 2.5: Audit client stub
 
 **Files:**
+
 - Create: `src/lib/audit.ts`
 - Test: `src/lib/audit.test.ts`
 
@@ -925,6 +946,7 @@ git commit -m "feat(lib): add auditClient stub (logs via logger, ATNA-ready)"
 ### Task 3.1: orthancFetch with auth headers + correlation + health
 
 **Files:**
+
 - Create: `src/lib/client.ts`
 - Test: `src/lib/client.test.ts`
 
@@ -1083,6 +1105,7 @@ git commit -m "feat(lib): add orthancFetch transport with auth/correlation/healt
 ### Task 4.1: api/system.ts — smallest read path end-to-end
 
 **Files:**
+
 - Create: `src/api/system.ts`
 - Test: `src/api/system.test.ts`
 
@@ -1175,6 +1198,7 @@ git commit -m "feat(api): add typed system/statistics/plugins endpoint module"
 ### Task 4.2: api/studies.ts
 
 **Files:**
+
 - Create: `src/api/studies.ts`
 - Test: `src/api/studies.test.ts`
 
@@ -1325,6 +1349,7 @@ Create all of the following. Commit after each module passes.
 **4.3h `src/api/tools.ts`** — `lookup(body)` → `POST /tools/lookup`
 
 For each module:
+
 1. Write tests first.
 2. Run — FAIL.
 3. Implement.
@@ -1350,6 +1375,7 @@ upload: (file: File | Blob) =>
 ### Task 5.1: deleteStudyAction
 
 **Files:**
+
 - Create: `src/actions/deleteStudy.ts`
 - Test: `src/actions/deleteStudy.test.ts`
 
@@ -1453,6 +1479,7 @@ Replace mock data in the existing Lovable features with real hooks. **Do not rew
 ### Task 6.1: studies list feature uses real API
 
 **Files:**
+
 - Audit: `src/features/studies/` (find the file rendering the study table)
 - Create: `src/features/studies/hooks/useStudies.ts`
 - Create: `src/features/studies/hooks/useStudies.test.ts`
@@ -1586,6 +1613,7 @@ Hook up the existing "Delete", "Anonymize", "Modify", "Send", "Download" buttons
 ### Task 7.1: Audit existing stores for PHI
 
 **Files:**
+
 - Inspect: `src/store/*.ts`
 
 **Step 1: Read each store file**
@@ -1629,6 +1657,7 @@ git commit -m "feat(store): add memory-only sessionStore for PHI-carrying state"
 ### Task 8.1: Global health banner
 
 **Files:**
+
 - Create: `src/components/HealthBanner.tsx`
 - Test: `src/components/HealthBanner.test.tsx`
 - Modify: `src/App.tsx` to render `<HealthBanner />` at the top
@@ -1696,6 +1725,7 @@ git commit -m "feat(ux): global health banner subscribed to healthTracker"
 ### Task 8.2: Error boundary with scrubbed display
 
 **Files:**
+
 - Create: `src/components/ErrorBoundary.tsx`
 - Modify: `src/App.tsx` to wrap the router in the boundary
 
@@ -1717,6 +1747,7 @@ git commit -m "feat(ux): add error boundary with PHI-safe error display"
 ### Task 9.1: Manual smoke checklist
 
 **Files:**
+
 - Create: `docs/plans/2026-04-11-v0.1-smoke-checklist.md`
 
 **Contents:**
@@ -1760,6 +1791,7 @@ git commit -m "docs: add v0.1 end-to-end smoke checklist"
 ### Task 10.2: Update README
 
 **Files:**
+
 - Modify: `README.md`
 
 Add a "Development" section: docker compose up, seed, `bun run dev`, the smoke checklist location, and a link to the design doc.

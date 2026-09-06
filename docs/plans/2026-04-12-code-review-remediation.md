@@ -17,6 +17,7 @@
 > Context: `saveModality.ts`, `deleteModality.ts`, and `echoModality.ts` all duplicate the same `{ action, resourceType, resourceId, timestamp }` object literal. We extract this once, then use it in all four new actions (Tasks 2–4).
 
 **Files:**
+
 - Create: `src/actions/audit-base.ts`
 - Create: `src/actions/audit-base.test.ts`
 - Modify: `src/actions/saveModality.ts`
@@ -98,19 +99,24 @@ Expected: PASS
 **Step 5: Update the three existing action files to use `makeAuditBase`**
 
 In `src/actions/saveModality.ts`, replace:
+
 ```typescript
 import { modalitiesApi, type ModalityConfig } from "@/api/modalities";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
 ```
+
 with:
+
 ```typescript
 import { modalitiesApi, type ModalityConfig } from "@/api/modalities";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
 import { makeAuditBase } from "@/actions/audit-base";
 ```
+
 And replace the `const base = { ... }` block with:
+
 ```typescript
 const base = makeAuditBase('modality.save', 'modality', name);
 ```
@@ -141,6 +147,7 @@ git commit -m "refactor: extract makeAuditBase helper, eliminate audit object du
 > Context: `OrthancStudyRepository.sendToModality()` (line 260 of `src/shared/api/orthanc-study-repository.ts`) calls `orthancFetch` directly, bypassing the `actions/` audit seam. Sending a study to a modality is a PHI-affecting write that must be audited.
 
 **Files:**
+
 - Create: `src/actions/sendStudy.ts`
 - Create: `src/actions/sendStudy.test.ts`
 - Modify: `src/shared/api/orthanc-study-repository.ts` (lines 260–268)
@@ -271,6 +278,7 @@ Expected: PASS
 In `src/shared/api/orthanc-study-repository.ts`, replace the `sendToModality` method body:
 
 Old:
+
 ```typescript
 async sendToModality(id: string, modalityId: string): Promise<void> {
   await orthancFetch<unknown>(`/modalities/${modalityId}/store`, {
@@ -282,6 +290,7 @@ async sendToModality(id: string, modalityId: string): Promise<void> {
 ```
 
 New:
+
 ```typescript
 async sendToModality(id: string, modalityId: string): Promise<void> {
   await sendStudyAction(id, modalityId);
@@ -313,6 +322,7 @@ git commit -m "feat: add audit coverage for sendStudy — route through actions/
 > Context: Same gap as Task 2 but for label mutations. These are writes that affect study metadata which may be linked to PHI via studyId.
 
 **Files:**
+
 - Create: `src/actions/studyLabel.ts`
 - Create: `src/actions/studyLabel.test.ts`
 - Modify: `src/api/studies.ts` (add `addLabel`, `removeLabel`)
@@ -475,6 +485,7 @@ Expected: PASS
 In `src/shared/api/orthanc-study-repository.ts`, replace `addLabel` and `removeLabel` method bodies:
 
 Old `addLabel`:
+
 ```typescript
 async addLabel(id: string, label: string): Promise<void> {
   await orthancFetch<unknown>(`/studies/${id}/labels/${encodeURIComponent(label)}`, {
@@ -482,7 +493,9 @@ async addLabel(id: string, label: string): Promise<void> {
   });
 }
 ```
+
 New:
+
 ```typescript
 async addLabel(id: string, label: string): Promise<void> {
   await addLabelAction(id, label);
@@ -490,6 +503,7 @@ async addLabel(id: string, label: string): Promise<void> {
 ```
 
 Old `removeLabel`:
+
 ```typescript
 async removeLabel(id: string, label: string): Promise<void> {
   await orthancFetch<unknown>(`/studies/${id}/labels/${encodeURIComponent(label)}`, {
@@ -497,7 +511,9 @@ async removeLabel(id: string, label: string): Promise<void> {
   });
 }
 ```
+
 New:
+
 ```typescript
 async removeLabel(id: string, label: string): Promise<void> {
   await removeLabelAction(id, label);
@@ -531,6 +547,7 @@ git commit -m "feat: add audit coverage for addLabel/removeLabel — route throu
 > Context: `runUpload()` in `src/store/upload-store.ts` calls `instancesApi.upload(file)` which uses `fetch()`. `fetch()` gives no `upload.onprogress` events, so the progress bar shows 0% then instantly 100%. For large DICOM files (often 50–200MB) this is misleading. We replace the `instancesApi.upload` call with a local XHR wrapper that emits real progress.
 
 **Files:**
+
 - Create: `src/lib/upload-xhr.ts`
 - Create: `src/lib/upload-xhr.test.ts`
 - Modify: `src/store/upload-store.ts` (the `runUpload` function)
@@ -698,6 +715,7 @@ Expected: PASS
 Replace the `instancesApi.upload(file)` call with `uploadDicomWithProgress`. The relevant section of `runUpload()`:
 
 Old:
+
 ```typescript
 try {
   await instancesApi.upload(file);
@@ -708,6 +726,7 @@ try {
 ```
 
 New:
+
 ```typescript
 try {
   const orthancBase = getConfig().orthancUrl ?? '/orthanc-proxy';
@@ -721,6 +740,7 @@ try {
 ```
 
 Add import at top of `upload-store.ts`:
+
 ```typescript
 import { uploadDicomWithProgress } from '@/lib/upload-xhr';
 import { getConfig } from '@/config/runtime';
@@ -759,6 +779,7 @@ git commit -m "feat: real XHR upload progress — replace fetch() with XHR to em
 > Context: `ModalitiesTab.handleEchoAll` (line 220 of `ModalitiesTab.tsx`) calls `echoModalityAction` directly, bypassing the `useEchoModality` mutation hook. This means the "Echo All" path has no TanStack loading/error state management, no toast via the hook's `onError`, and diverges from the single-echo path. Fix: make `handleEchoAll` call `handleEcho(name)` for each modality.
 
 **Files:**
+
 - Modify: `src/features/settings/components/ModalitiesTab.tsx` (lines 220–236)
 
 > Note: This is a UI-only change. The existing unit tests for `echoModality.ts` and `useEchoModality.ts` are unaffected. We add a focused component test.
@@ -816,6 +837,7 @@ Expected: FAIL — `mutate` called 0 times (because `handleEchoAll` currently ca
 Replace the current `handleEchoAll` implementation:
 
 Old:
+
 ```typescript
 const handleEchoAll = async () => {
   if (modalityNames.length === 0) return;
@@ -836,6 +858,7 @@ const handleEchoAll = async () => {
 ```
 
 New:
+
 ```typescript
 const handleEchoAll = () => {
   if (modalityNames.length === 0) return;
@@ -884,11 +907,13 @@ git commit -m "fix: unify Echo All to use handleEcho — remove direct echoModal
 > Context: The Echo, Edit, and Delete action buttons in `ModalitiesTab.tsx` display icons with tooltip text but have no `aria-label`. Screen readers cannot identify these buttons.
 
 **Files:**
+
 - Modify: `src/features/settings/components/ModalitiesTab.tsx` (the three icon-only `<Button>` elements in `ModalityTableRow`)
 
 **Step 1: Identify the exact buttons**
 
 Search for the three icon buttons. They look like:
+
 ```tsx
 <Button variant="ghost" size="icon" onClick={() => handleEcho(name)}>
   <Activity className="h-4 w-4" />
@@ -898,6 +923,7 @@ Search for the three icon buttons. They look like:
 **Step 2: Add `aria-label` to each button**
 
 Echo button:
+
 ```tsx
 <Button
   variant="ghost"
@@ -908,6 +934,7 @@ Echo button:
 ```
 
 Edit button:
+
 ```tsx
 <Button
   variant="ghost"
@@ -918,6 +945,7 @@ Edit button:
 ```
 
 Delete button:
+
 ```tsx
 <Button
   variant="ghost"
@@ -961,6 +989,7 @@ git commit -m "fix(a11y): add aria-label to icon-only buttons in ModalityTableRo
 > Context: `UploadPage.tsx` drop zone is a `<div>` with `onClick` and `onDrop` but no `role`, `tabIndex`, or keyboard handler. Keyboard users cannot activate the file picker.
 
 **Files:**
+
 - Modify: `src/features/upload/pages/UploadPage.tsx` (lines ~86–117)
 
 **Step 1: Add keyboard accessibility attributes to the drop zone div**
@@ -1051,6 +1080,7 @@ git commit -m "fix(a11y): make upload drop zone keyboard accessible (role, tabIn
 > Context: Lines 62–68 and 82–88 of `src/features/studies/hooks/use-studies.ts` contain identical `Object.entries(...).map(...)` lambda blocks. Extract to a named function.
 
 **Files:**
+
 - Modify: `src/features/studies/hooks/use-studies.ts`
 
 **Step 1: Add a named `mapDicomTagEntries` helper at the top of the file**
@@ -1073,11 +1103,13 @@ function mapDicomTagEntries(raw: Record<string, RawDicomTag>) {
 **Step 2: Replace both inline lambdas with the helper**
 
 In `useSeriesSharedTags`:
+
 ```typescript
 return mapDicomTagEntries(raw as Record<string, RawDicomTag>);
 ```
 
 In `useStudySharedTags`:
+
 ```typescript
 return mapDicomTagEntries(raw as Record<string, RawDicomTag>);
 ```
@@ -1104,6 +1136,7 @@ git commit -m "refactor: extract mapDicomTagEntries helper — eliminate duplica
 > Context: Lines 210 and 216 of `src/shared/api/orthanc-study-repository.ts` use `as unknown as string[]` and `as unknown as OrthancInstance[]`. These bypass TypeScript entirely. The correct fix is a type guard.
 
 **Files:**
+
 - Modify: `src/shared/api/orthanc-study-repository.ts`
 
 **Step 1: Add type guard functions near the top of the file**
@@ -1121,7 +1154,9 @@ Find the `getInstancesForSeries` method and the two cast sites. Replace:
 ```typescript
 const raw = await seriesApi.getInstances(seriesId) as unknown as string[];
 ```
+
 with:
+
 ```typescript
 const rawInstances = await seriesApi.getInstances(seriesId);
 const instanceIds = isStringArray(rawInstances) ? rawInstances : (rawInstances as OrthancInstance[]).map(i => i.ID);
@@ -1159,6 +1194,7 @@ git commit -m "fix: replace as-unknown-as casts with type guard in getInstancesF
 > Context: ~15 strings in `StudyListPage.tsx` are hardcoded English — column headers, filter labels, pagination, status text, empty state. The settings page uses `t()` correctly. This page is the highest-traffic route.
 
 **Files:**
+
 - Modify: `src/features/studies/pages/StudyListPage.tsx`
 - Modify: the English i18n translation file (find with `grep -rn "upload.dropTitle" src/ public/`)
 
@@ -1250,11 +1286,13 @@ git commit -m "fix(i18n): wire t() for all hardcoded English strings in StudyLis
 ### Task 11: Fix demo repository violations
 
 **Files:**
+
 - Modify: `src/shared/api/mock/demo-study-repository.ts`
 
 **Changes:**
 
 1. Replace `console.log` on line 96 with the PHI-safe logger:
+
    ```typescript
    // Remove:
    console.log(`[Demo] Sending study ${id} to modality ${modalityId}`);
@@ -1265,6 +1303,7 @@ git commit -m "fix(i18n): wire t() for all hardcoded English strings in StudyLis
    ```
 
 2. Fix direct mutation of `study.labels` on lines 101–109:
+
    ```typescript
    // Old (addLabel):
    if (study && !study.labels?.includes(label)) {
@@ -1275,6 +1314,7 @@ git commit -m "fix(i18n): wire t() for all hardcoded English strings in StudyLis
      return { ...study, labels: [...(study.labels ?? []), label] };
    }
    ```
+
    (Adjust to work with the store's immutable update pattern — use `set()` or return the updated object.)
 
    ```typescript
@@ -1290,6 +1330,7 @@ npx vitest run src/shared/
 ```
 
 **Commit:**
+
 ```bash
 git add src/shared/api/mock/demo-study-repository.ts
 git commit -m "fix: remove console.log and fix label mutation in DemoStudyRepository"
@@ -1302,6 +1343,7 @@ git commit -m "fix: remove console.log and fix label mutation in DemoStudyReposi
 > Context: `src/pages/Index.tsx` contains unmodified scaffold boilerplate ("Welcome to Your Blank App"). The router already redirects `/` to `/studies` via a `<Navigate>` component in `App.tsx`. The `Index.tsx` file is unused.
 
 **Files:**
+
 - Delete: `src/pages/Index.tsx` (if unused by the router)
 
 **Step 1: Confirm it is not imported anywhere**
@@ -1339,6 +1381,7 @@ git commit -m "chore: remove unused scaffold Index.tsx page"
 > Context: `src/features/studies/hooks/` uses kebab-case (`use-studies.ts`); `src/features/settings/hooks/` uses camelCase (`useSaveModality.ts`). Pick kebab-case (more common in React ecosystem) and apply uniformly.
 
 **Files:**
+
 - Rename: `src/features/settings/hooks/useSaveModality.ts` → `use-save-modality.ts`
 - Rename: `src/features/settings/hooks/useDeleteModality.ts` → `use-delete-modality.ts`
 - Rename: `src/features/settings/hooks/useEchoModality.ts` → `use-echo-modality.ts`

@@ -81,6 +81,18 @@ test.describe('Desktop Viewport (1280x800)', () => {
 
     await page.screenshot({ path: 'e2e/prod/screenshots/desktop-01-initial.png', fullPage: true });
 
+    // Visual Regression: vergleicht gegen Baseline-Screenshot.
+    // Bei gewollten UI-Aenderungen: npx playwright test --update-snapshots
+    // Maskiert dynamische Elemente (Study-Count, Timestamps) um False-Positives zu vermeiden.
+    await expect(page).toHaveScreenshot('oe3-desktop-initial.png', {
+      maxDiffPixelRatio: 0.01,
+      animations: 'disabled',
+      mask: [
+        page.locator('[data-testid="study-count"]'),
+        page.locator('time'),
+      ],
+    });
+
     const bodyText = await page.locator('body').innerText();
     console.log(`DESKTOP: Body text (first 200): ${bodyText.substring(0, 200)}`);
 

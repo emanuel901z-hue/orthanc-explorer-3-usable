@@ -26,12 +26,14 @@ Standalone React/TypeScript SPA deployable as a Docker sidecar alongside Orthanc
 ## Why Build This
 
 ### Orthanc Explorer v1 (Legacy)
+
 - Built-in to Orthanc core
 - Bare HTML/jQuery — looks like a 2012 admin panel
 - Still the default UI in most installations
 - Functional but hostile to non-technical users
 
 ### Orthanc Explorer 2 (OE2) — Current State
+
 - Built by the Orthanc Team (Alain Mazy / orthancteam)
 - **Tech stack:** Vue.js + Bootstrap + Bootstrap Icons
 - Improvement over v1 — study-level browsing, labels, Keycloak auth, share links, viewer integration
@@ -46,12 +48,15 @@ Standalone React/TypeScript SPA deployable as a Docker sidecar alongside Orthanc
   - Modality/DICOMweb server management requires editing config files + restart
 
 ### Orthanc Tools JS (Third-Party)
+
 - React + Bootstrap + Node.js frontend with authentication layer
 - Adds batch processing, role management
 - Still in beta, limited community adoption
 
 ### Community Demand
+
 The Orthanc community has explicitly requested:
+
 - Batch operations (anonymize, export, delete multiple studies)
 - Better modality management (add/edit/test without config file editing)
 - Drag-and-drop folder upload with recursive handling
@@ -65,6 +70,7 @@ The Orthanc community has explicitly requested:
 ## Development Pipeline
 
 ### Phase 1: Requirements Generation (Claude)
+
 - Audit OE2 feature set for complete parity checklist
 - Document every Orthanc REST API endpoint the UI consumes
 - Map every OE2 config option to a UI feature
@@ -72,12 +78,14 @@ The Orthanc community has explicitly requested:
 - Produce functional requirements with acceptance criteria
 
 ### Phase 2: UI Scaffolding (Lovable.dev)
+
 - Generate all views and components from requirements
 - Layout, navigation, responsive design, component library
 - Dark/light theme, data tables, forms, modals
 - Lovable outputs React + Tailwind — perfect for downstream work
 
 ### Phase 3: Logic & API Integration (VS Code + Claude Code)
+
 - Port Lovable output into proper project structure
 - Wire up Orthanc REST API calls with error handling
 - DICOM tag parsing, date format handling, UID manipulation
@@ -88,6 +96,7 @@ The Orthanc community has explicitly requested:
 - Testing against real Orthanc instance
 
 ### Phase 4: Deployment (Azure + Docker)
+
 - Containerize as Docker image
 - Deploy as sidecar in Azure Container Apps alongside Orthanc
 - Environment variable configuration
@@ -115,7 +124,7 @@ The Orthanc community has explicitly requested:
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │              Orthanc Explorer 3                   │
 │           (React SPA — Static Files)              │
@@ -187,7 +196,9 @@ properties:
 ## Screens & Features
 
 ### 1. Study List (Main View)
+
 **OE2 Parity:**
+
 - Search by PatientName, PatientID, StudyDate, AccessionNumber, StudyDescription, ModalitiesInStudy
 - Column display configuration
 - Labels management (create, assign, filter)
@@ -197,6 +208,7 @@ properties:
 - Order by any column
 
 **Enhancements:**
+
 - Virtual scrolling (TanStack Table) — handles 100K+ studies without pagination lag
 - Debounced search with URL state (shareable/bookmarkable filters)
 - Saved search presets (store in localStorage or Orthanc metadata)
@@ -206,7 +218,9 @@ properties:
 - Date range picker with presets (today, last 7 days, last 30 days, custom)
 
 ### 2. Study Detail
+
 **OE2 Parity:**
+
 - Study metadata display (configurable tags)
 - Series list with modality, description, instance count
 - Series thumbnail preview
@@ -214,6 +228,7 @@ properties:
 - Modify study tags, anonymize, download ZIP, share link, send to peer/modality, delete
 
 **Enhancements:**
+
 - Series thumbnails with lazy loading (WADO-RS rendered frames)
 - Inline DICOM tag browser with search and human-readable tag names
 - Side-by-side study comparison (for follow-up imaging)
@@ -221,32 +236,39 @@ properties:
 - Activity log (received, modified, accessed timestamps)
 
 ### 3. Upload
+
 **OE2 Parity:** DICOM file upload via browser with upload report
 
 **Enhancements:**
+
 - Drag-and-drop with recursive folder support
 - Upload progress bar per file and overall
 - Pre-upload validation, duplicate detection
 - Upload queue with pause/resume/cancel
 
 ### 4. Remote Sources (DICOM & DICOMweb)
+
 **OE2 Parity:** C-FIND query, C-MOVE retrieve, DICOMweb browse and retrieve
 
 **Enhancements:**
+
 - Unified search across local + remote sources
 - Connection status indicators, test connection button
 - Query history
 
 ### 5. Settings & Configuration
+
 **OE2 Parity:** System info, plugin status
 
 **Enhancements:**
+
 - **In-app modality management** (no config file editing!)
 - **In-app DICOMweb server management** with connection testing
 - Real-time system dashboard (disk, ingestion rate, connections)
 - Log viewer, job queue monitoring
 
 ### 6. Worklist Management
+
 Clean form-based worklist creation, calendar view, status tracking
 
 ### 7. Cross-Cutting UX
@@ -267,7 +289,7 @@ Clean form-based worklist creation, calendar view, status tracking
 
 ### Core Endpoints
 
-```
+```text
 # System
 GET  /system, /statistics, /plugins, /changes
 
@@ -305,7 +327,7 @@ GET  /jobs, /jobs/{id}
 
 ### DICOMweb Endpoints
 
-```
+```text
 GET  /dicom-web/studies?PatientName=Smith*     (QIDO-RS)
 GET  /dicom-web/studies/{uid}/series/{uid}/instances/{uid}/rendered  (WADO-RS)
 POST /dicom-web/studies                         (STOW-RS)
@@ -335,11 +357,13 @@ POST /dicom-web/studies                         (STOW-RS)
 ### Weekend Sprint — v0.1
 
 **Day 1 (Saturday):**
+
 - Morning: Generate requirements with Claude → feed to Lovable
 - Afternoon: Lovable builds study list, study detail, upload, settings shells
 - Evening: Port to VS Code, connect to Orthanc REST API for study list
 
 **Day 2 (Sunday):**
+
 - Morning: Wire up study detail, series list, basic actions
 - Afternoon: Upload with drag-drop, basic search/filter
 - Evening: Docker container, test against real Orthanc, screen recording
@@ -347,6 +371,7 @@ POST /dicom-web/studies                         (STOW-RS)
 **Deliverable:** Working study list + detail + upload + settings in Docker. Screen recording for forum/LinkedIn.
 
 ### Post-Sprint
+
 - Week 1-2: Community feedback, bug fixes, auth support
 - Week 3-4: Modality management, remote query/retrieve
 - Month 2: DICOMweb browser, worklist, command palette
@@ -389,7 +414,6 @@ POST /dicom-web/studies                         (STOW-RS)
 - [Lovable.dev](https://lovable.dev)
 - [[The Notes/Projects/Orthanc Improvements/Azure-DICOMweb-OAuth-Plugin]] — Companion project
 
-
 ---
 
 ## Prior Art: Orthanc Tools JS (Archived)
@@ -403,13 +427,11 @@ POST /dicom-web/studies                         (STOW-RS)
 
 React + Bootstrap frontend with a full Node.js/Express backend acting as reverse proxy between UI and Orthanc. Added auth (local users + Active Directory), role management, batch processing, and automatic retrieval scheduling. Author: Salim Kanoun, nuclear medicine physician in Toulouse (Pixilib company). Also maintains GaelO clinical trial platform, which likely consumed his bandwidth.
 
-
 ### Why It Died — Deployment Complexity
 
 Their docker-compose required 4-5 containers: the app, PostgreSQL (users/roles/settings), Redis (sessions), Traefik reverse proxy, plus Orthanc itself. Compare to OE2 which is a single config option in Orthanc. Forum users were asking "how do I even install this?"
 
 The Node.js backend was the core architectural mistake. Every Orthanc API endpoint had to be re-implemented as a backend route, creating a massive maintenance surface a part-time maintainer couldn't sustain. In May 2023 they announced a frontend rewrite ("The Reborn"). Two years later: archived.
-
 
 ### Lessons for OE3
 
@@ -423,10 +445,10 @@ The Node.js backend was the core architectural mistake. Every Orthanc API endpoi
 
 5. **Modality config is now possible via API.** Salim said in-app modality management was impossible because config required file edits + restart. Since then, Orthanc added `DicomModalitiesInDatabase` and `OrthancPeersInDatabase` (v1.5.0+) — stores modalities in DB, exposes via REST. In-app modality management IS feasible now.
 
-
 ### What to Study (Not Copy — AGPL License)
 
 The repo is public and readable as a reference implementation. Worth examining:
+
 - Orthanc API call patterns (their service layer)
 - Anonymization/modification UI flows — complex DICOM operations with edge cases
 - Batch processing job queue pattern
@@ -437,7 +459,6 @@ The repo is public and readable as a reference implementation. Worth examining:
 ### Strategic Takeaway
 
 87 stars in the Orthanc niche proves real demand. The project's failure proves deployment complexity and full-stack maintenance burden kills adoption. OE3's "pure SPA sidecar" architecture dodges the exact bullet that killed this project.
-
 
 ---
 
@@ -469,50 +490,55 @@ Lovable has generated working UI shells for the core screens. Screenshots captur
 - [ ] Action handlers (Send, Modify, Anonymize, Delete, Download ZIP)
 - [ ] Docker containerization
 
-
 ### Settings Runtime Behavior
 
 **Live-editable (no restart, stored in DB via REST API):**
+
 - DICOM Modalities — requires `DicomModalitiesInDatabase: true` in orthanc.json. Then `PUT /modalities/{name}` and `DELETE /modalities/{name}` work at runtime. The Add Modality dialog (Name, AET, Port, Host, Manufacturer) maps directly to this API.
 - Orthanc Peers — requires `OrthancPeersInDatabase: true`. Same pattern via `PUT /peers/{name}`.
 - DICOMweb Servers — `PUT /dicom-web/servers/{name}` works at runtime when DICOMweb plugin is loaded.
 
 **Restart required:**
+
 - Core Orthanc config (ports, storage paths, plugin loading, SSL)
 - Plugin-level config (e.g., `DicomWebOAuth` section in orthanc.json)
 - Any setting that lives in orthanc.json and isn't backed by a `*InDatabase` flag
 
 **UX implications:**
+
 - Modalities tab, DICOMweb tab: full CRUD in the UI, instant effect. No restart banner needed.
 - OAuth plugin config (client ID, secret, token endpoint): one-time setup in orthanc.json or env vars. Could show read-only status in UI ("OAuth configured for: Azure Health Data Services") but editing requires config file change + restart.
 - Preferences tab (branding, theme): these are OE3-local settings stored in browser localStorage or a sidecar config — no Orthanc restart involved.
 - System tab: read-only display of Orthanc system info (`GET /system`), plugin list (`GET /plugins`), storage stats. No restart implications.
 
 **Implementation notes:**
+
 - Settings → Modalities: wire to `GET /modalities`, `PUT /modalities/{name}`, `DELETE /modalities/{name}`
 - Settings → DICOMweb: wire to `GET /dicom-web/servers`, `PUT /dicom-web/servers/{name}`, `DELETE /dicom-web/servers/{name}`
 - Add Modality dialog fields map to Orthanc modality config: `{ "AET": "CT_MAIN", "Host": "192.168.1.10", "Port": 104, "Manufacturer": "Siemens" }`
 - Add DICOMweb Server dialog: Name, URL, Auth type (None/Basic/Bearer/OAuth 2.0), capabilities toggles (QIDO/WADO/STOW)
 - C-Echo test button on modality rows → `POST /modalities/{name}/echo`
 
-
 ### Auth Display (Adaptive User Badge)
 
 **Principle:** OE3 never owns auth. It only displays identity when the environment provides it.
 
 **Behavior:**
+
 - Top-right corner of the header bar, left of any settings/help icons
 - Displays authenticated username when available
 - Does NOT render when no auth context is detected
 - No login form, no user management, no session handling
 
 **Detection strategy (check in order):**
+
 1. **JWT in Authorization header** — decode payload, extract `preferred_username` or `sub` claim. Common with Keycloak/OIDC via orthanc-auth-service.
 2. **Proxy headers** — check for `X-Remote-User`, `X-Forwarded-User`, or similar headers injected by reverse proxy (Nginx, Traefik, Azure Front Door).
 3. **Orthanc Authorization Plugin** — detect via `GET /plugins` whether authorization plugin is active. If so, attempt to read user info from token.
 4. **No auth detected** — hide the badge entirely. No error, no placeholder.
 
 **UI component:**
+
 - Avatar circle with initials (derived from username) + username text
 - Click → dropdown menu with:
   - Username / email (read-only display)
@@ -522,11 +548,11 @@ Lovable has generated working UI shells for the core screens. Screenshots captur
 - Subtle — should not dominate the header
 
 **Why this matters:**
+
 - Production deployments behind SSO expect to see "who am I" confirmation
 - Builds admin trust without adding auth complexity
 - Reinforces that OE3 is enterprise-ready
 - Zero friction for no-auth lab/dev setups — component simply doesn't appear
-
 
 ### SMART on FHIR / EHR Integration (Future Phase)
 
@@ -537,11 +563,11 @@ New document created: [[smart-on-fhir-integration]]
 **Key insight:** No other Orthanc frontend offers this. It's a unique differentiator.
 
 **Testing path:** Free sandboxes exist at every tier:
-- SMART App Launcher (https://launch.smarthealthit.org) — no registration, start immediately
-- Epic sandbox (https://open.epic.com) — free dev account
+
+- SMART App Launcher (<https://launch.smarthealthit.org>) — no registration, start immediately
+- Epic sandbox (<https://open.epic.com>) — free dev account
 - Oracle Health code Console — free CernerCare account
 - Docker-based local sandbox available
-
 
 ---
 
@@ -568,6 +594,7 @@ The FDA classifies DICOM viewers intended for **diagnostic interpretation** as C
 ### OE3's Position: Clean Regulatory Boundary
 
 OE3 is primarily a **study management and navigation interface**, not a diagnostic viewer. It:
+
 - Manages study lists, searches, uploads, modality configuration
 - Handles SMART on FHIR launch and patient context
 - Provides settings, audit, and admin functionality
@@ -581,10 +608,12 @@ OE3 is primarily a **study management and navigation interface**, not a diagnost
 ### Viewer Architecture: Dual Strategy
 
 **Standalone mode:**
+
 - Study browser → click study → launches OHIF (or configured viewer) in new tab
 - Same pattern as OE2. User chooses their viewer.
 
 **Embedded EHR mode (SMART on FHIR):**
+
 - Embed **Cornerstone3D** directly as a React component for inline image viewing
 - Cornerstone3D is the rendering engine underneath OHIF — same image quality, but used as a library rather than a full application
 - Supports: scroll, window/level, zoom/pan, basic measurements
@@ -592,6 +621,7 @@ OE3 is primarily a **study management and navigation interface**, not a diagnost
 - "Open in Full Viewer" escape hatch → launches OHIF/institutional viewer in new tab for radiologists who need full diagnostic tooling
 
 **Why Cornerstone3D, not embedded OHIF:**
+
 - OHIF is a complete SPA — its own routing, state management, study list, config system
 - Embedding one SPA inside another SPA inside an EHR iframe = routing conflicts, state collisions, CSS conflicts
 - Cornerstone3D as a library integrates cleanly into OE3's React component tree
@@ -599,6 +629,7 @@ OE3 is primarily a **study management and navigation interface**, not a diagnost
 - Same rendering engine, zero architecture conflicts
 
 **Libraries:**
+
 - `@cornerstonejs/core` — rendering engine
 - `@cornerstonejs/streaming-image-volume-loader` — DICOMweb image loading
 - `@cornerstonejs/tools` — interaction tools (W/L, zoom, pan, scroll, measurements)
@@ -610,6 +641,7 @@ OE3 is primarily a **study management and navigation interface**, not a diagnost
 ### Consulting Opportunity
 
 OE3's architecture could make it *easier* for organizations to get 510(k) clearance on a viewer built with it:
+
 - EHR launch infrastructure (SMART on FHIR) already built
 - Patient context management handled
 - Audit trail available (with ATNA plugin)
@@ -622,7 +654,6 @@ This is a consulting engagement: helping organizations navigate the regulatory p
 
 The paper describes **workflow integration and infrastructure**, not diagnostic capability. The security architecture, SMART launch protocol, and OAuth2 pipeline are all infrastructure-level contributions. The paper should note the intended use boundary and the deliberate separation of workflow orchestration (OE3) from diagnostic viewing (delegated to cleared viewers). This keeps the paper focused on the novel contributions without regulatory complications.
 
-
 ---
 
 ## Existing Viewer Framework — MultiSeriesViewer Component
@@ -634,17 +665,20 @@ A fully functional 4-panel DICOM viewer already exists in the ResonAit codebase 
 ### Current Capabilities
 
 **Layout & Navigation:**
+
 - 4-panel grid (2×2) with maximize/restore per panel (double-click or button)
 - Layout mode toggle: grid ↔ single maximized panel
 - Drag-and-drop series into viewports with visual highlighting per panel
 - Empty state prompts ("Drag & drop a series here")
 
 **Scrolling & Sync:**
+
 - Individual per-viewport sliders
 - Synchronized scrolling via master slider (normalized 0-100% so series of different lengths stay proportional)
 - Mouse wheel scrolling (linked or independent based on sync mode)
 
 **Tools:**
+
 - Window/Level adjustment (drag left/right = contrast, up/down = brightness)
 - Pan tool (drag to move image)
 - Zoom tool (drag up/down)
@@ -653,26 +687,31 @@ A fully functional 4-panel DICOM viewer already exists in the ResonAit codebase 
 - Reset per-viewport and reset-all
 
 **Cine Playback:**
+
 - Play/pause with auto-advance
 - Speed control (0.5x, 1x, 2x)
 - Loops back to start
 
 **Loading & Performance:**
+
 - Progressive loading: first image loads immediately (user sees something fast), remaining images stream in background
 - Loading counter overlay ("Loading 12/45")
 - Full loading overlay for initial load, corner indicator for background loading
 
 **Viewport Info Overlay:**
+
 - Modality, series number, slice position (e.g., "23 / 145")
 - W/L values, zoom percentage
 - Series description
 
 **Touch Support:**
+
 - Full touch event handling for iPad
 - Touch-friendly button sizing (min 44px)
 - Safe area inset handling for slider positioning
 
 **Responsive:**
+
 - ResizeObserver-based canvas sizing via `useContainerSize` hook
 - Dynamic canvas dimensions for grid vs maximized modes
 - Redraws on container resize
@@ -680,7 +719,8 @@ A fully functional 4-panel DICOM viewer already exists in the ResonAit codebase 
 ### Current Rendering Approach
 
 The component renders to raw HTML `<canvas>` elements, loading pre-rendered PNG frames from a ResonAit-specific API endpoint:
-```
+
+```text
 GET /dicomimage/instances/{id}/rendered?viewport=600,600&quality=70
 ```
 
@@ -689,6 +729,7 @@ Window/level is applied via manual `getImageData`/`putImageData` pixel manipulat
 ### Adaptation Plan for OE3
 
 **What stays (reuse as-is):**
+
 - Entire layout system (grid, maximize, responsive sizing)
 - Toolbar (tool selector, playback controls, sync toggle, layout selector, help modal)
 - Drag-and-drop logic

@@ -7,6 +7,7 @@ A React SPA wired to a local Orthanc DICOM server with healthcare-grade architec
 ## Commands
 
 ### Development
+
 ```bash
 # Install dependencies
 npm install
@@ -25,6 +26,7 @@ npm run preview
 ```
 
 ### Testing
+
 ```bash
 # Run all unit tests (single pass, 218 tests)
 npm run test
@@ -40,6 +42,7 @@ npx playwright test --config=e2e/prod/playwright.prod.config.ts
 ```
 
 ### Build & Quality
+
 ```bash
 # Production build
 npm run build
@@ -51,8 +54,27 @@ npm run build:dev
 npm run lint
 
 # TypeScript type check (no emit)
-npx tsc --noEmit
+npx tsc --noEmit -p tsconfig.app.json
+
+# Dependency audit (high+critical blocking, 5 allowlisted GHSA-IDs)
+npm run audit
+
+# Bundle size analysis (vite-bundle-visualizer)
+npm run bundle:visualize
 ```
+
+### CI/CD
+
+GitHub Actions CI (`.github/workflows/ci.yml`) laeuft bei Pull Requests und Push auf main:
+
+| Job | Inhalt | Dauer |
+|-----|--------|-------|
+| `typecheck` | `tsc --noEmit -p tsconfig.app.json` | ~15s |
+| `lint` | `npm run lint` (ESLint) | ~10s |
+| `test` | `npm run test` (Vitest, 218 Tests) | ~15s |
+| `audit` | `npm run audit` (audit-ci, high+critical blocking) | ~10s |
+
+Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit jsdom.
 
 ## Architecture
 
@@ -105,6 +127,7 @@ Controlled by `window.__OE3_CONFIG__.authMode` in `public/config.js`:
 ### Backend-Proxy Auth Mode (fork-specific)
 
 When `authMode: "none"` and `orthancUrl` points to a backend proxy (e.g. `/api/v1/pacs/orthanc`), OE3 acts as a pure SPA with no auth headers. The backend proxy:
+
 - Validates JWT cookies (httpOnly, set via `/viewer-session` or `/oe3-ui` endpoint)
 - Injects Orthanc admin credentials server-side
 - Enforces RBAC and audit trails
@@ -114,6 +137,7 @@ OE3's `lib/client.ts` uses `credentials: 'include'` so cookies are sent automati
 ## Feature Flags (RBAC)
 
 `src/config/features.ts` provides `useFeature(key)` — a layered resolver that checks:
+
 1. `config.js` feature flags (deployment-time)
 2. User profile permissions (Phase 2 — not yet implemented)
 3. SMART-on-FHIR scopes (Phase 2 — not yet implemented)

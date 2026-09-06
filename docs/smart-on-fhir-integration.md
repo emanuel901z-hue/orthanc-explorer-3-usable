@@ -34,17 +34,20 @@ SMART on FHIR (Substitutable Medical Apps, Reusable Technologies) is the open st
 ## Why This Matters
 
 ### Clinical Workflow
+
 - Clinician opens a patient chart in Epic → clicks "Imaging" → OE3 opens inline showing that patient's studies
 - No context switching, no separate login, no copy-pasting MRNs
 - Studies are immediately scoped to the right patient
 
 ### Strategic Positioning
+
 - Differentiates OE3 from every other Orthanc frontend (OE2, Orthanc Tools JS, etc.)
 - Signals enterprise readiness even before first production deployment
 - Opens consulting opportunities: "I can embed your PACS inside your EHR"
 - Aligns with 21st Century Cures Act information blocking rules (§171.301) — health systems must support standardized API access
 
 ### Market Context
+
 - Epic holds ~38% of US hospital market share
 - Oracle Health (Cerner) holds ~25%
 - Both require SMART on FHIR for third-party app integration
@@ -56,7 +59,7 @@ SMART on FHIR (Substitutable Medical Apps, Reusable Technologies) is the open st
 
 ### How SMART on FHIR Works (EHR Launch Flow)
 
-```
+```text
 ┌─────────────┐     1. Launch URL + params      ┌──────────────┐
 │   EHR        │ ──────────────────────────────→ │  OE3         │
 │ (Epic, etc.) │     ?iss=...&launch=abc123      │  /launch     │
@@ -101,11 +104,13 @@ SMART on FHIR (Substitutable Medical Apps, Reusable Technologies) is the open st
 OE3 must work in two modes:
 
 **Standalone Mode** (default — current behavior):
+
 - Full study browser, sidebar nav, upload, settings
 - No patient scoping
 - Used by PACS admins, radiologists, standalone deployments
 
 **Embedded/EHR Mode** (SMART launch):
+
 - Patient-scoped study list only
 - No sidebar nav (iframe constraints)
 - Streamlined header: patient name + MRN + "Viewing imaging for [Patient]"
@@ -113,6 +118,7 @@ OE3 must work in two modes:
 - Triggered by URL parameters: `/launch?iss=...&launch=...` or `?mode=embedded&patient=MRN`
 
 Detection logic:
+
 ```typescript
 // In React router or app initialization
 const isSmartLaunch = searchParams.has('iss') && searchParams.has('launch');
@@ -130,8 +136,8 @@ The official SMART on FHIR JavaScript client handles the entire OAuth2 dance:
 
 - **npm:** `npm i fhirclient` (package: `fhirclient`, v2.6.3+)
 - **CDN:** `https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js`
-- **Docs:** http://docs.smarthealthit.org/client-js/
-- **GitHub:** https://github.com/smart-on-fhir/client-js
+- **Docs:** <http://docs.smarthealthit.org/client-js/>
+- **GitHub:** <https://github.com/smart-on-fhir/client-js>
 - **License:** Apache-2.0
 - **Browser + Node support**
 
@@ -239,17 +245,19 @@ async function mapFhirPatientToOrthanc(fhirClient, orthancBaseUrl) {
 
 For the actual image viewing, OE3 can embed:
 
-1. **OHIF Viewer** (https://ohif.org/) — React-based, DICOMweb-native, most full-featured
-2. **Cornerstone.js** (https://www.cornerstonejs.org/) — Lower-level library, more customizable
+1. **OHIF Viewer** (<https://ohif.org/>) — React-based, DICOMweb-native, most full-featured
+2. **Cornerstone.js** (<https://www.cornerstonejs.org/>) — Lower-level library, more customizable
 3. **dwv** (DICOM Web Viewer) — Lighter weight option
 
 The viewer connects to Orthanc's DICOMweb endpoint:
-```
+
+```text
 GET /dicom-web/studies/{StudyInstanceUID}/series/{SeriesInstanceUID}/instances
 GET /dicom-web/wado?...  (for image retrieval)
 ```
 
 In embedded mode, the flow is:
+
 1. SMART launch → get patient context → get MRN
 2. Query Orthanc for patient's studies → display study list
 3. User clicks study → embedded viewer loads via DICOMweb
@@ -261,12 +269,13 @@ In embedded mode, the flow is:
 
 ### Tier 1: SMART App Launcher (Start Here)
 
-**URL:** https://launch.smarthealthit.org
+**URL:** <https://launch.smarthealthit.org>
 
 **What it is:** A free, no-registration-required tool that simulates an EHR launching your SMART app. Maintained by the SMART Health IT project (Boston Children's Hospital / Harvard).
 
 **How to use it:**
-1. Go to https://launch.smarthealthit.org
+
+1. Go to <https://launch.smarthealthit.org>
 2. Launch Type: "Provider EHR Launch" + "Simulate launch within the EHR user interface"
 3. FHIR Version: R4
 4. Select a test patient from the patient picker
@@ -275,6 +284,7 @@ In embedded mode, the flow is:
 7. Click "Launch App!"
 
 **What it tests:**
+
 - Full OAuth2 authorization code flow with PKCE
 - Patient context delivery
 - Provider context delivery
@@ -286,17 +296,19 @@ In embedded mode, the flow is:
 **Limitations:** The test patients won't have imaging data (no ImagingStudy resources), so you'll need to mock the Orthanc connection or have a local Orthanc with matching PatientIDs.
 
 **Docker option:** You can also run it locally:
+
 ```bash
 docker run -t -p 9009:80 smartonfhir/smart-launcher:latest
 ```
 
 ### Tier 2: SMART Dev Sandbox (Docker, Full Stack)
 
-**GitHub:** https://github.com/smart-on-fhir/smart-dev-sandbox
+**GitHub:** <https://github.com/smart-on-fhir/smart-dev-sandbox>
 
 **What it is:** A Docker-compose stack that runs the complete SMART ecosystem locally: HAPI FHIR server, auth server, patient browser, app launcher.
 
 **Setup:**
+
 ```bash
 git clone https://github.com/smart-on-fhir/smart-dev-sandbox.git
 cd smart-dev-sandbox
@@ -308,23 +320,26 @@ docker compose up -d
 
 ### Tier 3: Epic Sandbox
 
-**URL:** https://open.epic.com / https://fhir.epic.com
+**URL:** <https://open.epic.com> / <https://fhir.epic.com>
 
 **Registration:** Free developer account at open.epic.com
 
 **What you get:**
+
 - Non-production Client ID for testing
-- SMART on FHIR EHR launch simulation via https://open.epic.com/launchpad
+- SMART on FHIR EHR launch simulation via <https://open.epic.com/launchpad>
 - Sandbox FHIR R4 endpoint with test patients
 - Full OAuth2 flow identical to production Epic
 
 **Key details:**
+
 - Sandbox base URL: documented at fhir.epic.com
 - Test patient search by MRN: `GET /api/FHIR/R4/Patient?identifier=urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|{MRN}`
 - MyChart test credentials for patient-facing apps: username `fhirjason`, password `epicepic1`
 - After registering your app, allow ~10 minutes for propagation
 
 **Testing flow:**
+
 1. Register app at open.epic.com → get non-production Client ID
 2. Go to open.epic.com/launchpad → select "OAuth 2.0 SSO" launch type
 3. Enter your Launch URL
@@ -335,19 +350,20 @@ docker compose up -d
 
 ### Tier 4: Oracle Health (Cerner) Sandbox
 
-**URL:** https://code-console.cerner.com (requires CernerCare account)
+**URL:** <https://code-console.cerner.com> (requires CernerCare account)
 
 **What you get:**
+
 - FHIR R4 sandbox endpoints
 - App registration via code Console
 - Sandbox patient data for testing
 - Provider and patient launch simulation
 
-**Documentation:** https://docs.oracle.com/en/industries/health/millennium-platform-apis/build-smart-on-fhir-apps/
+**Documentation:** <https://docs.oracle.com/en/industries/health/millennium-platform-apis/build-smart-on-fhir-apps/>
 
 ### Tier 5: Inferno Test Suite (Compliance Validation)
 
-**URL:** https://inferno.healthit.gov/test-kits/smart-app-launch/
+**URL:** <https://inferno.healthit.gov/test-kits/smart-app-launch/>
 
 **What it is:** Official ONC (Office of the National Coordinator) testing tool that validates your SMART implementation against the spec. Used for certification. Not for development — use after you have a working implementation.
 
@@ -360,7 +376,7 @@ docker compose up -d
 **Goal:** Prove the SMART launch → Orthanc query pipeline works.
 
 1. Add `/launch` and `/callback` routes to OE3 using `fhirclient` library
-2. Test with SMART App Launcher (https://launch.smarthealthit.org)
+2. Test with SMART App Launcher (<https://launch.smarthealthit.org>)
 3. On successful auth, log the patient FHIR ID and extracted MRN to console
 4. Hardcode a matching PatientID in local Orthanc with a test DICOM study
 5. Display the study list filtered to that patient
@@ -479,17 +495,16 @@ Commercial PACS vendors (Visage, Sectra, Horos) have their own EHR integrations 
 
 ## References
 
-- SMART on FHIR spec: https://docs.smarthealthit.org/
-- SMART App Launch IG: https://hl7.org/fhir/smart-app-launch/
-- fhirclient JS library: https://github.com/smart-on-fhir/client-js
-- SMART App Launcher (testing): https://launch.smarthealthit.org
-- SMART Dev Sandbox (Docker): https://github.com/smart-on-fhir/smart-dev-sandbox
-- Epic on FHIR: https://fhir.epic.com
-- Epic Launchpad: https://open.epic.com/launchpad
-- Oracle Health SMART docs: https://docs.oracle.com/en/industries/health/millennium-platform-apis/build-smart-on-fhir-apps/
-- Inferno Test Suite: https://inferno.healthit.gov/test-kits/smart-app-launch/
-- Synthea (synthetic FHIR data): https://github.com/synthetichealth/synthea
-
+- SMART on FHIR spec: <https://docs.smarthealthit.org/>
+- SMART App Launch IG: <https://hl7.org/fhir/smart-app-launch/>
+- fhirclient JS library: <https://github.com/smart-on-fhir/client-js>
+- SMART App Launcher (testing): <https://launch.smarthealthit.org>
+- SMART Dev Sandbox (Docker): <https://github.com/smart-on-fhir/smart-dev-sandbox>
+- Epic on FHIR: <https://fhir.epic.com>
+- Epic Launchpad: <https://open.epic.com/launchpad>
+- Oracle Health SMART docs: <https://docs.oracle.com/en/industries/health/millennium-platform-apis/build-smart-on-fhir-apps/>
+- Inferno Test Suite: <https://inferno.healthit.gov/test-kits/smart-app-launch/>
+- Synthea (synthetic FHIR data): <https://github.com/synthetichealth/synthea>
 
 ---
 
@@ -510,12 +525,14 @@ Epic does NOT ship its own PACS or diagnostic image viewer. Their imaging stack 
 ### Jodogne's FHIR Work (Related but Different)
 
 Sébastien Jodogne published two papers on Orthanc + FHIR:
+
 - "Setting a PACS on FHIR" — HEALTHINF 2024 (BIOSTEC), SCITEPRESS, pp. 123-131
 - "Combining Languages to Set a PACS on FHIR" — Springer 2026, expanded version
 
 His approach: Using Java and Python plugins to make Orthanc **serve** FHIR resources (ImagingStudy) via HAPI FHIR framework. This turns Orthanc into a FHIR-compliant imaging data source.
 
 **Our approach is different and complementary:** We're not making Orthanc serve FHIR. We're making OE3 **consumable** by EHRs via SMART launch. These solve different problems:
+
 - Jodogne: "How do FHIR clients query Orthanc for imaging metadata?" (server-side)
 - OE3 SMART: "How do clinicians view Orthanc images without leaving their EHR?" (client-side)
 
@@ -530,6 +547,7 @@ Both could coexist. In fact, Jodogne's FHIR ImagingStudy support could make the 
 ### Why This Is Publishable
 
 This work sits at the intersection of three active research areas:
+
 1. Open-source medical imaging infrastructure (Orthanc ecosystem)
 2. FHIR-based EHR interoperability (SMART on FHIR standard)
 3. Clinical workflow integration (embedding PACS in EHR)
@@ -539,6 +557,7 @@ The novel contribution: **First open-source DICOM viewer with SMART on FHIR EHR 
 ### Target Venues (Ranked by Fit)
 
 #### 1. SIIM Annual Meeting + JIIM Journal (Best Fit)
+
 - **Conference:** SIIM26, June 10-12, 2026, Pittsburgh, PA
 - **Hackathon:** June 10-12, 2026 — hybrid (in-person + virtual). OE3 + SMART launch would be a strong hackathon project.
 - **Abstract deadline:** December 15 (for 2026, likely past — check for late submissions or target SIIM27)
@@ -547,12 +566,14 @@ The novel contribution: **First open-source DICOM viewer with SMART on FHIR EHR 
 - **Hackathon angle:** Enter the SIIM26 hackathon with OE3. Build the SMART launch demo live. Hackathon projects get showcased and can lead to papers.
 
 #### 2. HEALTHINF / BIOSTEC (Jodogne's Venue)
+
 - **Conference:** BIOSTEC 2027 (next available — BIOSTEC 2026 deadline was Dec 16, 2025, already passed)
 - **Why good:** Direct continuation of Jodogne's work. Can cite his papers and present OE3 SMART as the client-side complement. Paper would be reviewed by people already familiar with Orthanc.
 - **Format:** Regular paper (8-10 pages) or Position Paper (4-6 pages, work in progress OK)
 - **Published by:** SCITEPRESS, later expanded versions invited to Springer CCIS
 
 #### 3. Journal of Digital Imaging / JIIM (Direct Journal Submission)
+
 - **Journal:** JIIM (Springer Nature), successor to JDI
 - **No conference required** — submit anytime
 - **Accepts:** Technical notes, experience reports, hypothesis-driven research
@@ -560,11 +581,13 @@ The novel contribution: **First open-source DICOM viewer with SMART on FHIR EHR 
 - **Audience:** Imaging informatics professionals, radiologists, PACS administrators
 
 #### 4. AMIA (American Medical Informatics Association)
+
 - **Conference:** AMIA Annual Symposium (usually November)
 - **Broader audience** — health informatics generally, not imaging-specific
 - **Good if framing emphasizes interoperability and 21st Century Cures Act compliance**
 
 #### 5. IHE Connectathon / HIMSS
+
 - **Not traditional paper venues** but good for demos and industry visibility
 - **IHE Connectathon** tests interoperability profiles — demonstrating SMART launch with Orthanc would be noteworthy
 
@@ -575,6 +598,7 @@ The novel contribution: **First open-source DICOM viewer with SMART on FHIR EHR 
 **Abstract:** Present OE3 as the first open-source DICOM viewer with SMART on FHIR EHR launch capability. Demonstrate successful integration with Epic sandbox and SMART App Launcher. Discuss architecture (pure SPA, no backend, zero Orthanc modifications), patient context mapping (FHIR Patient → MRN → DICOM PatientID), and implications for resource-constrained healthcare facilities.
 
 **Sections:**
+
 1. Introduction — Gap between Orthanc's capabilities and clinical workflow integration
 2. Background — Orthanc ecosystem, SMART on FHIR standard, Jodogne's FHIR work
 3. Architecture — OE3 design, SMART launch flow, dual-mode operation
@@ -598,7 +622,6 @@ The novel contribution: **First open-source DICOM viewer with SMART on FHIR EHR 
 
 Your JHU graduate degree could be relevant for academic credibility. Check if you can still list Hopkins affiliation (alumni status) or collaborate with someone at JHU's imaging informatics group.
 
-
 ---
 
 ## Combined Paper Framing: End-to-End Open-Source Cloud Imaging
@@ -607,7 +630,7 @@ Your JHU graduate degree could be relevant for academic credibility. Check if yo
 
 The OAuth plugin and SMART on FHIR launch are not isolated projects — they form a complete, secure, open-source imaging pipeline that connects EHR clinician workflows to cloud PACS infrastructure through Orthanc.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        CLINICIAN WORKFLOW                               │
 │                                                                         │
@@ -660,6 +683,7 @@ The OAuth plugin and SMART on FHIR launch are not isolated projects — they for
 This architecture is notably secure because credentials never touch the application layer:
 
 **Azure (Tier 2 — Managed Identity):**
+
 - Zero credentials stored anywhere — no client secrets, no certificates, no config files
 - Azure's identity platform automatically provisions and rotates tokens
 - The Orthanc container running in Azure Container Apps or AKS receives tokens from the Azure Instance Metadata Service (IMDS) at `169.254.169.254`
@@ -668,12 +692,14 @@ This architecture is notably secure because credentials never touch the applicat
 - Scoped to specific resources via Azure RBAC — the managed identity only has access to the DICOM service it needs
 
 **Google Cloud (Tier 1 — OAuth2 + Workload Identity):**
+
 - Service account key file (traditional) OR Workload Identity Federation (keyless)
 - Workload Identity Federation: GKE pods authenticate directly, no key files
 - OAuth2 client credentials flow with automatic token refresh
 - Scoped via Google Cloud IAM roles
 
 **Generic OIDC (Tier 1 — Client Credentials):**
+
 - Standard OAuth2 client credentials flow
 - Works with any OIDC-compliant provider: Keycloak, Auth0, Okta, AWS Cognito
 - Client ID + secret stored in Orthanc config or environment variables
@@ -681,6 +707,7 @@ This architecture is notably secure because credentials never touch the applicat
 - Supports token introspection for validation
 
 **The security chain:**
+
 1. **Clinician → EHR:** Authenticated by hospital SSO (Active Directory, etc.)
 2. **EHR → OE3:** SMART on FHIR OAuth2 with PKCE (no client secrets in browser)
 3. **OE3 → Orthanc:** Basic auth or token passthrough (internal network / localhost)
@@ -699,6 +726,7 @@ Every hop is authenticated. The most sensitive leg (Orthanc → Cloud PACS) uses
 Open-source DICOM servers such as Orthanc are widely deployed in research and clinical settings, yet two critical integration gaps remain: secure federation with cloud-hosted PACS services (Azure Health Data Services, Google Cloud Healthcare API) and embedding imaging workflows within EHR systems (Epic, Oracle Health). We present two complementary contributions that together form a complete, secure, open-source imaging pipeline. First, orthanc-dicomweb-oauth, a Python plugin enabling Orthanc to authenticate against any OAuth2/OIDC-compliant DICOMweb endpoint, with support for Azure Managed Identity (zero-credential authentication), Google Cloud service accounts, and generic OIDC providers. Second, Orthanc Explorer 3, a modern React-based frontend with SMART on FHIR EHR launch capability, allowing clinicians to view Orthanc-managed imaging directly within their EHR. The combined architecture provides an end-to-end solution where clinician authentication flows from the EHR through SMART on FHIR to the viewer, while backend authentication flows from Orthanc through OAuth2 to cloud PACS — with no stored credentials on the Azure path. We evaluate the system against the SMART App Launcher, Epic sandbox, and Azure Health Data Services, demonstrating successful patient-context-aware image viewing with sub-second token acquisition. The complete system is released as open-source software under the MIT license.
 
 **Key contributions (for reviewers):**
+
 1. First generic OAuth2 plugin for Orthanc outbound DICOMweb connections (provider-agnostic)
 2. First open-source DICOM viewer with SMART on FHIR EHR launch capability
 3. Zero-credential cloud PACS authentication via Azure Managed Identity
@@ -706,11 +734,11 @@ Open-source DICOM servers such as Orthanc are widely deployed in research and cl
 5. All components released under MIT license with Docker deployment examples
 
 **Why this paper is stronger combined:**
+
 - Each piece alone is a useful tool. Together they tell a complete deployment story.
 - The security narrative only works when you show the full chain: every hop authenticated, credentials eliminated where possible.
 - Reviewers can envision a real deployment: community hospital runs Orthanc + OE3, federates with regional cloud PACS, clinicians access it from Epic — all open source, all secure.
 - Directly extends Jodogne's "Setting a PACS on FHIR" (2024) by adding both the outbound auth story and the inbound EHR embedding story.
-
 
 ---
 
@@ -719,6 +747,7 @@ Open-source DICOM servers such as Orthanc are widely deployed in research and cl
 ### Recommendation: Cornerstone3D Embedded, OHIF as Escape Hatch
 
 The OE2 pattern of launching OHIF in a new browser tab **does not work** in embedded EHR mode:
+
 - Already inside an iframe (EHR launched OE3 via SMART)
 - New tabs break EHR workflow, lose patient context visually
 - Some EHR iframe configurations block `window.open()` via CSP headers
@@ -726,7 +755,7 @@ The OE2 pattern of launching OHIF in a new browser tab **does not work** in embe
 
 ### Architecture
 
-```
+```text
 EHR iframe
   └── OE3 (React SPA)
        ├── Compact header (patient name, MRN, back arrow)
@@ -742,6 +771,7 @@ EHR iframe
 ### Why Cornerstone3D, Not Embedded OHIF
 
 Cornerstone3D is the rendering engine *underneath* OHIF. OHIF is a complete application framework (routing, state management, study list, hanging protocols, configuration). Embedding one SPA inside another SPA inside an EHR iframe creates:
+
 - Routing conflicts (both apps want to own the URL)
 - State management collisions
 - CSS conflicts
@@ -752,6 +782,7 @@ Cornerstone3D as a library avoids all of this — import it, create a viewport e
 ### Clinical Context
 
 In embedded EHR mode, users are:
+
 - Referring physicians checking if imaging was completed
 - ER docs glancing at the chest X-ray
 - Surgeons reviewing pre-op imaging
@@ -764,7 +795,8 @@ For the rare case needing full diagnostic tooling → "Open in Full Viewer" esca
 ### Implementation Notes
 
 **Libraries:**
-```
+
+```text
 @cornerstonejs/core
 @cornerstonejs/streaming-image-volume-loader
 @cornerstonejs/tools
@@ -777,6 +809,7 @@ All TypeScript, MIT licensed, React examples in docs. A minimal `<ViewportPanel>
 ### FDA Regulatory Boundary
 
 This architecture creates a clean regulatory separation:
+
 - OE3 + embedded Cornerstone3D in informational/review mode = **not a diagnostic workstation**
 - "Open in Full Viewer" explicitly delegates diagnostic viewing to whatever the institution has cleared
 - Disclaimer: "Not intended for primary diagnostic interpretation"
@@ -794,7 +827,6 @@ See: [[Orthanc-Explorer-3#FDA Regulatory Positioning]] for full regulatory analy
 | Image viewing | OHIF in new tab (default) | Cornerstone3D inline |
 | Full viewer access | Direct (configured viewer URL) | "Open in Full Viewer" escape hatch |
 | Patient banner | Optional | Always shown |
-
 
 ### Existing Viewer Component — Adaptation Path
 

@@ -1,0 +1,17 @@
+{
+  "low": false,
+  "moderate": false,
+  "high": true,
+  "critical": true,
+  "allowlist": [
+    "GHSA-52cp-r559-cp3m",
+    "GHSA-5p4m-2wfm-xmqj",
+    "GHSA-mh29-5h37-fv8m",
+    "GHSA-4w7w-66w2-5vf9",
+    "GHSA-fx2h-pf6j-xcff"
+  ],
+  "skip-dev": false,
+  "package-manager": "auto",
+  "report-level": "full"
+}
+

@@ -1,0 +1,61 @@
+# OE3 CI Pipeline — Orthanc Explorer 3 Usable Fork
+# ==============================================================================
+# Laeuft bei Pull Requests und manuell. Schuetzt den Public-Fork vor
+# Regressionen: TypeScript, ESLint, Vitest (218 Tests), audit-ci.
+#
+# Der Fork hat KEINE Datenbank-Abhaengigkeit — alle Tests sind reine
+# Unit/Component-Tests mit jsdom. Kein Postgres/Redis Service noetig.
+# ==============================================================================
+name: OE3 CI Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npx tsc --noEmit -p tsconfig.app.json
+
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run lint
+
+  test:
+    name: Unit Tests (Vitest, 218 Tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run test
+
+  audit:
+    name: Dependency Audit (audit-ci)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run audit

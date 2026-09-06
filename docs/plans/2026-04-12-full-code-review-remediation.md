@@ -30,6 +30,7 @@
 **Context:** `SendStudyDialog` calls `generateDemoModalities()` and `generateDemoDicomWebServers()` (mock data) and `simulateSendProgress()` (fake timer). The real API hooks `useModalities()` and `useDicomWebServers()` already exist. `sendStudyAction` already exists. We replace the mocks with live data and real mutation.
 
 **Files:**
+
 - Modify: `src/features/studies/components/SendStudyDialog.tsx`
 - Modify: `src/features/studies/components/SendStudyDialog.tsx` (test — create alongside)
 - Create: `src/features/studies/components/SendStudyDialog.test.tsx`
@@ -211,6 +212,7 @@ git commit -m "feat: wire SendStudyDialog to live modalities and DICOMweb server
 **Context:** `use-anonymize-job.ts` uses `setInterval` with `Math.random()` to fake anonymization progress. `anonymizeStudyAction` in `src/actions/anonymizeStudy.ts` already calls the real Orthanc `/studies/{id}/anonymize` endpoint. Orthanc jobs return an ID and can be polled via `jobsApi.get(jobId)`. We replace the simulation with a real mutation + job poll.
 
 **Files:**
+
 - Modify: `src/features/tasks/hooks/use-anonymize-job.ts`
 - Create: `src/features/tasks/hooks/use-anonymize-job.test.ts`
 
@@ -374,6 +376,7 @@ git commit -m "feat: wire useAnonymizeJob to real anonymizeStudyAction — remov
 **Context:** `AuthProvider` always returns a hardcoded admin user. The interface (`AuthContextValue`, `Permission`, `UserRole`) is already correct and production-ready. We add a runtime config guard so the demo user only activates when `authMode === "none"`. When `authMode === "oidc"` or `"smart"`, we throw a clear "not yet implemented" error (better than silently admitting a demo admin). This prevents accidental production exposure.
 
 **Files:**
+
 - Modify: `src/app/providers/auth-context.tsx`
 - Create: `src/app/providers/auth-context.test.tsx`
 
@@ -470,6 +473,7 @@ git commit -m "fix: guard AuthProvider against non-none authMode — throw expli
 **Context:** `src/shared/api/http-client.ts` (`HttpClient`), `src/shared/api/orthanc-client.ts` (`OrthancClient`), and `src/shared/api/dicomweb-client.ts` (`DicomWebClient`) are a parallel transport stack that is not used in any production path. All production code uses `orthancFetch` from `src/lib/client.ts`. Before deleting, verify no production import exists.
 
 **Files:**
+
 - Delete: `src/shared/api/http-client.ts`
 - Delete: `src/shared/api/orthanc-client.ts`
 - Delete: `src/shared/api/dicomweb-client.ts`
@@ -520,6 +524,7 @@ git commit -m "chore: remove unused HttpClient/OrthancClient/DicomWebClient tran
 **Context:** `OrthancStudyRepository.sendToModality()` calls `sendStudyAction()` (an actions-layer function) from within the repository. Repositories should be pure data access. The action wrapper (`sendStudyAction`) should be invoked at the feature component / hook level, not inside the repo. Same violation exists for `addLabel` and `removeLabel` calling `addLabelAction` / `removeLabelAction`.
 
 **Files:**
+
 - Modify: `src/shared/api/orthanc-study-repository.ts` (lines 249–262)
 - Modify: `src/shared/api/orthanc-study-repository.test.ts`
 
@@ -563,6 +568,7 @@ Expected: FAIL — `sendStudyAction` throws from our mock, proving the repo call
 **Step 3: Fix `orthanc-study-repository.ts`**
 
 Remove the actions-layer imports (lines 23–24):
+
 ```typescript
 // DELETE these lines:
 import { sendStudyAction } from '@/actions/sendStudy';
@@ -570,6 +576,7 @@ import { addLabelAction, removeLabelAction } from '@/actions/studyLabel';
 ```
 
 Replace the three method bodies:
+
 ```typescript
 async sendToModality(id: string, modalityId: string): Promise<void> {
   await studiesApi.sendToModality(id, modalityId);
@@ -613,6 +620,7 @@ git commit -m "fix: remove actions-layer imports from OrthancStudyRepository —
 **Context:** `deleteMutation` and `downloadMutation` both lack `onError` callbacks. A failed delete or download produces no user feedback. We add toast notifications that include the correlation ID from `OrthancError` for supportability.
 
 **Files:**
+
 - Modify: `src/features/studies/pages/StudyDetailPage.tsx` (lines 68–79)
 
 **Step 1: Write the failing test**
@@ -696,12 +704,14 @@ Expected: FAIL — no toast appears on delete error.
 **Step 3: Add `onError` to both mutations**
 
 In `StudyDetailPage.tsx`, add the import at the top:
+
 ```typescript
 import { toast } from 'sonner';
 import { OrthancError } from '@/lib/errors';
 ```
 
 Update `deleteMutation` (starting line 68):
+
 ```typescript
 const deleteMutation = useMutation({
   mutationFn: (orthancStudy: OrthancStudy) => deleteStudyAction(orthancStudy),
@@ -717,6 +727,7 @@ const deleteMutation = useMutation({
 ```
 
 Update `downloadMutation` (starting line 76):
+
 ```typescript
 const downloadMutation = useMutation({
   mutationFn: (id: string) =>
@@ -755,6 +766,7 @@ git commit -m "fix: add onError toast handlers to delete and download mutations 
 **Context:** `Study`, `Series`, `Instance` exist as both Orthanc wire types (`src/api/studies.ts`) and domain model types (`src/shared/types/dicom.ts`). The repository file manages this with aliased imports — `import type { Study as OrthancStudy }`. We rename the wire types to `OrthancStudy`, `OrthancSeries`, `OrthancInstance` so the alias is no longer needed and the distinction is always visible in code.
 
 **Files:**
+
 - Modify: `src/api/studies.ts`
 - Modify: `src/api/series.ts`
 - Modify: `src/api/instances.ts`
@@ -775,10 +787,13 @@ grep -r "from '@/api/studies'\|from '@/api/series'\|from '@/api/instances'" \
 **Step 2: Rename exports in `src/api/studies.ts`**
 
 Change:
+
 ```typescript
 export type Study = { ... }
 ```
+
 to:
+
 ```typescript
 export type OrthancStudy = { ... }
 // Keep backward compat alias during transition — remove after all callers updated
@@ -790,18 +805,23 @@ Do the same for `Series` → `OrthancSeries` in `src/api/series.ts` and `Instanc
 **Step 3: Update all import sites**
 
 For each file found in Step 1, change:
+
 ```typescript
 import type { Study as OrthancStudy } from '@/api/studies';
 ```
+
 to:
+
 ```typescript
 import type { OrthancStudy } from '@/api/studies';
 ```
+
 And update all usage of the alias to the new canonical name.
 
 **Step 4: Remove the backward-compat aliases from step 2**
 
 Once all callers are updated:
+
 ```typescript
 // Remove: export type Study = OrthancStudy;
 ```
@@ -837,6 +857,7 @@ git commit -m "refactor: rename Orthanc wire types Study→OrthancStudy, Series�
 **Context:** `eslint.config.js` disables `@typescript-eslint/no-unused-vars` and ignores `src/app/providers/**` and `src/app/layout/**`. Prettier is missing entirely. We fix all three.
 
 **Files:**
+
 - Modify: `eslint.config.js`
 - Create: `.prettierrc`
 - Create: `.prettierignore`
@@ -844,6 +865,7 @@ git commit -m "refactor: rename Orthanc wire types Study→OrthancStudy, Series�
 **Step 1: Add Prettier**
 
 Create `.prettierrc`:
+
 ```json
 {
   "semi": true,
@@ -855,6 +877,7 @@ Create `.prettierrc`:
 ```
 
 Create `.prettierignore`:
+
 ```
 dist
 node_modules
@@ -862,6 +885,7 @@ public/
 ```
 
 Install Prettier:
+
 ```bash
 npm install --save-dev prettier eslint-config-prettier
 ```
@@ -933,6 +957,7 @@ git commit -m "chore: re-enable no-unused-vars, remove layout eslint exclusions,
 **Context:** `const JSON_HEADERS = { "Content-Type": "application/json" }` is redeclared in 6 API files: `modalities.ts`, `jobs.ts`, `dicomWebServers.ts`, `tools.ts`, `studies.ts`, `peers.ts`. Move it to `src/lib/client.ts` as an export.
 
 **Files:**
+
 - Modify: `src/lib/client.ts`
 - Modify: `src/api/modalities.ts`
 - Modify: `src/api/jobs.ts`
@@ -951,6 +976,7 @@ export const JSON_CONTENT_HEADERS = { "Content-Type": "application/json" } as co
 **Step 2: Update all 6 API files**
 
 In each file, remove the local `const JSON_HEADERS` declaration and add:
+
 ```typescript
 import { orthancFetch, JSON_CONTENT_HEADERS } from "@/lib/client";
 ```
@@ -983,6 +1009,7 @@ git commit -m "refactor: extract JSON_CONTENT_HEADERS to client.ts — remove 6 
 **Context:** `src/lib/upload-xhr.ts` declares its own `scrubbedMessage()` with a nearly identical HTTP status map to `SCRUBBED_MESSAGES` in `src/lib/errors.ts`. The XHR module should use the shared map. `OrthancError.from()` already does the lookup — we expose the scrubber as a named export.
 
 **Files:**
+
 - Modify: `src/lib/errors.ts`
 - Modify: `src/lib/upload-xhr.ts`
 - Modify: `src/lib/errors.test.ts` (add coverage for the export)

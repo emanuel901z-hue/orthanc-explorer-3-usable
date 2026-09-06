@@ -348,6 +348,7 @@ StudyListPage / StudyDetailPage / SeriesDetailPage / ...
 ```
 
 **PHI hygiene rules enforced in code:**
+
 - PHI-bearing searches use `POST /tools/find` — never GET with query strings in URLs or browser history
 - URL parameters carry only Orthanc UUIDs, never patient names or MRNs
 - `localStorage` is allow-listed — session data containing PHI is memory-only and cleared on logout
@@ -367,6 +368,7 @@ StudyListPage / StudyDetailPage / SeriesDetailPage / ...
 `lib/correlation.ts` generates UUIDv4 correlation IDs for the `X-Request-Id` header. `crypto.randomUUID()` is only available in **secure contexts** (HTTPS or `localhost`). On internal HTTP deployments (e.g. `http://10.0.0.1:8080`), it is `undefined` and throws a `TypeError` — which is silently caught by `orthancFetch`'s catch block, causing **all API calls to fail**.
 
 The fix provides a fallback chain:
+
 1. `crypto.randomUUID()` (secure contexts — HTTPS, localhost)
 2. `crypto.getRandomValues()` with manual UUIDv4 formatting (all contexts)
 3. `Math.random()` as last resort (not cryptographically secure, but sufficient for correlation IDs)

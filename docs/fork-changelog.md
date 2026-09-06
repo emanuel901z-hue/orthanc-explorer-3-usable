@@ -4,6 +4,45 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.2.0 — CI Pipeline + audit-ci (2026-09-06)
+
+### GitHub Actions CI Pipeline
+
+- **Neue CI** (`.github/workflows/ci.yml`) — 4 Jobs, laeuft bei PR + Push auf main:
+  - `typecheck`: `tsc --noEmit -p tsconfig.app.json`
+  - `lint`: `npm run lint` (ESLint)
+  - `test`: `npm run test` (Vitest, 218 Tests)
+  - `audit`: `npm run audit` (audit-ci, high+critical blocking)
+- Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit jsdom.
+- Kein Postgres/Redis Service noetig (wie beim PP-Backend).
+
+### audit-ci — Strukturierter Dependency-Scan
+
+- **`.audit-ci.jsonc`** konfiguriert: high+critical blocking, moderate non-blocking.
+- **5 GHSA-IDs allowlisted** (dev-dependencies, nicht in Production-Build):
+  - `GHSA-52cp-r559-cp3m` — js-yaml (via markdownlint-cli2, dev-only)
+  - `GHSA-5p4m-2wfm-xmqj` — js-yaml (via markdownlint-cli2, dev-only)
+  - `GHSA-mh29-5h37-fv8m` — js-yaml prototype pollution (via markdownlint-cli2, dev-only)
+  - `GHSA-4w7w-66w2-5vf9` — js-yaml (via markdownlint-cli2, dev-only)
+  - `GHSA-fx2h-pf6j-xcff` — Vite path traversal in dev server (dev-only, nicht in production builds)
+- `npm run audit` Script zum manuellen Ausfuehren.
+
+### Files Changed
+
+```text
+Added:
+  .github/workflows/ci.yml
+  .audit-ci.jsonc
+
+Modified:
+  CLAUDE.md
+  docs/fork-changelog.md
+  package.json
+  package-lock.json
+```
+
+---
+
 ## v2.1.0 — UX/Accessibility/i18n Optimization Sprint (2026-09-06)
 
 ### Critical: Accessibility (A11y)
@@ -50,7 +89,7 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ### Files Changed
 
-```
+```text
 Modified:
   docs/fork-changelog.md
   e2e/prod/prod-viewport.spec.ts
@@ -125,7 +164,7 @@ Added:
 
 ### Files Changed
 
-```
+```text
 Modified (47 files):
   src/actions/*.ts (17 action files — BEFORE+AFTER audit + signatures)
   src/actions/*.test.ts (test updates for new signatures + audit events)
@@ -183,7 +222,7 @@ Added:
 
 ### Files Changed
 
-```
+```text
 Modified:
   README.md
   docs/fork-changelog.md
@@ -233,7 +272,7 @@ Added:
 
 ### Files Changed
 
-```
+```text
 Modified:
   src/app/layout/AppLayout.tsx
   src/features/studies/pages/StudyListPage.tsx
@@ -286,7 +325,7 @@ Added:
 
 ### Files Changed
 
-```
+```text
 Modified:
   src/components/ui/select.tsx
   src/components/ui/switch.tsx
@@ -330,7 +369,7 @@ Added:
 
 ### Files Changed
 
-```
+```text
 Added:
   src/shared/hooks/use-media-query.ts
 
@@ -384,7 +423,7 @@ Modified:
 
 ### Files Changed
 
-```
+```text
 Added:
   oe3/src/api/shares.ts
   oe3/src/api/worklists.ts
@@ -443,7 +482,7 @@ Modified:
 
 ### Files Changed
 
-```
+```text
 Added:
   oe3/src/actions/deleteSeries.ts
   oe3/src/features/audit/pages/AuditLogsPage.tsx
@@ -496,7 +535,7 @@ Modified:
 
 ### Files Changed
 
-```
+```text
 Modified:
   index.html
   public/config.js
@@ -564,7 +603,7 @@ Removed:
 
 ### Files Changed
 
-```
+```text
 Added:
   src/actions/mergeStudy.ts
   src/features/activity/hooks/useOrthancJobs.ts
@@ -647,7 +686,7 @@ Total: 9 languages (en, es, fr, de, ja, zh, ru, tr, ar).
 
 ### Files Changed
 
-```
+```text
 Modified:
   .gitignore
   src/features/studies/pages/StudyDetailPage.tsx
@@ -722,7 +761,7 @@ Added:
 
 ### Files Changed
 
-```
+```text
 Modified:
   src/api/changes.ts
   src/api/dicomWebServers.ts
@@ -779,7 +818,7 @@ Added:
 
 ### Files Changed
 
-```
+```text
 Modified:
   README.md
   docs/fork-changelog.md

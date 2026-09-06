@@ -28,6 +28,7 @@
 ## Task 1: Confirm the duplicate upload store is unused, then delete it
 
 **Files:**
+
 - Delete: `src/features/upload/store/upload-store.ts`
 
 **Step 1: Search for imports of the feature-path upload store**
@@ -65,6 +66,7 @@ git commit -m "chore: remove duplicate upload-store in features/upload/store"
 ## Task 2: Write failing tests for the real upload store
 
 **Files:**
+
 - Create: `src/store/upload-store.test.ts`
 
 **Step 1: Create the test file**
@@ -205,6 +207,7 @@ Expected: tests fail because the store still has simulation code (no real `insta
 ## Task 3: Implement the real upload store
 
 **Files:**
+
 - Modify: `src/store/upload-store.ts`
 
 **Step 1: Replace the entire file with the real implementation**
@@ -321,6 +324,7 @@ git commit -m "feat(upload): replace simulated upload with real POST /instances 
 ## Task 4: Wire UploadPage retry button to upload store
 
 **Files:**
+
 - Modify: `src/features/upload/pages/UploadPage.tsx`
 
 The UploadPage currently calls `retryJob(item.id)` from the job store. This only resets the job status but never re-triggers the actual upload. It needs to call `retryUpload(id)` from the upload store instead.
@@ -334,6 +338,7 @@ const { jobs, removeJob, clearCompleted, retryJob } = useJobStore();
 ```
 
 And around line 166:
+
 ```tsx
 onClick={() => retryJob(item.id)
 ```
@@ -341,20 +346,26 @@ onClick={() => retryJob(item.id)
 **Step 2: Apply the two-line change**
 
 Change line 13-14 from:
+
 ```typescript
 const { jobs, removeJob, clearCompleted, retryJob } = useJobStore();
 ```
+
 to:
+
 ```typescript
 const { jobs, removeJob, clearCompleted } = useJobStore();
 const { addFiles, retryUpload } = useUploadStore();
 ```
 
 Change the retry button onClick (line ~166) from:
+
 ```tsx
 onClick={() => retryJob(item.id)}
 ```
+
 to:
+
 ```tsx
 onClick={() => retryUpload(item.id)}
 ```
@@ -395,6 +406,7 @@ docker compose -f docker-compose.dev.yml up -d
 ```
 
 Wait until all three containers show `(healthy)`:
+
 ```bash
 docker compose -f docker-compose.dev.yml ps
 ```
@@ -417,23 +429,29 @@ App should load at `http://localhost:5173`.
    - Network tab shows **POST `/orthanc-proxy/instances`** (dev proxy) with `Content-Type: application/dicom`
    - Row status changes to `complete` (green checkmark)
 5. Verify in Orthanc:
+
    ```bash
    curl -s http://localhost:8042/instances | jq length
    ```
+
    Expected: count increased by 1.
 
 **Step 4: Test the retry flow**
 
 1. Stop the Orthanc container temporarily:
+
    ```bash
    docker stop orthanc-explorer-3-orthanc-1
    ```
+
 2. Drag `test-data/sample.dcm` onto the drop zone
 3. The upload should fail (row shows error / orange triangle)
 4. Restart Orthanc:
+
    ```bash
    docker start orthanc-explorer-3-orthanc-1
    ```
+
 5. Click the retry button (↻) on the failed row
 6. Row should transition: `pending` → `running` → `complete`
 

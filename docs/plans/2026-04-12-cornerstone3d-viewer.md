@@ -48,13 +48,17 @@ URL params (studyId)
 - `dicom-parser` — peer dep of dicom-image-loader; parses raw DICOM bytes
 
 The wadors: URL format Cornerstone3D expects:
+
 ```
 wadors:/orthanc-proxy/dicom-web/studies/{studyUID}/series/{seriesUID}/instances/{instanceUID}/frames/1
 ```
+
 Vite proxy strips `/orthanc-proxy` prefix, so Orthanc receives:
+
 ```
 GET /dicom-web/studies/{studyUID}/series/{seriesUID}/instances/{instanceUID}/frames/1
 ```
+
 This is standard DICOMweb WADO-RS — Orthanc DICOMweb plugin responds with `multipart/related`.
 
 ---
@@ -62,6 +66,7 @@ This is standard DICOMweb WADO-RS — Orthanc DICOMweb plugin responds with `mul
 ### Task 1: Install Cornerstone3D packages
 
 **Files:**
+
 - Modify: `package.json` (via npm install)
 
 **Step 1: Install**
@@ -76,6 +81,7 @@ npm install @cornerstonejs/core @cornerstonejs/tools @cornerstonejs/dicom-image-
 ```bash
 npx tsc --noEmit 2>&1 | grep -v "node_modules" | head -30
 ```
+
 Expected: Zero new errors (some pre-existing errors are OK as long as they were there before).
 
 **Step 3: Commit**
@@ -90,6 +96,7 @@ git commit -m "feat(viewer): install Cornerstone3D packages"
 ### Task 2: Create Cornerstone3D initialization singleton
 
 **Files:**
+
 - Create: `src/lib/cornerstone.ts`
 - Create: `src/lib/cornerstone.test.ts`
 
@@ -145,6 +152,7 @@ describe('initCornerstone', () => {
 ```bash
 npx vitest run src/lib/cornerstone.test.ts 2>&1 | tail -10
 ```
+
 Expected: `Cannot find module './cornerstone'`
 
 **Step 3: Write minimal implementation**
@@ -203,6 +211,7 @@ export async function initCornerstone(): Promise<void> {
 ```bash
 npx vitest run src/lib/cornerstone.test.ts
 ```
+
 Expected: 3 tests PASS
 
 **Step 5: Commit**
@@ -217,6 +226,7 @@ git commit -m "feat(viewer): Cornerstone3D init singleton with idempotent guard"
 ### Task 3: Build wadors image ID helper
 
 **Files:**
+
 - Create: `src/lib/cornerstoneImageIds.ts`
 - Create: `src/lib/cornerstoneImageIds.test.ts`
 
@@ -318,6 +328,7 @@ export function buildWadorsImageId({
 ```bash
 npx vitest run src/lib/cornerstoneImageIds.test.ts
 ```
+
 Expected: 4 tests PASS
 
 **Step 5: Commit**
@@ -334,6 +345,7 @@ git commit -m "feat(viewer): buildWadorsImageId helper for Orthanc DICOMweb"
 The `SeriesPanel` currently uses `SeriesItem` with no DICOM UIDs. We need `studyInstanceUID` and `seriesInstanceUID` to build imageIds when a series is dropped onto a viewport.
 
 **Files:**
+
 - Modify: `src/features/viewer/components/SeriesPanel.tsx` (lines 8–14 — the `SeriesItem` interface)
 
 **Step 1: Read the current SeriesItem**
@@ -392,6 +404,7 @@ const seriesItems: SeriesItem[] = (seriesList ?? []).map(s => ({
 ```bash
 npx tsc --noEmit 2>&1 | grep -v node_modules | head -20
 ```
+
 Expected: No errors referencing `SeriesItem`.
 
 **Step 5: Commit**
@@ -410,6 +423,7 @@ This component owns one `RenderingEngine`, loads a series as a Stack, and joins 
 It internally calls `useSeriesInstances` (existing hook) and `buildWadorsImageId` to get imageIds without any new networking code.
 
 **Files:**
+
 - Create: `src/features/viewer/components/CornerstoneViewport.tsx`
 
 > **No unit test for this component** — Cornerstone3D calls WebGL APIs that jsdom cannot simulate. Browser integration testing in Task 9.
@@ -592,6 +606,7 @@ git commit -m "feat(viewer): CornerstoneViewport with WebGL stack rendering and 
 Manages 1–4 `CornerstoneViewport` instances in a CSS grid, creates/owns the shared ToolGroup, handles drag-and-drop into slots.
 
 **Files:**
+
 - Create: `src/features/viewer/components/CornerstoneMultiViewport.tsx`
 
 Create `src/features/viewer/components/CornerstoneMultiViewport.tsx`:
@@ -759,6 +774,7 @@ git commit -m "feat(viewer): CornerstoneMultiViewport with drag-and-drop series 
 Provides a `setActiveTool` function that swaps the primary mouse binding in the shared ToolGroup — called by the toolbar buttons.
 
 **Files:**
+
 - Create: `src/features/viewer/hooks/useViewerTools.ts`
 - Create: `src/features/viewer/hooks/useViewerTools.test.ts`
 
@@ -870,6 +886,7 @@ git commit -m "feat(viewer): useViewerTools hook for toolbar tool switching"
 Replace all procedural canvas code with the real Cornerstone3D components. Keep the header bar, toolbar, layout switcher, and SeriesPanel wrappers.
 
 **Files:**
+
 - Modify: `src/features/viewer/pages/ViewerPage.tsx`
 
 **Step 1: Read the current end of ViewerPage.tsx**
@@ -886,6 +903,7 @@ Then read: `Read src/features/viewer/pages/ViewerPage.tsx` with appropriate offs
 **Step 2: Identify what to keep vs delete**
 
 **KEEP:**
+
 - Imports: `useParams`, `useNavigate`, `Button`, `Separator`, `Badge`, shadcn UI components, lucide icons
 - `useStudy`, `useStudySeries` hooks
 - `formatPatientName`
@@ -895,6 +913,7 @@ Then read: `Read src/features/viewer/pages/ViewerPage.tsx` with appropriate offs
 - The `Layout` type
 
 **DELETE (replace with Cornerstone3D):**
+
 - `generateMRISlice()` function (~100 lines of procedural math)
 - `generateDemoSlice()` function (~100 lines of procedural math)
 - `DEFAULT_WL` constant
@@ -1129,9 +1148,11 @@ git commit -m "feat(viewer): replace procedural canvas with Cornerstone3D in Vie
 ### Task 9: Verify Vite proxy covers DICOMweb path
 
 **Files:**
+
 - Read: `vite.config.ts` (already confirmed — no changes needed)
 
 The existing proxy:
+
 ```typescript
 "/orthanc-proxy": {
   target: "http://localhost:8042",
@@ -1141,10 +1162,13 @@ The existing proxy:
 ```
 
 A Cornerstone3D request to:
+
 ```
 /orthanc-proxy/dicom-web/studies/1.2.3.../frames/1
 ```
+
 becomes:
+
 ```
 http://localhost:8042/dicom-web/studies/1.2.3.../frames/1
 ```
@@ -1156,6 +1180,7 @@ This is correct. No `vite.config.ts` changes needed.
 ```bash
 curl -s http://localhost:8042/dicom-web/studies | head -5
 ```
+
 Expected: `[]` or a JSON array. If you get a 404, the DICOMweb plugin may not be enabled — check `docker-compose.dev.yml` for plugin config and refer to the Orthanc DICOMweb plugin docs.
 
 ---

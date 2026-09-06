@@ -30,7 +30,7 @@ Build **Orthanc Explorer 3**, a modern enterprise-grade React SPA for managing m
 
 Implement a **Domain-Driven Design (DDD)** architecture with clear separation of concerns:
 
-```
+```text
 src/
 ├── app/                          # Application layer
 │   ├── router/                   # React Router setup
@@ -294,6 +294,7 @@ function generatePatients(count: number): Array<{ id: string; name: string; birt
 ### 1. Layout & Navigation
 
 **App Shell with Sidebar Navigation:**
+
 - Logo and app title at top
 - Collapsible sidebar with icons + labels
 - Navigation items:
@@ -309,6 +310,7 @@ function generatePatients(count: number): Array<{ id: string; name: string; birt
 ### 2. Study List Page (`/studies`)
 
 **Main Features:**
+
 - **Search Bar** at top with filters:
   - Patient Name
   - Patient ID
@@ -332,6 +334,7 @@ function generatePatients(count: number): Array<{ id: string; name: string; birt
   - Space to select row
 
 **State Management:**
+
 - Search filters in URL query params (shareable links)
 - Column preferences in localStorage
 - Selected rows in component state
@@ -339,6 +342,7 @@ function generatePatients(count: number): Array<{ id: string; name: string; birt
 ### 3. Study Detail Page (`/studies/:id`)
 
 **Layout:** Two-column layout
+
 - **Left Column (Study Metadata):**
   - Patient info card (name, ID, birthdate, sex)
   - Study info card (date, time, description, accession #)
@@ -354,6 +358,7 @@ function generatePatients(count: number): Array<{ id: string; name: string; birt
     - Click to expand instance list
 
 **Tabs:**
+
 - Overview (default)
 - DICOM Tags (searchable tag browser)
 - Activity Log (timestamps for received, accessed, modified)
@@ -361,6 +366,7 @@ function generatePatients(count: number): Array<{ id: string; name: string; birt
 ### 4. Upload Page (`/upload`)
 
 **Features:**
+
 - Drag-and-drop zone (large, centered)
 - File picker button
 - Upload queue table:
@@ -370,12 +376,14 @@ function generatePatients(count: number): Array<{ id: string; name: string; birt
 - Upload report on completion (success count, failures with reasons)
 
 **State:**
+
 - Upload queue in Zustand store
 - Mock upload progress with setTimeout for demo
 
 ### 5. Remote Sources Page (`/remote-sources`)
 
 **Tabs:**
+
 - **DICOM Query/Retrieve**
   - Modality selector dropdown
   - Search form (similar to study list)
@@ -391,6 +399,7 @@ function generatePatients(count: number): Array<{ id: string; name: string; birt
 ### 6. Settings Page (`/settings`)
 
 **Tabs:**
+
 - **System Info**
   - Orthanc version, disk usage, database stats (demo data)
 
@@ -493,24 +502,29 @@ interface UploadState {
 ## Key UX Patterns
 
 ### Command Palette (Future Enhancement)
+
 - Cmd+K to open
 - Search studies, navigate to pages, run actions
 - Built with Radix UI Command component
 
 ### Toast Notifications
+
 - Success/error/info toasts for actions
 - Use shadcn/ui Sonner component
 
 ### Confirmation Modals
+
 - Delete confirmations with checkboxes for "also delete on disk"
 - Batch operation warnings
 
 ### Loading States
+
 - Skeleton loaders for tables during initial load
 - Spinner overlays for actions
 - Optimistic updates with TanStack Query
 
 ### Error Handling
+
 - Error boundaries for component crashes
 - Inline error messages in forms
 - Toast notifications for API errors
@@ -521,17 +535,20 @@ interface UploadState {
 ## Styling Guidelines
 
 **Tailwind Configuration:**
+
 - Custom color palette for healthcare context (calming blues/greens, not aggressive reds)
 - Dark mode with `class` strategy
 - Custom spacing for medical data density
 
 **Component Style:**
+
 - Clean, spacious layouts (healthcare users = less tech-savvy)
 - Large click targets (min 44x44px)
 - High contrast text for readability
 - Consistent spacing (use Tailwind spacing scale)
 
 **Typography:**
+
 - Use Inter font (modern, readable)
 - DICOM UIDs in monospace font
 - Patient names in slightly larger, bold font
@@ -565,6 +582,7 @@ interface UploadState {
 ## Environment Configuration
 
 Use Vite environment variables:
+
 ```typescript
 // src/infrastructure/config/env.ts
 export const config = {
