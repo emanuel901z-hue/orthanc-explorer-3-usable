@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
@@ -161,6 +161,24 @@ export default function StudyListPage() {
     referringPhysician: false, // hidden by default
   });
   const [showColumnConfig, setShowColumnConfig] = useState(false);
+  const colConfigRef = useRef<HTMLDivElement>(null);
+
+  // Close the column-config dropdown on outside click — previously it only
+  // toggled via its own button, so it stayed open when tapping elsewhere.
+  useEffect(() => {
+    if (!showColumnConfig) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (colConfigRef.current && !colConfigRef.current.contains(e.target as Node)) {
+        setShowColumnConfig(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [showColumnConfig]);
 
   // RBAC feature flags — controlled by config.js (deployment-time)
   const canDownload = useFeature('download');
@@ -605,7 +623,7 @@ export default function StudyListPage() {
               />
             </Button>
             {/* Column configuration dropdown */}
-            <div className="relative">
+            <div className="relative" ref={colConfigRef}>
               <Button
                 variant="outline"
                 onClick={() => setShowColumnConfig(!showColumnConfig)}
@@ -819,19 +837,21 @@ export default function StudyListPage() {
                 onValueChange={(colId) => {
                   const prev = sorting[0];
                   // Keep current direction when switching columns; sensible defaults otherwise
-                  const desc = prev?.id === colId ? prev.desc : colId !== 'patientName' && colId !== 'studyDescription' && colId !== 'accessionNumber' && colId !== 'modalities' && colId !== 'status';
-                  setSorting([{ id: colId, desc }]);
+                  const descDefault = ['studyDate', 'lastUpdate', 'numberOfInstances', 'status'].includes(colId);
+                  setSorting([{ id: colId, desc: prev?.id === colId ? prev.desc : descDefault }]);
                 }}
               >
                 <SelectTrigger className="h-8 flex-1 text-xs" aria-label={t('studyList.sortBy', { defaultValue: 'Sort by' })}>
                   <SelectValue placeholder={t('studyList.sortBy', { defaultValue: 'Sort by' })} />
                 </SelectTrigger>
                 <SelectContent>
-                  {['patientName', 'studyDate', 'modalities', 'studyDescription', 'accessionNumber', 'numberOfInstances', 'status'].map((id) => (
-                    <SelectItem key={id} value={id}>
-                      {getColumnLabel(id, t)}
-                    </SelectItem>
-                  ))}
+                  {table.getAllLeafColumns()
+                    .filter((col) => col.getCanSort())
+                    .map((col) => (
+                      <SelectItem key={col.id} value={col.id}>
+                        {getColumnLabel(col.id, t)}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
               <Button
@@ -879,13 +899,17 @@ export default function StudyListPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-sm truncate">
-                            {formatPatientName(s.patientName)}
+                            {columnVisibility.patientName !== false ? formatPatientName(s.patientName) : s.patientId}
                           </span>
-                          <div
-                            className={`h-2 w-2 rounded-full shrink-0 ${s.isStable ? 'bg-success' : 'bg-warning animate-pulse'}`}
-                          />
+                          {columnVisibility.status !== false && (
+                            <div
+                              className={`h-2 w-2 rounded-full shrink-0 ${s.isStable ? 'bg-success' : 'bg-warning animate-pulse'}`}
+                            />
+                          )}
                         </div>
-                        <div className="text-xs text-muted-foreground">{s.patientId}</div>
+                        {columnVisibility.patientName !== false && (
+                          <div className="text-xs text-muted-foreground">{s.patientId}</div>
+                        )}
                       </div>
                       {/* Quick actions */}
                       <div className="flex items-center gap-0.5 shrink-0">
@@ -909,30 +933,56 @@ export default function StudyListPage() {
                         </Button>
                       </div>
                     </div>
-                    {/* Meta grid: date, modality, accession, images */}
+                    {/* Meta grid: gated by column visibility toggles */}
                     <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
-                      <div>
-                        <span className="text-muted-foreground">{t('studies.studyDate')}: </span>
-                        <span>{format(s.studyDate, 'MMM dd, yyyy')}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-muted-foreground">{t('studyList.columns.modality')}: </span>
-                        {s.modalities.map((m) => (
-                          <ModalityBadge key={m} modality={m} />
-                        ))}
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">{t('studyList.columns.accession')}: </span>
-                        <span className="font-mono">{s.accessionNumber || '—'}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">{t('studyList.columns.images')}: </span>
-                        <span className="font-medium">{s.numberOfInstances ?? '—'}</span>
-                        <span className="text-muted-foreground"> ({t('studyList.columns.seriesCount', { count: s.numberOfSeries })})</span>
-                      </div>
+                      {columnVisibility.studyDate !== false && (
+                        <div>
+                          <span className="text-muted-foreground">{t('studies.studyDate')}: </span>
+                          <span>{format(s.studyDate, 'MMM dd, yyyy')}</span>
+                        </div>
+                      )}
+                      {columnVisibility.modalities !== false && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-muted-foreground">{t('studyList.columns.modality')}: </span>
+                          {s.modalities.map((m) => (
+                            <ModalityBadge key={m} modality={m} />
+                          ))}
+                        </div>
+                      )}
+                      {columnVisibility.accessionNumber !== false && (
+                        <div>
+                          <span className="text-muted-foreground">{t('studyList.columns.accession')}: </span>
+                          <span className="font-mono">{s.accessionNumber || '—'}</span>
+                        </div>
+                      )}
+                      {columnVisibility.numberOfInstances !== false && (
+                        <div>
+                          <span className="text-muted-foreground">{t('studyList.columns.images')}: </span>
+                          <span className="font-medium">{s.numberOfInstances ?? '—'}</span>
+                          <span className="text-muted-foreground"> ({t('studyList.columns.seriesCount', { count: s.numberOfSeries })})</span>
+                        </div>
+                      )}
+                      {columnVisibility.referringPhysician !== false && s.referringPhysician && (
+                        <div className="col-span-2">
+                          <span className="text-muted-foreground">{t('studyList.columns.referring')}: </span>
+                          <span>{s.referringPhysician.replace(/\^/g, ', ')}</span>
+                        </div>
+                      )}
+                      {columnVisibility.lastUpdate !== false && (
+                        <div>
+                          <span className="text-muted-foreground">{t('studyList.columns.lastUpdate')}: </span>
+                          <span>{format(s.lastUpdate, 'MMM dd, yyyy HH:mm')}</span>
+                        </div>
+                      )}
+                      {columnVisibility.studyInstanceUID !== false && s.studyInstanceUID && (
+                        <div className="col-span-2">
+                          <span className="text-muted-foreground">{t('studyList.columns.studyInstanceUID')}: </span>
+                          <span className="font-mono break-all">{s.studyInstanceUID}</span>
+                        </div>
+                      )}
                     </div>
-                    {/* Description (if present) */}
-                    {s.studyDescription && (
+                    {/* Description (if present and column enabled) */}
+                    {columnVisibility.studyDescription !== false && s.studyDescription && (
                       <div className="mt-2 text-xs text-muted-foreground truncate">
                         {s.studyDescription}
                       </div>

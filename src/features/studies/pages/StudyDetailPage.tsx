@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -101,6 +101,23 @@ export default function StudyDetailPage() {
     seriesInstanceUID: true,
   });
   const [showSeriesColumnConfig, setShowSeriesColumnConfig] = useState(false);
+  const seriesColConfigRef = useRef<HTMLDivElement>(null);
+
+  // Close the series column-config dropdown on outside click.
+  useEffect(() => {
+    if (!showSeriesColumnConfig) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (seriesColConfigRef.current && !seriesColConfigRef.current.contains(e.target as Node)) {
+        setShowSeriesColumnConfig(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [showSeriesColumnConfig]);
   const [selectedSeriesIds, setSelectedSeriesIds] = useState<Set<string>>(new Set());
   const [bulkDownloading, setBulkDownloading] = useState(false);
   const isMobile = useMediaQuery('(max-width: 767px)');
@@ -626,7 +643,7 @@ export default function StudyDetailPage() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between gap-2 flex-col sm:flex-row">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Series ({series.length})</CardTitle>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:flex-nowrap">
                       {seriesView === 'table' && (
                         <div className="relative flex-1 sm:w-48">
                           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
@@ -639,38 +656,11 @@ export default function StudyDetailPage() {
                           />
                         </div>
                       )}
-                      {isMobile && (
-                        <div className="flex items-center gap-1">
-                          <Select
-                            value={seriesSort.key}
-                            onValueChange={(k) => setSeriesSort({ key: k as SortKey, dir: seriesSort.dir })}
-                          >
-                            <SelectTrigger className="h-8 w-[118px] text-xs" aria-label={t('studyDetail.sortBy', { defaultValue: 'Sort by' })}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="seriesNumber">{t('quickReport.seriesNumber', { defaultValue: '#' })}</SelectItem>
-                              <SelectItem value="modality">{t('studies.modality', { defaultValue: 'Modality' })}</SelectItem>
-                              <SelectItem value="seriesDescription">{t('studies.description', { defaultValue: 'Description' })}</SelectItem>
-                              <SelectItem value="numberOfInstances">{t('studyDetail.images', { defaultValue: 'Images' })}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={() => setSeriesSort((p) => ({ ...p, dir: p.dir === 'asc' ? 'desc' : 'asc' }))}
-                            aria-label={seriesSort.dir === 'asc' ? t('studyList.sortAsc', { defaultValue: 'Ascending' }) : t('studyList.sortDesc', { defaultValue: 'Descending' })}
-                          >
-                            {seriesSort.dir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
-                          </Button>
-                        </div>
-                      )}
                       <ToggleGroup type="single" value={seriesView} onValueChange={(v) => v && setSeriesView(v as 'grid' | 'table')} size="sm">
                         <ToggleGroupItem value="grid" aria-label="Grid view"><LayoutGrid className="h-3.5 w-3.5" /></ToggleGroupItem>
                         <ToggleGroupItem value="table" aria-label="Table view"><List className="h-3.5 w-3.5" /></ToggleGroupItem>
                       </ToggleGroup>
-                      <div className="relative">
+                      <div className="relative" ref={seriesColConfigRef}>
                         <Button
                           variant="outline"
                           size="sm"
@@ -683,7 +673,7 @@ export default function StudyDetailPage() {
                           <ChevronDown className={`h-3 w-3 transition-transform ${showSeriesColumnConfig ? 'rotate-180' : ''}`} />
                         </Button>
                         {showSeriesColumnConfig && (
-                          <div className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
+                          <div data-col-config-open className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
                             <p className="text-xs font-semibold text-muted-foreground mb-2">
                               {t('studyList.columns.toggle')}
                             </p>
@@ -716,6 +706,36 @@ export default function StudyDetailPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
+                  {isMobile && (
+                    /* Mobile sort bar — same pattern as the studies list;
+                       the table-header sorting is not reachable on cards */
+                    <div className="flex items-center gap-2 pb-2 mb-2 border-b">
+                      <ArrowUpDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <Select
+                        value={seriesSort.key}
+                        onValueChange={(k) => setSeriesSort({ key: k as SortKey, dir: seriesSort.dir })}
+                      >
+                        <SelectTrigger className="h-8 flex-1 text-xs" aria-label={t('studyDetail.sortBy', { defaultValue: 'Sort by' })}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="seriesNumber">{t('quickReport.seriesNumber', { defaultValue: '#' })}</SelectItem>
+                          <SelectItem value="modality">{t('studies.modality', { defaultValue: 'Modality' })}</SelectItem>
+                          <SelectItem value="seriesDescription">{t('studies.description', { defaultValue: 'Description' })}</SelectItem>
+                          <SelectItem value="numberOfInstances">{t('studyDetail.images', { defaultValue: 'Images' })}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0 shrink-0"
+                        onClick={() => setSeriesSort((p) => ({ ...p, dir: p.dir === 'asc' ? 'desc' : 'asc' }))}
+                        aria-label={seriesSort.dir === 'asc' ? t('studyList.sortAsc', { defaultValue: 'Ascending' }) : t('studyList.sortDesc', { defaultValue: 'Descending' })}
+                      >
+                        {seriesSort.dir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
+                      </Button>
+                    </div>
+                  )}
                   {seriesView === 'grid' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {filteredSortedSeries.map((s) => (
@@ -802,26 +822,36 @@ export default function StudyDetailPage() {
                                   onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
                                 >
                                   <div className="flex items-center gap-2">
-                                    <Checkbox
-                                      checked={isSelected}
-                                      onCheckedChange={() => toggleSelectSeries(s.id)}
-                                      aria-label={`Select series ${s.seriesNumber}`}
-                                      onClick={(e) => e.stopPropagation()}
-                                    />
-                                    <span className="font-medium text-sm">#{s.seriesNumber}</span>
-                                    <ModalityBadge modality={s.modality} />
-                                    <span className="text-xs text-muted-foreground ml-auto">
-                                      {s.numberOfInstances} img
-                                    </span>
+                                    {seriesColumnVisibility.select && (
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={() => toggleSelectSeries(s.id)}
+                                        aria-label={`Select series ${s.seriesNumber}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+                                    )}
+                                    {seriesColumnVisibility.seriesNumber && (
+                                      <span className="font-medium text-sm">#{s.seriesNumber}</span>
+                                    )}
+                                    {seriesColumnVisibility.modality && (
+                                      <ModalityBadge modality={s.modality} />
+                                    )}
+                                    {seriesColumnVisibility.numberOfInstances && (
+                                      <span className="text-xs text-muted-foreground ml-auto">
+                                        {s.numberOfInstances} img
+                                      </span>
+                                    )}
                                   </div>
-                                  {s.seriesDescription && (
+                                  {seriesColumnVisibility.seriesDescription && s.seriesDescription && (
                                     <div className="mt-1.5 text-xs text-muted-foreground pl-7">
                                       {s.seriesDescription}
                                     </div>
                                   )}
-                                  <div className="mt-1 text-[10px] font-mono text-muted-foreground pl-7 truncate">
-                                    {s.seriesInstanceUID}
-                                  </div>
+                                  {seriesColumnVisibility.seriesInstanceUID && (
+                                    <div className="mt-1 text-[10px] font-mono text-muted-foreground pl-7 truncate">
+                                      {s.seriesInstanceUID}
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })
