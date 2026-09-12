@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         if (res.status === 403) {
           setUser(null);
-          setAuthError('Nur System-Administratoren duerfen auf OE3 zugreifen.');
+          setAuthError('Zugriff verweigert: ADMIN/SUPERADMIN mit aktiver Local-PACS-Konfiguration erforderlich.');
           return;
         }
         if (!res.ok) {

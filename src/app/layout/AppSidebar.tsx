@@ -28,9 +28,10 @@ import {
 } from '@/components/ui/sidebar';
 import { AboutDialog } from './AboutDialog';
 import { useUiStore } from '@/store/ui-store';
+import { APP_VERSION } from '@/config/version';
 
 export function AppSidebar() {
-  const { toggleSidebar, state } = useSidebar();
+  const { toggleSidebar, state, isMobile, setOpenMobile } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const [aboutOpen, setAboutOpen] = useState(false);
   const { t } = useTranslation();
@@ -75,6 +76,11 @@ export function AppSidebar() {
                       to={item.url}
                       className="hover:bg-sidebar-accent"
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      onClick={() => {
+                        // Close the mobile sheet after navigation — otherwise the
+                        // menu stays open and covers the content on small screens.
+                        if (isMobile) setOpenMobile(false);
+                      }}
                     >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
@@ -114,7 +120,7 @@ export function AppSidebar() {
           <Info className="h-3 w-3 shrink-0" />
           {!isCollapsed && (
             <span className="text-[10px] leading-tight">
-              v1.3.0 · © 2026 OE3 Usable Fork
+              v{APP_VERSION} · © 2026 OE3 Usable Fork
               <br />
               MIT License
             </span>

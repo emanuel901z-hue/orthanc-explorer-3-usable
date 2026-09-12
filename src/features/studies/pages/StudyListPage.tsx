@@ -90,15 +90,31 @@ const MODALITY_OPTIONS = [
 ];
 const DEFAULT_PAGE_SIZE = 25;
 
+type TFn = ReturnType<typeof useTranslation>['t'];
+
+function getColumnLabel(colId: string, t: TFn): string {
+  const keys: Record<string, string> = {
+    patientName: 'studies.patientName',
+    studyDate: 'studies.studyDate',
+    modalities: 'studyList.columns.modality',
+    studyDescription: 'studyList.columns.description',
+    accessionNumber: 'studyList.columns.accession',
+    studyInstanceUID: 'studyList.columns.studyInstanceUID',
+    lastUpdate: 'studyList.columns.lastUpdate',
+    referringPhysician: 'studyList.columns.referring',
+    numberOfInstances: 'studyList.columns.images',
+    status: 'studyList.columns.status',
+  };
+  return t(keys[colId] ?? colId, { defaultValue: colId });
+}
+
 /** Sortable header button — renders sort direction indicator. */
 function SortableHeader({
   label,
   column,
-  t,
 }: {
   label: string;
   column: { toggleSorting: () => void; getIsSorted: () => false | 'asc' | 'desc' };
-  t: (key: string) => string;
 }) {
   const sorted = column.getIsSorted();
   return (
@@ -184,7 +200,7 @@ export default function StudyListPage() {
     queryKey: ['orthanc-labels'],
     queryFn: () => toolsApi.getLabels(),
     staleTime: 60_000,
-    enabled: labelsSupported,
+    enabled: !!labelsSupported,
     retry: false, // 404 means labels not supported — don't retry
   });
 
@@ -199,7 +215,7 @@ export default function StudyListPage() {
       );
       return counts;
     },
-    enabled: labelsSupported && allLabels.length > 0,
+    enabled: !!labelsSupported && allLabels.length > 0,
     staleTime: 60_000,
   });
 
@@ -285,7 +301,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'patientName',
         header: ({ column }) => (
-          <SortableHeader label={t('studies.patientName')} column={column} t={t} />
+          <SortableHeader label={t('studies.patientName')} column={column} />
         ),
         cell: ({ row }) => (
           <div>
@@ -297,7 +313,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'studyDate',
         header: ({ column }) => (
-          <SortableHeader label={t('studies.studyDate')} column={column} t={t} />
+          <SortableHeader label={t('studies.studyDate')} column={column} />
         ),
         cell: ({ row }) => (
           <div>
@@ -311,7 +327,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'modalities',
         header: ({ column }) => (
-          <SortableHeader label={t('studyList.columns.modality')} column={column} t={t} />
+          <SortableHeader label={t('studyList.columns.modality')} column={column} />
         ),
         cell: ({ row }) => (
           <div className="flex gap-1">
@@ -330,7 +346,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'studyDescription',
         header: ({ column }) => (
-          <SortableHeader label={t('studyList.columns.description')} column={column} t={t} />
+          <SortableHeader label={t('studyList.columns.description')} column={column} />
         ),
         cell: ({ row }) => (
           <span className="text-sm truncate max-w-[200px] block">
@@ -341,7 +357,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'accessionNumber',
         header: ({ column }) => (
-          <SortableHeader label={t('studyList.columns.accession')} column={column} t={t} />
+          <SortableHeader label={t('studyList.columns.accession')} column={column} />
         ),
         cell: ({ row }) => (
           <span className="font-mono text-xs text-muted-foreground">
@@ -352,7 +368,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'studyInstanceUID',
         header: ({ column }) => (
-          <SortableHeader label={t('studyList.columns.studyInstanceUID')} column={column} t={t} />
+          <SortableHeader label={t('studyList.columns.studyInstanceUID')} column={column} />
         ),
         cell: ({ row }) => (
           <span
@@ -368,7 +384,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'lastUpdate',
         header: ({ column }) => (
-          <SortableHeader label={t('studyList.columns.lastUpdate')} column={column} t={t} />
+          <SortableHeader label={t('studyList.columns.lastUpdate')} column={column} />
         ),
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground">
@@ -380,7 +396,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'referringPhysician',
         header: ({ column }) => (
-          <SortableHeader label={t('studyList.columns.referring')} column={column} t={t} />
+          <SortableHeader label={t('studyList.columns.referring')} column={column} />
         ),
         cell: ({ row }) => (
           <span className="text-sm truncate max-w-[160px] block">
@@ -393,7 +409,7 @@ export default function StudyListPage() {
       {
         accessorKey: 'numberOfInstances',
         header: ({ column }) => (
-          <SortableHeader label={t('studyList.columns.images')} column={column} t={t} />
+          <SortableHeader label={t('studyList.columns.images')} column={column} />
         ),
         cell: ({ row }) => (
           <div>
@@ -464,7 +480,7 @@ export default function StudyListPage() {
         id: 'status',
         accessorFn: (row) => (row.isStable ? 1 : 0),
         header: ({ column }) => (
-          <SortableHeader label={t('studyList.columns.status')} column={column} t={t} />
+          <SortableHeader label={t('studyList.columns.status')} column={column} />
         ),
         size: 120,
         minSize: 100,
@@ -615,9 +631,7 @@ export default function StudyListPage() {
                             checked={col.getIsVisible()}
                             onCheckedChange={(v) => col.toggleVisibility(!!v)}
                           />
-                          <span>{col.columnDef.header && typeof col.columnDef.header === 'function'
-                            ? col.id
-                            : String(col.columnDef.header || col.id)}</span>
+                          <span>{getColumnLabel(col.id, t)}</span>
                         </label>
                       ))}
                   </div>
@@ -796,6 +810,40 @@ export default function StudyListPage() {
         )}
         {isMobile ? (
           /* ── Mobile Card View ── */
+          <div>
+            {/* Mobile sort control — replaces non-reachable table header sorting */}
+            <div className="flex items-center gap-2 px-3 py-2 border-b">
+              <ArrowUpDown className="h-4 w-4 text-muted-foreground shrink-0" />
+              <Select
+                value={sorting[0]?.id ?? 'studyDate'}
+                onValueChange={(colId) => {
+                  const prev = sorting[0];
+                  // Keep current direction when switching columns; sensible defaults otherwise
+                  const desc = prev?.id === colId ? prev.desc : colId !== 'patientName' && colId !== 'studyDescription' && colId !== 'accessionNumber' && colId !== 'modalities' && colId !== 'status';
+                  setSorting([{ id: colId, desc }]);
+                }}
+              >
+                <SelectTrigger className="h-8 flex-1 text-xs" aria-label={t('studyList.sortBy', { defaultValue: 'Sort by' })}>
+                  <SelectValue placeholder={t('studyList.sortBy', { defaultValue: 'Sort by' })} />
+                </SelectTrigger>
+                <SelectContent>
+                  {['patientName', 'studyDate', 'modalities', 'studyDescription', 'accessionNumber', 'numberOfInstances', 'status'].map((id) => (
+                    <SelectItem key={id} value={id}>
+                      {getColumnLabel(id, t)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 shrink-0"
+                onClick={() => setSorting([{ id: sorting[0]?.id ?? 'studyDate', desc: !(sorting[0]?.desc ?? true) }])}
+                aria-label={sorting[0]?.desc === false ? t('studyList.sortAsc', { defaultValue: 'Ascending' }) : t('studyList.sortDesc', { defaultValue: 'Descending' })}
+              >
+                {sorting[0]?.desc === false ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+              </Button>
+            </div>
           <div className="divide-y">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
@@ -893,6 +941,7 @@ export default function StudyListPage() {
                 );
               })
             )}
+          </div>
           </div>
         ) : (
         /* ── Desktop Table View ── */

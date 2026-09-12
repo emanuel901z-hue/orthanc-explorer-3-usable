@@ -23,10 +23,14 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // v2.2.0: Aligned with PP strategy — warn for legacy code, not error
       "@typescript-eslint/no-unused-vars": [
-        "error",
+        "warn",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
+      "@typescript-eslint/no-explicit-any": "warn",
+      // smart-search.ts uses \/ in regex — legitimate pattern
+      "no-useless-escape": "warn",
     },
   },
 );

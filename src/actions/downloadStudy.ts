@@ -34,6 +34,9 @@ export async function downloadStudyAction(
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    // Kurze Verzoegerung, damit der Browser den Speichern-Dialog oeffnen kann,
+    // bevor der Button wieder aktiviert wird (verhindert Doppelklicks und "abgestuerzt"-Gefuehl).
+    await new Promise((resolve) => setTimeout(resolve, 1200));
     URL.revokeObjectURL(url);
     auditClient.emit({ ...base, outcome: "success" });
   } catch (e) {

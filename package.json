@@ -1,7 +1,7 @@
 {
   "name": "orthanc-explorer-3-usable",
   "private": true,
-  "version": "1.3.0",
+  "version": "2.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

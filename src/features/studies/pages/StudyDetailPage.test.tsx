@@ -211,7 +211,7 @@ describe('StudyDetailPage — mutation error handlers', () => {
     });
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Download failed.');
+      expect(toast.error).toHaveBeenCalledWith('Download failed');
     });
   });
 

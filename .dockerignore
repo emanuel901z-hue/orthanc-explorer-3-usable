@@ -1,0 +1,27 @@
+# Build-Context fuer OE3 Dockerfile reduzieren
+# Nur Source, Lockfiles, Build-Konfiguration und Assets werden benoetigt.
+node_modules
+dist
+test-results
+e2e
+test-data
+tests
+.git
+.gitignore
+.DS_Store
+.env
+.env.*
+.envrc
+*.log
+README.md
+LICENSE
+CLAUDE.md
+docs
+.github
+scripts
+vitest.config.ts
+playwright.smoke.config.ts
+.eslint*
+.prettier*
+.audit-ci.jsonc
+docker-compose.dev.yml

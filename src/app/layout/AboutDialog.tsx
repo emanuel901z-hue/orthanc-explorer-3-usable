@@ -9,8 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useUiStore } from '@/store/ui-store';
 import { useSystemInfo, useStats, usePlugins } from '@/features/settings/hooks/use-system-info';
-
-const APP_VERSION = '1.8.0';
+import { APP_VERSION } from '@/config/version';
 
 interface AboutDialogProps {
   open: boolean;
@@ -42,6 +41,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     t('about.features.backendProxy'),
     t('about.features.authGate'),
     t('about.features.merge'),
+    t('about.features.patientSafeMerge'),
     t('about.features.smartSearch'),
     t('about.features.rbac'),
     t('about.features.branding'),
@@ -50,14 +50,19 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     t('about.features.dicomweb'),
     t('about.features.i18n'),
     t('about.features.mobileCards'),
+    t('about.features.columnConfig'),
     t('about.features.keyboardShortcuts'),
     t('about.features.worklists'),
     t('about.features.auditLogs'),
+    t('about.features.sharing'),
+    t('about.features.customButtons'),
+    t('about.features.addSeries'),
+    t('about.features.quickReport'),
   ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[85dvh] overflow-y-auto w-[calc(100vw-2rem)] sm:w-full sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <img

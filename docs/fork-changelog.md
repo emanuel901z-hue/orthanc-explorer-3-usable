@@ -4,6 +4,67 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.3.0 — DICOM Upload + Merge: Patient-Safe Matching (2026-09-08)
+
+### Critical: Cross-patient merge prevention
+
+- **`addDicomToStudyAction` now pre-validates patient identity before `POST /studies/{id}/merge`.**
+- Prevents accidental merges of DICOM from a different patient into the target study.
+- Mismatched source studies are reported as `skipped` instead of merged.
+- UI shows a dedicated `study.addDicomPatientMismatch` toast.
+
+### High: Umlaut- and DICOM-PN-aware patient matching
+
+- New utility `src/lib/dicom-patient-matching.ts` ports simplified logic from PP-Portal `PatientIdNormalizationService`:
+  - Parses DICOM `PatientName` (`LastName^FirstName^...`).
+  - Generates Umlaut-safe name variants (`ü` ↔ `ue`, `ö` ↔ `oe`, `ä` ↔ `ae`, `ß` ↔ `ss`).
+  - Normalizes `PatientBirthDate` from `YYYYMMDD` to `YYYY-MM-DD`.
+  - First-name prefix matching (`Hans-P` matches `Hans-Peter`).
+- Matching strategy:
+  1. Exact `PatientID` match, if present on both sides.
+  2. Fallback: last-name + first-name + birth-date match (Umlaut-safe).
+  3. Missing birth date on either side → no match (conservative).
+
+### High: DICOM upload/merge audit trail
+
+- `addDicomToStudyAction` emits `study.addDicom` (started/success/failure) and per-file `instance.upload` (started/success/failure) events.
+- Audit detail includes `uploaded`, `failed`, `merged`, `skipped`, `mismatchedStudyIds`.
+- `errorCode` is captured for upload failures.
+
+### Medium: Add Series dialog improvements
+
+- DICOM mode now reports partial results (`uploaded`, `failed`, `merged`, `skipped`).
+- Patient mismatch displayed via dedicated i18n toast.
+- File sizes use shared `formatDiskSize` utility.
+
+### Tests added
+
+- `src/lib/dicom-patient-matching.test.ts` (24 tests): PN parsing, Umlaut variants, date normalization, match/no-match cases.
+- `src/actions/addDicomToStudy.test.ts` (7 tests): same-patient merge, umlaut-spelling merge, different-patient skip, upload failure, progress callback, merge error propagation.
+
+### Verification
+
+- `npx tsc --noEmit -p tsconfig.app.json`: 0 errors.
+- `npx vitest run`: 249/249 tests passing.
+
+### Files changed
+
+```text
+Added:
+  src/lib/dicom-patient-matching.ts
+  src/lib/dicom-patient-matching.test.ts
+  src/actions/addDicomToStudy.test.ts
+
+Modified:
+  src/actions/addDicomToStudy.ts
+  src/features/studies/components/AddSeriesDialog.tsx
+  src/i18n/locales/de.json
+  src/i18n/locales/en.json
+  docs/fork-changelog.md
+```
+
+---
+
 ## v2.2.0 — CI Pipeline + audit-ci (2026-09-06)
 
 ### GitHub Actions CI Pipeline

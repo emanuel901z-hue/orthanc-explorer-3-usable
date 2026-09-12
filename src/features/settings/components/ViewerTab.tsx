@@ -86,11 +86,11 @@ export default function ViewerTab() {
     {
       id: 'volview',
       name: 'VolView',
-      url: '/volview/',
-      status: 'configured',
+      url: '',
+      status: 'not configured',
       type: 'web',
       description: t('viewer.volviewDescription'),
-      enabled: true,
+      enabled: false,
       defaultViewer: false,
     },
     {
@@ -152,6 +152,10 @@ export default function ViewerTab() {
     );
     toast.success(t('viewer.saveSuccess', { name: editViewer.name }), { description: editUrl });
     setEditViewer(null);
+  };
+
+  const toggleEnabled = (id: string) => {
+    setViewers((prev) => prev.map((v) => (v.id === id ? { ...v, enabled: !v.enabled } : v)));
   };
 
   const setDefault = (id: string) => {
@@ -251,6 +255,20 @@ export default function ViewerTab() {
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">{v.description}</p>
                       </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`viewer-toggle-${v.id}`}
+                        checked={v.enabled}
+                        onCheckedChange={() => toggleEnabled(v.id)}
+                        aria-label={t('viewer.toggleEnabled', { name: v.name })}
+                      />
+                      <Label
+                        htmlFor={`viewer-toggle-${v.id}`}
+                        className="text-xs font-normal cursor-pointer"
+                      >
+                        {v.enabled ? t('viewer.enabled') : t('viewer.disabled')}
+                      </Label>
                     </div>
                   </div>
 

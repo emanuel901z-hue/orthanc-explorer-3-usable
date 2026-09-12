@@ -6,7 +6,7 @@
  */
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { Printer, X } from 'lucide-react';
+import { Printer, Loader2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,31 +14,68 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Study, Series } from '@/shared/types';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Study } from '@/shared/types';
 import { formatPatientName } from '@/shared/components/ModalityBadge';
+import { useStudySeries } from '@/features/studies/hooks/use-studies';
+import { useState } from 'react';
 
 interface QuickReportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   study: Study | null;
-  series?: Series[];
 }
 
-export default function QuickReportDialog({ open, onOpenChange, study, series = [] }: QuickReportDialogProps) {
+export default function QuickReportDialog({ open, onOpenChange, study }: QuickReportDialogProps) {
   const { t } = useTranslation();
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const { data: series = [], isLoading: seriesLoading } = useStudySeries(study?.id ?? '');
 
   if (!study) return null;
 
+  const sex = study.patientSex
+    ? study.patientSex === 'M'
+      ? t('studyDetail.sexMale', { defaultValue: 'Male' })
+      : study.patientSex === 'F'
+        ? t('studyDetail.sexFemale', { defaultValue: 'Female' })
+        : t('studyDetail.sexOther', { defaultValue: 'Other' })
+    : '—';
+
+  const formatMeta = (value: string | undefined) => value && value.trim() ? value : '—';
+
   const handlePrint = () => {
+    setIsPrinting(true);
     const printWindow = window.open('', '_blank', 'width=800,height=600');
-    if (!printWindow) return;
+    if (!printWindow) {
+      setIsPrinting(false);
+      return;
+    }
+
+    const rows = series
+      .map(
+        (s, i) => `<tr>
+          <td>${s.seriesNumber ?? i + 1}</td>
+          <td>${s.modality}</td>
+          <td>${s.seriesDescription || '—'}</td>
+          <td>${s.numberOfInstances}</td>
+        </tr>`
+      )
+      .join('');
 
     const html = `
 <!DOCTYPE html>
 <html lang="${t('common.lang', { defaultValue: 'en' })}">
 <head>
 <meta charset="utf-8">
-<title>Study Report — ${formatPatientName(study.patientName)}</title>
+<title>${formatPatientName(study.patientName)} — ${t('quickReport.title', { defaultValue: 'Quick Report' })}</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 40px; color: #333; }
   h1 { font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 8px; }
@@ -53,68 +90,122 @@ export default function QuickReportDialog({ open, onOpenChange, study, series = 
 </style>
 </head>
 <body>
-  <h1>Study Report</h1>
+  <h1>${t('quickReport.title', { defaultValue: 'Quick Report' })}</h1>
   <dl class="meta">
-    <dt>Patient Name</dt><dd>${formatPatientName(study.patientName)}</dd>
-    <dt>Patient ID</dt><dd>${study.patientId}</dd>
-    <dt>Study Date</dt><dd>${study.studyDate ? format(study.studyDate, 'MMM dd, yyyy') : '—'}</dd>
-    <dt>Study Time</dt><dd>${study.studyTime || '—'}</dd>
-    <dt>Modality</dt><dd>${study.modalities.join(', ')}</dd>
-    <dt>Study Description</dt><dd>${study.studyDescription || '—'}</dd>
-    <dt>Accession Number</dt><dd>${study.accessionNumber || '—'}</dd>
-    <dt>Referring Physician</dt><dd>${study.referringPhysician?.replace(/\^/g, ', ') || '—'}</dd>
-    <dt>Study Instance UID</dt><dd>${study.studyInstanceUID || '—'}</dd>
-    <dt>Number of Series</dt><dd>${study.numberOfSeries}</dd>
-    <dt>Number of Instances</dt><dd>${study.numberOfInstances}</dd>
+    <dt>${t('quickReport.patientName', { defaultValue: 'Patient Name' })}</dt><dd>${formatPatientName(study.patientName)}</dd>
+    <dt>${t('quickReport.patientId', { defaultValue: 'Patient ID' })}</dt><dd>${study.patientId}</dd>
+    <dt>${t('quickReport.birthDate', { defaultValue: 'Birth Date' })}</dt><dd>${study.patientBirthDate ? format(study.patientBirthDate, 'PPP') : '—'}</dd>
+    <dt>${t('quickReport.sex', { defaultValue: 'Sex' })}</dt><dd>${sex}</dd>
+    <dt>${t('quickReport.studyDate', { defaultValue: 'Study Date' })}</dt><dd>${study.studyDate ? format(study.studyDate, 'PPP') : '—'}</dd>
+    <dt>${t('quickReport.studyTime', { defaultValue: 'Study Time' })}</dt><dd>${formatMeta(study.studyTime)}</dd>
+    <dt>${t('quickReport.modality', { defaultValue: 'Modality' })}</dt><dd>${study.modalities.join(', ')}</dd>
+    <dt>${t('quickReport.studyDescription', { defaultValue: 'Study Description' })}</dt><dd>${formatMeta(study.studyDescription)}</dd>
+    <dt>${t('quickReport.accessionNumber', { defaultValue: 'Accession Number' })}</dt><dd>${formatMeta(study.accessionNumber)}</dd>
+    <dt>${t('quickReport.referringPhysician', { defaultValue: 'Referring Physician' })}</dt><dd>${formatMeta(study.referringPhysician?.replace(/\^/g, ', '))}</dd>
+    <dt>${t('quickReport.studyInstanceUID', { defaultValue: 'Study Instance UID' })}</dt><dd>${formatMeta(study.studyInstanceUID)}</dd>
+    <dt>${t('quickReport.numberOfSeries', { defaultValue: 'Number of Series' })}</dt><dd>${study.numberOfSeries}</dd>
+    <dt>${t('quickReport.numberOfInstances', { defaultValue: 'Number of Instances' })}</dt><dd>${study.numberOfInstances}</dd>
   </dl>
-  <h2>Series</h2>
+  <h2>${t('quickReport.series', { defaultValue: 'Series' })}</h2>
   <table>
-    <thead><tr><th>#</th><th>Modality</th><th>Description</th><th>Instances</th></tr></thead>
+    <thead><tr>
+      <th>${t('quickReport.seriesNumber', { defaultValue: '#' })}</th>
+      <th>${t('studies.modality', { defaultValue: 'Modality' })}</th>
+      <th>${t('quickReport.seriesDescription', { defaultValue: 'Description' })}</th>
+      <th>${t('quickReport.seriesInstances', { defaultValue: 'Instances' })}</th>
+    </tr></thead>
     <tbody>
-      ${series.map((s, i) => `<tr><td>${s.seriesNumber ?? i + 1}</td><td>${s.modality}</td><td>${s.seriesDescription || '—'}</td><td>${s.numberOfInstances}</td></tr>`).join('')}
+      ${rows || `<tr><td colspan="4" class="text-center">${t('quickReport.noSeries', { defaultValue: 'No series data loaded' })}</td></tr>`}
     </tbody>
   </table>
-  <div class="footer">Generated by Orthanc Explorer 3 on ${format(new Date(), 'MMM dd, yyyy HH:mm')}</div>
+  <div class="footer">${t('quickReport.footer', { date: format(new Date(), 'PPP p'), defaultValue: `Generated by Orthanc Explorer 3 on ${format(new Date(), 'PPP p')}` })}</div>
 </body>
 </html>`;
     printWindow.document.write(html);
     printWindow.document.close();
     printWindow.focus();
-    setTimeout(() => printWindow.print(), 500);
+    setTimeout(() => {
+      printWindow.print();
+      setIsPrinting(false);
+    }, 500);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            {t('studyList.quickReport', { defaultValue: 'Quick Report' })}
-            <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-              <X className="h-4 w-4" />
-            </Button>
+          <DialogTitle className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            {t('quickReport.title', { defaultValue: 'Quick Report' })}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <dl className="grid grid-cols-[200px_1fr] gap-y-2 text-sm">
-            <dt className="font-semibold text-muted-foreground">{t('studies.patientName')}</dt>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.patientName', { defaultValue: 'Patient Name' })}</dt>
             <dd>{formatPatientName(study.patientName)}</dd>
-            <dt className="font-semibold text-muted-foreground">{t('studyList.columns.accession')}</dt>
-            <dd>{study.accessionNumber || '—'}</dd>
-            <dt className="font-semibold text-muted-foreground">{t('studies.studyDate')}</dt>
-            <dd>{study.studyDate ? format(study.studyDate, 'MMM dd, yyyy') : '—'}</dd>
-            <dt className="font-semibold text-muted-foreground">{t('studyList.columns.modality')}</dt>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.patientId', { defaultValue: 'Patient ID' })}</dt>
+            <dd>{study.patientId}</dd>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.birthDate', { defaultValue: 'Birth Date' })}</dt>
+            <dd>{study.patientBirthDate ? format(study.patientBirthDate, 'PPP') : '—'}</dd>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.sex', { defaultValue: 'Sex' })}</dt>
+            <dd>{sex}</dd>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.studyDate', { defaultValue: 'Study Date' })}</dt>
+            <dd>{study.studyDate ? format(study.studyDate, 'PPP') : '—'}</dd>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.studyTime', { defaultValue: 'Study Time' })}</dt>
+            <dd>{formatMeta(study.studyTime)}</dd>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.modality', { defaultValue: 'Modality' })}</dt>
             <dd>{study.modalities.join(', ')}</dd>
-            <dt className="font-semibold text-muted-foreground">{t('studyList.columns.description')}</dt>
-            <dd>{study.studyDescription || '—'}</dd>
-            <dt className="font-semibold text-muted-foreground">{t('studyList.columns.referring')}</dt>
-            <dd>{study.referringPhysician?.replace(/\^/g, ', ') || '—'}</dd>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.studyDescription', { defaultValue: 'Study Description' })}</dt>
+            <dd>{formatMeta(study.studyDescription)}</dd>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.accessionNumber', { defaultValue: 'Accession Number' })}</dt>
+            <dd>{formatMeta(study.accessionNumber)}</dd>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.referringPhysician', { defaultValue: 'Referring Physician' })}</dt>
+            <dd>{formatMeta(study.referringPhysician?.replace(/\^/g, ', '))}</dd>
+            <dt className="font-semibold text-muted-foreground">{t('quickReport.studyInstanceUID', { defaultValue: 'Study Instance UID' })}</dt>
+            <dd className="font-mono text-xs">{formatMeta(study.studyInstanceUID)}</dd>
           </dl>
+
+          <div>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+              {t('quickReport.series', { defaultValue: 'Series' })}
+            </h3>
+            {seriesLoading ? (
+              <div className="text-sm text-muted-foreground py-4 text-center">{t('common.loading')}</div>
+            ) : series.length === 0 ? (
+              <div className="text-sm text-muted-foreground py-4 text-center">{t('quickReport.noSeries', { defaultValue: 'No series data loaded' })}</div>
+            ) : (
+              <div className="overflow-auto border rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-16">{t('quickReport.seriesNumber', { defaultValue: '#' })}</TableHead>
+                      <TableHead>{t('studies.modality', { defaultValue: 'Modality' })}</TableHead>
+                      <TableHead>{t('quickReport.seriesDescription', { defaultValue: 'Description' })}</TableHead>
+                      <TableHead className="w-24">{t('quickReport.seriesInstances', { defaultValue: 'Instances' })}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {series.map((s, i) => (
+                      <TableRow key={s.id}>
+                        <TableCell>{s.seriesNumber ?? i + 1}</TableCell>
+                        <TableCell>{s.modality}</TableCell>
+                        <TableCell>{s.seriesDescription || '—'}</TableCell>
+                        <TableCell>{s.numberOfInstances}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
               {t('common.close', { defaultValue: 'Close' })}
             </Button>
-            <Button size="sm" onClick={handlePrint} className="gap-1.5">
-              <Printer className="h-3.5 w-3.5" /> {t('studyList.print', { defaultValue: 'Print / Save PDF' })}
+            <Button size="sm" onClick={handlePrint} disabled={isPrinting} className="gap-1.5">
+              {isPrinting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
+              {t('quickReport.print', { defaultValue: 'Print / Save PDF' })}
             </Button>
           </div>
         </div>

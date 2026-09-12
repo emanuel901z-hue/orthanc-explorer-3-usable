@@ -45,7 +45,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
           <LockKeyhole className="h-12 w-12 text-muted-foreground" />
           <h1 className="text-xl font-semibold">Anmeldung erforderlich</h1>
           <p className="text-sm text-muted-foreground">
-            Orthanc Explorer 3 erfordert eine System-Administrator-Anmeldung.
+            Orthanc Explorer 3 erfordert eine ADMIN/SUPERADMIN-Anmeldung mit aktiver Local-PACS-Konfiguration.
             Bitte oeffnen Sie OE3 ueber das Admin-Dashboard (PACS-Tab).
           </p>
           <a

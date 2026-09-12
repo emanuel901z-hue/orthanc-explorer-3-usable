@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, FileText, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus } from 'lucide-react';
+import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -17,6 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useStudy, useStudySeries, useInstancePreview, useStudySharedTags } from '@/features/studies/hooks/use-studies';
 import { ModalityBadge, formatPatientName, formatDiskSize } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
@@ -37,7 +38,6 @@ import { OrthancError } from '@/lib/errors';
 import { useFeature } from '@/config/features';
 import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
-import type { Series } from '@/shared/types';
 import { toolsApi } from '@/api/tools';
 
 function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
@@ -92,6 +92,15 @@ export default function StudyDetailPage() {
   const [seriesView, setSeriesView] = useState<'grid' | 'table'>('table');
   const [seriesSearch, setSeriesSearch] = useState('');
   const [seriesSort, setSeriesSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'seriesNumber', dir: 'asc' });
+  const [seriesColumnVisibility, setSeriesColumnVisibility] = useState<Record<string, boolean>>({
+    select: true,
+    seriesNumber: true,
+    modality: true,
+    seriesDescription: true,
+    numberOfInstances: true,
+    seriesInstanceUID: true,
+  });
+  const [showSeriesColumnConfig, setShowSeriesColumnConfig] = useState(false);
   const [selectedSeriesIds, setSelectedSeriesIds] = useState<Set<string>>(new Set());
   const [bulkDownloading, setBulkDownloading] = useState(false);
   const isMobile = useMediaQuery('(max-width: 767px)');
@@ -111,9 +120,12 @@ export default function StudyDetailPage() {
   const downloadMutation = useMutation({
     mutationFn: (id: string) =>
       downloadStudyAction(id, study ? `${formatPatientName(study.patientName)}.zip` : `${id}.zip`),
+    onSuccess: () => {
+      toast.success(t('studyDetail.downloadStarted', { defaultValue: 'Download started' }));
+    },
     onError: (err) => {
       const ref = err instanceof OrthancError ? ` (Ref: ${err.correlationId})` : '';
-      toast.error(`Download failed.${ref}`);
+      toast.error(t('studyDetail.downloadFailed', { defaultValue: 'Download failed' }) + ref);
     },
   });
 
@@ -125,10 +137,10 @@ export default function StudyDetailPage() {
         study ? `${formatPatientName(study.patientName)}_DICOMDIR.zip` : `${id}_dicomdir.zip`,
         { dicomDir: true },
       ),
-    onSuccess: () => toast.success(t('studyDetail.dicomDirDownloaded', { defaultValue: 'DICOM-DIR ZIP downloaded' })),
+    onSuccess: () => toast.success(t('studyDetail.dicomDirStarted', { defaultValue: 'DICOM-DIR download started' })),
     onError: (err) => {
       const ref = err instanceof OrthancError ? ` (Ref: ${err.correlationId})` : '';
-      toast.error(`DICOM-DIR download failed.${ref}`);
+      toast.error(t('studyDetail.dicomDirFailed', { defaultValue: 'DICOM-DIR download failed' }) + ref);
     },
   });
 
@@ -312,7 +324,7 @@ export default function StudyDetailPage() {
                   method: 'POST',
                   credentials: 'include',
                 });
-              } catch (e) {
+              } catch {
                 // Cookie may already be valid — continue to open OHIF
               }
               window.open(`/ohif/viewer?StudyInstanceUIDs=${study.studyInstanceUID}`, '_blank', 'noopener,noreferrer');
@@ -324,7 +336,7 @@ export default function StudyDetailPage() {
           {(() => {
             const viewers = JSON.parse(localStorage.getItem('oe3-viewers') || '[]') as Array<{id: string; url: string; enabled: boolean; type: string}>;
             return viewers
-              .filter((v) => v.enabled && v.id !== 'ohif' && v.id !== 'stone')
+              .filter((v) => v.enabled && v.url && v.id !== 'ohif' && v.id !== 'stone')
               .map((v) => (
                 <Button
                   key={v.id}
@@ -363,10 +375,15 @@ export default function StudyDetailPage() {
                     downloadMutation.mutate(studyId!);
                   }}
                 >
-                  <Download className="h-3.5 w-3.5" /> {t('actions.download')}
+                  {downloadMutation.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Download className="h-3.5 w-3.5" />
+                  )}
+                  {downloadMutation.isPending ? t('studyDetail.preparingDownload', { defaultValue: 'Preparing...' }) : t('actions.download')}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Download as DICOM ZIP archive</TooltipContent>
+              <TooltipContent>{t('studyDetail.downloadTooltip', { defaultValue: 'Download as DICOM ZIP archive' })}</TooltipContent>
             </Tooltip>
           )}
           {canDownload && (
@@ -382,10 +399,15 @@ export default function StudyDetailPage() {
                     downloadDicomDirMutation.mutate(studyId!);
                   }}
                 >
-                  <FolderArchive className="h-3.5 w-3.5" /> {t('studyDetail.dicomDir', { defaultValue: 'DICOM-DIR' })}
+                  {downloadDicomDirMutation.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <FolderArchive className="h-3.5 w-3.5" />
+                  )}
+                  {downloadDicomDirMutation.isPending ? t('studyDetail.preparingDicomDir', { defaultValue: 'Preparing DICOM-DIR...' }) : t('studyDetail.dicomDir', { defaultValue: 'DICOM-DIR' })}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Download as ZIP with DICOMDIR index</TooltipContent>
+              <TooltipContent>{t('studyDetail.dicomDirTooltip', { defaultValue: 'Download as ZIP with DICOMDIR index' })}</TooltipContent>
             </Tooltip>
           )}
           {canSend && (
@@ -499,18 +521,24 @@ export default function StudyDetailPage() {
                     <span className="text-lg font-semibold">{formatPatientName(study.patientName)}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-y-2 text-sm">
-                    <span className="text-muted-foreground">Patient ID</span>
+                    <span className="text-muted-foreground">{t('studyDetail.patientId', { defaultValue: 'Patient ID' })}</span>
                     <span className="font-mono text-xs">{study.patientId}</span>
                     {study.patientBirthDate && (
                       <>
-                        <span className="text-muted-foreground">Birth Date</span>
+                        <span className="text-muted-foreground">{t('studyDetail.birthDate', { defaultValue: 'Birth Date' })}</span>
                         <span>{format(study.patientBirthDate, 'MMM dd, yyyy')}</span>
                       </>
                     )}
                     {study.patientSex && (
                       <>
-                        <span className="text-muted-foreground">Sex</span>
-                        <span>{study.patientSex === 'M' ? 'Male' : study.patientSex === 'F' ? 'Female' : 'Other'}</span>
+                        <span className="text-muted-foreground">{t('studyDetail.sex', { defaultValue: 'Sex' })}</span>
+                        <span>
+                          {study.patientSex === 'M'
+                            ? t('studyDetail.sexMale', { defaultValue: 'Male' })
+                            : study.patientSex === 'F'
+                              ? t('studyDetail.sexFemale', { defaultValue: 'Female' })
+                              : t('studyDetail.sexOther', { defaultValue: 'Other' })}
+                        </span>
                       </>
                     )}
                   </div>
@@ -527,23 +555,23 @@ export default function StudyDetailPage() {
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Study Info</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t('studyDetail.studyInfo', { defaultValue: 'Study Info' })}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-2 gap-y-2 text-sm">
-                    <span className="text-muted-foreground">Date</span>
+                    <span className="text-muted-foreground">{t('studies.studyDate', { defaultValue: 'Study Date' })}</span>
                     <span>{format(study.studyDate, 'MMM dd, yyyy')}</span>
                     {study.studyTime && (
                       <>
-                        <span className="text-muted-foreground">Time</span>
+                        <span className="text-muted-foreground">{t('quickReport.studyTime', { defaultValue: 'Study Time' })}</span>
                         <span>{study.studyTime}</span>
                       </>
                     )}
-                    <span className="text-muted-foreground">Description</span>
+                    <span className="text-muted-foreground">{t('studies.description', { defaultValue: 'Description' })}</span>
                     <span>{study.studyDescription || '—'}</span>
-                    <span className="text-muted-foreground">Accession #</span>
+                    <span className="text-muted-foreground">{t('studyList.columns.accession', { defaultValue: 'Accession #' })}</span>
                     <span className="font-mono text-xs">{study.accessionNumber}</span>
-                    <span className="text-muted-foreground">Modality</span>
+                    <span className="text-muted-foreground">{t('studies.modality', { defaultValue: 'Modality' })}</span>
                     <div className="flex gap-1">
                       {study.modalities.map((m) => <ModalityBadge key={m} modality={m} />)}
                     </div>
@@ -553,24 +581,24 @@ export default function StudyDetailPage() {
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Statistics</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t('studyDetail.statistics', { defaultValue: 'Statistics' })}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-3 text-center">
                     <div className="p-2 rounded-lg bg-muted">
                       <Layers className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                       <div className="font-semibold">{study.numberOfSeries}</div>
-                      <div className="text-xs text-muted-foreground">Series</div>
+                      <div className="text-xs text-muted-foreground">{t('studies.series', { defaultValue: 'Series' })}</div>
                     </div>
                     <div className="p-2 rounded-lg bg-muted">
                       <Image className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                       <div className="font-semibold">{study.numberOfInstances ?? '—'}</div>
-                      <div className="text-xs text-muted-foreground">Images</div>
+                      <div className="text-xs text-muted-foreground">{t('studyDetail.images', { defaultValue: 'Images' })}</div>
                     </div>
                     <div className="p-2 rounded-lg bg-muted">
                       <HardDrive className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                       <div className="font-semibold">{formatDiskSize(study.diskSize)}</div>
-                      <div className="text-xs text-muted-foreground">Size</div>
+                      <div className="text-xs text-muted-foreground">{t('common.size', { defaultValue: 'Size' })}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -611,10 +639,79 @@ export default function StudyDetailPage() {
                           />
                         </div>
                       )}
+                      {isMobile && (
+                        <div className="flex items-center gap-1">
+                          <Select
+                            value={seriesSort.key}
+                            onValueChange={(k) => setSeriesSort({ key: k as SortKey, dir: seriesSort.dir })}
+                          >
+                            <SelectTrigger className="h-8 w-[118px] text-xs" aria-label={t('studyDetail.sortBy', { defaultValue: 'Sort by' })}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="seriesNumber">{t('quickReport.seriesNumber', { defaultValue: '#' })}</SelectItem>
+                              <SelectItem value="modality">{t('studies.modality', { defaultValue: 'Modality' })}</SelectItem>
+                              <SelectItem value="seriesDescription">{t('studies.description', { defaultValue: 'Description' })}</SelectItem>
+                              <SelectItem value="numberOfInstances">{t('studyDetail.images', { defaultValue: 'Images' })}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => setSeriesSort((p) => ({ ...p, dir: p.dir === 'asc' ? 'desc' : 'asc' }))}
+                            aria-label={seriesSort.dir === 'asc' ? t('studyList.sortAsc', { defaultValue: 'Ascending' }) : t('studyList.sortDesc', { defaultValue: 'Descending' })}
+                          >
+                            {seriesSort.dir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
+                          </Button>
+                        </div>
+                      )}
                       <ToggleGroup type="single" value={seriesView} onValueChange={(v) => v && setSeriesView(v as 'grid' | 'table')} size="sm">
                         <ToggleGroupItem value="grid" aria-label="Grid view"><LayoutGrid className="h-3.5 w-3.5" /></ToggleGroupItem>
                         <ToggleGroupItem value="table" aria-label="Table view"><List className="h-3.5 w-3.5" /></ToggleGroupItem>
                       </ToggleGroup>
+                      <div className="relative">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowSeriesColumnConfig((p) => !p)}
+                          className="gap-1.5"
+                          aria-expanded={showSeriesColumnConfig}
+                        >
+                          <Settings2 className="h-3.5 w-3.5" />
+                          <span className="hidden sm:inline">{t('studyList.columns.config')}</span>
+                          <ChevronDown className={`h-3 w-3 transition-transform ${showSeriesColumnConfig ? 'rotate-180' : ''}`} />
+                        </Button>
+                        {showSeriesColumnConfig && (
+                          <div className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
+                            <p className="text-xs font-semibold text-muted-foreground mb-2">
+                              {t('studyList.columns.toggle')}
+                            </p>
+                            <div className="space-y-1">
+                              {[
+                                { id: 'seriesNumber', label: t('quickReport.seriesNumber', { defaultValue: '#' }) },
+                                { id: 'modality', label: t('studies.modality', { defaultValue: 'Modality' }) },
+                                { id: 'seriesDescription', label: t('studies.description', { defaultValue: 'Description' }) },
+                                { id: 'numberOfInstances', label: t('studyDetail.images', { defaultValue: 'Images' }) },
+                                { id: 'seriesInstanceUID', label: t('studyDetail.seriesInstanceUID', { defaultValue: 'Series Instance UID' }) },
+                              ].map((col) => (
+                                <label
+                                  key={col.id}
+                                  className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 px-2 py-1 rounded"
+                                >
+                                  <Checkbox
+                                    checked={seriesColumnVisibility[col.id]}
+                                    onCheckedChange={(v) =>
+                                      setSeriesColumnVisibility((prev) => ({ ...prev, [col.id]: !!v }))
+                                    }
+                                  />
+                                  <span>{col.label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
@@ -736,32 +833,44 @@ export default function StudyDetailPage() {
                           <Table style={{ minWidth: '700px' }}>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="w-10">
-                                  <Checkbox
-                                    checked={allSelected ? true : someSelected ? 'indeterminate' : false}
-                                    onCheckedChange={toggleSelectAll}
-                                    aria-label="Select all series"
-                                  />
-                                </TableHead>
-                                <TableHead className="cursor-pointer select-none w-16" onClick={() => toggleSort('seriesNumber')}>
-                                  #<SortIcon col="seriesNumber" />
-                                </TableHead>
-                                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('modality')}>
-                                  Modality<SortIcon col="modality" />
-                                </TableHead>
-                                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('seriesDescription')}>
-                                  Description<SortIcon col="seriesDescription" />
-                                </TableHead>
-                                <TableHead className="cursor-pointer select-none w-24" onClick={() => toggleSort('numberOfInstances')}>
-                                  Images<SortIcon col="numberOfInstances" />
-                                </TableHead>
-                                <TableHead>Series Instance UID</TableHead>
+                                {seriesColumnVisibility.select && (
+                                  <TableHead className="w-10">
+                                    <Checkbox
+                                      checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+                                      onCheckedChange={toggleSelectAll}
+                                      aria-label="Select all series"
+                                    />
+                                  </TableHead>
+                                )}
+                                {seriesColumnVisibility.seriesNumber && (
+                                  <TableHead className="cursor-pointer select-none w-16" onClick={() => toggleSort('seriesNumber')}>
+                                    {t('quickReport.seriesNumber', { defaultValue: '#' })}<SortIcon col="seriesNumber" />
+                                  </TableHead>
+                                )}
+                                {seriesColumnVisibility.modality && (
+                                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('modality')}>
+                                    {t('studies.modality', { defaultValue: 'Modality' })}<SortIcon col="modality" />
+                                  </TableHead>
+                                )}
+                                {seriesColumnVisibility.seriesDescription && (
+                                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('seriesDescription')}>
+                                    {t('studies.description', { defaultValue: 'Description' })}<SortIcon col="seriesDescription" />
+                                  </TableHead>
+                                )}
+                                {seriesColumnVisibility.numberOfInstances && (
+                                  <TableHead className="cursor-pointer select-none w-24" onClick={() => toggleSort('numberOfInstances')}>
+                                    {t('studyDetail.images', { defaultValue: 'Images' })}<SortIcon col="numberOfInstances" />
+                                  </TableHead>
+                                )}
+                                {seriesColumnVisibility.seriesInstanceUID && (
+                                  <TableHead>{t('studyDetail.seriesInstanceUID', { defaultValue: 'Series Instance UID' })}</TableHead>
+                                )}
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {filteredSortedSeries.length === 0 ? (
                                 <TableRow>
-                                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                                  <TableCell colSpan={Object.values(seriesColumnVisibility).filter(Boolean).length} className="text-center text-muted-foreground py-8">
                                     No series match "{seriesSearch}"
                                   </TableCell>
                                 </TableRow>
@@ -774,23 +883,35 @@ export default function StudyDetailPage() {
                                       className={`cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}
                                       onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
                                     >
-                                      <TableCell onClick={(e) => { e.stopPropagation(); toggleSelectSeries(s.id); }}>
-                                        <Checkbox checked={isSelected} aria-label={`Select series ${s.seriesNumber}`} />
-                                      </TableCell>
-                                      <TableCell className="font-medium">{s.seriesNumber}</TableCell>
-                                      <TableCell><ModalityBadge modality={s.modality} /></TableCell>
-                                      <TableCell className="text-sm">{s.seriesDescription || '—'}</TableCell>
-                                      <TableCell className="text-sm text-muted-foreground">{s.numberOfInstances}</TableCell>
-                                      <TableCell className="font-mono text-xs text-muted-foreground max-w-[250px]">
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <span className="truncate block">{s.seriesInstanceUID}</span>
-                                          </TooltipTrigger>
-                                          <TooltipContent side="top" className="max-w-md font-mono text-xs break-all">
-                                            {s.seriesInstanceUID}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TableCell>
+                                      {seriesColumnVisibility.select && (
+                                        <TableCell onClick={(e) => { e.stopPropagation(); toggleSelectSeries(s.id); }}>
+                                          <Checkbox checked={isSelected} aria-label={`Select series ${s.seriesNumber}`} />
+                                        </TableCell>
+                                      )}
+                                      {seriesColumnVisibility.seriesNumber && (
+                                        <TableCell className="font-medium">{s.seriesNumber}</TableCell>
+                                      )}
+                                      {seriesColumnVisibility.modality && (
+                                        <TableCell><ModalityBadge modality={s.modality} /></TableCell>
+                                      )}
+                                      {seriesColumnVisibility.seriesDescription && (
+                                        <TableCell className="text-sm">{s.seriesDescription || '—'}</TableCell>
+                                      )}
+                                      {seriesColumnVisibility.numberOfInstances && (
+                                        <TableCell className="text-sm text-muted-foreground">{s.numberOfInstances}</TableCell>
+                                      )}
+                                      {seriesColumnVisibility.seriesInstanceUID && (
+                                        <TableCell className="font-mono text-xs text-muted-foreground max-w-[250px]">
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <span className="truncate block">{s.seriesInstanceUID}</span>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top" className="max-w-md font-mono text-xs break-all">
+                                              {s.seriesInstanceUID}
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TableCell>
+                                      )}
                                     </TableRow>
                                   );
                                 })
@@ -842,7 +963,7 @@ export default function StudyDetailPage() {
         <TabsContent value="activity">
           <Card>
             <CardContent className="pt-6">
-              <StudyActivityLog studyId={studyId} />
+              <StudyActivityLog studyId={studyId} studyInstanceUid={study?.studyInstanceUID} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -937,6 +1058,7 @@ export default function StudyDetailPage() {
           open={addSeriesOpen}
           onOpenChange={setAddSeriesOpen}
           studyId={study.id}
+          studyInstanceUid={study.studyInstanceUID}
           patientId={study.patientId}
           patientName={study.patientName}
         />

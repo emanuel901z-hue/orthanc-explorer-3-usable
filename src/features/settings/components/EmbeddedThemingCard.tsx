@@ -246,7 +246,7 @@ export default function EmbeddedThemingCard() {
         <Separator />
 
         {/* Preview + Save */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
               className="h-8 w-8 rounded-md border"
@@ -260,10 +260,11 @@ export default function EmbeddedThemingCard() {
             />
             <span className="text-xs text-muted-foreground">{t('theming.livePreview')}</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
+              className="flex-1 sm:flex-none"
               onClick={() => {
                 resetTheming();
                 setDraftAppName(useUiStore.getState().appName);
@@ -272,7 +273,7 @@ export default function EmbeddedThemingCard() {
             >
               {t('theming.reset')}
             </Button>
-            <Button size="sm" onClick={handleSave}>
+            <Button size="sm" className="flex-1 sm:flex-none" onClick={handleSave}>
               {t('theming.saveTheming')}
             </Button>
           </div>

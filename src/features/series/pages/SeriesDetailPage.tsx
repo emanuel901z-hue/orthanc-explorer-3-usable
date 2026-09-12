@@ -336,7 +336,7 @@ export default function SeriesDetailPage() {
                 setModifyOpen(true);
               }}
             >
-              <Pencil className="h-3.5 w-3.5" /> {t('series.modify')}
+              <Pencil className="h-3.5 w-3.5" /> {t('actions.modify')}
             </Button>
           )}
           {canAnonymize && (
