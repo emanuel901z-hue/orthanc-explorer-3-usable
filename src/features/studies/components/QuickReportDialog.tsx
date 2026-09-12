@@ -23,9 +23,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Study } from '@/shared/types';
-import { formatPatientName } from '@/shared/components/ModalityBadge';
+import { formatPatientName, ModalityBadge } from '@/shared/components/ModalityBadge';
 import { useStudySeries } from '@/features/studies/hooks/use-studies';
-import { useState } from 'react';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
+import { useState, useMemo } from 'react';
 
 interface QuickReportDialogProps {
   open: boolean;
@@ -36,8 +37,16 @@ interface QuickReportDialogProps {
 export default function QuickReportDialog({ open, onOpenChange, study }: QuickReportDialogProps) {
   const { t } = useTranslation();
   const [isPrinting, setIsPrinting] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
-  const { data: series = [], isLoading: seriesLoading } = useStudySeries(study?.id ?? '');
+  const { data: seriesRaw = [], isLoading: seriesLoading } = useStudySeries(study?.id ?? '');
+
+  // Always sort the report's series table by series number — Orthanc
+  // returns them in arbitrary order.
+  const series = useMemo(
+    () => [...seriesRaw].sort((a, b) => (a.seriesNumber ?? 0) - (b.seriesNumber ?? 0)),
+    [seriesRaw],
+  );
 
   if (!study) return null;
 
@@ -132,7 +141,7 @@ export default function QuickReportDialog({ open, onOpenChange, study }: QuickRe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:w-full max-w-3xl max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
@@ -140,7 +149,7 @@ export default function QuickReportDialog({ open, onOpenChange, study }: QuickRe
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <dl className="grid grid-cols-[200px_1fr] gap-y-2 text-sm">
+          <dl className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-y-2 text-sm">
             <dt className="font-semibold text-muted-foreground">{t('quickReport.patientName', { defaultValue: 'Patient Name' })}</dt>
             <dd>{formatPatientName(study.patientName)}</dd>
             <dt className="font-semibold text-muted-foreground">{t('quickReport.patientId', { defaultValue: 'Patient ID' })}</dt>
@@ -162,7 +171,7 @@ export default function QuickReportDialog({ open, onOpenChange, study }: QuickRe
             <dt className="font-semibold text-muted-foreground">{t('quickReport.referringPhysician', { defaultValue: 'Referring Physician' })}</dt>
             <dd>{formatMeta(study.referringPhysician?.replace(/\^/g, ', '))}</dd>
             <dt className="font-semibold text-muted-foreground">{t('quickReport.studyInstanceUID', { defaultValue: 'Study Instance UID' })}</dt>
-            <dd className="font-mono text-xs">{formatMeta(study.studyInstanceUID)}</dd>
+            <dd className="font-mono text-xs break-all">{formatMeta(study.studyInstanceUID)}</dd>
           </dl>
 
           <div>
@@ -173,6 +182,25 @@ export default function QuickReportDialog({ open, onOpenChange, study }: QuickRe
               <div className="text-sm text-muted-foreground py-4 text-center">{t('common.loading')}</div>
             ) : series.length === 0 ? (
               <div className="text-sm text-muted-foreground py-4 text-center">{t('quickReport.noSeries', { defaultValue: 'No series data loaded' })}</div>
+            ) : isMobile ? (
+              /* Mobile: the 4-col table does not fit small viewports —
+                 render a readable card list instead. */
+              <div className="divide-y border rounded-lg">
+                {series.map((s, i) => (
+                  <div key={s.id} className="p-3 flex items-start gap-3">
+                    <span className="font-medium text-sm w-8 shrink-0">#{s.seriesNumber ?? i + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <ModalityBadge modality={s.modality} />
+                        <span className="text-xs text-muted-foreground ml-auto">
+                          {s.numberOfInstances} {t('quickReport.seriesInstances', { defaultValue: 'Instances' })}
+                        </span>
+                      </div>
+                      <p className="text-sm mt-1 break-words">{s.seriesDescription || '—'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="overflow-auto border rounded-lg">
                 <Table>
