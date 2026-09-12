@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 
 export interface DicomTagEntry {
@@ -259,6 +260,113 @@ function TagRow({
   );
 }
 
+/** Mobile layout — stacked card per tag instead of the 4-column table. */
+function TagCard({
+  entry,
+  depth = 0,
+  editable,
+  modifications,
+  onModify,
+}: {
+  entry: DicomTagEntry;
+  depth?: number;
+  editable?: boolean;
+  modifications?: Map<string, string>;
+  onModify?: (tag: string, name: string, originalValue: string, newValue: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState(entry.value);
+  const hasChildren = entry.children && entry.children.length > 0;
+  const vrClass = VR_COLORS[entry.vr] || 'bg-muted text-muted-foreground';
+  const isEditable = editable && !NON_EDITABLE_TAGS.has(entry.tag) && entry.vr !== 'SQ';
+  const modifiedValue = modifications?.get(entry.tag);
+  const isModified = modifiedValue !== undefined;
+  const displayValue = isModified ? modifiedValue : entry.value;
+
+  const handleStartEdit = () => {
+    if (!isEditable) return;
+    setEditValue(displayValue);
+    setEditing(true);
+  };
+
+  const handleCommit = () => {
+    setEditing(false);
+    if (editValue !== entry.value) {
+      onModify?.(entry.tag, entry.name, entry.value, editValue);
+    } else if (isModified) {
+      onModify?.(entry.tag, entry.name, entry.value, entry.value);
+    }
+  };
+
+  const handleRevert = () => {
+    setEditing(false);
+    setEditValue(entry.value);
+    onModify?.(entry.tag, entry.name, entry.value, entry.value);
+  };
+
+  return (
+    <>
+      <div
+        className={cn(
+          'py-2 border-b last:border-b-0',
+          depth > 0 && 'bg-muted/30',
+          isModified && 'bg-amber-50 dark:bg-amber-950/30',
+        )}
+        style={{ paddingLeft: `${12 + depth * 16}px`, paddingRight: '12px' }}
+      >
+        <div
+          className={cn('flex items-center gap-2', hasChildren && 'cursor-pointer')}
+          onClick={hasChildren ? () => setExpanded(!expanded) : undefined}
+        >
+          {hasChildren && (expanded ? <ChevronDown className="h-3.5 w-3.5 shrink-0" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0" />)}
+          <span className="font-mono text-xs">{entry.tag}</span>
+          <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 font-mono', vrClass)}>{entry.vr}</Badge>
+        </div>
+        <div className="text-xs mt-0.5 pl-5">{entry.name}</div>
+        <div className="font-mono text-xs mt-0.5 pl-5">
+          {editing ? (
+            <Input
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCommit();
+                if (e.key === 'Escape') { setEditing(false); setEditValue(displayValue); }
+              }}
+              onBlur={handleCommit}
+              autoFocus
+              className="h-7 text-xs font-mono py-0 px-1.5"
+            />
+          ) : (
+            <div className="flex items-start gap-1.5">
+              <span
+                className={cn(
+                  'break-all min-w-0',
+                  isEditable && 'cursor-text',
+                  isModified ? 'text-amber-700 dark:text-amber-400 font-medium' : 'text-muted-foreground'
+                )}
+                onDoubleClick={handleStartEdit}
+                title={isEditable ? t('dicomTagBrowser.doubleClickToEdit') : t('dicomTagBrowser.readOnlyTag')}
+              >
+                {displayValue || <span className="text-muted-foreground/40 italic">{t('dicomTagBrowser.empty')}</span>}
+              </span>
+              {isModified && (
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0 opacity-60 hover:opacity-100" onClick={handleRevert}>
+                  <Undo2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+      {hasChildren && expanded && entry.children!.map((child) => (
+        <TagCard key={child.tag} entry={child} depth={depth + 1} editable={editable} modifications={modifications} onModify={onModify} />
+      ))}
+    </>
+  );
+}
+
 interface DicomTagBrowserProps {
   study: {
     patientName: string;
@@ -278,6 +386,7 @@ interface DicomTagBrowserProps {
 
 export default function DicomTagBrowser({ study, tags, editable, onModificationsChange }: DicomTagBrowserProps) {
   const { t } = useTranslation();
+  const isMobile = useMediaQuery('(max-width: 767px)');
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<'tag' | 'name' | 'vr' | 'value'>('tag');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
@@ -382,6 +491,21 @@ export default function DicomTagBrowser({ study, tags, editable, onModifications
         {t('dicomTagBrowser.tagCount', { count: filtered.length })}
         {editable && <span className="ml-2 text-muted-foreground/60">· {t('dicomTagBrowser.doubleClickHint')}</span>}
       </div>
+      {isMobile ? (
+        /* Mobile: the 4-column table requires constant horizontal scrolling —
+           stacked cards keep every field visible. */
+        <div className="max-h-[600px] overflow-y-auto border rounded-md">
+          {filtered.map((entry) => (
+            <TagCard
+              key={entry.tag}
+              entry={entry}
+              editable={editable}
+              modifications={modifications}
+              onModify={handleModify}
+            />
+          ))}
+        </div>
+      ) : (
       <div className="overflow-auto max-h-[600px] border rounded-md">
         <Table>
           <TableHeader>
@@ -414,6 +538,7 @@ export default function DicomTagBrowser({ study, tags, editable, onModifications
           </TableBody>
         </Table>
       </div>
+      )}
     </div>
   );
 }

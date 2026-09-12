@@ -426,11 +426,11 @@ function ModalityMobileCard({
   return (
     <Card>
       <CardContent className="p-3 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <span
               className={cn(
-                'inline-flex items-center justify-center h-6 w-6 rounded-full',
+                'inline-flex items-center justify-center h-6 w-6 shrink-0 rounded-full',
                 hasEchoResult
                   ? isOnline ? 'bg-emerald-500/10' : 'bg-destructive/10'
                   : 'bg-muted',
@@ -445,9 +445,9 @@ function ModalityMobileCard({
                 )}
               />
             </span>
-            <p className="font-medium">{modality.name}</p>
+            <p className="font-medium break-all">{modality.name}</p>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 shrink-0">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={isEchoing} onClick={() => onEcho(name)}>
               {isEchoing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
             </Button>
@@ -459,11 +459,11 @@ function ModalityMobileCard({
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-1 text-xs">
-          <div><span className="text-muted-foreground">{t('modality.aet')}: </span><code className="bg-muted px-1 rounded font-mono">{modality.aet}</code></div>
-          <div><span className="text-muted-foreground">{t('modality.host')}: </span>{modality.host}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+          <div><span className="text-muted-foreground">{t('modality.aet')}: </span><code className="bg-muted px-1 rounded font-mono break-all">{modality.aet}</code></div>
+          <div><span className="text-muted-foreground">{t('modality.host')}: </span><span className="break-all">{modality.host}</span></div>
           <div><span className="text-muted-foreground">{t('modality.port')}: </span>{modality.port > 0 ? modality.port : '—'}</div>
-          <div><span className="text-muted-foreground">{t('modality.manufacturer')}: </span>{modality.manufacturer || '—'}</div>
+          <div><span className="text-muted-foreground">{t('modality.manufacturer')}: </span><span className="break-all">{modality.manufacturer || '—'}</span></div>
         </div>
         {echoResult && (
           <div className="flex items-center gap-1.5 text-xs">

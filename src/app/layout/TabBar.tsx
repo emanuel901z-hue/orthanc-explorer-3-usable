@@ -129,11 +129,11 @@ export function TabBar() {
                       }
                     }}
                     className={cn(
-                      'ml-auto shrink-0 rounded p-0.5 hover:bg-muted-foreground/20 transition-opacity',
-                      isActive ? 'opacity-70' : 'opacity-0 group-hover:opacity-70',
+                      'touch-exempt ml-auto shrink-0 flex items-center justify-center h-5 w-5 rounded-full hover:bg-muted-foreground/20 transition-opacity',
+                      isActive ? 'opacity-80' : 'opacity-60 group-hover:opacity-100',
                     )}
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-3.5 w-3.5" />
                   </span>
                 )}
               </button>

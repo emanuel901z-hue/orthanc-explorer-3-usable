@@ -148,11 +148,19 @@
 
 /* Touch-optimized controls — ensure minimum 44px touch targets on mobile */
 @media (pointer: coarse) {
-  button:not(.touch-exempt),
+  /* Exempt switches: the Radix Switch root is a <button> whose h-6/w-11 pill
+     shape would be squashed into a 44px ball by the blanket min-size. */
+  button:not(.touch-exempt):not([role="switch"]),
   [role="button"]:not(.touch-exempt),
   a.btn:not(.touch-exempt) {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Switches keep their pill shape but stay comfortably tappable */
+  button[role="switch"] {
+    min-height: 28px;
+    min-width: 48px;
   }
 
   /* Table rows: increase height for easier touch selection */
@@ -160,10 +168,10 @@
     min-height: 48px;
   }
 
-  /* Checkbox/radio: larger touch target */
+  /* Checkbox/radio: larger touch target (but not absurdly oversized) */
   button[role="checkbox"],
   [role="radio"] {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: 24px;
+    min-width: 24px;
   }
 }
