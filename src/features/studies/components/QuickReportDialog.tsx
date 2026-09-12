@@ -187,17 +187,15 @@ export default function QuickReportDialog({ open, onOpenChange, study }: QuickRe
                  render a readable card list instead. */
               <div className="divide-y border rounded-lg">
                 {series.map((s, i) => (
-                  <div key={s.id} className="p-3 flex items-start gap-3">
-                    <span className="font-medium text-sm w-8 shrink-0">#{s.seriesNumber ?? i + 1}</span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <ModalityBadge modality={s.modality} />
-                        <span className="text-xs text-muted-foreground ml-auto">
-                          {s.numberOfInstances} {t('quickReport.seriesInstances', { defaultValue: 'Instances' })}
-                        </span>
-                      </div>
-                      <p className="text-sm mt-1 break-words">{s.seriesDescription || '—'}</p>
+                  <div key={s.id} className="p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm shrink-0">#{s.seriesNumber ?? i + 1}</span>
+                      <ModalityBadge modality={s.modality} />
+                      <span className="text-xs text-muted-foreground ml-auto whitespace-nowrap">
+                        {s.numberOfInstances} {t('quickReport.seriesInstances', { defaultValue: 'Instances' })}
+                      </span>
                     </div>
+                    <p className="text-sm mt-1 break-words">{s.seriesDescription || '—'}</p>
                   </div>
                 ))}
               </div>
