@@ -52,13 +52,13 @@ export const toolsApi = {
     }),
 
   /**
-   * GET /labels — Returns all labels in the Orthanc database.
+   * GET /tools/labels — Returns all labels in the Orthanc database.
    * Returns array of label names (strings).
    * Returns empty array on 404 (labels not supported by this Orthanc version/config).
    */
   getLabels: async (): Promise<string[]> => {
     try {
-      return await orthancFetch<string[]>('/labels', { silent404: true });
+      return await orthancFetch<string[]>('/tools/labels', { silent404: true });
     } catch (e) {
       if (e instanceof OrthancError && e.status === 404) return [];
       throw e;

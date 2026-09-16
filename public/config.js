@@ -12,6 +12,8 @@ window.__OE3_CONFIG__ = {
   // Omit/remove to hide the broker feature entirely.
   brokerUrl: "/broker-api",
   authMode: "none",
+  // Dev has no /oe3-me backend endpoint — skip the auth gate.
+  authCheck: false,
   features: {},
   branding: { title: "Orthanc Explorer 3 (Dev)", logoUrl: "/logo/oe3-logo-128.png" },
 };

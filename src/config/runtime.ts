@@ -7,6 +7,10 @@ export const OE3ConfigSchema = z.object({
    * the broker feature is hidden when unset. */
   brokerUrl: z.string().optional(),
   authMode: z.enum(["none", "basic", "oidc", "smart"]),
+  /** When false, the AuthGate's /oe3-me check is skipped and a local admin
+   * user is assumed. For standalone deployments without a backend proxy
+   * (e.g. plain Orthanc). Default true — production keeps the gate. */
+  authCheck: z.boolean().default(true),
   fhir: z.object({
     iss: z.string(),
     clientId: z.string(),

@@ -100,6 +100,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Standalone deployments without a backend proxy have no /oe3-me
+    // endpoint — the explicit authCheck:false opt-out grants a local admin
+    // session instead of blocking the app with "Zugriff verweigert".
+    if (cfg.authCheck === false) {
+      setUser({
+        id: 'local',
+        displayName: 'Local Admin',
+        email: '',
+        initials: 'LA',
+        roles: ['admin'],
+      });
+      setAuthError(null);
+      setIsLoading(false);
+      return;
+    }
+
     // Fetch current user from backend — validates JWT cookie
     // cfg.orthancUrl is "/api/v1/pacs/orthanc" — replace trailing /orthanc with /oe3-me
     const url = `${cfg.orthancUrl.replace(/\/orthanc$/, '')}/oe3-me`;
@@ -135,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuthError(`Network error: ${err.message}`);
       })
       .finally(() => setIsLoading(false));
-  }, [cfg.authMode, cfg.orthancUrl]);
+  }, [cfg.authMode, cfg.authCheck, cfg.orthancUrl]);
 
   const value = useMemo<AuthContextValue>(() => {
     const permissions = user ? resolvePermissions(user.roles) : new Set<Permission>();

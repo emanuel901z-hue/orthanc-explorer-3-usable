@@ -49,7 +49,7 @@ function EchoBadge({ echo, onEcho, pending }: {
       ? 'text-green-600'
       : 'text-destructive';
   return (
-    <span className={`inline-flex items-center gap-1 text-xs ${cls}`}>
+    <span className={`inline-flex items-center gap-1 text-xs whitespace-nowrap ${cls}`}>
       {icon}
       {echo.last_check === null
         ? t('broker.neverChecked')
@@ -59,12 +59,12 @@ function EchoBadge({ echo, onEcho, pending }: {
       <Button
         variant="ghost"
         size="sm"
-        className="h-6 w-6 p-0"
+        className="h-9 w-9 p-0 sm:h-7 sm:w-7"
         aria-label={t('broker.echoNow')}
         onClick={onEcho}
         disabled={pending}
       >
-        {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
+        {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Zap className="h-3.5 w-3.5" />}
       </Button>
     </span>
   );
@@ -202,7 +202,7 @@ export default function BrokerPage() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="font-mono text-xs">
+                    <TableCell className="font-mono text-xs break-all">
                       {(() => {
                         const cfg = sourceById.get(s.id);
                         return cfg ? `${cfg.aet}@${cfg.host}:${cfg.port}` : '—';
@@ -253,7 +253,7 @@ export default function BrokerPage() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="font-mono text-xs">
+                    <TableCell className="font-mono text-xs break-all">
                       {(() => {
                         const cfg = targetById.get(tg.id);
                         return cfg ? `${cfg.aet}@${cfg.host}:${cfg.port}` : '—';
