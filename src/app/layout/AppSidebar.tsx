@@ -11,6 +11,7 @@ import {
   Info,
   Shield,
   ClipboardList,
+  RadioTower,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -28,6 +29,8 @@ import {
 } from '@/components/ui/sidebar';
 import { AboutDialog } from './AboutDialog';
 import { useUiStore } from '@/store/ui-store';
+import { useFeature } from '@/config/features';
+import { getConfig } from '@/config/runtime';
 import { APP_VERSION } from '@/config/version';
 
 export function AppSidebar() {
@@ -36,6 +39,7 @@ export function AppSidebar() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const { t } = useTranslation();
   const { appName, logoUrl } = useUiStore();
+  const brokerEnabled = useFeature('mwlBroker') && Boolean(getConfig().brokerUrl);
 
   const navItems = [
     { title: t('nav.studies'), url: '/studies', icon: BookOpen },
@@ -43,6 +47,9 @@ export function AppSidebar() {
     { title: t('nav.activity'), url: '/activity', icon: ActivityIcon },
     { title: t('nav.auditLogs', { defaultValue: 'Audit Logs' }), url: '/audit-logs', icon: Shield },
     { title: t('nav.worklists', { defaultValue: 'Worklists' }), url: '/worklists', icon: ClipboardList },
+    ...(brokerEnabled
+      ? [{ title: t('nav.broker', { defaultValue: 'MWL Broker' }), url: '/broker', icon: RadioTower }]
+      : []),
     { title: t('nav.remoteSources'), url: '/remote-sources', icon: Globe },
     { title: t('nav.settings'), url: '/settings', icon: Settings },
   ];

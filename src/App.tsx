@@ -14,6 +14,7 @@ import RemoteSourcesPage from "@/features/servers/pages/RemoteSourcesPage";
 import ActivityPage from "@/features/activity/pages/ActivityPage";
 import AuditLogsPage from "@/features/audit/pages/AuditLogsPage";
 import WorklistsPage from "@/features/worklists/pages/WorklistsPage";
+import BrokerPage from "@/features/broker/pages/BrokerPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="activity" element={<ActivityPage />} />
               <Route path="audit-logs" element={<AuditLogsPage />} />
               <Route path="worklists" element={<WorklistsPage />} />
+              <Route path="broker" element={<BrokerPage />} />
               <Route path="remote-sources" element={<RemoteSourcesPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
