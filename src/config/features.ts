@@ -9,7 +9,8 @@ export type FeatureKey =
   | "download"
   | "editLabels"
   | "modalityManagement"
-  | "dicomWebManagement";
+  | "dicomWebManagement"
+  | "mwlBroker";
 
 export type UserProfile = { permissions: string[] } | null;
 export type SmartScopes = string[] | null;
@@ -52,6 +53,7 @@ const FEATURE_ALIASES: Record<FeatureKey, string[]> = {
   editLabels: ['enableEditLabels'],
   modalityManagement: ['enableModalityConfig', 'enableModalityManagement'],
   dicomWebManagement: ['enableDicomWebConfig', 'enableDicomWebManagement'],
+  mwlBroker: ['enableMwlBroker'],
 };
 
 function isFeatureDisabled(cfg: ReturnType<typeof getConfig>, key: FeatureKey): boolean {

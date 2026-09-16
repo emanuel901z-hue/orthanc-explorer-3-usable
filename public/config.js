@@ -8,6 +8,9 @@ window.__OE3_CONFIG__ = {
   // avoiding CORS entirely during local development.
   // In production replace with an absolute URL or "" (plugin/same-origin mode).
   orthancUrl: "/orthanc-proxy",
+  // mwl-broker REST API — proxied same-origin by the Vite dev server.
+  // Omit/remove to hide the broker feature entirely.
+  brokerUrl: "/broker-api",
   authMode: "none",
   features: {},
   branding: { title: "Orthanc Explorer 3 (Dev)", logoUrl: "/logo/oe3-logo-128.png" },

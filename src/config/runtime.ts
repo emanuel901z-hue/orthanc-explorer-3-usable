@@ -3,6 +3,9 @@ import { z } from "zod";
 
 export const OE3ConfigSchema = z.object({
   orthancUrl: z.string(),
+  /** Base URL of the mwl-broker REST API (e.g. "/broker-api"). Optional —
+   * the broker feature is hidden when unset. */
+  brokerUrl: z.string().optional(),
   authMode: z.enum(["none", "basic", "oidc", "smart"]),
   fhir: z.object({
     iss: z.string(),
