@@ -20,6 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useStudy, useStudySeries, useInstancePreview, useStudySharedTags } from '@/features/studies/hooks/use-studies';
 import { ModalityBadge, formatPatientName, formatDiskSize } from '@/shared/components/ModalityBadge';
+import { requestViewerSession } from '@/lib/viewer-session';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import MigrateStudyDialog from '@/features/studies/components/MigrateStudyDialog';
 import ShareStudyDialog from '@/features/studies/components/ShareStudyDialog';
@@ -335,15 +336,9 @@ export default function StudyDetailPage() {
             size="sm"
             className="gap-1.5"
             onClick={async () => {
-              // Set httpOnly cookie for OHIF/DICOMweb access (8h PACS token)
-              try {
-                await fetch('/api/v1/pacs/viewer-session', {
-                  method: 'POST',
-                  credentials: 'include',
-                });
-              } catch {
-                // Cookie may already be valid — continue to open OHIF
-              }
+              // Set httpOnly cookie for OHIF/DICOMweb access (8h PACS token);
+              // skipped in standalone deployments (viewerSession: false).
+              await requestViewerSession();
               window.open(`/ohif/viewer?StudyInstanceUIDs=${study.studyInstanceUID}`, '_blank', 'noopener,noreferrer');
             }}
           >
@@ -361,10 +356,8 @@ export default function StudyDetailPage() {
                   size="sm"
                   className="gap-1.5 capitalize"
                   onClick={async () => {
-                    // Set viewer session cookie first
-                    try {
-                      await fetch('/api/v1/pacs/viewer-session', { method: 'POST', credentials: 'include' });
-                    } catch { /* cookie may already be valid */ }
+                    // Set viewer session cookie first (no-op when viewerSession: false)
+                    await requestViewerSession();
                     if (v.type === 'desktop') {
                       // Weasis uses custom protocol: weasis://$dicom:get -w "rsid:..." ...
                       window.location.href = `${v.url}$dicom:get -r "http://10.0.1.46:3080/api/v1/pacs/orthanc/wado-rs/studies/${study.studyInstanceUID}"`;

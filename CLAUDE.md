@@ -89,6 +89,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - `e2e/prod/` — Playwright production viewport tests (desktop + mobile)
 - Entry point: `src/main.tsx` — calls `loadConfig()` before mounting React; shows a PHI-safe error screen on config failure
 - Runtime config: `public/config.js` — replaced at deploy time; sets `orthancUrl`, `authMode`, `features`, `branding`
+- Standalone flags (both default `true` for backend-proxy production): `authCheck: false` skips the `/oe3-me` gate, `viewerSession: false` skips the `POST /api/v1/pacs/viewer-session` before opening an external viewer (see `src/lib/viewer-session.ts`)
 - Dev proxy: `vite.config.ts` rewrites `/orthanc-proxy → http://localhost:8042` to avoid CORS in dev
 
 ## Tech Stack

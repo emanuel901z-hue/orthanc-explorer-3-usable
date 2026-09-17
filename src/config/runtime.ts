@@ -11,6 +11,10 @@ export const OE3ConfigSchema = z.object({
    * user is assumed. For standalone deployments without a backend proxy
    * (e.g. plain Orthanc). Default true — production keeps the gate. */
   authCheck: z.boolean().default(true),
+  /** When false, the POST to /api/v1/pacs/viewer-session before opening an
+   * external viewer is skipped (standalone deployments have no backend
+   * proxy endpoint). Default true. */
+  viewerSession: z.boolean().default(true),
   fhir: z.object({
     iss: z.string(),
     clientId: z.string(),

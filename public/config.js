@@ -14,6 +14,8 @@ window.__OE3_CONFIG__ = {
   authMode: "none",
   // Dev has no /oe3-me backend endpoint — skip the auth gate.
   authCheck: false,
+  // Dev has no viewer-session endpoint either.
+  viewerSession: false,
   features: {},
   branding: { title: "Orthanc Explorer 3 (Dev)", logoUrl: "/logo/oe3-logo-128.png" },
 };

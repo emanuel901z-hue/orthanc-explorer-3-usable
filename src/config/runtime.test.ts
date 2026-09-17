@@ -61,6 +61,19 @@ describe('runtime config', () => {
     expect(loadConfig().authCheck).toBe(true);
   });
 
+  it('defaults viewerSession to true and accepts false', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', authMode: 'none', features: {} };
+    expect(loadConfig().viewerSession).toBe(true);
+
+    __resetConfigForTests();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = {
+      orthancUrl: '', authMode: 'none', features: {}, viewerSession: false,
+    };
+    expect(loadConfig().viewerSession).toBe(false);
+  });
+
   it('accepts authCheck:false for standalone deployments without backend proxy', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__OE3_CONFIG__ = {
