@@ -32,6 +32,7 @@ import { BreakerBadge } from '../components/BreakerBadge';
 import { HealthPanel } from '../components/HealthPanel';
 import { CaseCheckPanel } from '../components/CaseCheckPanel';
 import { CacheCard } from '../components/CacheCard';
+import { SpoolCard } from '../components/SpoolCard';
 import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
 
 export default function BrokerPage() {
@@ -138,6 +139,8 @@ export default function BrokerPage() {
       />
 
       <CaseCheckPanel />
+
+      <SpoolCard />
 
       <CacheCard />
 

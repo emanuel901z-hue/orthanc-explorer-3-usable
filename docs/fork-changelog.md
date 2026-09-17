@@ -22,6 +22,18 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
   `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
   Ressourcentypen).
 
+### Neu: Store-Warteschlange (C-STORE-Spool)
+
+- **Spool-Karte** im Dashboard: Rückstand, ältester Eintrag, Belegung,
+  Dead-Letter-Badge und „Alle erneut senden" (bestätigt, auditiert).
+- Seite **`/broker/spool`** („Store-Warteschlange"): Filter nach Status, je
+  Eintrag Ziel/Versuche/Größe/letzter Fehler, „Jetzt erneut senden" und
+  „Verwerfen" mit **Pflicht-Begründung** (der Dialog erklärt den Verlust).
+- Semantik: nicht zustellbare Instanzen werden gepuffert und automatisch
+  wiederholt; bei vollem Budget weist der Broker ab, statt still zu verwerfen.
+- Mobile: Einträge als Cards; Retry/Verwerfen laufen über auditierte Mutations
+  (`broker.spool.*`).
+
 ### Neu: Worklist-Cache mit Stale-Fallback
 
 - **Cache-Karte** im Dashboard: Einträge, Alter und Zustand (`empty |
@@ -77,10 +89,10 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ### Tests & Tooling
 
-- 386 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
-  Mobile 375×812, 35 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
-  (69 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
-- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 98,1 %.
+- 395 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
+  Mobile 375×812, 38 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
+  (77 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
+- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 97,8 %.
 
 ---
 

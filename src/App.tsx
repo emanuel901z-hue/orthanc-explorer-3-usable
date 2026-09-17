@@ -21,6 +21,7 @@ import RulesPage from "@/features/broker/pages/RulesPage";
 import TransformsPage from "@/features/broker/pages/TransformsPage";
 import BrokerSettingsPage from "@/features/broker/pages/BrokerSettingsPage";
 import AuditPage from "@/features/broker/pages/AuditPage";
+import SpoolPage from "@/features/broker/pages/SpoolPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="broker/transforms" element={<TransformsPage />} />
               <Route path="broker/settings" element={<BrokerSettingsPage />} />
               <Route path="broker/audit" element={<AuditPage />} />
+              <Route path="broker/spool" element={<SpoolPage />} />
               <Route path="remote-sources" element={<RemoteSourcesPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>

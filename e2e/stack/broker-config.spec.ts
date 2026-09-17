@@ -378,6 +378,60 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('spool card shows the store-and-forward queue', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker', /MWL/i);
+    const card = page.getByTestId('broker-spool');
+    await expect(card).toBeVisible();
+    await expect(card.getByTestId('broker-spool-stats')).toBeVisible();
+    // the test-stack scenario leaves one dead letter
+    const stats = await (await page.request.get('/broker-api/api/v1/spool/stats')).json();
+    if (stats.dead > 0) {
+      await expect(card).toContainText(/dead letter/i);
+    } else if (stats.open > 0) {
+      await expect(card).toContainText(/waiting|wartend/i);
+    } else {
+      await expect(card).toContainText(/nothing queued|nichts in der Warteschlange/i);
+    }
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-spool-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('spool page lists a dead letter and delivers it after a retry', async ({ page }) => {
+    // the test-stack scenario leaves a dead letter (target was down while the
+    // worker retried); the target is healthy again by now
+    const stats = await (await page.request.get('/broker-api/api/v1/spool/stats')).json();
+    test.skip(stats.dead === 0, 'spool scenario not prepared');
+
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/spool', /store queue|store-warteschlange/i);
+    // delivered instances stay listed as a duplicate guard — address the
+    // dead-letter entry by its own accession
+    const rows = page.locator('tr, [data-testid="config-row"]');
+    const row = rows.filter({ hasText: 'ACC-SPOOL-2' }).first();
+    await expect(row).toBeVisible({ timeout: 15000 });
+    await expect(row).toContainText(/dead letter/i);
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-spool-page-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+
+    // retry → the worker delivers it to the recovered target (status change)
+    await row.getByRole('button', { name: /retry now|jetzt erneut senden/i }).click();
+    await expect(row).toContainText(/delivered|zugestellt/i, { timeout: 60000 });
+
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

@@ -17,6 +17,7 @@ required in this repository.
 | `/broker/rules` | Routing rules (source → target, priority, enable toggle) |
 | `/broker/transforms` | DICOM modify rules (tag set/remove/prefix/suffix/replace/copy, scope, priority) |
 | `/broker/settings` | Runtime settings (ENV default + UI override/reset) |
+| `/broker/spool` | Store queue: queued instances, per-entry retry, discard with a reason |
 | `/broker/audit` | Change log: before/after diff, rollback, configuration export/import (dry-run first) |
 
 Sidebar: a collapsible “MWL Broker” group with all six entries (only rendered
@@ -59,6 +60,9 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/audit/config` | Change log (diff + rollback) |
 | `GET/POST` | `/api/v1/config/export`, `/api/v1/config/import?dry_run=` | Configuration export/import |
 | `POST` | `/api/v1/config/rollback/{id}` | Roll a change back |
+| `GET` | `/api/v1/spool`, `/api/v1/spool/stats` | Store queue + spool card |
+| `POST` | `/api/v1/spool/{id}/retry`, `/api/v1/spool/retry-all` | "Retry now" / "Retry all" |
+| `DELETE` | `/api/v1/spool/{id}?reason=` | Discard (reason required, audited) |
 | `GET` | `/api/v1/cache/stats`, `/api/v1/cache/items` | Worklist cache card |
 | `DELETE` | `/api/v1/cache`, `/api/v1/cache/sources/{id}` | "Clear cache" (confirmed) |
 | `POST` | `/api/v1/simulate/route`, `/api/v1/simulate/transform` | "Check a case" dry-run |
@@ -80,6 +84,13 @@ Minimum fields the UI reads:
   — `before_json`/`after_json` drive the diff view; `id` drives the rollback
 - `config/import` (dry-run): `{dry_run, changes[], skipped[], summary}` —
   `changes` are `{entity,action,name,fields}`; the UI shows them before applying
+- `spool/stats`: `{queued,failed,dead,sent,open,bytes,oldest_age_s,capacity,enabled,accept_when_queued}`
+  — `capacity.full` drives the "spool full" badge; `dead` drives the error badge
+- `spool[]`: `{id,sop_instance_uid,study_uid,accession,target_name,status,attempts,
+  last_error,payload_bytes,age_s,next_attempt_at,sent_at}` — the DICOM payload
+  stays on disk, the API never exposes patient data
+- `logs/stores[]`: `status` may be `queued` (spooled for retry) or `duplicate`
+  (already spooled/delivered, acknowledged without forwarding)
 - `cache/stats[]`: `{source_id,source_name,entries,age_s,state,stale_on_error,refresh_s}`
   — `state` is `empty | available | expired`; the UI renders the fallback state
   and disables "clear" when nothing is cached

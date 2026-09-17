@@ -28,7 +28,7 @@ npm run preview
 ### Testing
 
 ```bash
-# Run all unit tests (single pass, 386 tests)
+# Run all unit tests (single pass, 395 tests)
 npm run test
 
 # Watch mode
@@ -71,7 +71,7 @@ GitHub Actions CI (`.github/workflows/ci.yml`) laeuft bei Pull Requests und Push
 |-----|--------|-------|
 | `typecheck` | `tsc --noEmit -p tsconfig.app.json` | ~15s |
 | `lint` | `npm run lint` (ESLint) | ~10s |
-| `test` | `npm run test` (Vitest, 386 Tests) | ~15s |
+| `test` | `npm run test` (Vitest, 395 Tests) | ~15s |
 | `audit` | `npm run audit` (audit-ci, high+critical blocking) | ~10s |
 
 Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit jsdom.
@@ -101,7 +101,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (386 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (395 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -206,6 +206,9 @@ features: {
 | `src/features/broker/components/BreakerBadge.tsx` | Circuit-breaker badge per source (open/half-open + operator reset) |
 | `src/features/broker/components/HealthPanel.tsx` | Configuration health panel: localized findings + deep links into the forms |
 | `src/features/broker/pages/AuditPage.tsx` | Change log with before/after diff, rollback, export and import (dry-run first) |
+| `src/features/broker/pages/SpoolPage.tsx` | Store queue: filter, per-entry retry, discard with a mandatory reason |
+| `src/features/broker/components/SpoolCard.tsx` | Spool backlog (oldest, usage, dead letters) + audited "retry all" |
+| `src/features/broker/hooks/use-broker-spool.ts` | Audited mutations for spool retry/discard |
 | `src/features/broker/components/CacheCard.tsx` | Worklist cache state per source + audited "clear cache" |
 | `src/features/broker/components/CaseCheckPanel.tsx` | "Check a case" dry-run: routing decision + tag diff (`POST /simulate/*`) |
 | `src/features/broker/lib/config-diff.ts` | Pure diff/format helpers for change-log entries and import plans |

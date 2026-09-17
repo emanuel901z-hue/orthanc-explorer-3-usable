@@ -24,6 +24,9 @@
  *   POST   /api/v1/simulate/route     POST /api/v1/simulate/transform
  *   GET    /api/v1/cache/stats        GET /api/v1/cache/items
  *   DELETE /api/v1/cache              DELETE /api/v1/cache/sources/:id
+ *   GET    /api/v1/spool              GET /api/v1/spool/stats
+ *   POST   /api/v1/spool/:id/retry    POST /api/v1/spool/retry-all
+ *   DELETE /api/v1/spool/:id?reason=
  *   GET    /api/v1/logs/queries       GET /api/v1/logs/stores
  */
 import { getConfig } from '@/config/runtime';
@@ -138,6 +141,46 @@ export type EchoStatus = {
   breaker_state?: BreakerState | null;
   /** Seconds until the next probe (null unless the breaker is open). */
   breaker_retry_in_s?: number | null;
+};
+
+/** C-STORE spool backlog (store and forward). */
+export type SpoolStats = {
+  queued: number;
+  failed: number;
+  dead: number;
+  sent: number;
+  open: number;
+  bytes: number;
+  oldest_age_s: number | null;
+  capacity: {
+    items: number;
+    bytes: number;
+    max_items: number;
+    max_bytes: number;
+    full: boolean;
+  };
+  enabled: boolean;
+  accept_when_queued: boolean;
+};
+
+export type SpoolStatus = 'queued' | 'failed' | 'dead' | 'sent';
+
+/** One spooled C-STORE instance (metadata only, payload stays on disk). */
+export type SpoolItem = {
+  id: number;
+  sop_instance_uid: string;
+  study_uid: string;
+  accession: string;
+  source_id: number | null;
+  target_id: number | null;
+  target_name: string;
+  status: SpoolStatus;
+  attempts: number;
+  last_error: string;
+  payload_bytes: number;
+  age_s: number;
+  next_attempt_at: string | null;
+  sent_at: string | null;
 };
 
 /** Worklist cache state of one source (outage bridge). */
@@ -405,6 +448,24 @@ export const brokerApi = {
 
   health: {
     config: () => brokerFetch<BrokerHealth>('/api/v1/health/config'),
+  },
+
+  spool: {
+    stats: () => brokerFetch<SpoolStats>('/api/v1/spool/stats'),
+    items: (params: { status?: string; limit?: number } = {}) => {
+      const query = new URLSearchParams();
+      if (params.status) query.set('status', params.status);
+      query.set('limit', String(params.limit ?? 100));
+      return brokerFetch<SpoolItem[]>(`/api/v1/spool?${query.toString()}`);
+    },
+    retry: (id: number) =>
+      brokerFetch<{ requeued: number }>(`/api/v1/spool/${id}/retry`, post({})),
+    retryAll: () => brokerFetch<{ requeued: number }>('/api/v1/spool/retry-all', post({})),
+    discard: (id: number, reason: string) =>
+      brokerFetch<void>(
+        `/api/v1/spool/${id}?reason=${encodeURIComponent(reason)}`,
+        { method: 'DELETE' },
+      ),
   },
 
   cache: {

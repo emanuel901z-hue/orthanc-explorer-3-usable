@@ -20,6 +20,7 @@ const PAGES = [
   ['transforms', '/oe3/broker/transforms', /modify rules|modify-regeln/i],
   ['settings', '/oe3/broker/settings', /broker settings|broker-einstellungen/i],
   ['audit', '/oe3/broker/audit', /change log|änderungsprotokoll/i],
+  ['spool', '/oe3/broker/spool', /store queue|store-warteschlange/i],
 ];
 
 const results = [];
@@ -243,6 +244,24 @@ async function domReport(page) {
   await page.waitForTimeout(2500);
   const rtt = await page.getByText(/\d+\s*ms/).first().isVisible();
   record('sources: manueller C-ECHO liefert RTT im UI', rtt);
+
+  // C-STORE spool card (store and forward)
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  const spoolCard = page.getByTestId('broker-spool');
+  const spoolVisible = await spoolCard.count() > 0 && await spoolCard.first().isVisible();
+  record('monitoring: Spool-Karte (Store and Forward) wird gerendert', spoolVisible);
+  if (spoolVisible) {
+    const stats = await page.evaluate(async () => {
+      const res = await fetch('/broker-api/api/v1/spool/stats');
+      return res.ok ? res.json() : null;
+    });
+    const text = await spoolCard.textContent();
+    const expected = (stats?.open ?? 0) > 0
+      ? /waiting|wartend|dead letter/i
+      : /nothing queued|nichts in der Warteschlange/i;
+    record('monitoring: Spool zeigt den aktuellen Rückstand', expected.test(text || ''),
+      `open=${stats?.open ?? '?'}`);
+  }
 
   // worklist cache card (outage bridge)
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });

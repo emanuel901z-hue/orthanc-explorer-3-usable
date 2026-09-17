@@ -86,6 +86,7 @@ export function AppSidebar() {
             { title: t('broker.rulesTitle'), url: '/broker/rules' },
             { title: t('broker.transformsTitle'), url: '/broker/transforms' },
             { title: t('broker.settingsTitle'), url: '/broker/settings' },
+            { title: t('broker.spoolPageTitle'), url: '/broker/spool' },
             { title: t('broker.auditTitle'), url: '/broker/audit' },
           ],
         }]
