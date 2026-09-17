@@ -23,6 +23,14 @@ vi.mock('@/api/broker', () => ({
     rules: { list: vi.fn(() => Promise.resolve([])) },
     transforms: { list: vi.fn(() => Promise.resolve([])) },
     settings: { list: mockList, set: mockSet, reset: mockReset },
+    atna: {
+      stats: vi.fn(() => Promise.resolve({
+        enabled: false, configured: false, host: '', port: 6514, protocol: 'tcp',
+        queue_size: 0, queue_max: 10000, worker_running: false,
+      })),
+      test: vi.fn(() => Promise.resolve({ ok: false, error: 'not configured' })),
+      sample: vi.fn(() => Promise.resolve({ xml: '<AuditMessage/>' })),
+    },
     notify: {
       events: vi.fn(() => Promise.resolve([
         { code: 'source_down', severity: 'error', description: 'A source stopped answering.' },

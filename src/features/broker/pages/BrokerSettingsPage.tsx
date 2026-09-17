@@ -19,6 +19,7 @@ import { brokerApi, type BrokerSetting } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { NotificationsCard } from '../components/NotificationsCard';
+import { AtnaCard } from '../components/AtnaCard';
 import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
 
 const isTrue = (value: string) => ['true', '1', 'yes', 'on'].includes(value.trim().toLowerCase());
@@ -118,7 +119,13 @@ export default function BrokerSettingsPage() {
   // the alerting keys get their own card (event picker instead of a CSV field)
   const all = settingsQuery.data ?? [];
   const notifyKeys = new Set(['notify_webhook_url', 'notify_events', 'notify_min_interval_s']);
-  const generic = all.filter((setting) => !notifyKeys.has(setting.key));
+  const atnaKeys = new Set([
+    'atna_enabled', 'atna_syslog_host', 'atna_syslog_port', 'atna_syslog_protocol',
+    'atna_tls_ca_file', 'atna_queue_max',
+  ]);
+  const generic = all.filter(
+    (setting) => !notifyKeys.has(setting.key) && !atnaKeys.has(setting.key),
+  );
 
   return (
     <BrokerPageShell
@@ -127,6 +134,7 @@ export default function BrokerSettingsPage() {
     >
       <div className="space-y-3">
         {all.length > 0 && <NotificationsCard settings={all} />}
+        {all.length > 0 && <AtnaCard settings={all} />}
         {generic.map((setting) => (
           <SettingRow key={setting.key} setting={setting} />
         ))}

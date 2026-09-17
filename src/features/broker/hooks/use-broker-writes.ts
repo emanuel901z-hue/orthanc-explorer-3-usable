@@ -63,6 +63,10 @@ export const CONFIG_KEYS = [
   ['broker', 'transforms'],
   ['broker', 'settings'],
   ['broker', 'status'],
+  ['broker', 'local-items'],
+  ['broker', 'hl7'],
+  ['broker', 'station-rules'],
+  ['broker', 'atna'],
 ];
 
 export function useBrokerSourceWrites() {

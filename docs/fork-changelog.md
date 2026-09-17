@@ -22,6 +22,23 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
   `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
   Ressourcentypen).
 
+### Neu: lokale Worklist, Stationsregeln, ATNA
+
+- **`/broker/worklist`**: lokale Worklist-Einträge (Notfälle, ungeplante
+  Untersuchungen) mit CRUD, Gültigkeit und Herkunft; daneben das **HL7-Panel**
+  (Nachricht einfügen → „Prüfen (Trockenlauf)" zeigt das Parse-Ergebnis samt
+  Warnungen, „Anwenden" schreibt) und die letzten empfangenen Nachrichten.
+- **`/broker/stations`**: Stationsregeln (Quellen verbergen/erlauben,
+  Prioritäts-Override) mit **Vorschau** — „welche Quellen sieht diese Konsole?".
+- **ATNA-Karte** auf der Settings-Seite: Audit-Trail an die eigene
+  Audit-Record-Repository (TCP/TLS), Zustand/Puffer, Testversand und die
+  Beispielnachricht als XML.
+- Alle Mutationen laufen über auditierte Hooks (`broker.local_item.*`,
+  `broker.hl7.orm`, `broker.station_rule.*`); Mobile überall als Cards.
+- 428 Unit-Tests (Vitest), Playwright-Suite mit 44 Tests (Notfall in der Liste,
+  HL7-Trockenlauf, Stationsvorschau, ATNA-Beispiel + Testversand),
+  `verify-ui.cjs` jetzt mit 100 Checks.
+
 ### Neu: Alerting-Karte (Webhook)
 
 - Eigene **Alerting-Karte** auf der Broker-Settings-Seite: Webhook-URL mit
@@ -101,9 +118,9 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ### Tests & Tooling
 
-- 404 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
-  Mobile 375×812, 40 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
-  (80 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
+- 428 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
+  Mobile 375×812, 44 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
+  (100 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
 - Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 97,9 %.
 
 ---

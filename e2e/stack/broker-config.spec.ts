@@ -456,6 +456,78 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('local worklist lists the emergency and checks an HL7 message', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/worklist', /local worklist|lokale worklist/i);
+    await expect(page.getByText('EMERG-E2E')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Notfall^Erika')).toBeVisible();
+
+    // the HL7 panel ships a sample message: check it (dry-run, writes nothing)
+    const panel = page.getByTestId('broker-hl7');
+    await panel.getByRole('button', { name: /check \(dry-run\)|prüfen \(trockenlauf\)/i }).click();
+    const result = page.getByTestId('broker-hl7-result');
+    await expect(result).toBeVisible({ timeout: 15000 });
+    await expect(result).toContainText('ACC-HL7-1');
+    await expect(result).toContainText(/dry-run|trockenlauf/i);
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-worklist-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('station rules list the rule and preview a station', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/stations', /station rules|stationsregeln/i);
+    await expect(page.getByText('e2e-ct-hides-ris-b')).toBeVisible({ timeout: 15000 });
+
+    const preview = page.getByTestId('broker-station-preview');
+    await preview.getByLabel(/station ae title/i).fill('CT_01');
+    await preview.getByRole('button', { name: /check station|station prüfen/i }).click();
+    const result = page.getByTestId('broker-station-preview-result');
+    await expect(result).toBeVisible({ timeout: 15000 });
+    await expect(result).toContainText('e2e-ct-hides-ris-b');
+    await expect(result).toContainText('ris-a');
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-stations-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('ATNA card shows the state, the sample message and sends a test', async ({ page }) => {
+    // the test-stack scenario configured an audit repository on the host
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/settings', /broker settings|broker-einstellungen/i);
+    const card = page.getByTestId('atna-card');
+    await expect(card).toBeVisible();
+    await expect(card).toContainText(/repository configured|Gegenstelle konfiguriert/i);
+
+    await card.getByRole('button', { name: /show sample message|beispielnachricht zeigen/i }).click();
+    const sample = page.getByTestId('atna-sample');
+    await expect(sample).toContainText('<AuditMessage', { timeout: 15000 });
+    await expect(sample).toContainText('110112');   // the Query event code
+    await expect(sample).toContainText('ParticipantObjectIdentification');
+
+    await card.getByRole('button', { name: /send test message|testnachricht senden/i }).click();
+    await expect(page.getByTestId('atna-test-result'))
+      .toContainText(/accepted|angenommen/i, { timeout: 20000 });
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-atna-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

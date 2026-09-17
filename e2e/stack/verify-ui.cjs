@@ -21,6 +21,8 @@ const PAGES = [
   ['settings', '/oe3/broker/settings', /broker settings|broker-einstellungen/i],
   ['audit', '/oe3/broker/audit', /change log|änderungsprotokoll/i],
   ['spool', '/oe3/broker/spool', /store queue|store-warteschlange/i],
+  ['worklist', '/oe3/broker/worklist', /local worklist|lokale worklist/i],
+  ['stations', '/oe3/broker/stations', /station rules|stationsregeln/i],
 ];
 
 const results = [];
@@ -244,6 +246,41 @@ async function domReport(page) {
   await page.waitForTimeout(2500);
   const rtt = await page.getByText(/\d+\s*ms/).first().isVisible();
   record('sources: manueller C-ECHO liefert RTT im UI', rtt);
+
+  // ATNA card (audit trail)
+  await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
+  const atnaCard = page.getByTestId('atna-card');
+  await atnaCard.first().waitFor({ timeout: 10000 }).catch(() => {});
+  const atnaVisible = await atnaCard.count() > 0 && await atnaCard.first().isVisible();
+  record('settings: ATNA-Karte wird gerendert', atnaVisible);
+  if (atnaVisible) {
+    const atnaOverflow = await atnaCard.evaluate((el) => el.scrollWidth > el.clientWidth);
+    record('settings: ATNA-Karte ohne Overflow', !atnaOverflow);
+    const stats = await page.evaluate(async () => {
+      const res = await fetch('/broker-api/api/v1/atna/stats');
+      return res.ok ? res.json() : null;
+    });
+    record('settings: ATNA-Status ist abrufbar', stats !== null && stats.queue_max > 0,
+      `host=${stats?.host ?? '?'} protocol=${stats?.protocol ?? '?'}`);
+  }
+
+  // local worklist + HL7 panel
+  await page.goto(`${OE3}/oe3/broker/worklist`, { waitUntil: 'domcontentloaded' });
+  const hl7Panel = page.getByTestId('broker-hl7');
+  await hl7Panel.first().waitFor({ timeout: 10000 }).catch(() => {});
+  record('worklist: HL7-Panel wird gerendert',
+    await hl7Panel.count() > 0 && await hl7Panel.first().isVisible());
+  record('worklist: genau eine H1', await page.locator('h1').count() === 1);
+  record('worklist: kein horizontaler Overflow',
+    !(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)));
+
+  // station rules
+  await page.goto(`${OE3}/oe3/broker/stations`, { waitUntil: 'domcontentloaded' });
+  const stationPreview = page.getByTestId('broker-station-preview');
+  await stationPreview.first().waitFor({ timeout: 10000 }).catch(() => {});
+  record('stations: Vorschau-Panel wird gerendert',
+    await stationPreview.count() > 0 && await stationPreview.first().isVisible());
+  record('stations: genau eine H1', await page.locator('h1').count() === 1);
 
   // alerting card (webhook + events + test message)
   await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });

@@ -17,6 +17,8 @@ required in this repository.
 | `/broker/rules` | Routing rules (source → target, priority, enable toggle) |
 | `/broker/transforms` | DICOM modify rules (tag set/remove/prefix/suffix/replace/copy, scope, priority) |
 | `/broker/settings` | Runtime settings (ENV default + UI override/reset) |
+| `/broker/worklist` | Local worklist items + HL7 ORM interface check |
+| `/broker/stations` | Per-station rules + source-visibility preview |
 | `/broker/spool` | Store queue: queued instances, per-entry retry, discard with a reason |
 | `/broker/audit` | Change log: before/after diff, rollback, configuration export/import (dry-run first) |
 
@@ -60,6 +62,11 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/audit/config` | Change log (diff + rollback) |
 | `GET/POST` | `/api/v1/config/export`, `/api/v1/config/import?dry_run=` | Configuration export/import |
 | `POST` | `/api/v1/config/rollback/{id}` | Roll a change back |
+| `GET/POST/PUT/DELETE` | `/api/v1/local-items` | Local worklist items (emergencies) |
+| `POST` | `/api/v1/hl7/orm?dry_run=`, `GET /api/v1/hl7/messages` | HL7 ORM intake + message log |
+| `GET/POST/PUT/DELETE` | `/api/v1/station-rules` | Per-station filter and priority |
+| `POST` | `/api/v1/simulate/station` | "What would this console see?" |
+| `GET` | `/api/v1/atna/stats`, `POST /api/v1/atna/test`, `GET /api/v1/atna/sample` | ATNA audit trail |
 | `GET` | `/api/v1/notify/events` | Alerting card: the event catalog (code, severity, description) |
 | `POST` | `/api/v1/notify/test` | "Send test message" (returns the delivery result) |
 | `GET` | `/api/v1/spool`, `/api/v1/spool/stats` | Store queue + spool card |
@@ -86,6 +93,16 @@ Minimum fields the UI reads:
   — `before_json`/`after_json` drive the diff view; `id` drives the rollback
 - `config/import` (dry-run): `{dry_run, changes[], skipped[], summary}` —
   `changes` are `{entity,action,name,fields}`; the UI shows them before applying
+- `local-items[]`: full item including the patient name — this is *actively
+  maintained* data (the editor needs it), unlike the cache. The change log and
+  the configuration export deliberately carry the schedule only, no patient data
+- `hl7/orm?dry_run=true`: `{dry_run, action, parsed{}, warnings[]}` — the
+  interface check; `dry_run=false` applies it and returns the affected item
+- `hl7/messages[]`: `{ts,transport,message_type,control_id,order_control,accession,action,error}`
+- `station-rules[]`: `{name,station_aet,mode,source_ids,source_priority,priority,enabled}`
+- `simulate/station`: `{rule_id,rule_name,mode,sources[{id,name,visible,effective_priority}],reason}`
+- `atna/stats`: `{enabled,configured,host,port,protocol,queue_size,queue_max,worker_running}`;
+  `atna/sample` returns the XML the receiving team validates against
 - `notify/events[]`: `{code, severity, description}` — the UI renders checkboxes
   from it, so a new event on the broker side shows up without a UI change
 - `notify/test`: `{ok, error}` — the operator's check after configuring the

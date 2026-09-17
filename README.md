@@ -45,6 +45,9 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
 | **Study Sharing** | Share studies via Orthanc Shares plugin or instant viewer link. Share by email, copy link, expiration date, description. |
 | **Worklists** | DICOM Modality Worklist Management — list, upload, delete worklists via dedicated page and API. |
+| **MWL Broker — Local Worklist & HL7** | Emergencies and unscheduled exams exist in no RIS — the broker holds them itself (`/broker/worklist`) and merges them into every matching C-FIND with the **highest priority** (they win against the RIS and are routable via the `local` pseudo source). Orders arrive as **HL7 ORM** over REST (with a dry-run) or through an **MLLP listener**; the panel shows the parser result, its warnings and the recent messages. |
+| **MWL Broker — Station Rules** | Each console sees its own worklist: a **per-station rule** (`/broker/stations`) hides sources from a station or shows only some, and can flip the merge order for that station. A preview answers "what would this console see?" using the same matching as the live C-FIND. |
+| **MWL Broker — ATNA Audit Trail** | IHE-conformant audit messages (DICOM PS3.15 XML in RFC 5424 syslog) over **TCP or TLS** to the hospital's own Audit Record Repository — query, import, export and security events. Off by default, never blocks DICOM traffic, and the settings card offers a test message plus the sample XML for the receiving team. |
 | **MWL Broker — Alerting** | Push broker events to a **webhook** (Slack/Teams-compatible JSON): a dedicated card on the settings page lists every event with severity and description, lets the operator pick the ones they care about, and offers **"send test message"** with the delivery result. Delivery is fire-and-forget on a background thread — a slow webhook never delays DICOM traffic — and repeated events for the same object are de-bounced. |
 | **MWL Broker — Store Queue** | Store and forward: instances that cannot be delivered are spooled and retried automatically. The dashboard shows a **spool card** (backlog, oldest entry, usage, dead letters, "retry all"), and `/broker/spool` lists every queued instance with target, attempts and last error — with per-entry retry and a discard that requires a reason. Nothing is ever dropped silently: when the spool is full the broker refuses instead. |
 | **MWL Broker — Worklist Cache** | Bridges an unreachable RIS: the dashboard shows a **cache card** (items/age/state per source, "clear cache" with confirmation), a **warning banner** while answers come from the cache, and a "from cache" marker in the query log. A live answer always *replaces* the snapshot, so completed orders disappear immediately — the RIS stays the source of truth (same lifecycle as Medavis/dcm4chee handle it). |
@@ -177,7 +180,7 @@ Open [http://localhost:5173](http://localhost:5173). The dev server proxies `/or
 # Start dev server (requires Docker stack running)
 npm run dev
 
-# Run unit tests (single pass, 404 tests)
+# Run unit tests (single pass, 428 tests)
 npm run test
 
 # Run unit tests in watch mode

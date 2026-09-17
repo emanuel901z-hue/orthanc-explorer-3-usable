@@ -24,6 +24,12 @@
  *   POST   /api/v1/simulate/route     POST /api/v1/simulate/transform
  *   GET    /api/v1/cache/stats        GET /api/v1/cache/items
  *   DELETE /api/v1/cache              DELETE /api/v1/cache/sources/:id
+ *   GET    /api/v1/local-items        POST /api/v1/local-items
+ *   PUT    /api/v1/local-items/:id    DELETE /api/v1/local-items/:id
+ *   POST   /api/v1/hl7/orm            GET /api/v1/hl7/messages
+ *   GET    /api/v1/station-rules      POST /api/v1/station-rules
+ *   POST   /api/v1/simulate/station
+ *   GET    /api/v1/atna/stats         POST /api/v1/atna/test   GET /api/v1/atna/sample
  *   GET    /api/v1/notify/events      POST /api/v1/notify/test
  *   GET    /api/v1/spool              GET /api/v1/spool/stats
  *   POST   /api/v1/spool/:id/retry    POST /api/v1/spool/retry-all
@@ -142,6 +148,94 @@ export type EchoStatus = {
   breaker_state?: BreakerState | null;
   /** Seconds until the next probe (null unless the breaker is open). */
   breaker_retry_in_s?: number | null;
+};
+
+/** A locally maintained worklist item (emergency / unscheduled exam). */
+export type LocalItem = {
+  id: number;
+  accession: string;
+  sps_id: string;
+  patient_id: string;
+  patient_name: string;
+  birth_date: string;
+  sex: string;
+  modality: string;
+  station_aet: string;
+  procedure_description: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  study_uid: string;
+  sps_status: string;
+  valid_until: string | null;
+  enabled: boolean;
+  origin: 'manual' | 'hl7';
+  created_at: string;
+  updated_at: string;
+};
+
+export type LocalItemIn = Omit<LocalItem, 'id' | 'origin' | 'created_at' | 'updated_at'>;
+
+/** Result of an HL7 ORM message (dry-run shows what would happen). */
+export type Hl7Parse = {
+  dry_run: boolean;
+  message_type: string;
+  control_id: string;
+  order_control: string;
+  accession: string;
+  action: string;
+  item: LocalItem | null;
+  parsed: Record<string, unknown>;
+  warnings: string[];
+};
+
+/** One inbound HL7 message (troubleshooting log). */
+export type Hl7Message = {
+  id: number;
+  ts: string;
+  transport: string;
+  message_type: string;
+  control_id: string;
+  order_control: string;
+  accession: string;
+  action: string;
+  error: string;
+};
+
+/** Per-station worklist rule (filter + priority override). */
+export type StationRule = {
+  id: number;
+  name: string;
+  station_aet: string;
+  mode: 'allow' | 'deny';
+  source_ids: number[];
+  source_priority: Record<string, number>;
+  priority: number;
+  enabled: boolean;
+  created_at: string;
+};
+
+export type StationRuleIn = Omit<StationRule, 'id' | 'created_at'>;
+
+/** What a station would see — a dry-run of the station rules. */
+export type StationPreview = {
+  station_aet: string;
+  rule_id: number | null;
+  rule_name: string | null;
+  mode: 'allow' | 'deny' | null;
+  sources: { id: number; name: string; visible: boolean; effective_priority: number }[];
+  reason: string;
+};
+
+/** State of the ATNA audit trail. */
+export type AtnaStats = {
+  enabled: boolean;
+  configured: boolean;
+  host: string;
+  port: number;
+  protocol: string;
+  queue_size: number;
+  queue_max: number;
+  worker_running: boolean;
 };
 
 /** One alerting event the broker can push to a webhook. */
@@ -456,6 +550,44 @@ export const brokerApi = {
 
   health: {
     config: () => brokerFetch<BrokerHealth>('/api/v1/health/config'),
+  },
+
+  localItems: {
+    list: () => brokerFetch<LocalItem[]>('/api/v1/local-items'),
+    create: (body: LocalItemIn) =>
+      brokerFetch<LocalItem>('/api/v1/local-items', post(body)),
+    update: (id: number, body: LocalItemIn) =>
+      brokerFetch<LocalItem>(`/api/v1/local-items/${id}`, put(body)),
+    remove: (id: number) =>
+      brokerFetch<void>(`/api/v1/local-items/${id}`, { method: 'DELETE' }),
+  },
+
+  hl7: {
+    orm: (message: string, dryRun: boolean) =>
+      brokerFetch<Hl7Parse>(`/api/v1/hl7/orm?dry_run=${dryRun ? 'true' : 'false'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: message,
+      }),
+    messages: (limit = 50) => brokerFetch<Hl7Message[]>(`/api/v1/hl7/messages?limit=${limit}`),
+  },
+
+  stationRules: {
+    list: () => brokerFetch<StationRule[]>('/api/v1/station-rules'),
+    create: (body: StationRuleIn) =>
+      brokerFetch<StationRule>('/api/v1/station-rules', post(body)),
+    update: (id: number, body: StationRuleIn) =>
+      brokerFetch<StationRule>(`/api/v1/station-rules/${id}`, put(body)),
+    remove: (id: number) =>
+      brokerFetch<void>(`/api/v1/station-rules/${id}`, { method: 'DELETE' }),
+    simulate: (stationAet: string) =>
+      brokerFetch<StationPreview>('/api/v1/simulate/station', post({ station_aet: stationAet })),
+  },
+
+  atna: {
+    stats: () => brokerFetch<AtnaStats>('/api/v1/atna/stats'),
+    test: () => brokerFetch<{ ok: boolean; error: string }>('/api/v1/atna/test', post({})),
+    sample: () => brokerFetch<{ xml: string }>('/api/v1/atna/sample'),
   },
 
   notify: {
