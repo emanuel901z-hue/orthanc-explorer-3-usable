@@ -22,6 +22,19 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
   `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
   Ressourcentypen).
 
+### Neu: Worklist-Cache mit Stale-Fallback
+
+- **Cache-Karte** im Dashboard: Einträge, Alter und Zustand (`empty |
+  available | expired`) je Quelle, Fallback-Flag, Refresh-Intervall und
+  „Cache leeren" mit Bestätigung (auditiert als `broker.cache.clear`).
+- **Warnbanner**, solange der jüngste Query aus dem Cache bedient wurde, und
+  ein „aus Cache"-Marker im Query-Log.
+- Quellen-Dialog: Cache-Gruppe (Fallback-Schalter, Hintergrund-Aktualisierung).
+- Die globalen Schalter (Cache an/aus, Stale-Fenster, erledigte Schritte
+  ausblenden, max. Einträge) erscheinen automatisch auf der Settings-Seite.
+- Semantik: eine Live-Antwort **ersetzt** den Snapshot — abgeschlossene
+  Aufträge verschwinden sofort; erledigte Schritte kommen nie aus dem Cache.
+
 ### Neu: Änderungsprotokoll, Export/Import und Simulation
 
 - Seite **`/broker/audit`** („Änderungsprotokoll"): jede
@@ -64,10 +77,10 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ### Tests & Tooling
 
-- 378 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
-  Mobile 375×812, 31 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
-  (66 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
-- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 98 %.
+- 386 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
+  Mobile 375×812, 35 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
+  (69 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
+- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 98,1 %.
 
 ---
 

@@ -22,6 +22,8 @@
  *   GET    /api/v1/audit/config       GET /api/v1/config/export
  *   POST   /api/v1/config/import      POST /api/v1/config/rollback/:id
  *   POST   /api/v1/simulate/route     POST /api/v1/simulate/transform
+ *   GET    /api/v1/cache/stats        GET /api/v1/cache/items
+ *   DELETE /api/v1/cache              DELETE /api/v1/cache/sources/:id
  *   GET    /api/v1/logs/queries       GET /api/v1/logs/stores
  */
 import { getConfig } from '@/config/runtime';
@@ -41,10 +43,24 @@ export type BrokerSource = {
   enabled: boolean;
   timeout_s: number;
   priority: number;
+  /** May this source be answered from the worklist cache while unreachable? */
+  cache_stale_on_error: boolean;
+  /** Background refresh interval of the cached snapshot (0 = off). */
+  cache_refresh_s: number;
   created_at: string;
 };
 
-export type BrokerSourceIn = Omit<BrokerSource, 'id' | 'created_at'>;
+/**
+ * Write payload for a source. The cache fields are optional: the broker
+ * applies its own defaults when they are omitted (matching the Pydantic
+ * schema), while responses always carry them.
+ */
+export type BrokerSourceIn = Omit<
+  BrokerSource, 'id' | 'created_at' | 'cache_stale_on_error' | 'cache_refresh_s'
+> & {
+  cache_stale_on_error?: boolean;
+  cache_refresh_s?: number;
+};
 
 export type BrokerTarget = {
   id: number;
@@ -122,6 +138,31 @@ export type EchoStatus = {
   breaker_state?: BreakerState | null;
   /** Seconds until the next probe (null unless the breaker is open). */
   breaker_retry_in_s?: number | null;
+};
+
+/** Worklist cache state of one source (outage bridge). */
+export type CacheSource = {
+  source_id: number;
+  source_name: string;
+  entries: number;
+  age_s: number | null;
+  state: 'empty' | 'available' | 'expired';
+  stale_on_error: boolean;
+  refresh_s: number;
+  newest_fetched_at: string | null;
+};
+
+/** One cached worklist item — metadata only, no PHI. */
+export type CacheItem = {
+  source_id: number;
+  source_name: string;
+  accession: string;
+  study_uid: string;
+  modality: string;
+  station_aet: string;
+  sps_status: string;
+  age_s: number;
+  fetched_at: string;
 };
 
 export type BreakerResetResult = {
@@ -230,6 +271,8 @@ export type QueryLogRow = {
   query_keys: Record<string, unknown>;
   answers: number;
   per_source: Record<string, number | string>;
+  /** Sources that had to be answered from the worklist cache. */
+  served_stale?: string[] | null;
   duration_ms: number;
   status: string;
 };
@@ -362,6 +405,19 @@ export const brokerApi = {
 
   health: {
     config: () => brokerFetch<BrokerHealth>('/api/v1/health/config'),
+  },
+
+  cache: {
+    stats: () => brokerFetch<CacheSource[]>('/api/v1/cache/stats'),
+    items: (params: { sourceId?: number; limit?: number } = {}) => {
+      const query = new URLSearchParams();
+      if (params.sourceId !== undefined) query.set('source_id', String(params.sourceId));
+      query.set('limit', String(params.limit ?? 100));
+      return brokerFetch<CacheItem[]>(`/api/v1/cache/items?${query.toString()}`);
+    },
+    clear: () => brokerFetch<void>('/api/v1/cache', { method: 'DELETE' }),
+    clearSource: (sourceId: number) =>
+      brokerFetch<void>(`/api/v1/cache/sources/${sourceId}`, { method: 'DELETE' }),
   },
 
   audit: {

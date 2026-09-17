@@ -240,6 +240,28 @@ describe("brokerApi", () => {
       .toEqual({ accession: "ACC-1", values: { PatientID: "P1" } });
   });
 
+  it("cache.stats()/items()/clear() hit the cache endpoints", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response("[]", { status: 200 })),
+    );
+    await brokerApi.cache.stats();
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/cache/stats");
+
+    await brokerApi.cache.items({ sourceId: 3, limit: 10 });
+    expect(fetchMock.mock.calls[1][0]).toBe("/broker-api/api/v1/cache/items?source_id=3&limit=10");
+    await brokerApi.cache.items();
+    expect(fetchMock.mock.calls[2][0]).toBe("/broker-api/api/v1/cache/items?limit=100");
+
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(null, { status: 204 })));
+    await brokerApi.cache.clear();
+    expect(fetchMock.mock.calls[3][0]).toBe("/broker-api/api/v1/cache");
+    expect((fetchMock.mock.calls[3][1] as RequestInit).method).toBe("DELETE");
+
+    await brokerApi.cache.clearSource(5);
+    expect(fetchMock.mock.calls[4][0]).toBe("/broker-api/api/v1/cache/sources/5");
+    expect((fetchMock.mock.calls[4][1] as RequestInit).method).toBe("DELETE");
+  });
+
   it("transforms.list() hits /api/v1/transforms", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("[]", { status: 200 }),

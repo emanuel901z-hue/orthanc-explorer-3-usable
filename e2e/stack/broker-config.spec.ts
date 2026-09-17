@@ -334,6 +334,50 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('cache card shows the outage bridge state', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker', /MWL/i);
+    const card = page.getByTestId('broker-cache');
+    await expect(card).toBeVisible();
+    // the C-FIND smoke ran before the suite → the snapshot is filled
+    await expect(card.getByTestId('broker-cache-list')).toBeVisible();
+    await expect(card).toContainText(/ris-a/);
+    await expect(card).toContainText(/items/i);
+    // the semantics are explained (upstream stays the source of truth)
+    await expect(card).toContainText(/source of truth|Quelle der Wahrheit/i);
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-cache-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('stale answers are visible in the dashboard', async ({ page }) => {
+    // requires the test-stack scenario: test-stack.sh makes a source
+    // unreachable once and queries it, so the newest log entry is stale
+    const logs = await (await page.request.get('/broker-api/api/v1/logs/queries?limit=1')).json();
+    const stale = (logs[0]?.served_stale ?? []) as string[];
+    test.skip(stale.length === 0, 'stale scenario not prepared');
+
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker', /MWL/i);
+    const banner = page.getByTestId('broker-stale-banner');
+    await expect(banner).toBeVisible();
+    await expect(banner).toContainText(stale[0]);
+    await expect(banner).toContainText(/from cache|aus dem Cache/i);
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-stale-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

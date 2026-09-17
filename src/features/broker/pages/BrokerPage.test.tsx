@@ -154,6 +154,39 @@ describe('BrokerPage', () => {
     expect(screen.getByText(/skipped \(breaker\)/i)).toBeInTheDocument();
   });
 
+  it('warns while a source is served from the cache', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    mockQueries.mockResolvedValue([{
+      id: 1, ts: '2026-09-17T10:00:00Z', calling_aet: 'CT_01',
+      query_keys: {}, answers: 2, per_source: { 'ris-a': 2 },
+      served_stale: ['ris-a'], duration_ms: 11, status: 'partial',
+    }]);
+    renderPage();
+
+    const banner = await screen.findByTestId('broker-stale-banner');
+    expect(banner).toHaveTextContent('ris-a');
+    expect(banner).toHaveTextContent(/from cache/i);
+    // the banner *and* the log row mark it
+    expect(screen.getAllByText(/from cache/i).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows no stale banner when everything answered live', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    mockQueries.mockResolvedValue([{
+      id: 1, ts: '2026-09-17T10:00:00Z', calling_aet: 'CT_01',
+      query_keys: {}, answers: 2, per_source: { 'ris-a': 2 },
+      served_stale: null, duration_ms: 9, status: 'success',
+    }]);
+    renderPage();
+
+    await waitFor(() => expect(mockQueries).toHaveBeenCalled());
+    expect(screen.queryByTestId('broker-stale-banner')).not.toBeInTheDocument();
+  });
+
   it('echo button triggers a manual C-ECHO for that row', async () => {
     const { brokerApi } = await import('@/api/broker');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

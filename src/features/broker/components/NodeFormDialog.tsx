@@ -42,6 +42,8 @@ const DEFAULTS: NodeFormValues = {
   enabled: true,
   timeout_s: 10,
   priority: 100,
+  cache_stale_on_error: true,
+  cache_refresh_s: 0,
   is_default: false,
 };
 
@@ -56,6 +58,8 @@ function fromRow(kind: NodeKind, row: BrokerSource | BrokerTarget): NodeFormValu
     charset: 'charset' in row ? row.charset : DEFAULTS.charset,
     timeout_s: 'timeout_s' in row ? row.timeout_s : DEFAULTS.timeout_s,
     priority: 'priority' in row ? row.priority : DEFAULTS.priority,
+    cache_stale_on_error: 'cache_stale_on_error' in row ? row.cache_stale_on_error : true,
+    cache_refresh_s: 'cache_refresh_s' in row ? row.cache_refresh_s : 0,
     is_default: kind === 'target' && 'is_default' in row ? row.is_default : false,
   };
   return base as NodeFormValues;
@@ -224,6 +228,36 @@ export function NodeFormDialog({
                 />
                 <p className="text-xs text-muted-foreground">{t('broker.priorityHint')}</p>
               </div>
+
+              {kind === 'source' && (
+                <div className="space-y-3 rounded-md border p-3">
+                  <p className="text-sm font-medium">{t('broker.cacheGroup')}</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <Label htmlFor="node-cache-stale">{t('broker.cacheStaleOnError')}</Label>
+                      <p className="text-xs text-muted-foreground">{t('broker.cacheStaleOnErrorHint')}</p>
+                    </div>
+                    <Switch
+                      id="node-cache-stale"
+                      checked={values.cache_stale_on_error ?? true}
+                      onCheckedChange={(checked) => set('cache_stale_on_error', checked)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="node-cache-refresh">{t('broker.cacheRefresh')}</Label>
+                    <Input
+                      id="node-cache-refresh"
+                      type="number"
+                      min={0}
+                      max={86400}
+                      className="font-mono"
+                      value={values.cache_refresh_s ?? 0}
+                      onChange={(e) => set('cache_refresh_s', Number(e.target.value))}
+                    />
+                    <p className="text-xs text-muted-foreground">{t('broker.cacheRefreshHint')}</p>
+                  </div>
+                </div>
+              )}
             </>
           )}
 

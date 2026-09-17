@@ -59,6 +59,8 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/audit/config` | Change log (diff + rollback) |
 | `GET/POST` | `/api/v1/config/export`, `/api/v1/config/import?dry_run=` | Configuration export/import |
 | `POST` | `/api/v1/config/rollback/{id}` | Roll a change back |
+| `GET` | `/api/v1/cache/stats`, `/api/v1/cache/items` | Worklist cache card |
+| `DELETE` | `/api/v1/cache`, `/api/v1/cache/sources/{id}` | "Clear cache" (confirmed) |
 | `POST` | `/api/v1/simulate/route`, `/api/v1/simulate/transform` | "Check a case" dry-run |
 | `POST` | `/api/v1/sources/{id}/reset-breaker` | Circuit-breaker badge: operator reset |
 | `POST` | `/api/v1/sources/{id}/echo` | "Run C-ECHO now" button |
@@ -78,6 +80,15 @@ Minimum fields the UI reads:
   — `before_json`/`after_json` drive the diff view; `id` drives the rollback
 - `config/import` (dry-run): `{dry_run, changes[], skipped[], summary}` —
   `changes` are `{entity,action,name,fields}`; the UI shows them before applying
+- `cache/stats[]`: `{source_id,source_name,entries,age_s,state,stale_on_error,refresh_s}`
+  — `state` is `empty | available | expired`; the UI renders the fallback state
+  and disables "clear" when nothing is cached
+- `cache/items[]`: metadata only (`accession`, `study_uid`, `modality`,
+  `station_aet`, `sps_status`, `age_s`) — deliberately **without** patient
+  identifiers, even though the cached payload contains PHI
+- `logs/queries[]`: `served_stale` lists the sources that had to be answered
+  from the cache (the dashboard banner and the log badge read it)
+- `sources[]` carry `cache_stale_on_error` and `cache_refresh_s`
 - `simulate/*`: routing decision (`matched_via`, `target_name`, `rule_id`,
   `reason`) plus `rules_applied`, `changes[]` (`{tag,before,after}`) and
   `errors[]` — no side effects

@@ -244,6 +244,21 @@ async function domReport(page) {
   const rtt = await page.getByText(/\d+\s*ms/).first().isVisible();
   record('sources: manueller C-ECHO liefert RTT im UI', rtt);
 
+  // worklist cache card (outage bridge)
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  const cacheCard = page.getByTestId('broker-cache');
+  const cacheVisible = await cacheCard.count() > 0 && await cacheCard.first().isVisible();
+  record('monitoring: Cache-Karte (Ausfall-Überbrückung) wird gerendert', cacheVisible);
+  if (cacheVisible) {
+    const list = cacheCard.getByTestId('broker-cache-list');
+    const rows = await list.count() > 0 ? await list.locator('li').count() : 0;
+    record('monitoring: Cache zeigt Zustand je Quelle', rows >= 1, `${rows} Quellen`);
+    const dom = await cacheCard.evaluate((el) => ({
+      overflow: el.scrollWidth > el.clientWidth,
+    }));
+    record('monitoring: Cache-Karte ohne Overflow', !dom.overflow);
+  }
+
   // case check (simulation): routing dry-run on the monitoring page
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
   const casePanel = page.getByTestId('broker-case-check');

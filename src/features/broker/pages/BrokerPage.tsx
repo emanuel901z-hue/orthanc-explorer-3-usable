@@ -31,6 +31,7 @@ import { EchoBadge } from '../components/EchoBadge';
 import { BreakerBadge } from '../components/BreakerBadge';
 import { HealthPanel } from '../components/HealthPanel';
 import { CaseCheckPanel } from '../components/CaseCheckPanel';
+import { CacheCard } from '../components/CacheCard';
 import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
 
 export default function BrokerPage() {
@@ -119,12 +120,26 @@ export default function BrokerPage() {
         </Card>
       )}
 
+      {(() => {
+        const stale = (queriesQuery.data ?? [])[0]?.served_stale ?? [];
+        if (stale.length === 0) return null;
+        return (
+          <Card className="border-amber-500/40 bg-amber-500/5" data-testid="broker-stale-banner">
+            <CardContent className="p-3 text-sm text-amber-700">
+              {t('broker.staleBanner', { sources: stale.join(', ') })}
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       <HealthPanel
         health={healthQuery.data}
         onNavigate={(path) => navigate(path)}
       />
 
       <CaseCheckPanel />
+
+      <CacheCard />
 
       {/* Status cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -315,6 +330,11 @@ export default function BrokerPage() {
                       {Object.entries(row.per_source).map(([name, value]) => (
                         <span key={name} className="mr-2 inline-flex items-center gap-1">
                           {name}:
+                          {(row.served_stale ?? []).includes(name) && (
+                            <Badge variant="outline" className="text-[10px] text-amber-600">
+                              {t('broker.staleBadge')}
+                            </Badge>
+                          )}
                           {value === 'breaker_open' ? (
                             <Badge variant="outline" className="text-[10px] text-amber-600">
                               {t('broker.breakerSkipped')}

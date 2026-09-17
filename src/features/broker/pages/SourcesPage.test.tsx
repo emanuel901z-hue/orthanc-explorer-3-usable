@@ -172,6 +172,29 @@ describe('SourcesPage', () => {
     await waitFor(() => expect(mockResetBreaker).toHaveBeenCalledWith(1));
   });
 
+  it('sends the cache settings of the source dialog', async () => {
+    mockCreate.mockResolvedValue({ id: 2 });
+    renderPage();
+    await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: /add source/i }));
+    fireEvent.change(screen.getByLabelText(/^name$/i), { target: { value: 'ris-c' } });
+    fireEvent.change(screen.getByLabelText(/^ae ?title$/i), { target: { value: 'RIS_C' } });
+    fireEvent.change(screen.getByLabelText(/^host$/i), { target: { value: 'h' } });
+    fireEvent.change(screen.getByLabelText(/^port$/i), { target: { value: '104' } });
+
+    // the cache group is only offered for sources
+    expect(screen.getByText(/worklist cache/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('switch', { name: /serve from cache/i }));
+    fireEvent.change(screen.getByLabelText(/background refresh/i), { target: { value: '300' } });
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }));
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled());
+    expect(mockCreate.mock.calls[0][0]).toMatchObject({
+      name: 'ris-c', cache_stale_on_error: false, cache_refresh_s: 300,
+    });
+  });
+
   it('deletes a source only after confirmation', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
