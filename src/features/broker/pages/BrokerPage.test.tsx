@@ -77,4 +77,47 @@ describe('BrokerPage', () => {
     expect(screen.getByText('42')).toBeInTheDocument(); // query count
     expect(screen.getByText('12 ms')).toBeInTheDocument(); // echo RTT
   });
+
+  it('shows error banner when the status query fails', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    mockStatus.mockRejectedValue(new Error('broker unreachable'));
+    renderPage();
+    await waitFor(() =>
+      expect(screen.getByText(/could not be loaded/i)).toBeInTheDocument(),
+    );
+  });
+
+  it('renders empty states when no sources/targets exist', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    mockStatus.mockResolvedValue({
+      scp_listening: true, db_ok: true,
+      sources: [], targets: [],
+      counts: { queries: 0, stores: 0, seen_items: 0 },
+    });
+    mockSources.mockResolvedValue([]);
+    mockTargets.mockResolvedValue([]);
+    renderPage();
+    await waitFor(() =>
+      expect(screen.getByText(/No sources configured/i)).toBeInTheDocument(),
+    );
+    expect(screen.getByText(/No targets configured/i)).toBeInTheDocument();
+  });
+
+  it('echo button triggers a manual C-ECHO for that row', async () => {
+    const { brokerApi } = await import('@/api/broker');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    renderPage();
+    await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
+    const btn = screen.getAllByRole('button', { name: /echo/i })[0];
+    btn.click();
+    await waitFor(() =>
+      expect(vi.mocked(brokerApi.sources.echo)).toHaveBeenCalledWith(1),
+    );
+  });
 });

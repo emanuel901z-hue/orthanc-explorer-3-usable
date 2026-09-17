@@ -138,6 +138,14 @@ export default function BrokerPage() {
         <p className="text-sm text-muted-foreground">{t('broker.subtitle')}</p>
       </div>
 
+      {statusQuery.isError && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="p-3 text-sm text-destructive">
+            {t('broker.loadError')}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Status cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card>

@@ -54,4 +54,18 @@ describe('runtime config', () => {
     loadConfig();
     expect(getConfig().authMode).toBe('none');
   });
+
+  it('defaults authCheck to true (auth gate stays active)', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', authMode: 'none', features: {} };
+    expect(loadConfig().authCheck).toBe(true);
+  });
+
+  it('accepts authCheck:false for standalone deployments without backend proxy', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = {
+      orthancUrl: '', authMode: 'none', features: {}, authCheck: false,
+    };
+    expect(loadConfig().authCheck).toBe(false);
+  });
 });

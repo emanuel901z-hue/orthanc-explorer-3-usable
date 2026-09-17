@@ -919,7 +919,8 @@
     "status": "Status",
     "neverChecked": "never checked",
     "echoFailed": "echo failed",
-    "echoNow": "Run C-ECHO now"
+    "echoNow": "Run C-ECHO now",
+    "loadError": "Broker status could not be loaded"
   },
   "shortcuts": {
     "nav": {
