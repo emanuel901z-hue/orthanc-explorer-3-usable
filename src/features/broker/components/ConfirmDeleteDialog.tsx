@@ -18,12 +18,15 @@ export function ConfirmDeleteDialog({
   onOpenChange,
   itemName,
   pending,
+  warning,
   onConfirm,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   itemName: string;
   pending: boolean;
+  /** Extra consequence the operator has to see (e.g. dependent rules). */
+  warning?: string | null;
   onConfirm: () => void;
 }) {
   const { t } = useTranslation();
@@ -35,6 +38,9 @@ export function ConfirmDeleteDialog({
           <AlertDialogDescription>
             {t('broker.confirmDeleteBody', { name: itemName })}
           </AlertDialogDescription>
+          {warning && (
+            <p className="text-sm font-medium text-destructive">{warning}</p>
+          )}
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('common.cancel', { defaultValue: 'Cancel' })}</AlertDialogCancel>

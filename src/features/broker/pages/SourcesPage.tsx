@@ -24,6 +24,7 @@ import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { EchoBadge } from '../components/EchoBadge';
+import { BreakerBadge } from '../components/BreakerBadge';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { NodeFormDialog, type NodeFormValues } from '../components/NodeFormDialog';
 import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
@@ -49,7 +50,7 @@ export default function SourcesPage() {
     enabled: configured,
     refetchInterval: 5000,
   });
-  const { create, update, remove } = useBrokerSourceWrites();
+  const { create, update, remove, resetBreaker } = useBrokerSourceWrites();
   const echo = useBrokerEcho();
 
   const echoById = new Map((statusQuery.data?.sources ?? []).map((e) => [e.id, e]));
@@ -91,9 +92,19 @@ export default function SourcesPage() {
             <ConfigRowCard
               key={row.id}
               title={row.name}
-              badges={!row.enabled ? (
-                <Badge variant="outline" className="text-xs">{t('broker.disabled')}</Badge>
-              ) : null}
+              badges={
+                <>
+                  {!row.enabled && (
+                    <Badge variant="outline" className="text-xs">{t('broker.disabled')}</Badge>
+                  )}
+                  <BreakerBadge
+                    state={echoFor(row).breaker_state}
+                    retryInS={echoFor(row).breaker_retry_in_s}
+                    pending={resetBreaker.isPending}
+                    onReset={() => resetBreaker.mutate(row.id)}
+                  />
+                </>
+              }
               fields={[
                 { label: t('broker.endpoint'), value: `${row.aet}@${row.host}:${row.port}` },
                 { label: t('broker.charset'), value: row.charset },
@@ -158,6 +169,14 @@ export default function SourcesPage() {
                         {t('broker.disabled')}
                       </Badge>
                     )}
+                    <span className="ml-2 inline-block align-middle">
+                      <BreakerBadge
+                        state={echoFor(row).breaker_state}
+                        retryInS={echoFor(row).breaker_retry_in_s}
+                        pending={resetBreaker.isPending}
+                        onReset={() => resetBreaker.mutate(row.id)}
+                      />
+                    </span>
                   </TableCell>
                   <TableCell className="font-mono text-xs break-all">
                     {row.aet}@{row.host}:{row.port}
@@ -227,6 +246,7 @@ export default function SourcesPage() {
         open={deleting !== null}
         onOpenChange={(open) => { if (!open) setDeleting(null); }}
         itemName={deleting?.name ?? ''}
+        warning={t('broker.confirmDeleteDependenciesSource')}
         pending={remove.isPending}
         onConfirm={() => {
           if (!deleting) return;

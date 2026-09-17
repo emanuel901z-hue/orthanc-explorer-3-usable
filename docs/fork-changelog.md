@@ -22,6 +22,18 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
   `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
   Ressourcentypen).
 
+### Neu: Broker-Health-Panel + Circuit-Breaker-Anzeige
+
+- `/broker` zeigt oben ein **Konfigurations-Check-Panel**: Befunde nach
+  Schweregrad, lokalisierter handlungsorientierter Satz, Deep-Link („Beheben")
+  ins betroffene Formular, englischer API-Text als Fallback.
+- **Circuit-Breaker-Badge** je Quelle (offen/halb-offen mit Restzeit,
+  Ein-Klick-Reset mit Audit-Event `broker.source.breaker_reset`) in
+  Quellentabelle, Mobile-Cards und Monitoring.
+- Sidebar-Badge am „MWL Broker"-Eintrag (Fehler rot, sonst Warnungen).
+- Query-Log kennzeichnet übersprungene Quellen als „übersprungen (Breaker)".
+- Löschdialoge weisen auf mitentfernte Abhängigkeiten hin (Regeln/Transforms).
+
 ### Neu: Standalone-Deployment-Flags
 
 - `authCheck: false` — überspringt das `/oe3-me`-Gate in Deployments ohne
@@ -40,10 +52,10 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ### Tests & Tooling
 
-- 325 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
-  Mobile 375×812) und `e2e/stack/verify-ui.cjs` als Deep-Audit (56 Checks,
-  CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
-- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 98,9 %.
+- 348 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
+  Mobile 375×812, 25 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
+  (58 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
+- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 98,8 %.
 
 ---
 

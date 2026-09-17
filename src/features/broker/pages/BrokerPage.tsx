@@ -23,13 +23,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useNavigate } from 'react-router-dom';
 import { brokerApi } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { format } from 'date-fns';
 import { EchoBadge } from '../components/EchoBadge';
+import { BreakerBadge } from '../components/BreakerBadge';
+import { HealthPanel } from '../components/HealthPanel';
+import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
 
 export default function BrokerPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const brokerConfigured = Boolean(getConfig().brokerUrl);
 
@@ -58,6 +63,15 @@ export default function BrokerPage() {
     queryFn: () => brokerApi.targets.list(),
     enabled: brokerConfigured,
   });
+
+  const healthQuery = useQuery({
+    queryKey: ['broker', 'health'],
+    queryFn: () => brokerApi.health.config(),
+    enabled: brokerConfigured,
+    refetchInterval: 30000,
+  });
+
+  const { resetBreaker } = useBrokerSourceWrites();
 
   const echoMutation = useMutation({
     mutationFn: ({ kind, id }: { kind: 'source' | 'target'; id: number }) =>
@@ -103,6 +117,11 @@ export default function BrokerPage() {
           </CardContent>
         </Card>
       )}
+
+      <HealthPanel
+        health={healthQuery.data}
+        onNavigate={(path) => navigate(path)}
+      />
 
       {/* Status cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -167,6 +186,14 @@ export default function BrokerPage() {
                           {t('broker.disabled')}
                         </Badge>
                       )}
+                      <span className="ml-2 inline-block align-middle">
+                        <BreakerBadge
+                          state={s.breaker_state}
+                          retryInS={s.breaker_retry_in_s}
+                          pending={resetBreaker.isPending}
+                          onReset={() => resetBreaker.mutate(s.id)}
+                        />
+                      </span>
                     </TableCell>
                     <TableCell className="font-mono text-xs break-all">
                       {(() => {
@@ -282,9 +309,18 @@ export default function BrokerPage() {
                     <TableCell className="font-mono text-xs">{row.calling_aet}</TableCell>
                     <TableCell>{row.answers}</TableCell>
                     <TableCell className="text-xs">
-                      {Object.entries(row.per_source)
-                        .map(([k, v]) => `${k}:${v}`)
-                        .join(' ')}
+                      {Object.entries(row.per_source).map(([name, value]) => (
+                        <span key={name} className="mr-2 inline-flex items-center gap-1">
+                          {name}:
+                          {value === 'breaker_open' ? (
+                            <Badge variant="outline" className="text-[10px] text-amber-600">
+                              {t('broker.breakerSkipped')}
+                            </Badge>
+                          ) : (
+                            <span>{String(value)}</span>
+                          )}
+                        </span>
+                      ))}
                     </TableCell>
                     <TableCell className="text-xs">{row.duration_ms} ms</TableCell>
                     <TableCell>

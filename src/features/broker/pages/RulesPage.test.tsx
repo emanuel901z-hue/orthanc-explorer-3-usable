@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import RulesPage from './RulesPage';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import '@/i18n';
+import { mockMobileViewport, resetViewport } from '@/test/viewport';
 
 const { mockRules, mockSources, mockTargets, mockCreate, mockUpdate, mockDelete } = vi.hoisted(() => ({
   mockRules: vi.fn(),
@@ -63,13 +64,23 @@ describe('RulesPage', () => {
     mockUpdate.mockResolvedValue({ id: 1 });
     mockDelete.mockResolvedValue(undefined);
   });
-  afterEach(() => { __resetConfigForTests(); vi.clearAllMocks(); });
+  afterEach(() => { __resetConfigForTests(); resetViewport(); vi.clearAllMocks(); });
 
   it('resolves source and target names', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
     expect(screen.getByText('pacs-kh')).toBeInTheDocument();
     expect(screen.getByText('default')).toBeInTheDocument();
+  });
+
+  it('renders the mobile card layout with the scope', async () => {
+    mockMobileViewport();
+    renderPage();
+    await waitFor(() => expect(screen.getByText(/ris-a → pacs-kh/)).toBeInTheDocument());
+
+    expect(screen.getByText('Priority')).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('toggles a rule through the switch (audited update)', async () => {

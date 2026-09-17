@@ -28,7 +28,7 @@ npm run preview
 ### Testing
 
 ```bash
-# Run all unit tests (single pass, 325 tests)
+# Run all unit tests (single pass, 348 tests)
 npm run test
 
 # Watch mode
@@ -71,7 +71,7 @@ GitHub Actions CI (`.github/workflows/ci.yml`) laeuft bei Pull Requests und Push
 |-----|--------|-------|
 | `typecheck` | `tsc --noEmit -p tsconfig.app.json` | ~15s |
 | `lint` | `npm run lint` (ESLint) | ~10s |
-| `test` | `npm run test` (Vitest, 325 Tests) | ~15s |
+| `test` | `npm run test` (Vitest, 348 Tests) | ~15s |
 | `audit` | `npm run audit` (audit-ci, high+critical blocking) | ~10s |
 
 Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit jsdom.
@@ -101,7 +101,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (325 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (348 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -203,6 +203,9 @@ features: {
 | `src/features/broker/pages/{Sources,Targets,Rules,Transforms,BrokerSettings}Page.tsx` | Broker configuration pages (`/broker/sources`, `/targets`, `/rules`, `/transforms`, `/settings`) |
 | `src/features/broker/hooks/use-broker-writes.ts` | Audited write mutations (BEFORE+AFTER) for every broker config change |
 | `src/features/broker/components/ConfigRowCard.tsx` | Mobile card view for the broker config tables (below `md`) |
+| `src/features/broker/components/BreakerBadge.tsx` | Circuit-breaker badge per source (open/half-open + operator reset) |
+| `src/features/broker/components/HealthPanel.tsx` | Configuration health panel: localized findings + deep links into the forms |
+| `src/test/viewport.ts` | Test helper to simulate the mobile viewport (`matchMedia`) |
 | `src/lib/viewer-session.ts` | `POST /api/v1/pacs/viewer-session` before opening a viewer — skipped with `viewerSession: false` |
 | `e2e/stack/` | Playwright stack suite (desktop+mobile) + `verify-ui.cjs` deep audit (DOM checks, CRUD flows vs. REST API) |
 | `docs/mwl-broker-integration.md` | Integration contract for the optional MWL broker feature (endpoints, config, deployment) |

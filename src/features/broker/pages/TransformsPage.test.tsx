@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import TransformsPage from './TransformsPage';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import '@/i18n';
+import { mockMobileViewport, resetViewport } from '@/test/viewport';
 
 const { mockList, mockCreate, mockUpdate, mockDelete, mockSources } = vi.hoisted(() => ({
   mockList: vi.fn(),
@@ -70,7 +71,7 @@ describe('TransformsPage', () => {
     mockUpdate.mockResolvedValue({ id: 1 });
     mockDelete.mockResolvedValue(undefined);
   });
-  afterEach(() => { __resetConfigForTests(); vi.clearAllMocks(); });
+  afterEach(() => { __resetConfigForTests(); resetViewport(); vi.clearAllMocks(); });
 
   it('shows the operations and the resolved scope', async () => {
     renderPage();
@@ -112,6 +113,16 @@ describe('TransformsPage', () => {
     expect(screen.getByText('Operation 2')).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: /remove operation/i })[1]);
     expect(screen.queryByText('Operation 2')).not.toBeInTheDocument();
+  });
+
+  it('renders the mobile card layout with scope and operations', async () => {
+    mockMobileViewport();
+    renderPage();
+    await waitFor(() => expect(screen.getByText('kh-prefix')).toBeInTheDocument());
+
+    expect(screen.getByText('Scope')).toBeInTheDocument();
+    expect(screen.getByText('prefix PatientID, remove PatientAddress')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('toggles a rule through the switch', async () => {

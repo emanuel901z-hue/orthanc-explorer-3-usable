@@ -198,6 +198,58 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('health panel renders the configuration checks', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker', /MWL/i);
+
+    const panel = page.getByTestId('broker-health');
+    await expect(panel).toBeVisible();
+    // the test stack has no AET allowlist → the info-level note is always there
+    await expect(panel.getByText(/allowlist|Allowlist/i)).toBeVisible();
+    await assertNoOverflow(page, 'broker-health');
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-health-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('open circuit breaker is visible and can be reset by the operator', async ({ page }) => {
+    // requires the test-stack scenario (test-stack.sh trips the breaker for
+    // the deliberately dead source 'e2e-dead' before Playwright runs)
+    const status = await (await page.request.get('/broker-api/api/v1/status')).json();
+    const dead = (status.sources as Array<{ name: string; breaker_state?: string }>)
+      .find((s) => s.name === 'e2e-dead');
+    test.skip(!dead || dead.breaker_state !== 'open', 'breaker scenario not prepared');
+
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/sources', /upstream sources|upstream-quellen/i);
+    await expect(page.getByText(/breaker open/i).first()).toBeVisible();
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-breaker-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+
+    // the health panel reports it as well
+    await openPage(page, '/oe3/broker', /MWL/i);
+    await expect(page.getByTestId('broker-health').getByText(/temporarily skipped|übersprungen/i))
+      .toBeVisible();
+
+    // operator reset → the badge disappears
+    await openPage(page, '/oe3/broker/sources', /upstream sources|upstream-quellen/i);
+    await page.getByRole('button', { name: /reset circuit breaker|breaker zurücksetzen/i })
+      .first().click();
+    await expect(page.getByText(/breaker open/i)).toHaveCount(0, { timeout: 15000 });
+
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

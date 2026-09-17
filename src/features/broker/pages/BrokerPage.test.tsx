@@ -7,20 +7,23 @@ import BrokerPage from './BrokerPage';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import '@/i18n';
 
-const { mockStatus, mockQueries, mockSources, mockTargets } = vi.hoisted(() => ({
+const { mockStatus, mockQueries, mockSources, mockTargets, mockHealth, mockResetBreaker } = vi.hoisted(() => ({
   mockStatus: vi.fn(),
   mockQueries: vi.fn(),
   mockSources: vi.fn(),
   mockTargets: vi.fn(),
+  mockHealth: vi.fn(),
+  mockResetBreaker: vi.fn(),
 }));
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
     status: mockStatus,
     logs: { queries: mockQueries, stores: vi.fn(() => Promise.resolve([])) },
-    sources: { list: mockSources, echo: vi.fn() },
+    sources: { list: mockSources, echo: vi.fn(), resetBreaker: mockResetBreaker },
     targets: { list: mockTargets, echo: vi.fn() },
     rules: { list: vi.fn(() => Promise.resolve([])) },
+    health: { config: mockHealth },
   },
 }));
 
@@ -49,6 +52,8 @@ describe('BrokerPage', () => {
       counts: { queries: 42, stores: 7, seen_items: 9 },
     });
     mockQueries.mockResolvedValue([]);
+    mockHealth.mockResolvedValue({ findings: [], summary: { error: 0, warning: 0, info: 0 } });
+    mockResetBreaker.mockResolvedValue({ source_id: 1, name: 'ris-a', state: 'closed' });
     mockSources.mockResolvedValue([
       { id: 1, name: 'ris-a', aet: 'RIS_A', host: 'ris.local', port: 11114, calling_aet: 'MWLBROKER', charset: 'ISO_IR 100', enabled: true, timeout_s: 10, priority: 10, created_at: '' },
     ]);
@@ -105,6 +110,48 @@ describe('BrokerPage', () => {
       expect(screen.getByText(/No sources configured/i)).toBeInTheDocument(),
     );
     expect(screen.getByText(/No targets configured/i)).toBeInTheDocument();
+  });
+
+  it('renders the configuration health panel', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    mockHealth.mockResolvedValue({
+      findings: [{
+        code: 'no_default_target', severity: 'error',
+        message: 'fallback', entity: {}, details: {},
+      }],
+      summary: { error: 1, warning: 0, info: 0 },
+    });
+    renderPage();
+
+    await waitFor(() => expect(screen.getByTestId('broker-health')).toBeInTheDocument());
+    expect(await screen.findByText(/no enabled default target/i)).toBeInTheDocument();
+  });
+
+  it('shows an open circuit breaker and renders skipped sources in the log', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    mockStatus.mockResolvedValue({
+      scp_listening: true, db_ok: true,
+      sources: [{
+        kind: 'source', id: 1, name: 'ris-a', ok: false, rtt_ms: null,
+        last_check: '2026-09-16T10:00:00Z', error: 'refused',
+        breaker_state: 'open', breaker_retry_in_s: 15,
+      }],
+      targets: [],
+      counts: { queries: 1, stores: 0, seen_items: 0 },
+    });
+    mockQueries.mockResolvedValue([{
+      id: 1, ts: '2026-09-16T10:00:00Z', calling_aet: 'TESTSCU',
+      query_keys: {}, answers: 2, per_source: { 'ris-a': 'breaker_open', 'ris-b': 2 },
+      duration_ms: 12, status: 'partial',
+    }]);
+    renderPage();
+
+    await waitFor(() => expect(screen.getByText(/breaker open/i)).toBeInTheDocument());
+    expect(screen.getByText(/skipped \(breaker\)/i)).toBeInTheDocument();
   });
 
   it('echo button triggers a manual C-ECHO for that row', async () => {

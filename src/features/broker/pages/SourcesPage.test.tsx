@@ -5,13 +5,15 @@ import { MemoryRouter } from 'react-router-dom';
 import SourcesPage from './SourcesPage';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import '@/i18n';
+import { mockMobileViewport, resetViewport } from '@/test/viewport';
 
-const { mockList, mockCreate, mockUpdate, mockDelete, mockStatus } = vi.hoisted(() => ({
+const { mockList, mockCreate, mockUpdate, mockDelete, mockStatus, mockResetBreaker } = vi.hoisted(() => ({
   mockList: vi.fn(),
   mockCreate: vi.fn(),
   mockUpdate: vi.fn(),
   mockDelete: vi.fn(),
   mockStatus: vi.fn(),
+  mockResetBreaker: vi.fn(),
 }));
 
 vi.mock('@/api/broker', () => ({
@@ -20,6 +22,7 @@ vi.mock('@/api/broker', () => ({
     sources: {
       list: mockList, create: mockCreate, update: mockUpdate, delete: mockDelete,
       echo: vi.fn(() => Promise.resolve({ ok: true })),
+      resetBreaker: mockResetBreaker,
     },
     targets: {
       list: vi.fn(() => Promise.resolve([])), create: vi.fn(), update: vi.fn(),
@@ -65,7 +68,7 @@ describe('SourcesPage', () => {
     mockUpdate.mockResolvedValue({ id: 1 });
     mockDelete.mockResolvedValue(undefined);
   });
-  afterEach(() => { __resetConfigForTests(); vi.clearAllMocks(); });
+  afterEach(() => { __resetConfigForTests(); resetViewport(); vi.clearAllMocks(); });
 
   it('lists sources with their DICOM endpoint and charset', async () => {
     renderPage();
@@ -133,12 +136,50 @@ describe('SourcesPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('ris-b already exists');
   });
 
+  it('renders the mobile card layout with all fields', async () => {
+    mockMobileViewport();
+    renderPage();
+    await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
+
+    // the card shows label/value pairs instead of table columns
+    expect(screen.getByText('Endpoint')).toBeInTheDocument();
+    expect(screen.getByText('RIS_A@ris.local:11114')).toBeInTheDocument();
+    expect(screen.getByText('ISO_IR 100')).toBeInTheDocument();
+    expect(screen.getByText('10s')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    // actions stay reachable
+    expect(screen.getByRole('button', { name: /edit source/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete source/i })).toBeInTheDocument();
+  });
+
+  it('shows the circuit breaker and resets it', async () => {
+    mockStatus.mockResolvedValue({
+      scp_listening: true, db_ok: true, targets: [],
+      sources: [{
+        kind: 'source', id: 1, name: 'ris-a', ok: false, rtt_ms: null,
+        last_check: '2026-09-16T10:00:00Z', error: 'connection refused',
+        breaker_state: 'open', breaker_retry_in_s: 42,
+      }],
+      counts: { queries: 0, stores: 0, seen_items: 0 },
+    });
+    mockResetBreaker.mockResolvedValue({ source_id: 1, name: 'ris-a', state: 'closed' });
+
+    renderPage();
+    await waitFor(() => expect(screen.getByText(/breaker open/i)).toBeInTheDocument());
+    expect(screen.getByText(/42/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /reset circuit breaker/i }));
+    await waitFor(() => expect(mockResetBreaker).toHaveBeenCalledWith(1));
+  });
+
   it('deletes a source only after confirmation', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
 
     fireEvent.click(screen.getByRole('button', { name: /delete source/i }));
     expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+    // the operator sees that dependent rules are removed as well
+    expect(screen.getByText(/routing rules, modify rules and worklist history/i)).toBeInTheDocument();
     expect(mockDelete).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));

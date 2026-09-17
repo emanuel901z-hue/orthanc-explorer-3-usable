@@ -88,7 +88,14 @@ export function useBrokerSourceWrites() {
     resourceId: (id) => String(id),
     invalidate: CONFIG_KEYS,
   });
-  return { create, update, remove };
+  const resetBreaker = useAuditedMutation({
+    action: 'broker.source.breaker_reset',
+    resourceType: 'brokerSource',
+    run: (id: number) => brokerApi.sources.resetBreaker(id),
+    resourceId: (id) => String(id),
+    invalidate: CONFIG_KEYS,
+  });
+  return { create, update, remove, resetBreaker };
 }
 
 export function useBrokerTargetWrites() {

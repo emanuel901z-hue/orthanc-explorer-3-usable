@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import {
   BookOpen,
   Upload,
@@ -23,6 +24,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -30,6 +32,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { brokerApi } from '@/api/broker';
 import { AboutDialog } from './AboutDialog';
 import { useUiStore } from '@/store/ui-store';
 import { useFeature } from '@/config/features';
@@ -43,6 +46,21 @@ export function AppSidebar() {
   const { t } = useTranslation();
   const { appName, logoUrl } = useUiStore();
   const brokerEnabled = useFeature('mwlBroker') && Boolean(getConfig().brokerUrl);
+
+  // Configuration health for the sidebar badge — refreshed lazily (60 s),
+  // the dashboard polls the same key every 30 s while it is open.
+  const healthQuery = useQuery({
+    queryKey: ['broker', 'health'],
+    queryFn: () => brokerApi.health.config(),
+    enabled: brokerEnabled,
+    staleTime: 60_000,
+  });
+  const health = healthQuery.data?.summary;
+  const healthBadge = health && health.error > 0
+    ? { count: health.error, variant: 'destructive' as const, label: t('broker.healthErrors', { count: health.error }) }
+    : health && health.warning > 0
+      ? { count: health.warning, variant: 'secondary' as const, label: t('broker.healthWarnings', { count: health.warning }) }
+      : null;
 
   type NavItem = {
     title: string;
@@ -114,6 +132,15 @@ export function AppSidebar() {
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
+                  {item.url === '/broker' && healthBadge && (
+                    <SidebarMenuBadge
+                      className={healthBadge.variant === 'destructive' ? 'text-destructive' : 'text-amber-600'}
+                      title={healthBadge.label}
+                      aria-label={healthBadge.label}
+                    >
+                      {healthBadge.count}
+                    </SidebarMenuBadge>
+                  )}
                   {item.children && (
                     <SidebarMenuSub>
                       {item.children.map((child) => (

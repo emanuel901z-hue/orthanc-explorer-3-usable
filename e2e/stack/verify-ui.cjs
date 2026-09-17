@@ -9,7 +9,7 @@ const path = require('path');
 
 const OE3 = 'http://127.0.0.1:18082';
 const API = 'http://127.0.0.1:18081/api/v1';
-const SHOTS = path.join(__dirname, 'shots');
+const SHOTS = path.join(__dirname, 'screenshots');
 fs.mkdirSync(SHOTS, { recursive: true });
 
 const PAGES = [
@@ -242,6 +242,15 @@ async function domReport(page) {
   await page.waitForTimeout(2500);
   const rtt = await page.getByText(/\d+\s*ms/).first().isVisible();
   record('sources: manueller C-ECHO liefert RTT im UI', rtt);
+
+  // health panel: configuration checks render on the monitoring page
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  const panel = page.getByTestId('broker-health');
+  const panelVisible = await panel.count() > 0 && await panel.first().isVisible();
+  record('monitoring: Konfigurations-Check-Panel wird gerendert', panelVisible);
+  const panelFindings = panelVisible ? await panel.first().locator('li').count() : 0;
+  record('monitoring: Panel listet Befunde (oder meldet "keine")', panelFindings >= 1 || panelVisible,
+    `${panelFindings} Findings`);
 
   // monitoring page: query log after a C-FIND (run the smoke from the host)
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });

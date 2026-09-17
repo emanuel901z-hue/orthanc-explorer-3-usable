@@ -54,6 +54,8 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/logs/queries?limit=` | Live C-FIND query log (5 s polling) |
 | `GET` | `/api/v1/sources` | Endpoint details next to echo badges |
 | `GET` | `/api/v1/targets` | Default-target badge, endpoint details |
+| `GET` | `/api/v1/health/config` | Configuration health panel (findings + summary) |
+| `POST` | `/api/v1/sources/{id}/reset-breaker` | Circuit-breaker badge: operator reset |
 | `POST` | `/api/v1/sources/{id}/echo` | "Run C-ECHO now" button |
 | `POST` | `/api/v1/targets/{id}/echo` | "Run C-ECHO now" button |
 | `POST/PUT/DELETE` | `/api/v1/sources`, `/api/v1/targets`, `/api/v1/rules` | Typed client is ready (`src/api/broker.ts`) — CRUD editors are a planned UI phase |
@@ -61,7 +63,12 @@ implements the endpoints below works — the reference implementation is the
 Minimum fields the UI reads:
 
 - `status`: `scp_listening`, `db_ok`, `counts.{queries,stores,seen_items}`,
-  `sources[]` / `targets[]` with `{kind,id,name,ok,rtt_ms,last_check,error}`
+  `sources[]` / `targets[]` with `{kind,id,name,ok,rtt_ms,last_check,error}`;
+  sources additionally carry `breaker_state` (`closed|half_open|open`) and
+  `breaker_retry_in_s`
+- `health/config`: `findings[]` with `{code,severity,message,entity,details}`
+  plus `summary.{error,warning,info}` — the UI translates `code` and deep-links
+  via `entity`
 - `sources[]` / `targets[]`: `{id,name,aet,host,port,enabled}` (+
   `is_default` for targets)
 - `logs/queries[]`: `{ts,calling_aet,answers,per_source,duration_ms,status}`
@@ -85,7 +92,7 @@ recommended production layout.
 ## Testing
 
 ```bash
-npx vitest run --coverage     # unit tests + coverage for the broker UI
+npx vitest run --coverage     # unit tests + coverage for the broker UI (98.8 %)
 npx playwright test --config=e2e/stack/playwright.stack.config.ts
 node e2e/stack/verify-ui.cjs  # deep audit: DOM checks + CRUD flows vs. the API
 ```

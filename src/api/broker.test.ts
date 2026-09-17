@@ -164,6 +164,26 @@ describe("brokerApi", () => {
     expect((fetchMock.mock.calls[1][1] as RequestInit).method).toBe("DELETE");
   });
 
+  it("sources.resetBreaker() POSTs to the reset endpoint", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"source_id":3,"name":"ris-a","state":"closed","failures":0,"retry_in_s":null,"last_error":""}', { status: 200 }),
+    );
+    const result = await brokerApi.sources.resetBreaker(3);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/broker-api/api/v1/sources/3/reset-breaker");
+    expect((init as RequestInit).method).toBe("POST");
+    expect(result.state).toBe("closed");
+  });
+
+  it("health.config() hits /api/v1/health/config", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"findings":[],"summary":{"error":0,"warning":0,"info":0}}', { status: 200 }),
+    );
+    const health = await brokerApi.health.config();
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/health/config");
+    expect(health.summary.error).toBe(0);
+  });
+
   it("transforms.list() hits /api/v1/transforms", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("[]", { status: 200 }),

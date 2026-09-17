@@ -17,6 +17,8 @@
  *   PUT    /api/v1/transforms/:id     DELETE /api/v1/transforms/:id
  *   GET    /api/v1/settings           PUT /api/v1/settings/:key
  *   DELETE /api/v1/settings/:key
+ *   POST   /api/v1/sources/:id/reset-breaker
+ *   GET    /api/v1/health/config
  *   GET    /api/v1/logs/queries       GET /api/v1/logs/stores
  */
 import { getConfig } from '@/config/runtime';
@@ -102,6 +104,9 @@ export type BrokerSetting = {
   description: string;
 };
 
+/** Circuit-breaker state of an upstream source. */
+export type BreakerState = 'closed' | 'half_open' | 'open';
+
 export type EchoStatus = {
   kind: 'source' | 'target';
   id: number;
@@ -110,6 +115,35 @@ export type EchoStatus = {
   rtt_ms: number | null;
   last_check: string | null;
   error: string | null;
+  /** Sources only: skipped after repeated C-FIND failures. */
+  breaker_state?: BreakerState | null;
+  /** Seconds until the next probe (null unless the breaker is open). */
+  breaker_retry_in_s?: number | null;
+};
+
+export type BreakerResetResult = {
+  source_id: number;
+  name: string;
+  state: BreakerState;
+  failures: number;
+  retry_in_s: number | null;
+  last_error: string;
+};
+
+export type FindingSeverity = 'error' | 'warning' | 'info';
+
+/** One configuration consistency finding (the UI translates `code`). */
+export type BrokerFinding = {
+  code: string;
+  severity: FindingSeverity;
+  message: string;
+  entity: { kind?: string; id?: number; name?: string };
+  details: Record<string, unknown>;
+};
+
+export type BrokerHealth = {
+  findings: BrokerFinding[];
+  summary: Record<FindingSeverity, number>;
 };
 
 export type BrokerStatus = {
@@ -219,6 +253,8 @@ export const brokerApi = {
       brokerFetch<BrokerSource>(`/api/v1/sources/${id}`, put(body)),
     delete: (id: number) => brokerFetch<void>(`/api/v1/sources/${id}`, { method: 'DELETE' }),
     echo: (id: number) => brokerFetch<EchoStatus>(`/api/v1/sources/${id}/echo`, post({})),
+    resetBreaker: (id: number) =>
+      brokerFetch<BreakerResetResult>(`/api/v1/sources/${id}/reset-breaker`, post({})),
   },
 
   targets: {
@@ -253,6 +289,10 @@ export const brokerApi = {
       brokerFetch<BrokerSetting>(`/api/v1/settings/${encodeURIComponent(key)}`, put({ value })),
     reset: (key: string) =>
       brokerFetch<void>(`/api/v1/settings/${encodeURIComponent(key)}`, { method: 'DELETE' }),
+  },
+
+  health: {
+    config: () => brokerFetch<BrokerHealth>('/api/v1/health/config'),
   },
 
   logs: {

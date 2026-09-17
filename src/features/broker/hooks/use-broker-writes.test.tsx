@@ -16,12 +16,12 @@ import {
 import { auditClient } from '@/lib/audit';
 
 const {
-  mockCreate, mockSet, mockReset,
+  mockCreate, mockSet, mockReset, mockResetBreaker,
   targetCreate, targetUpdate, targetDelete,
   ruleCreate, ruleUpdate, ruleDelete,
   transformCreate, transformUpdate, transformDelete,
 } = vi.hoisted(() => ({
-  mockCreate: vi.fn(), mockSet: vi.fn(), mockReset: vi.fn(),
+  mockCreate: vi.fn(), mockSet: vi.fn(), mockReset: vi.fn(), mockResetBreaker: vi.fn(),
   targetCreate: vi.fn(), targetUpdate: vi.fn(), targetDelete: vi.fn(),
   ruleCreate: vi.fn(), ruleUpdate: vi.fn(), ruleDelete: vi.fn(),
   transformCreate: vi.fn(), transformUpdate: vi.fn(), transformDelete: vi.fn(),
@@ -31,6 +31,7 @@ vi.mock('@/api/broker', () => ({
   brokerApi: {
     sources: {
       create: mockCreate, update: vi.fn(), delete: vi.fn(), list: vi.fn(), echo: vi.fn(),
+      resetBreaker: mockResetBreaker,
     },
     targets: {
       create: targetCreate, update: targetUpdate, delete: targetDelete,
@@ -179,6 +180,23 @@ describe('use-broker-writes audit contract', () => {
       'broker.rule.create', 'broker.rule.update', 'broker.rule.delete',
       'broker.transform.create', 'broker.transform.update', 'broker.transform.delete',
     ]));
+  });
+
+  it('audits a circuit-breaker reset', async () => {
+    mockResetBreaker.mockResolvedValue({ source_id: 7, name: 'ris-a', state: 'closed' });
+    const { result } = renderHook(() => useBrokerSourceWrites(), { wrapper });
+
+    result.current.resetBreaker.mutate(7);
+
+    await waitFor(() => expect(result.current.resetBreaker.isSuccess).toBe(true));
+    expect(mockResetBreaker).toHaveBeenCalledWith(7);
+    expect(emit.mock.calls[0][0]).toMatchObject({
+      action: 'broker.source.breaker_reset',
+      resourceType: 'brokerSource',
+      outcome: 'started',
+      resourceId: '7',
+    });
+    expect(emit.mock.calls[1][0]).toMatchObject({ outcome: 'success' });
   });
 
   it('audits setting resets', async () => {

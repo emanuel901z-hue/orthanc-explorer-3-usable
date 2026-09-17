@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import TargetsPage from './TargetsPage';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import '@/i18n';
+import { mockMobileViewport, resetViewport } from '@/test/viewport';
 
 const { mockList, mockCreate, mockUpdate, mockDelete, mockStatus } = vi.hoisted(() => ({
   mockList: vi.fn(),
@@ -62,12 +63,23 @@ describe('TargetsPage', () => {
     mockUpdate.mockResolvedValue({ id: 1 });
     mockDelete.mockResolvedValue(undefined);
   });
-  afterEach(() => { __resetConfigForTests(); vi.clearAllMocks(); });
+  afterEach(() => { __resetConfigForTests(); resetViewport(); vi.clearAllMocks(); });
 
   it('lists targets, marking the default destination', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('PACS_KH@pacs.local:104')).toBeInTheDocument());
     expect(screen.getByText('default')).toBeInTheDocument();
+  });
+
+  it('renders the mobile card layout', async () => {
+    mockMobileViewport();
+    renderPage();
+    await waitFor(() => expect(screen.getByText('pacs-kh')).toBeInTheDocument());
+
+    expect(screen.getByText('default')).toBeInTheDocument();
+    expect(screen.getByText('PACS_KH@pacs.local:104')).toBeInTheDocument();
+    expect(screen.getByText('MWLBROKER')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('creates a target including the default flag', async () => {
