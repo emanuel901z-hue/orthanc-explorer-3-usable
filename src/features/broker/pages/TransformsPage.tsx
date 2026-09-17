@@ -40,7 +40,9 @@ import {
 } from '@/components/ui/table';
 import { brokerApi, type BrokerTransform, type TransformOperation } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
+import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { OperationsEditor } from '../components/OperationsEditor';
 import { useBrokerTransformWrites } from '../hooks/use-broker-writes';
@@ -69,6 +71,7 @@ const EMPTY_FORM: TransformForm = {
 export default function TransformsPage() {
   const { t } = useTranslation();
   const configured = Boolean(getConfig().brokerUrl);
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<BrokerTransform | null>(null);
@@ -158,6 +161,66 @@ export default function TransformsPage() {
         </Button>
       }
     >
+      {isMobile ? (
+        <div className="space-y-2">
+          {transforms.map((rule) => (
+            <ConfigRowCard
+              key={rule.id}
+              title={rule.name}
+              fields={[
+                {
+                  label: t('broker.transformScope'),
+                  value: `${sourceName(rule.source_id)} → ${targetName(rule.target_id)}`,
+                },
+                { label: t('broker.priority'), value: String(rule.priority) },
+                {
+                  label: t('broker.operations'),
+                  value: rule.operations.map((op) => `${op.op} ${op.tag}`).join(', '),
+                },
+              ]}
+              actions={
+                <>
+                  <Switch
+                    checked={rule.enabled}
+                    aria-label={t('broker.toggleTransform', { name: rule.name })}
+                    onCheckedChange={(checked) =>
+                      update.mutate({
+                        id: rule.id,
+                        body: {
+                          name: rule.name, priority: rule.priority,
+                          source_id: rule.source_id, target_id: rule.target_id,
+                          operations: rule.operations, enabled: checked,
+                        },
+                      })
+                    }
+                  />
+                  <Button
+                    variant="ghost" size="sm" className="h-9 w-9 p-0"
+                    aria-label={t('broker.editTransform')}
+                    onClick={() => { setEditing(rule); setDialogOpen(true); }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost" size="sm" className="h-9 w-9 p-0 text-destructive"
+                    aria-label={t('broker.deleteTransform')}
+                    onClick={() => setDeleting(rule)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              }
+            />
+          ))}
+          {transforms.length === 0 && (
+            <Card>
+              <CardContent className="p-6 text-center text-sm text-muted-foreground">
+                {t('broker.noTransforms')}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : (
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -242,6 +305,7 @@ export default function TransformsPage() {
           </Table>
         </CardContent>
       </Card>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

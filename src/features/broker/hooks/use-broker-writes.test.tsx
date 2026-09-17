@@ -6,19 +6,39 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { useBrokerSourceWrites, useBrokerSettingWrites } from './use-broker-writes';
+import {
+  useBrokerSourceWrites,
+  useBrokerSettingWrites,
+  useBrokerTargetWrites,
+  useBrokerRuleWrites,
+  useBrokerTransformWrites,
+} from './use-broker-writes';
 import { auditClient } from '@/lib/audit';
 
-const { mockCreate, mockSet, mockReset } = vi.hoisted(() => ({
-  mockCreate: vi.fn(),
-  mockSet: vi.fn(),
-  mockReset: vi.fn(),
+const {
+  mockCreate, mockSet, mockReset,
+  targetCreate, targetUpdate, targetDelete,
+  ruleCreate, ruleUpdate, ruleDelete,
+  transformCreate, transformUpdate, transformDelete,
+} = vi.hoisted(() => ({
+  mockCreate: vi.fn(), mockSet: vi.fn(), mockReset: vi.fn(),
+  targetCreate: vi.fn(), targetUpdate: vi.fn(), targetDelete: vi.fn(),
+  ruleCreate: vi.fn(), ruleUpdate: vi.fn(), ruleDelete: vi.fn(),
+  transformCreate: vi.fn(), transformUpdate: vi.fn(), transformDelete: vi.fn(),
 }));
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
     sources: {
       create: mockCreate, update: vi.fn(), delete: vi.fn(), list: vi.fn(), echo: vi.fn(),
+    },
+    targets: {
+      create: targetCreate, update: targetUpdate, delete: targetDelete,
+      list: vi.fn(), echo: vi.fn(),
+    },
+    rules: { create: ruleCreate, update: ruleUpdate, delete: ruleDelete, list: vi.fn() },
+    transforms: {
+      create: transformCreate, update: transformUpdate, delete: transformDelete, list: vi.fn(),
     },
     settings: { set: mockSet, reset: mockReset, list: vi.fn() },
   },
@@ -111,6 +131,54 @@ describe('use-broker-writes audit contract', () => {
 
     const keys = invalidate.mock.calls.map(([arg]) => JSON.stringify(arg?.queryKey));
     expect(keys).toContain(JSON.stringify(['broker', 'settings']));
+  });
+
+  it('covers the target, rule and transform write paths', async () => {
+    targetCreate.mockResolvedValue({ id: 11 });
+    targetUpdate.mockResolvedValue({ id: 11 });
+    targetDelete.mockResolvedValue(undefined);
+    ruleCreate.mockResolvedValue({ id: 21 });
+    ruleUpdate.mockResolvedValue({ id: 21 });
+    ruleDelete.mockResolvedValue(undefined);
+    transformCreate.mockResolvedValue({ id: 31 });
+    transformUpdate.mockResolvedValue({ id: 31 });
+    transformDelete.mockResolvedValue(undefined);
+
+    const targets = renderHook(() => useBrokerTargetWrites(), { wrapper });
+    targets.result.current.create.mutate({ name: 'pacs', aet: 'PACS', host: 'h', port: 104,
+      calling_aet: 'MWLBROKER', enabled: true, is_default: true });
+    await waitFor(() => expect(targets.result.current.create.isSuccess).toBe(true));
+    targets.result.current.update.mutate({ id: 11, body: { name: 'pacs2', aet: 'PACS',
+      host: 'h', port: 104, calling_aet: 'MWLBROKER', enabled: false, is_default: false } });
+    await waitFor(() => expect(targetUpdate).toHaveBeenCalledWith(11, expect.objectContaining({ name: 'pacs2' })));
+    targets.result.current.remove.mutate(11);
+    await waitFor(() => expect(targetDelete).toHaveBeenCalledWith(11));
+
+    const rules = renderHook(() => useBrokerRuleWrites(), { wrapper });
+    rules.result.current.create.mutate({ source_id: 1, target_id: 2, priority: 5, enabled: true });
+    await waitFor(() => expect(ruleCreate).toHaveBeenCalled());
+    rules.result.current.update.mutate({ id: 21, body: { source_id: 1, target_id: 2, priority: 9, enabled: false } });
+    await waitFor(() => expect(ruleUpdate).toHaveBeenCalledWith(21, expect.objectContaining({ priority: 9 })));
+    rules.result.current.remove.mutate(21);
+    await waitFor(() => expect(ruleDelete).toHaveBeenCalledWith(21));
+
+    const transforms = renderHook(() => useBrokerTransformWrites(), { wrapper });
+    transforms.result.current.create.mutate({ name: 't', enabled: true, priority: 1,
+      source_id: null, target_id: null, operations: [{ op: 'remove', tag: 'PatientAddress' }] });
+    await waitFor(() => expect(transformCreate).toHaveBeenCalled());
+    transforms.result.current.update.mutate({ id: 31, body: { name: 't2', enabled: false, priority: 2,
+      source_id: null, target_id: null, operations: [{ op: 'remove', tag: 'PatientID' }] } });
+    await waitFor(() => expect(transformUpdate).toHaveBeenCalledWith(31, expect.objectContaining({ name: 't2' })));
+    transforms.result.current.remove.mutate(31);
+    await waitFor(() => expect(transformDelete).toHaveBeenCalledWith(31));
+
+    // audit events for the extra paths
+    const actions = emit.mock.calls.map(([e]) => (e as { action: string }).action);
+    expect(actions).toEqual(expect.arrayContaining([
+      'broker.target.create', 'broker.target.update', 'broker.target.delete',
+      'broker.rule.create', 'broker.rule.update', 'broker.rule.delete',
+      'broker.transform.create', 'broker.transform.update', 'broker.transform.delete',
+    ]));
   });
 
   it('audits setting resets', async () => {

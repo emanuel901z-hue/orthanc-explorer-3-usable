@@ -103,31 +103,37 @@ test.describe('stack: broker config pages', () => {
   test('transform rule: create, verify, delete (full API round-trip)', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);
+    // unique per run — a leftover rule from an earlier run would make the
+    // create fail with 409 and leave the modal open
+    const ruleName = `e2e-institution-${Date.now().toString(36)}`;
 
     await openPage(page, '/oe3/broker/transforms', /modify rules|modify-regeln/i);
-    await expect(page.getByText(/no modify rules|keine modify-regeln/i)).toBeVisible();
+    // the empty state only applies to a pristine stack — a failed earlier run
+    // may have left rules behind, so don't depend on it
+    const emptyState = page.getByText(/no modify rules|keine modify-regeln/i);
+    if ((await emptyState.count()) > 0) await expect(emptyState).toBeVisible();
 
     // create
     await page.getByRole('button', { name: /add modify rule|modify-regel hinzufügen/i }).click();
-    await page.getByLabel(/^name$/i).fill('e2e-institution');
+    await page.getByLabel(/^name$/i).fill(ruleName);
     await page.getByLabel(/dicom tag/i).fill('InstitutionName');
     await page.getByLabel(/^value$/i).fill('E2E Klinikum');
     await page.getByRole('button', { name: /^save$|^speichern$/i }).click();
 
-    await expect(page.getByText('e2e-institution')).toBeVisible({ timeout: 15000 });
+    const row = page.locator('tr, [data-testid="config-row"]').filter({ hasText: ruleName });
+    await expect(row).toBeVisible({ timeout: 15000 });
     // the operations column is hidden below md — assert presence, not visibility
-    await expect(page.getByText('set InstitutionName')).toBeAttached();
+    await expect(row.getByText('set InstitutionName')).toBeAttached();
 
     await page.screenshot({
       path: join(SCREENSHOT_DIR, `broker-transforms-${test.info().project.name}.png`),
       fullPage: true,
     });
 
-    // delete
-    await page.getByRole('button', { name: /delete modify rule|modify-regel löschen/i }).click();
+    // delete (scoped to the row we just created)
+    await row.getByRole('button', { name: /delete modify rule|modify-regel löschen/i }).click();
     await page.getByRole('button', { name: /^delete$|^löschen$/i }).click();
-    await expect(page.getByText('e2e-institution')).toHaveCount(0, { timeout: 15000 });
-    await expect(page.getByText(/no modify rules|keine modify-regeln/i)).toBeVisible();
+    await expect(page.getByText(ruleName)).toHaveCount(0, { timeout: 15000 });
 
     expect(errors, errors.join('\n')).toEqual([]);
   });

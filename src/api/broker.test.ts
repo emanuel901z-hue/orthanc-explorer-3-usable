@@ -150,6 +150,89 @@ describe("brokerApi", () => {
     expect((init as RequestInit).method).toBe("DELETE");
   });
 
+  it("rules.update()/delete() target the rule id", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"id":5}', { status: 200 }),
+    );
+    await brokerApi.rules.update(5, { source_id: 1, target_id: 2, priority: 3, enabled: false });
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/rules/5");
+    expect((fetchMock.mock.calls[0][1] as RequestInit).method).toBe("PUT");
+
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+    await brokerApi.rules.delete(5);
+    expect(fetchMock.mock.calls[1][0]).toBe("/broker-api/api/v1/rules/5");
+    expect((fetchMock.mock.calls[1][1] as RequestInit).method).toBe("DELETE");
+  });
+
+  it("transforms.list() hits /api/v1/transforms", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("[]", { status: 200 }),
+    );
+    await brokerApi.transforms.list();
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/transforms");
+  });
+
+  it("logs.stores() passes the limit param", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("[]", { status: 200 }),
+    );
+    await brokerApi.logs.stores(7);
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/logs/stores?limit=7");
+  });
+
+  it("sources.update()/delete() target the source id", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"id":9}', { status: 200 }),
+    );
+    await brokerApi.sources.update(9, {
+      name: "ris-a", aet: "RIS_A", host: "h", port: 104,
+      calling_aet: "MWLBROKER", charset: "ISO_IR 100",
+      enabled: false, timeout_s: 10, priority: 10,
+    });
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/sources/9");
+    expect((fetchMock.mock.calls[0][1] as RequestInit).method).toBe("PUT");
+
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+    await brokerApi.sources.delete(9);
+    expect(fetchMock.mock.calls[1][0]).toBe("/broker-api/api/v1/sources/9");
+    expect((fetchMock.mock.calls[1][1] as RequestInit).method).toBe("DELETE");
+  });
+
+  it("targets.update()/delete() target the target id", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"id":4}', { status: 200 }),
+    );
+    await brokerApi.targets.update(4, {
+      name: "pacs", aet: "PACS", host: "h", port: 104,
+      calling_aet: "MWLBROKER", enabled: true, is_default: false,
+    });
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/targets/4");
+    expect((fetchMock.mock.calls[0][1] as RequestInit).method).toBe("PUT");
+
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+    await brokerApi.targets.delete(4);
+    expect(fetchMock.mock.calls[1][0]).toBe("/broker-api/api/v1/targets/4");
+    expect((fetchMock.mock.calls[1][1] as RequestInit).method).toBe("DELETE");
+  });
+
+  it("falls back to the scrubbed message when an error body is not JSON", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("<html>gateway error</html>", { status: 409 }),
+    );
+    await expect(brokerApi.sources.list()).rejects.toMatchObject({
+      status: 409,
+      message: "A conflict occurred.",
+    });
+  });
+
+  it("maps network failures to a scrubbed OrthancError", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("connection reset"));
+    await expect(brokerApi.status()).rejects.toMatchObject({
+      status: 0,
+      message: "Network error. Please try again.",
+    });
+  });
+
   it("propagates non-2xx as OrthancError", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response('{"detail":"nope"}', { status: 404 }),

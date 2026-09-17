@@ -39,7 +39,9 @@ import {
 } from '@/components/ui/table';
 import { brokerApi, type BrokerRule } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
+import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useBrokerRuleWrites } from '../hooks/use-broker-writes';
 
@@ -50,6 +52,7 @@ const EMPTY_FORM: RuleForm = { source_id: null, target_id: null, priority: 100, 
 export default function RulesPage() {
   const { t } = useTranslation();
   const configured = Boolean(getConfig().brokerUrl);
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<BrokerRule | null>(null);
@@ -124,6 +127,58 @@ export default function RulesPage() {
         </Button>
       }
     >
+      {isMobile ? (
+        <div className="space-y-2">
+          {rules.map((rule) => (
+            <ConfigRowCard
+              key={rule.id}
+              title={`${sourceName(rule.source_id)} → ${targetName(rule.target_id)}`}
+              badges={targets.find((tg) => tg.id === rule.target_id)?.is_default ? (
+                <Badge variant="secondary" className="text-xs">{t('broker.defaultTarget')}</Badge>
+              ) : null}
+              fields={[{ label: t('broker.priority'), value: String(rule.priority) }]}
+              actions={
+                <>
+                  <Switch
+                    checked={rule.enabled}
+                    aria-label={t('broker.toggleRule', { name: sourceName(rule.source_id) })}
+                    onCheckedChange={(checked) =>
+                      update.mutate({
+                        id: rule.id,
+                        body: {
+                          source_id: rule.source_id, target_id: rule.target_id,
+                          priority: rule.priority, enabled: checked,
+                        },
+                      })
+                    }
+                  />
+                  <Button
+                    variant="ghost" size="sm" className="h-9 w-9 p-0"
+                    aria-label={t('broker.editRule')}
+                    onClick={() => { setEditing(rule); setDialogOpen(true); }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost" size="sm" className="h-9 w-9 p-0 text-destructive"
+                    aria-label={t('broker.deleteRule')}
+                    onClick={() => setDeleting(rule)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              }
+            />
+          ))}
+          {rules.length === 0 && (
+            <Card>
+              <CardContent className="p-6 text-center text-sm text-muted-foreground">
+                {t('broker.noRules')}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : (
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -199,6 +254,7 @@ export default function RulesPage() {
           </Table>
         </CardContent>
       </Card>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">

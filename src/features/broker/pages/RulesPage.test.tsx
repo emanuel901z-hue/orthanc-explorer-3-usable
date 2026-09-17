@@ -6,10 +6,11 @@ import RulesPage from './RulesPage';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import '@/i18n';
 
-const { mockRules, mockSources, mockTargets, mockUpdate, mockDelete } = vi.hoisted(() => ({
+const { mockRules, mockSources, mockTargets, mockCreate, mockUpdate, mockDelete } = vi.hoisted(() => ({
   mockRules: vi.fn(),
   mockSources: vi.fn(),
   mockTargets: vi.fn(),
+  mockCreate: vi.fn(),
   mockUpdate: vi.fn(),
   mockDelete: vi.fn(),
 }));
@@ -22,7 +23,7 @@ vi.mock('@/api/broker', () => ({
     })),
     sources: { list: mockSources, echo: vi.fn() },
     targets: { list: mockTargets, echo: vi.fn() },
-    rules: { list: mockRules, create: vi.fn(), update: mockUpdate, delete: mockDelete },
+    rules: { list: mockRules, create: mockCreate, update: mockUpdate, delete: mockDelete },
     transforms: { list: vi.fn(() => Promise.resolve([])) },
     settings: { list: vi.fn(() => Promise.resolve([])) },
     logs: { queries: vi.fn(() => Promise.resolve([])), stores: vi.fn(() => Promise.resolve([])) },
@@ -58,6 +59,7 @@ describe('RulesPage', () => {
       { id: 20, name: 'pacs-kh', aet: 'PACS_KH', host: 'h', port: 1, calling_aet: 'C',
         enabled: true, is_default: true, created_at: '' },
     ]);
+    mockCreate.mockResolvedValue({ id: 2 });
     mockUpdate.mockResolvedValue({ id: 1 });
     mockDelete.mockResolvedValue(undefined);
   });
@@ -81,6 +83,38 @@ describe('RulesPage', () => {
     expect(mockUpdate.mock.calls[0][1]).toMatchObject({
       source_id: 10, target_id: 20, enabled: false,
     });
+  });
+
+  // Radix Select cannot be opened reliably in jsdom (no layout/pointer events),
+  // so the dialog's create path with a fresh selection is covered by the
+  // Playwright suite against the real stack. Here we exercise the same submit
+  // code path through the prefilled edit dialog.
+  it('edits a rule through the prefilled dialog', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: /edit rule/i }));
+    const priority = screen.getByLabelText('Priority') as HTMLInputElement;
+    expect(priority.value).toBe('10');
+    fireEvent.change(priority, { target: { value: '42' } });
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }));
+
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+    expect(mockUpdate.mock.calls[0][0]).toBe(1);
+    expect(mockUpdate.mock.calls[0][1]).toMatchObject({
+      source_id: 10, target_id: 20, priority: 42,
+    });
+  });
+
+  it('shows the server error when saving is rejected', async () => {
+    mockUpdate.mockRejectedValue(new Error('source 10 not found'));
+    renderPage();
+    await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: /edit rule/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('source 10 not found');
   });
 
   it('deletes a rule after confirmation', async () => {

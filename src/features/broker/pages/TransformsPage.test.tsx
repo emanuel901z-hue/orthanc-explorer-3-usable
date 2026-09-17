@@ -114,6 +114,32 @@ describe('TransformsPage', () => {
     expect(screen.queryByText('Operation 2')).not.toBeInTheDocument();
   });
 
+  it('toggles a rule through the switch', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('kh-prefix')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('switch'));
+
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+    expect(mockUpdate.mock.calls[0][0]).toBe(1);
+    expect(mockUpdate.mock.calls[0][1]).toMatchObject({ enabled: false, name: 'kh-prefix' });
+    expect(mockUpdate.mock.calls[0][1].operations).toHaveLength(2);
+  });
+
+  it('edits a rule through the prefilled dialog', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('kh-prefix')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: /edit modify rule/i }));
+    const name = screen.getByLabelText('Name') as HTMLInputElement;
+    expect(name.value).toBe('kh-prefix');
+    fireEvent.change(name, { target: { value: 'kh-prefix-2' } });
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }));
+
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+    expect(mockUpdate.mock.calls[0][1]).toMatchObject({ name: 'kh-prefix-2' });
+  });
+
   it('deletes a rule after confirmation', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('kh-prefix')).toBeInTheDocument());

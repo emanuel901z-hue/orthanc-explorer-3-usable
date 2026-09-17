@@ -20,7 +20,9 @@ import {
 } from '@/components/ui/table';
 import { brokerApi, type BrokerSource, type EchoStatus } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
+import { ConfigRowCard } from '../components/ConfigRowCard';
 import { EchoBadge } from '../components/EchoBadge';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { NodeFormDialog, type NodeFormValues } from '../components/NodeFormDialog';
@@ -30,6 +32,7 @@ import { useBrokerEcho } from '../hooks/use-broker-echo';
 export default function SourcesPage() {
   const { t } = useTranslation();
   const configured = Boolean(getConfig().brokerUrl);
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<BrokerSource | null>(null);
@@ -82,6 +85,55 @@ export default function SourcesPage() {
         </Button>
       }
     >
+      {isMobile ? (
+        <div className="space-y-2">
+          {sources.map((row) => (
+            <ConfigRowCard
+              key={row.id}
+              title={row.name}
+              badges={!row.enabled ? (
+                <Badge variant="outline" className="text-xs">{t('broker.disabled')}</Badge>
+              ) : null}
+              fields={[
+                { label: t('broker.endpoint'), value: `${row.aet}@${row.host}:${row.port}` },
+                { label: t('broker.charset'), value: row.charset },
+                { label: t('broker.timeout'), value: `${row.timeout_s}s` },
+                { label: t('broker.priority'), value: String(row.priority) },
+              ]}
+              actions={
+                <>
+                  <EchoBadge
+                    echo={echoFor(row)}
+                    pending={echo.isPending}
+                    onEcho={() => echo.mutate({ kind: 'source', id: row.id })}
+                  />
+                  <Button
+                    variant="ghost" size="sm" className="h-9 w-9 p-0"
+                    aria-label={t('broker.editSource')}
+                    onClick={() => { setEditing(row); setDialogOpen(true); }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost" size="sm" className="h-9 w-9 p-0 text-destructive"
+                    aria-label={t('broker.deleteSource')}
+                    onClick={() => setDeleting(row)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              }
+            />
+          ))}
+          {sources.length === 0 && (
+            <Card>
+              <CardContent className="p-6 text-center text-sm text-muted-foreground">
+                {t('broker.noSources')}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : (
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -159,6 +211,7 @@ export default function SourcesPage() {
           </Table>
         </CardContent>
       </Card>
+      )}
 
       <NodeFormDialog
         kind="source"
