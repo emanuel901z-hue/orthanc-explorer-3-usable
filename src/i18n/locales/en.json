@@ -1152,7 +1152,23 @@
     "setting_spool_poll_s": "Retry worker interval (s)",
     "health_spool_dead_letters": "{{count}} spooled instance(s) could not be delivered and gave up — retry them after fixing the target or discard them.",
     "health_spool_full": "The C-STORE spool is full ({{items}} of {{max_items}} entries) — new instances that cannot be forwarded are refused instead of queued.",
-    "health_spool_backlog": "{{open}} instance(s) are waiting in the spool (oldest {{oldest_minutes}} min) — check the target PACS."
+    "health_spool_backlog": "{{open}} instance(s) are waiting in the spool (oldest {{oldest_minutes}} min) — check the target PACS.",
+    "notifyTitle": "Alerting",
+    "notifyHint": "Push broker events to a webhook (Slack/Teams-compatible JSON). A slow webhook never delays DICOM traffic.",
+    "notifyActive": "webhook configured",
+    "notifyInactive": "not configured",
+    "notifyUrl": "Webhook URL",
+    "notifyEvents": "Events to send",
+    "notifyInterval": "Minimum interval (s)",
+    "notifyIntervalHint": "The same event for the same object is not repeated within this window (0 = no de-bounce).",
+    "notifyTest": "Send test message",
+    "notifyTesting": "Sending…",
+    "notifyTestOk": "The webhook accepted the test message.",
+    "notifyTestFailed": "Delivery failed: {{error}}",
+    "save": "Save",
+    "setting_notify_webhook_url": "Alerting webhook URL",
+    "setting_notify_events": "Alerting events",
+    "setting_notify_min_interval_s": "Alerting de-bounce (s)"
   },
   "shortcuts": {
     "nav": {

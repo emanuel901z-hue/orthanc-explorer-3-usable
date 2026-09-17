@@ -18,6 +18,7 @@ import { Switch } from '@/components/ui/switch';
 import { brokerApi, type BrokerSetting } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { BrokerPageShell } from '../components/BrokerPageShell';
+import { NotificationsCard } from '../components/NotificationsCard';
 import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
 
 const isTrue = (value: string) => ['true', '1', 'yes', 'on'].includes(value.trim().toLowerCase());
@@ -114,13 +115,19 @@ export default function BrokerSettingsPage() {
     enabled: configured,
   });
 
+  // the alerting keys get their own card (event picker instead of a CSV field)
+  const all = settingsQuery.data ?? [];
+  const notifyKeys = new Set(['notify_webhook_url', 'notify_events', 'notify_min_interval_s']);
+  const generic = all.filter((setting) => !notifyKeys.has(setting.key));
+
   return (
     <BrokerPageShell
       titleKey="broker.settingsTitle"
       subtitleKey="broker.settingsSubtitle"
     >
       <div className="space-y-3">
-        {(settingsQuery.data ?? []).map((setting) => (
+        {all.length > 0 && <NotificationsCard settings={all} />}
+        {generic.map((setting) => (
           <SettingRow key={setting.key} setting={setting} />
         ))}
       </div>

@@ -245,9 +245,23 @@ async function domReport(page) {
   const rtt = await page.getByText(/\d+\s*ms/).first().isVisible();
   record('sources: manueller C-ECHO liefert RTT im UI', rtt);
 
+  // alerting card (webhook + events + test message)
+  await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
+  const notifyCard = page.getByTestId('notify-card');
+  await notifyCard.first().waitFor({ timeout: 10000 }).catch(() => {});
+  const notifyVisible = await notifyCard.count() > 0 && await notifyCard.first().isVisible();
+  record('settings: Alerting-Karte wird gerendert', notifyVisible);
+  if (notifyVisible) {
+    const eventCount = await notifyCard.getByTestId('notify-events').locator('input[type=checkbox]').count();
+    record('settings: Alerting listet die verfügbaren Ereignisse', eventCount >= 5, `${eventCount} Ereignisse`);
+    const notifyDom = await notifyCard.evaluate((el) => ({ overflow: el.scrollWidth > el.clientWidth }));
+    record('settings: Alerting-Karte ohne Overflow', !notifyDom.overflow);
+  }
+
   // C-STORE spool card (store and forward)
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
   const spoolCard = page.getByTestId('broker-spool');
+  await spoolCard.first().waitFor({ timeout: 10000 }).catch(() => {});
   const spoolVisible = await spoolCard.count() > 0 && await spoolCard.first().isVisible();
   record('monitoring: Spool-Karte (Store and Forward) wird gerendert', spoolVisible);
   if (spoolVisible) {
@@ -266,6 +280,7 @@ async function domReport(page) {
   // worklist cache card (outage bridge)
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
   const cacheCard = page.getByTestId('broker-cache');
+  await cacheCard.first().waitFor({ timeout: 10000 }).catch(() => {});
   const cacheVisible = await cacheCard.count() > 0 && await cacheCard.first().isVisible();
   record('monitoring: Cache-Karte (Ausfall-Überbrückung) wird gerendert', cacheVisible);
   if (cacheVisible) {
@@ -281,6 +296,7 @@ async function domReport(page) {
   // case check (simulation): routing dry-run on the monitoring page
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
   const casePanel = page.getByTestId('broker-case-check');
+  await casePanel.first().waitFor({ timeout: 10000 }).catch(() => {});
   const caseVisible = await casePanel.count() > 0 && await casePanel.first().isVisible();
   record('monitoring: Fall-Prüfen-Panel (Simulation) wird gerendert', caseVisible);
   if (caseVisible) {
@@ -296,6 +312,7 @@ async function domReport(page) {
   // health panel: configuration checks render on the monitoring page
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
   const panel = page.getByTestId('broker-health');
+  await panel.first().waitFor({ timeout: 10000 }).catch(() => {});
   const panelVisible = await panel.count() > 0 && await panel.first().isVisible();
   record('monitoring: Konfigurations-Check-Panel wird gerendert', panelVisible);
   const panelFindings = panelVisible ? await panel.first().locator('li').count() : 0;

@@ -60,6 +60,8 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/audit/config` | Change log (diff + rollback) |
 | `GET/POST` | `/api/v1/config/export`, `/api/v1/config/import?dry_run=` | Configuration export/import |
 | `POST` | `/api/v1/config/rollback/{id}` | Roll a change back |
+| `GET` | `/api/v1/notify/events` | Alerting card: the event catalog (code, severity, description) |
+| `POST` | `/api/v1/notify/test` | "Send test message" (returns the delivery result) |
 | `GET` | `/api/v1/spool`, `/api/v1/spool/stats` | Store queue + spool card |
 | `POST` | `/api/v1/spool/{id}/retry`, `/api/v1/spool/retry-all` | "Retry now" / "Retry all" |
 | `DELETE` | `/api/v1/spool/{id}?reason=` | Discard (reason required, audited) |
@@ -84,6 +86,12 @@ Minimum fields the UI reads:
   — `before_json`/`after_json` drive the diff view; `id` drives the rollback
 - `config/import` (dry-run): `{dry_run, changes[], skipped[], summary}` —
   `changes` are `{entity,action,name,fields}`; the UI shows them before applying
+- `notify/events[]`: `{code, severity, description}` — the UI renders checkboxes
+  from it, so a new event on the broker side shows up without a UI change
+- `notify/test`: `{ok, error}` — the operator's check after configuring the
+  webhook; the URL itself is a setting (`notify_webhook_url`, empty = off)
+- `settings[]`: `notify_events` is a comma-separated list of event codes, the UI
+  edits it as a picker and writes the same CSV back
 - `spool/stats`: `{queued,failed,dead,sent,open,bytes,oldest_age_s,capacity,enabled,accept_when_queued}`
   — `capacity.full` drives the "spool full" badge; `dead` drives the error badge
 - `spool[]`: `{id,sop_instance_uid,study_uid,accession,target_name,status,attempts,

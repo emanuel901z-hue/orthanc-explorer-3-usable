@@ -1152,7 +1152,23 @@
     "setting_spool_poll_s": "Intervall Retry-Worker (s)",
     "health_spool_dead_letters": "{{count}} gepufferte Instanz(en) konnten nicht zugestellt werden und haben aufgegeben — nach der Zielkorrektur erneut senden oder verwerfen.",
     "health_spool_full": "Der C-STORE-Spool ist voll ({{items}} von {{max_items}} Einträgen) — neue, nicht zustellbare Instanzen werden abgewiesen statt gepuffert.",
-    "health_spool_backlog": "{{open}} Instanz(en) warten im Spool (älteste {{oldest_minutes}} min) — Ziel-PACS prüfen."
+    "health_spool_backlog": "{{open}} Instanz(en) warten im Spool (älteste {{oldest_minutes}} min) — Ziel-PACS prüfen.",
+    "notifyTitle": "Alerting",
+    "notifyHint": "Schickt Broker-Ereignisse an einen Webhook (Slack/Teams-kompatibles JSON). Ein langsamer Webhook verzögert nie den DICOM-Verkehr.",
+    "notifyActive": "Webhook konfiguriert",
+    "notifyInactive": "nicht konfiguriert",
+    "notifyUrl": "Webhook-URL",
+    "notifyEvents": "Zu sendende Ereignisse",
+    "notifyInterval": "Mindestabstand (s)",
+    "notifyIntervalHint": "Dasselbe Ereignis für dasselbe Objekt wird innerhalb dieses Fensters nicht wiederholt (0 = keine Dämpfung).",
+    "notifyTest": "Testnachricht senden",
+    "notifyTesting": "Sende…",
+    "notifyTestOk": "Der Webhook hat die Testnachricht angenommen.",
+    "notifyTestFailed": "Zustellung fehlgeschlagen: {{error}}",
+    "save": "Speichern",
+    "setting_notify_webhook_url": "Alerting-Webhook-URL",
+    "setting_notify_events": "Alerting-Ereignisse",
+    "setting_notify_min_interval_s": "Alerting-Dämpfung (s)"
   },
   "shortcuts": {
     "nav": {

@@ -24,6 +24,7 @@
  *   POST   /api/v1/simulate/route     POST /api/v1/simulate/transform
  *   GET    /api/v1/cache/stats        GET /api/v1/cache/items
  *   DELETE /api/v1/cache              DELETE /api/v1/cache/sources/:id
+ *   GET    /api/v1/notify/events      POST /api/v1/notify/test
  *   GET    /api/v1/spool              GET /api/v1/spool/stats
  *   POST   /api/v1/spool/:id/retry    POST /api/v1/spool/retry-all
  *   DELETE /api/v1/spool/:id?reason=
@@ -141,6 +142,13 @@ export type EchoStatus = {
   breaker_state?: BreakerState | null;
   /** Seconds until the next probe (null unless the breaker is open). */
   breaker_retry_in_s?: number | null;
+};
+
+/** One alerting event the broker can push to a webhook. */
+export type NotifyEvent = {
+  code: string;
+  severity: 'error' | 'warning' | 'info';
+  description: string;
 };
 
 /** C-STORE spool backlog (store and forward). */
@@ -448,6 +456,11 @@ export const brokerApi = {
 
   health: {
     config: () => brokerFetch<BrokerHealth>('/api/v1/health/config'),
+  },
+
+  notify: {
+    events: () => brokerFetch<NotifyEvent[]>('/api/v1/notify/events'),
+    test: () => brokerFetch<{ ok: boolean; error: string }>('/api/v1/notify/test', post({})),
   },
 
   spool: {

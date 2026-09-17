@@ -22,6 +22,18 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
   `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
   Ressourcentypen).
 
+### Neu: Alerting-Karte (Webhook)
+
+- Eigene **Alerting-Karte** auf der Broker-Settings-Seite: Webhook-URL mit
+  Override/Reset, **Ereignisauswahl als Checkboxen** (Code, Severity und
+  Beschreibung kommen aus `GET /notify/events`) und **„Testnachricht senden"**
+  mit Ergebnisanzeige.
+- Die drei Alerting-Schlüssel erscheinen nicht mehr in der generischen
+  Einstellungsliste (ein CSV-Feld wäre die falsche Bedienform).
+- Semantik: Zustellung fire-and-forget (ein langsamer Webhook verzögert nie
+  DICOM-Verkehr), nur Übergänge werden gemeldet, gleiche Ereignisse je Objekt
+  gedämpft, Webhook-URL nie vollständig im Log.
+
 ### Neu: Store-Warteschlange (C-STORE-Spool)
 
 - **Spool-Karte** im Dashboard: Rückstand, ältester Eintrag, Belegung,
@@ -89,10 +101,10 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ### Tests & Tooling
 
-- 395 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
-  Mobile 375×812, 38 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
-  (77 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
-- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 97,8 %.
+- 404 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
+  Mobile 375×812, 40 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
+  (80 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
+- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 97,9 %.
 
 ---
 

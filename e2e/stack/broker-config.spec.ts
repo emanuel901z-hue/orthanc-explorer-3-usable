@@ -432,6 +432,30 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('alerting card lists the events and sends a test message', async ({ page }) => {
+    // the test-stack scenario configured the webhook (a receiver on the host)
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/settings', /broker settings|broker-einstellungen/i);
+    const card = page.getByTestId('notify-card');
+    await expect(card).toBeVisible();
+    await expect(card).toContainText(/webhook configured|Webhook konfiguriert/i);
+    await expect(card.getByTestId('notify-events')).toContainText('source_down');
+    await expect(card.getByTestId('notify-events')).toContainText('spool_dead_letter');
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-notify-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+
+    await card.getByRole('button', { name: /send test message|Testnachricht senden/i }).click();
+    await expect(page.getByTestId('notify-test-result'))
+      .toContainText(/accepted|angenommen/i, { timeout: 20000 });
+
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

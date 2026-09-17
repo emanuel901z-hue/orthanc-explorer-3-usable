@@ -45,6 +45,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
 | **Study Sharing** | Share studies via Orthanc Shares plugin or instant viewer link. Share by email, copy link, expiration date, description. |
 | **Worklists** | DICOM Modality Worklist Management — list, upload, delete worklists via dedicated page and API. |
+| **MWL Broker — Alerting** | Push broker events to a **webhook** (Slack/Teams-compatible JSON): a dedicated card on the settings page lists every event with severity and description, lets the operator pick the ones they care about, and offers **"send test message"** with the delivery result. Delivery is fire-and-forget on a background thread — a slow webhook never delays DICOM traffic — and repeated events for the same object are de-bounced. |
 | **MWL Broker — Store Queue** | Store and forward: instances that cannot be delivered are spooled and retried automatically. The dashboard shows a **spool card** (backlog, oldest entry, usage, dead letters, "retry all"), and `/broker/spool` lists every queued instance with target, attempts and last error — with per-entry retry and a discard that requires a reason. Nothing is ever dropped silently: when the spool is full the broker refuses instead. |
 | **MWL Broker — Worklist Cache** | Bridges an unreachable RIS: the dashboard shows a **cache card** (items/age/state per source, "clear cache" with confirmation), a **warning banner** while answers come from the cache, and a "from cache" marker in the query log. A live answer always *replaces* the snapshot, so completed orders disappear immediately — the RIS stays the source of truth (same lifecycle as Medavis/dcm4chee handle it). |
 | **MWL Broker — Change Log & Simulation** | A **change log** (`/broker/audit`) records every configuration change with its before/after diff and offers **one-click rollback**, **export** of the whole configuration and **import with a mandatory dry-run diff**. A **"Check a case"** panel on the dashboard simulates routing and modify rules — using the same resolver as the live path. |
@@ -176,7 +177,7 @@ Open [http://localhost:5173](http://localhost:5173). The dev server proxies `/or
 # Start dev server (requires Docker stack running)
 npm run dev
 
-# Run unit tests (single pass, 395 tests)
+# Run unit tests (single pass, 404 tests)
 npm run test
 
 # Run unit tests in watch mode

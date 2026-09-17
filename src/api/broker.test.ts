@@ -240,6 +240,22 @@ describe("brokerApi", () => {
       .toEqual({ accession: "ACC-1", values: { PatientID: "P1" } });
   });
 
+  it("notify.events()/test() hit the alerting endpoints", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response("[]", { status: 200 })),
+    );
+    await brokerApi.notify.events();
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/notify/events");
+
+    fetchMock.mockImplementation(() => Promise.resolve(
+      new Response('{"ok":true,"error":""}', { status: 200 }),
+    ));
+    const result = await brokerApi.notify.test();
+    expect(fetchMock.mock.calls[1][0]).toBe("/broker-api/api/v1/notify/test");
+    expect((fetchMock.mock.calls[1][1] as RequestInit).method).toBe("POST");
+    expect(result.ok).toBe(true);
+  });
+
   it("cache.stats()/items()/clear() hit the cache endpoints", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() =>
       Promise.resolve(new Response("[]", { status: 200 })),

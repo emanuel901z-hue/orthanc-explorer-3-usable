@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import BrokerSettingsPage from './BrokerSettingsPage';
@@ -23,6 +23,12 @@ vi.mock('@/api/broker', () => ({
     rules: { list: vi.fn(() => Promise.resolve([])) },
     transforms: { list: vi.fn(() => Promise.resolve([])) },
     settings: { list: mockList, set: mockSet, reset: mockReset },
+    notify: {
+      events: vi.fn(() => Promise.resolve([
+        { code: 'source_down', severity: 'error', description: 'A source stopped answering.' },
+      ])),
+      test: vi.fn(() => Promise.resolve({ ok: true, error: '' })),
+    },
     logs: { queries: vi.fn(() => Promise.resolve([])), stores: vi.fn(() => Promise.resolve([])) },
   },
 }));
@@ -65,10 +71,14 @@ describe('BrokerSettingsPage', () => {
   it('shows source badge and the ENV default for each setting', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('Allowed calling AE titles')).toBeInTheDocument());
-    expect(screen.getByText('from .env')).toBeInTheDocument();
-    expect(screen.getByText('override')).toBeInTheDocument();
-    // ENV default of the AET whitelist is empty
-    expect(screen.getByText('—')).toBeInTheDocument();
+
+    // scoped: the alerting card renders its own badges
+    const envRow = within(screen.getByTestId('setting-strict_store_status'));
+    expect(envRow.getByText('from .env')).toBeInTheDocument();
+
+    const overrideRow = within(screen.getByTestId('setting-allowed_calling_aets'));
+    expect(overrideRow.getByText('override')).toBeInTheDocument();
+    expect(overrideRow.getByText('—')).toBeInTheDocument();   // ENV default is empty
   });
 
   it('toggles a boolean setting through the switch', async () => {
@@ -85,9 +95,10 @@ describe('BrokerSettingsPage', () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('Allowed calling AE titles')).toBeInTheDocument());
 
-    const input = screen.getByLabelText('Allowed calling AE titles') as HTMLInputElement;
+    const row = within(screen.getByTestId('setting-allowed_calling_aets'));
+    const input = row.getByLabelText('Allowed calling AE titles') as HTMLInputElement;
     expect(input.value).toBe('CT_01');
-    const saveButton = screen.getByRole('button', { name: /^save$/i });
+    const saveButton = row.getByRole('button', { name: /^save$/i });
     expect(saveButton).toBeDisabled();
 
     fireEvent.change(input, { target: { value: 'CT_01,MR_01' } });
