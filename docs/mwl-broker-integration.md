@@ -1,10 +1,28 @@
-# MWL Broker Dashboard — Integration
+# MWL Broker — Integration
 
-Optional feature that renders a DICOM Modality Worklist broker dashboard
-(status, upstream sources, store targets, live C-FIND query log, C-ECHO
-matrix) inside OE3. The UI talks to a **separate broker service over REST
-only** — no Python, no extra containers, and no Orthanc changes are required
-in this repository.
+Optional feature that renders a DICOM Modality Worklist broker UI inside OE3:
+a **monitoring dashboard** (status, echo matrix, live C-FIND query log) and the
+**full configuration** (upstream sources, store targets, routing rules, DICOM
+modify rules, runtime settings). The UI talks to a **separate broker service
+over REST only** — no Python, no extra containers, and no Orthanc changes are
+required in this repository.
+
+## Pages
+
+| Route | Purpose |
+|---|---|
+| `/broker` | Monitoring: SCP/DB status, C-ECHO matrix with RTT, counters, live query log |
+| `/broker/sources` | Upstream RIS/KIS systems: CRUD, enable/disable, priority, charset, C-ECHO |
+| `/broker/targets` | PACS store targets: CRUD, default target, C-ECHO |
+| `/broker/rules` | Routing rules (source → target, priority, enable toggle) |
+| `/broker/transforms` | DICOM modify rules (tag set/remove/prefix/suffix/replace/copy, scope, priority) |
+| `/broker/settings` | Runtime settings (ENV default + UI override/reset) |
+
+Sidebar: a collapsible “MWL Broker” group with all six entries (only rendered
+when `brokerUrl` is configured). Every write goes through
+`use-broker-writes.ts` and emits BEFORE/AFTER audit events, same contract as
+`src/actions/`. The config tables switch to card layouts below `md`
+(`ConfigRowCard`) — a four-column DICOM table does not fit a 375px viewport.
 
 ## Gating
 
@@ -64,9 +82,20 @@ For cross-origin setups (UI and broker on different hosts), the broker must
 send CORS headers (`Access-Control-Allow-Origin`); same-origin is the
 recommended production layout.
 
+## Testing
+
+```bash
+npx vitest run --coverage     # unit tests + coverage for the broker UI
+npx playwright test --config=e2e/stack/playwright.stack.config.ts
+node e2e/stack/verify-ui.cjs  # deep audit: DOM checks + CRUD flows vs. the API
+```
+
+Both E2E entry points need a running broker stack (the workspace repo provides
+`./test-stack.sh`, which builds an isolated stack and tears it down again).
+
 ## Scope
 
 The broker service itself (DICOM SCP, C-FIND fan-out/merge, C-STORE routing,
 Postgres config/log DB) lives outside this repository — the UI slice here is
-deliberately limited to the REST client, the dashboard page, runtime config,
-and tests. This keeps the fork merge-friendly with upstream OE3.
+deliberately limited to the REST client, the pages above, runtime config, and
+tests. This keeps the fork merge-friendly with upstream OE3.

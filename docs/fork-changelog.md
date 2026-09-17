@@ -4,6 +4,49 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## Unreleased — MWL Broker UI + Standalone-Deployment-Härtungen
+
+### Neu: MWL-Broker-Konfiguration (nicht nur Monitoring)
+
+- Sechs Broker-Seiten: `/broker` (Monitoring) plus `/broker/sources`,
+  `/targets`, `/rules`, `/transforms`, `/settings` — als Sidebar-Untergruppe.
+- Vollständiges CRUD für Upstream-Quellen (RIS/KIS) und Store-Ziele (PACS)
+  inkl. Enable/Disable, Priorität, Charset und C-ECHO-Test pro Knoten.
+- Routing-Regeln (Quelle → Ziel) und **DICOM-Modify-Regeln** (Tag
+  `set`/`remove`/`prefix`/`suffix`/`replace`/`copy`, Scope je Quelle/Ziel,
+  Priorität) — Validierung gegen das DICOM-Datenlexikon erfolgt broker-seitig,
+  422-Meldungen werden im Dialog angezeigt.
+- Laufzeit-Settings mit ENV-Default: Override und Reset pro Schlüssel.
+- Alle Schreibvorgänge laufen über `use-broker-writes.ts` und emittieren
+  BEFORE+AFTER-Audit-Events (`broker.*`-Actions, neue `brokerSource`,
+  `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
+  Ressourcentypen).
+
+### Neu: Standalone-Deployment-Flags
+
+- `authCheck: false` — überspringt das `/oe3-me`-Gate in Deployments ohne
+  Backend-Proxy (vorher blockierte ein 404 die gesamte App).
+- `viewerSession: false` — überspringt `POST /api/v1/pacs/viewer-session`
+  vor dem Öffnen eines Viewers (Endpoint existiert nur hinter dem Proxy).
+  Beide Defaults bleiben `true`; Produktivverhalten unverändert.
+
+### Fixes
+
+- `tools.getLabels` nutzte `/labels` (404) statt `/tools/labels`.
+- Mobile Sidebar: `sr-only` Sheet-Titel ergänzt (Radix-A11y-Warnung).
+- Broker-Tabellen rendern unterhalb `md` als Cards — Action-Buttons wurden bei
+  375 px abgeschnitten; DICOM-Endpunkte brechen nicht mehr mitten im Token.
+- `ConfigRowCard` rendert seine Badges (default/disabled fehlten auf Mobile).
+
+### Tests & Tooling
+
+- 325 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
+  Mobile 375×812) und `e2e/stack/verify-ui.cjs` als Deep-Audit (56 Checks,
+  CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
+- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 98,9 %.
+
+---
+
 ## v2.3.0 — DICOM Upload + Merge: Patient-Safe Matching (2026-09-08)
 
 ### Critical: Cross-patient merge prevention

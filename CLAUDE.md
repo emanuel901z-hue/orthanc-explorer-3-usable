@@ -28,7 +28,7 @@ npm run preview
 ### Testing
 
 ```bash
-# Run all unit tests (single pass, 218 tests)
+# Run all unit tests (single pass, 325 tests)
 npm run test
 
 # Watch mode
@@ -71,7 +71,7 @@ GitHub Actions CI (`.github/workflows/ci.yml`) laeuft bei Pull Requests und Push
 |-----|--------|-------|
 | `typecheck` | `tsc --noEmit -p tsconfig.app.json` | ~15s |
 | `lint` | `npm run lint` (ESLint) | ~10s |
-| `test` | `npm run test` (Vitest, 218 Tests) | ~15s |
+| `test` | `npm run test` (Vitest, 325 Tests) | ~15s |
 | `audit` | `npm run audit` (audit-ci, high+critical blocking) | ~10s |
 
 Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit jsdom.
@@ -101,7 +101,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (218 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (325 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -199,7 +199,12 @@ features: {
 | `src/api/shares.ts` | Shares API: create, list, get, delete — Orthanc Shares plugin support |
 | `src/api/worklists.ts` | Worklists API: list, get, query, delete, upload — DICOM Modality Worklist Management |
 | `src/api/broker.ts` | Typed client for the external MWL broker REST API (`/api/v1/*` via `brokerUrl`) — only active when configured |
-| `src/features/broker/pages/BrokerPage.tsx` | MWL broker dashboard: SCP/DB status, echo matrix, live query log (route `/broker`) |
+| `src/features/broker/pages/BrokerPage.tsx` | MWL broker monitoring: SCP/DB status, echo matrix, live query log (route `/broker`) |
+| `src/features/broker/pages/{Sources,Targets,Rules,Transforms,BrokerSettings}Page.tsx` | Broker configuration pages (`/broker/sources`, `/targets`, `/rules`, `/transforms`, `/settings`) |
+| `src/features/broker/hooks/use-broker-writes.ts` | Audited write mutations (BEFORE+AFTER) for every broker config change |
+| `src/features/broker/components/ConfigRowCard.tsx` | Mobile card view for the broker config tables (below `md`) |
+| `src/lib/viewer-session.ts` | `POST /api/v1/pacs/viewer-session` before opening a viewer — skipped with `viewerSession: false` |
+| `e2e/stack/` | Playwright stack suite (desktop+mobile) + `verify-ui.cjs` deep audit (DOM checks, CRUD flows vs. REST API) |
 | `docs/mwl-broker-integration.md` | Integration contract for the optional MWL broker feature (endpoints, config, deployment) |
 | `src/features/servers/pages/RemoteSourcesPage.tsx` | Remote query/retrieve (C-FIND/C-MOVE/C-ECHO) with results table |
 | `src/features/studies/components/ShareStudyDialog.tsx` | Share study via Shares plugin or instant viewer link, email, clipboard |
@@ -230,6 +235,7 @@ features: {
 - AuthGate wraps the entire app — no API calls fire until `/oe3-me` confirms authentication. Do not bypass AuthGate in new components.
 - **Feature flags use two key forms**: the canonical form (`delete`, `modify`, `anonymize`, `send`) AND the legacy `enableX` form (`enableDelete`, `enableModify`, etc. shipped in `config.prod.js`). The `FEATURE_ALIASES` map in `features.ts` maps both — never remove it or production RBAC breaks.
 - **Search inputs must carry `data-shortcut="search"`** — the `/` keyboard shortcut in `use-keyboard-shortcuts.ts` uses this i18n-agnostic attribute selector (not locale-specific placeholder matching). Add it to any new search input.
+- **Data tables switch to card layouts below `md`** — use `useMediaQuery('(max-width: 767px)')` and render a card list (see `ConfigRowCard` for the broker tables, `StudyListPage` for the study list). A table with 4+ columns clips its action buttons on a 375px viewport.
 - **Every page must have exactly one `<h1>`** — use `className="sr-only"` if the visible title is a breadcrumb/badge. Verified by E2E A11y regression tests.
 - **Write actions must emit BEFORE+AFTER audit events** — `auditClient.emit({ ...base, outcome: 'started' })` before the API call, `success`/`failure` after. See any action in `src/actions/` for the pattern.
 - **`AuditEvent.resourceId` must not carry PHI** — for uploads, use a non-PHI batch ID (not the filename); for other actions, use the Orthanc UUID.

@@ -27,7 +27,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Column Resizing** | TanStack Table `columnResizeMode: 'onChange'` with `table-layout: fixed` for proper width enforcement. |
 | **Label-Based Filtering** | Filter studies by Orthanc Labels via `/tools/find` with `Labels` + `LabelsConstraint: 'All'` (AND logic). Comma-separated input in the filter panel. |
 | **RBAC Feature Flags** | Action buttons (download, send, modify, anonymize, delete, editLabels) are gated by `useFeature()` hooks. Feature flags set in `config.js` at deployment time. |
-| **OHIF Viewer Integration** | "Open in OHIF" button on study detail — calls `POST /api/v1/pacs/viewer-session` to set an httpOnly cookie, then opens `/ohif/viewer?StudyInstanceUIDs=<uid>` in a new tab. |
+| **OHIF Viewer Integration** | "Open in OHIF" button on study detail — calls `POST /api/v1/pacs/viewer-session` to set an httpOnly cookie, then opens `/ohif/viewer?StudyInstanceUIDs=<uid>` in a new tab. Standalone deployments without a backend proxy set `viewerSession: false` to skip that call. |
 | **Series Management** | Full series-level actions: download (ZIP archive), send to modality, modify, anonymize, delete. Sortable series table with multi-select and bulk download. |
 | **Sortable DICOM Tag Browser** | All 4 columns (Tag, VR, Name, Value) are click-to-sort with arrow icons. |
 | **Non-Secure Context Fix** | `crypto.randomUUID()` fallback for HTTP deployments (not just HTTPS/localhost). Without this fix, all API calls silently fail on plain HTTP. |
@@ -45,7 +45,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
 | **Study Sharing** | Share studies via Orthanc Shares plugin or instant viewer link. Share by email, copy link, expiration date, description. |
 | **Worklists** | DICOM Modality Worklist Management — list, upload, delete worklists via dedicated page and API. |
-| **MWL Broker Dashboard** | Optional monitoring UI for a separate MWL broker service (C-FIND proxy/aggregator): SCP/DB status, upstream sources, store targets, C-ECHO matrix with RTT, live query log. Gated by `brokerUrl` in `config.js` — invisible without a broker. See [docs/mwl-broker-integration.md](docs/mwl-broker-integration.md). |
+| **MWL Broker — Dashboard + Konfiguration** | Optional UI for a separate MWL broker service (C-FIND proxy/aggregator): monitoring (SCP/DB status, C-ECHO matrix with RTT, live query log) **plus full configuration** — upstream sources, store targets, routing rules, DICOM modify rules (tag set/remove/prefix/suffix/replace/copy) and runtime settings, all with audited writes. Gated by `brokerUrl` in `config.js` — invisible without a broker. See [docs/mwl-broker-integration.md](docs/mwl-broker-integration.md). |
 | **Custom HTTP Buttons** | Configurable buttons that open arbitrary URLs with template tokens (`{studyId}`, `{patientId}`, `{accession}`, etc.). Persisted to `localStorage`. |
 | **Add Series (Encapsulated)** | Upload PDF/JPEG/PNG/STL files as a new DICOM series within an existing study via Orthanc `/tools/create-dicom`. |
 | **Modify In-Place / Duplicate** | Choose between `KeepSource: false` (modify in-place) or `KeepSource: true` (create duplicate) in the Modify dialog. |
@@ -172,7 +172,7 @@ Open [http://localhost:5173](http://localhost:5173). The dev server proxies `/or
 # Start dev server (requires Docker stack running)
 npm run dev
 
-# Run unit tests (single pass, 191 tests)
+# Run unit tests (single pass, 325 tests)
 npm run test
 
 # Run unit tests in watch mode
@@ -183,6 +183,17 @@ npx vitest run src/lib/audit.test.ts
 
 # Run Playwright production viewport tests (requires running deployment)
 npx playwright test --config=e2e/prod/playwright.prod.config.ts
+
+# Run the stack E2E suite (desktop + mobile) against a local docker stack
+# (workspace repo: ./test-stack.sh brings it up and tears it down)
+npx playwright test --config=e2e/stack/playwright.stack.config.ts
+
+# Deep UI audit: DOM checks + CRUD flows cross-checked against the REST API
+# (desktop 1400x900 + mobile 375x812, screenshots in e2e/stack/shots/)
+node e2e/stack/verify-ui.cjs
+
+# Coverage (broker UI + client)
+npx vitest run --coverage
 
 # Lint
 npm run lint
