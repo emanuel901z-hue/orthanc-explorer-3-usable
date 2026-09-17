@@ -73,8 +73,11 @@ test.describe('stack: study list', () => {
     await page.goto('/oe3/');
     // Should redirect to /studies and render the list (stack has ≥1 study).
     // Mobile renders cards, desktop a table — the count label works for both.
+    // Match the numeric count specifically (empty state also says "studies
+    // found" on desktop, which would trip strict mode).
     await expect(page).toHaveURL(/\/studies/, { timeout: 15000 });
-    await expect(page.getByText(/studies found|Studien gefunden/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/^\d+ studies found$|^\d+ Studien gefunden$/i))
+      .toBeVisible({ timeout: 15000 });
 
     const dom = await analyzeDom(page, 'studies');
     expect(dom.h1Count).toBe(1);
