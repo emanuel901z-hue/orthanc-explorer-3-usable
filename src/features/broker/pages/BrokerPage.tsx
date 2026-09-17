@@ -12,13 +12,8 @@ import {
   Loader2,
   Database,
   Activity,
-  CircleCheck,
-  CircleX,
-  CircleHelp,
-  Zap,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -28,47 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { brokerApi, type EchoStatus } from '@/api/broker';
+import { brokerApi } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { format } from 'date-fns';
-
-function EchoBadge({ echo, onEcho, pending }: {
-  echo: EchoStatus;
-  onEcho: () => void;
-  pending: boolean;
-}) {
-  const { t } = useTranslation();
-  const icon = echo.last_check === null
-    ? <CircleHelp className="h-3 w-3" />
-    : echo.ok
-      ? <CircleCheck className="h-3 w-3" />
-      : <CircleX className="h-3 w-3" />;
-  const cls = echo.last_check === null
-    ? 'text-muted-foreground'
-    : echo.ok
-      ? 'text-green-600'
-      : 'text-destructive';
-  return (
-    <span className={`inline-flex items-center gap-1 text-xs whitespace-nowrap ${cls}`}>
-      {icon}
-      {echo.last_check === null
-        ? t('broker.neverChecked')
-        : echo.ok
-          ? `${echo.rtt_ms ?? '?'} ms`
-          : (echo.error ?? t('broker.echoFailed'))}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 w-9 p-0 sm:h-7 sm:w-7"
-        aria-label={t('broker.echoNow')}
-        onClick={onEcho}
-        disabled={pending}
-      >
-        {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Zap className="h-3.5 w-3.5" />}
-      </Button>
-    </span>
-  );
-}
+import { EchoBadge } from '../components/EchoBadge';
 
 export default function BrokerPage() {
   const { t } = useTranslation();

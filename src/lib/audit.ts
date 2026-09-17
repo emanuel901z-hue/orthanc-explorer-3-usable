@@ -10,9 +10,22 @@
 
 import { logger } from "@/lib/logger";
 
+export type AuditResourceType =
+  | "study"
+  | "series"
+  | "instance"
+  | "modality"
+  | "dicomWebServer"
+  | "peer"
+  | "brokerSource"
+  | "brokerTarget"
+  | "brokerRule"
+  | "brokerTransform"
+  | "brokerSetting";
+
 export type AuditEvent = {
   action: string;
-  resourceType: "study" | "series" | "instance" | "modality" | "dicomWebServer" | "peer";
+  resourceType: AuditResourceType;
   resourceId: string;
   outcome: "started" | "success" | "failure";
   timestamp: string;

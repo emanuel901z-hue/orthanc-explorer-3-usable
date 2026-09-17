@@ -15,6 +15,11 @@ import ActivityPage from "@/features/activity/pages/ActivityPage";
 import AuditLogsPage from "@/features/audit/pages/AuditLogsPage";
 import WorklistsPage from "@/features/worklists/pages/WorklistsPage";
 import BrokerPage from "@/features/broker/pages/BrokerPage";
+import SourcesPage from "@/features/broker/pages/SourcesPage";
+import TargetsPage from "@/features/broker/pages/TargetsPage";
+import RulesPage from "@/features/broker/pages/RulesPage";
+import TransformsPage from "@/features/broker/pages/TransformsPage";
+import BrokerSettingsPage from "@/features/broker/pages/BrokerSettingsPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +41,11 @@ const App = () => (
               <Route path="audit-logs" element={<AuditLogsPage />} />
               <Route path="worklists" element={<WorklistsPage />} />
               <Route path="broker" element={<BrokerPage />} />
+              <Route path="broker/sources" element={<SourcesPage />} />
+              <Route path="broker/targets" element={<TargetsPage />} />
+              <Route path="broker/rules" element={<RulesPage />} />
+              <Route path="broker/transforms" element={<TransformsPage />} />
+              <Route path="broker/settings" element={<BrokerSettingsPage />} />
               <Route path="remote-sources" element={<RemoteSourcesPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>

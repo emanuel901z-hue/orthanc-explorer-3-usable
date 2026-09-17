@@ -13,6 +13,10 @@
  *   (same shape for /targets)
  *   GET    /api/v1/rules              POST /api/v1/rules
  *   PUT    /api/v1/rules/:id          DELETE /api/v1/rules/:id
+ *   GET    /api/v1/transforms         POST /api/v1/transforms
+ *   PUT    /api/v1/transforms/:id     DELETE /api/v1/transforms/:id
+ *   GET    /api/v1/settings           PUT /api/v1/settings/:key
+ *   DELETE /api/v1/settings/:key
  *   GET    /api/v1/logs/queries       GET /api/v1/logs/stores
  */
 import { getConfig } from '@/config/runtime';
@@ -61,6 +65,43 @@ export type BrokerRule = {
 
 export type BrokerRuleIn = Omit<BrokerRule, 'id'>;
 
+export type TransformOpKind = 'set' | 'remove' | 'prefix' | 'suffix' | 'replace' | 'copy';
+
+/** One DICOM attribute modification (validated broker-side against the
+ *  DICOM data dictionary; UIDs are rejected). */
+export type TransformOperation = {
+  op: TransformOpKind;
+  tag: string;
+  value?: string | null;
+  pattern?: string | null;
+  from_tag?: string | null;
+};
+
+export type BrokerTransform = {
+  id: number;
+  name: string;
+  enabled: boolean;
+  priority: number;
+  /** null = applies to any source */
+  source_id: number | null;
+  /** null = applies to any target */
+  target_id: number | null;
+  operations: TransformOperation[];
+  created_at: string;
+};
+
+export type BrokerTransformIn = Omit<BrokerTransform, 'id' | 'created_at'>;
+
+export type BrokerSetting = {
+  key: string;
+  value: string;
+  default: string;
+  /** 'db' = UI override active, 'env' = deployment default */
+  source: 'db' | 'env';
+  kind: 'bool' | 'int' | 'aets';
+  description: string;
+};
+
 export type EchoStatus = {
   kind: 'source' | 'target';
   id: number;
@@ -103,6 +144,25 @@ export type StoreLogRow = {
   error: string;
 };
 
+/**
+ * Broker error responses (409/404/422) carry configuration-level messages —
+ * "unknown DICOM keyword 'Nope'", "ris-a already exists" — never PHI. Those
+ * are worth showing in the UI, so they are read here; every other status
+ * keeps the scrubbed default from OrthancError.
+ */
+async function configErrorDetail(res: Response): Promise<string | null> {
+  if (![404, 409, 422].includes(res.status)) return null;
+  try {
+    const body = await res.clone().json();
+    const detail = body?.detail;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) return detail.map(String).join('; ');
+  } catch {
+    /* not JSON — fall back to the scrubbed message */
+  }
+  return null;
+}
+
 async function brokerFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const cfg = getConfig();
   const correlationId = newCorrelationId();
@@ -120,7 +180,10 @@ async function brokerFetch<T>(path: string, init: RequestInit = {}): Promise<T> 
       credentials: 'include',
     });
     if (!res.ok) {
-      const err = await OrthancError.from(res, correlationId);
+      const detail = await configErrorDetail(res);
+      const err = detail
+        ? new OrthancError(res.status, correlationId, detail)
+        : await OrthancError.from(res, correlationId);
       logger.error('broker.fetch.failed', { path, status: err.status, correlationId });
       throw err;
     }
@@ -173,6 +236,23 @@ export const brokerApi = {
     update: (id: number, body: BrokerRuleIn) =>
       brokerFetch<BrokerRule>(`/api/v1/rules/${id}`, put(body)),
     delete: (id: number) => brokerFetch<void>(`/api/v1/rules/${id}`, { method: 'DELETE' }),
+  },
+
+  transforms: {
+    list: () => brokerFetch<BrokerTransform[]>('/api/v1/transforms'),
+    create: (body: BrokerTransformIn) =>
+      brokerFetch<BrokerTransform>('/api/v1/transforms', post(body)),
+    update: (id: number, body: BrokerTransformIn) =>
+      brokerFetch<BrokerTransform>(`/api/v1/transforms/${id}`, put(body)),
+    delete: (id: number) => brokerFetch<void>(`/api/v1/transforms/${id}`, { method: 'DELETE' }),
+  },
+
+  settings: {
+    list: () => brokerFetch<BrokerSetting[]>('/api/v1/settings'),
+    set: (key: string, value: string) =>
+      brokerFetch<BrokerSetting>(`/api/v1/settings/${encodeURIComponent(key)}`, put({ value })),
+    reset: (key: string) =>
+      brokerFetch<void>(`/api/v1/settings/${encodeURIComponent(key)}`, { method: 'DELETE' }),
   },
 
   logs: {

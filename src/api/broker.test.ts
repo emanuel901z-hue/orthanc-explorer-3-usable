@@ -78,11 +78,103 @@ describe("brokerApi", () => {
     expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/logs/queries?limit=10");
   });
 
+  it("transforms.create() posts operations", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"id":1}', { status: 201 }),
+    );
+    await brokerApi.transforms.create({
+      name: "kh-prefix",
+      enabled: true,
+      priority: 10,
+      source_id: null,
+      target_id: null,
+      operations: [{ op: "prefix", tag: "PatientID", value: "KH_" }],
+    });
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/broker-api/api/v1/transforms");
+    const body = JSON.parse((init as RequestInit).body as string);
+    expect(body.operations[0]).toMatchObject({ op: "prefix", tag: "PatientID" });
+    expect(body.source_id).toBeNull();
+  });
+
+  it("transforms.update() PUTs to /api/v1/transforms/:id", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"id":3}', { status: 200 }),
+    );
+    await brokerApi.transforms.update(3, {
+      name: "x", enabled: false, priority: 5, source_id: 1, target_id: 2,
+      operations: [{ op: "remove", tag: "PatientAddress" }],
+    });
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/broker-api/api/v1/transforms/3");
+    expect((init as RequestInit).method).toBe("PUT");
+  });
+
+  it("transforms.delete() DELETEs the rule", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(null, { status: 204 }),
+    );
+    await brokerApi.transforms.delete(4);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/broker-api/api/v1/transforms/4");
+    expect((init as RequestInit).method).toBe("DELETE");
+  });
+
+  it("settings.list() hits /api/v1/settings", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("[]", { status: 200 }),
+    );
+    await brokerApi.settings.list();
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/settings");
+  });
+
+  it("settings.set() PUTs the value", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"key":"echo_interval_s","value":"45","source":"db"}', { status: 200 }),
+    );
+    const updated = await brokerApi.settings.set("echo_interval_s", "45");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/broker-api/api/v1/settings/echo_interval_s");
+    expect((init as RequestInit).method).toBe("PUT");
+    expect(JSON.parse((init as RequestInit).body as string).value).toBe("45");
+    expect(updated.source).toBe("db");
+  });
+
+  it("settings.reset() DELETEs the override", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(null, { status: 204 }),
+    );
+    await brokerApi.settings.reset("allowed_calling_aets");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/broker-api/api/v1/settings/allowed_calling_aets");
+    expect((init as RequestInit).method).toBe("DELETE");
+  });
+
   it("propagates non-2xx as OrthancError", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response('{"detail":"nope"}', { status: 404 }),
     );
     await expect(brokerApi.targets.list()).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("surfaces broker validation details (422) in the message", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        '{"detail":["operation 1: unknown DICOM keyword \'Nope\'","operation 2: \'value\' is required"]}',
+        { status: 422 },
+      ),
+    );
+    await expect(brokerApi.transforms.create({
+      name: "x", enabled: true, priority: 1, source_id: null, target_id: null,
+      operations: [{ op: "set", tag: "Nope", value: "x" }],
+    })).rejects.toThrow(/unknown DICOM keyword 'Nope'.*'value' is required/s);
+  });
+
+  it("keeps other error bodies scrubbed (no detail leakage)", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"detail":"internal secret path /etc/passwd"}', { status: 500 }),
+    );
+    await expect(brokerApi.status()).rejects.toThrow(/server encountered an error/i);
   });
 });
 

@@ -25,6 +25,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { AboutDialog } from './AboutDialog';
@@ -41,14 +44,32 @@ export function AppSidebar() {
   const { appName, logoUrl } = useUiStore();
   const brokerEnabled = useFeature('mwlBroker') && Boolean(getConfig().brokerUrl);
 
-  const navItems = [
+  type NavItem = {
+    title: string;
+    url: string;
+    icon: typeof BookOpen;
+    children?: { title: string; url: string }[];
+  };
+
+  const navItems: NavItem[] = [
     { title: t('nav.studies'), url: '/studies', icon: BookOpen },
     { title: t('nav.upload'), url: '/upload', icon: Upload },
     { title: t('nav.activity'), url: '/activity', icon: ActivityIcon },
     { title: t('nav.auditLogs', { defaultValue: 'Audit Logs' }), url: '/audit-logs', icon: Shield },
     { title: t('nav.worklists', { defaultValue: 'Worklists' }), url: '/worklists', icon: ClipboardList },
     ...(brokerEnabled
-      ? [{ title: t('nav.broker', { defaultValue: 'MWL Broker' }), url: '/broker', icon: RadioTower }]
+      ? [{
+          title: t('nav.broker', { defaultValue: 'MWL Broker' }),
+          url: '/broker',
+          icon: RadioTower,
+          children: [
+            { title: t('broker.sourcesTitle'), url: '/broker/sources' },
+            { title: t('broker.targetsTitle'), url: '/broker/targets' },
+            { title: t('broker.rulesTitle'), url: '/broker/rules' },
+            { title: t('broker.transformsTitle'), url: '/broker/transforms' },
+            { title: t('broker.settingsTitle'), url: '/broker/settings' },
+          ],
+        }]
       : []),
     { title: t('nav.remoteSources'), url: '/remote-sources', icon: Globe },
     { title: t('nav.settings'), url: '/settings', icon: Settings },
@@ -93,6 +114,26 @@ export function AppSidebar() {
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
+                  {item.children && (
+                    <SidebarMenuSub>
+                      {item.children.map((child) => (
+                        <SidebarMenuSubItem key={child.url}>
+                          <SidebarMenuSubButton asChild>
+                            <NavLink
+                              to={child.url}
+                              className="hover:bg-sidebar-accent"
+                              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                              onClick={() => {
+                                if (isMobile) setOpenMobile(false);
+                              }}
+                            >
+                              <span>{child.title}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

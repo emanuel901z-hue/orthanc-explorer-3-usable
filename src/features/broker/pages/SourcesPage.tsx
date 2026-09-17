@@ -1,0 +1,185 @@
+/**
+ * SourcesPage — CRUD for upstream MWL sources (RIS/KIS).
+ *
+ * Every write is audited (BEFORE + AFTER) via use-broker-writes.
+ */
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { brokerApi, type BrokerSource, type EchoStatus } from '@/api/broker';
+import { getConfig } from '@/config/runtime';
+import { BrokerPageShell } from '../components/BrokerPageShell';
+import { EchoBadge } from '../components/EchoBadge';
+import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
+import { NodeFormDialog, type NodeFormValues } from '../components/NodeFormDialog';
+import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
+import { useBrokerEcho } from '../hooks/use-broker-echo';
+
+export default function SourcesPage() {
+  const { t } = useTranslation();
+  const configured = Boolean(getConfig().brokerUrl);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<BrokerSource | null>(null);
+  const [deleting, setDeleting] = useState<BrokerSource | null>(null);
+
+  const sourcesQuery = useQuery({
+    queryKey: ['broker', 'sources'],
+    queryFn: brokerApi.sources.list,
+    enabled: configured,
+  });
+  const statusQuery = useQuery({
+    queryKey: ['broker', 'status'],
+    queryFn: brokerApi.status,
+    enabled: configured,
+    refetchInterval: 5000,
+  });
+  const { create, update, remove } = useBrokerSourceWrites();
+  const echo = useBrokerEcho();
+
+  const echoById = new Map((statusQuery.data?.sources ?? []).map((e) => [e.id, e]));
+  const echoFor = (row: BrokerSource): EchoStatus =>
+    echoById.get(row.id) ?? {
+      kind: 'source', id: row.id, name: row.name,
+      ok: false, rtt_ms: null, last_check: null, error: null,
+    };
+
+  const sources = sourcesQuery.data ?? [];
+  const pending = create.isPending || update.isPending || remove.isPending;
+
+  const submit = (values: NodeFormValues) => {
+    const onDone = () => { setDialogOpen(false); setEditing(null); };
+    if (editing) {
+      update.mutate({ id: editing.id, body: values }, { onSuccess: onDone });
+    } else {
+      create.mutate(values, { onSuccess: onDone });
+    }
+  };
+
+  return (
+    <BrokerPageShell
+      titleKey="broker.sourcesTitle"
+      subtitleKey="broker.sourcesSubtitle"
+      actions={
+        <Button
+          onClick={() => { setEditing(null); setDialogOpen(true); }}
+          size="sm"
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          {t('broker.addSource')}
+        </Button>
+      }
+    >
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('broker.name')}</TableHead>
+                <TableHead>{t('broker.endpoint')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('broker.charset')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('broker.timeout')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('broker.priority')}</TableHead>
+                <TableHead className="w-[140px]">{t('broker.echo')}</TableHead>
+                <TableHead className="w-[110px] text-right">{t('broker.actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sources.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell className="font-medium">
+                    {row.name}
+                    {!row.enabled && (
+                      <Badge variant="outline" className="ml-2 text-xs">
+                        {t('broker.disabled')}
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs break-all">
+                    {row.aet}@{row.host}:{row.port}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell font-mono text-xs">
+                    {row.charset}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell text-xs">
+                    {row.timeout_s}s
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell text-xs">
+                    {row.priority}
+                  </TableCell>
+                  <TableCell>
+                    <EchoBadge
+                      echo={echoFor(row)}
+                      pending={echo.isPending}
+                      onEcho={() => echo.mutate({ kind: 'source', id: row.id })}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 w-9 p-0"
+                      aria-label={t('broker.editSource')}
+                      onClick={() => { setEditing(row); setDialogOpen(true); }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 w-9 p-0 text-destructive"
+                      aria-label={t('broker.deleteSource')}
+                      onClick={() => setDeleting(row)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {sources.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground text-sm py-8">
+                    {t('broker.noSources')}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <NodeFormDialog
+        kind="source"
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        initial={editing}
+        pending={pending}
+        error={create.error?.message ?? update.error?.message ?? null}
+        onSubmit={submit}
+      />
+
+      <ConfirmDeleteDialog
+        open={deleting !== null}
+        onOpenChange={(open) => { if (!open) setDeleting(null); }}
+        itemName={deleting?.name ?? ''}
+        pending={remove.isPending}
+        onConfirm={() => {
+          if (!deleting) return;
+          remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) });
+        }}
+      />
+    </BrokerPageShell>
+  );
+}
