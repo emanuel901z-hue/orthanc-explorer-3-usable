@@ -184,6 +184,62 @@ describe("brokerApi", () => {
     expect(health.summary.error).toBe(0);
   });
 
+  it("audit.config() builds the filter query", async () => {
+    // a Response body can only be read once — hand out a fresh one per call
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response("[]", { status: 200 })),
+    );
+    await brokerApi.audit.config({ entity: "source", limit: 25, offset: 50 });
+    expect(fetchMock.mock.calls[0][0])
+      .toBe("/broker-api/api/v1/audit/config?entity=source&limit=25&offset=50");
+
+    await brokerApi.audit.config();
+    expect(fetchMock.mock.calls[1][0]).toBe("/broker-api/api/v1/audit/config?limit=50");
+  });
+
+  it("audit.rollback() POSTs to the rollback endpoint", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response('{"audit_id":7,"entity":"source","action":"restore","message":"ok"}', { status: 200 }),
+    );
+    const result = await brokerApi.audit.rollback(7);
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/config/rollback/7");
+    expect((fetchMock.mock.calls[0][1] as RequestInit).method).toBe("POST");
+    expect(result.action).toBe("restore");
+  });
+
+  it("config.export()/import() target the config endpoints", async () => {
+    const doc = {
+      schema_version: 1, sources: [], targets: [], rules: [], transforms: [], settings: {},
+    };
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify(doc), { status: 200 })),
+    );
+    await brokerApi.config.export();
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/config/export");
+
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(
+      '{"schema_version":1,"dry_run":true,"changes":[],"skipped":[],"summary":{"create":0,"update":0,"skipped":0}}',
+      { status: 200 },
+    )));
+    const plan = await brokerApi.config.import(doc as never, true);
+    expect(fetchMock.mock.calls[1][0]).toBe("/broker-api/api/v1/config/import?dry_run=true");
+    expect((fetchMock.mock.calls[1][1] as RequestInit).method).toBe("POST");
+    expect(plan.dry_run).toBe(true);
+  });
+
+  it("simulate.route()/transform() POST the case", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response('{"accession":"ACC-1","study_uid":"","matched_via":"default","source_id":null,"source_name":null,"target_id":1,"target_name":"pacs","rule_id":null,"reason":"default","rules_applied":[],"changes":[],"errors":[]}', { status: 200 })),
+    );
+    await brokerApi.simulate.route({ accession: "ACC-1" });
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/simulate/route");
+
+    await brokerApi.simulate.transform({ accession: "ACC-1", values: { PatientID: "P1" } });
+    expect(fetchMock.mock.calls[1][0]).toBe("/broker-api/api/v1/simulate/transform");
+    expect(JSON.parse((fetchMock.mock.calls[1][1] as RequestInit).body as string))
+      .toEqual({ accession: "ACC-1", values: { PatientID: "P1" } });
+  });
+
   it("transforms.list() hits /api/v1/transforms", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("[]", { status: 200 }),

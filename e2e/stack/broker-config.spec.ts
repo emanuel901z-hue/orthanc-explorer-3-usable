@@ -250,6 +250,90 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('case check simulates routing for a known worklist item', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker', /MWL/i);
+    const panel = page.getByTestId('broker-case-check');
+    await expect(panel).toBeVisible();
+
+    // the C-FIND smoke (run by test-stack.sh before the suite) recorded this
+    // accession in seen_items, so the routing rule must win
+    await panel.getByLabel(/accession number/i).fill('ACC-A-001');
+    await panel.getByLabel(/tag values to test/i).fill('PatientID=P1001');
+    await panel.getByRole('button', { name: /run check/i }).click();
+
+    const result = panel.getByTestId('case-check-result');
+    await expect(result).toBeVisible({ timeout: 15000 });
+    await expect(result).toContainText(/matched via accession|Treffer über Accession/i);
+    await expect(result).toContainText('ris-a');
+    await expect(result).toContainText('pacs-peer');
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-case-check-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('case check falls back to the default target for an unknown case', async ({ page }) => {
+    await openPage(page, '/oe3/broker', /MWL/i);
+    const panel = page.getByTestId('broker-case-check');
+
+    await panel.getByLabel(/accession number/i).fill('E2E-UNKNOWN-ACC');
+    await panel.getByRole('button', { name: /run check/i }).click();
+
+    const result = panel.getByTestId('case-check-result');
+    await expect(result).toBeVisible({ timeout: 15000 });
+    await expect(result).toContainText(/default target|Default-Ziel/i);
+    await expect(result).toContainText('orthanc');
+  });
+
+  test('change log records a configuration change and rolls it back', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+    const name = `e2e-audit-${Date.now().toString(36)}`;
+
+    // 1. create a source through the UI
+    await openPage(page, '/oe3/broker/sources', /upstream sources|upstream-quellen/i);
+    await page.getByRole('button', { name: /add source|quelle hinzufügen/i }).click();
+    await page.getByLabel(/^name$/i).fill(name);
+    // anchored: "Calling AE title" must not match as well
+    await page.getByLabel(/^ae ?title$|^ae-titel$/i).fill('AUDIT');
+    await page.getByLabel(/^host$/i).fill('127.0.0.1');
+    await page.getByLabel(/^port$/i).fill('11198');
+    await page.getByRole('button', { name: /^save$|^speichern$/i }).click();
+    await expect(page.getByText(name)).toBeVisible({ timeout: 15000 });
+
+    // 2. the change log shows it
+    await openPage(page, '/oe3/broker/audit', /change log|änderungsprotokoll/i);
+    const row = page.locator('tr, [data-testid="config-row"]').filter({ hasText: name }).first();
+    await expect(row).toBeVisible({ timeout: 15000 });
+    await expect(row).toContainText(/created|angelegt/i);
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-audit-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+
+    // 3. the diff shows the field values
+    await row.getByRole('button', { name: /show changes|änderungen anzeigen/i }).click();
+    await expect(page.getByRole('dialog')).toContainText('aet');
+    // Radix adds its own close icon — Escape is the unambiguous way out
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+
+    // 4. rollback removes the source again
+    await row.getByRole('button', { name: /roll this change back|zurücksetzen/i }).click();
+    await page.getByRole('button', { name: /^delete$|^löschen$/i }).click();
+
+    await openPage(page, '/oe3/broker/sources', /upstream sources|upstream-quellen/i);
+    await expect(page.getByText(name)).toHaveCount(0, { timeout: 15000 });
+
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

@@ -17,6 +17,7 @@ required in this repository.
 | `/broker/rules` | Routing rules (source → target, priority, enable toggle) |
 | `/broker/transforms` | DICOM modify rules (tag set/remove/prefix/suffix/replace/copy, scope, priority) |
 | `/broker/settings` | Runtime settings (ENV default + UI override/reset) |
+| `/broker/audit` | Change log: before/after diff, rollback, configuration export/import (dry-run first) |
 
 Sidebar: a collapsible “MWL Broker” group with all six entries (only rendered
 when `brokerUrl` is configured). Every write goes through
@@ -55,6 +56,10 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/sources` | Endpoint details next to echo badges |
 | `GET` | `/api/v1/targets` | Default-target badge, endpoint details |
 | `GET` | `/api/v1/health/config` | Configuration health panel (findings + summary) |
+| `GET` | `/api/v1/audit/config` | Change log (diff + rollback) |
+| `GET/POST` | `/api/v1/config/export`, `/api/v1/config/import?dry_run=` | Configuration export/import |
+| `POST` | `/api/v1/config/rollback/{id}` | Roll a change back |
+| `POST` | `/api/v1/simulate/route`, `/api/v1/simulate/transform` | "Check a case" dry-run |
 | `POST` | `/api/v1/sources/{id}/reset-breaker` | Circuit-breaker badge: operator reset |
 | `POST` | `/api/v1/sources/{id}/echo` | "Run C-ECHO now" button |
 | `POST` | `/api/v1/targets/{id}/echo` | "Run C-ECHO now" button |
@@ -69,6 +74,13 @@ Minimum fields the UI reads:
 - `health/config`: `findings[]` with `{code,severity,message,entity,details}`
   plus `summary.{error,warning,info}` — the UI translates `code` and deep-links
   via `entity`
+- `audit/config[]`: `{id,ts,actor,action,entity,entity_id,before_json,after_json}`
+  — `before_json`/`after_json` drive the diff view; `id` drives the rollback
+- `config/import` (dry-run): `{dry_run, changes[], skipped[], summary}` —
+  `changes` are `{entity,action,name,fields}`; the UI shows them before applying
+- `simulate/*`: routing decision (`matched_via`, `target_name`, `rule_id`,
+  `reason`) plus `rules_applied`, `changes[]` (`{tag,before,after}`) and
+  `errors[]` — no side effects
 - `sources[]` / `targets[]`: `{id,name,aet,host,port,enabled}` (+
   `is_default` for targets)
 - `logs/queries[]`: `{ts,calling_aet,answers,per_source,duration_ms,status}`
@@ -92,7 +104,7 @@ recommended production layout.
 ## Testing
 
 ```bash
-npx vitest run --coverage     # unit tests + coverage for the broker UI (98.8 %)
+npx vitest run --coverage     # unit tests + coverage for the broker UI (98 %)
 npx playwright test --config=e2e/stack/playwright.stack.config.ts
 node e2e/stack/verify-ui.cjs  # deep audit: DOM checks + CRUD flows vs. the API
 ```

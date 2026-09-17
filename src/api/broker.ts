@@ -19,6 +19,9 @@
  *   DELETE /api/v1/settings/:key
  *   POST   /api/v1/sources/:id/reset-breaker
  *   GET    /api/v1/health/config
+ *   GET    /api/v1/audit/config       GET /api/v1/config/export
+ *   POST   /api/v1/config/import      POST /api/v1/config/rollback/:id
+ *   POST   /api/v1/simulate/route     POST /api/v1/simulate/transform
  *   GET    /api/v1/logs/queries       GET /api/v1/logs/stores
  */
 import { getConfig } from '@/config/runtime';
@@ -144,6 +147,72 @@ export type BrokerFinding = {
 export type BrokerHealth = {
   findings: BrokerFinding[];
   summary: Record<FindingSeverity, number>;
+};
+
+/** One configuration change-log entry (before/after snapshots). */
+export type ConfigAuditEntry = {
+  id: number;
+  ts: string;
+  actor: string;
+  action: string;
+  entity: 'source' | 'target' | 'rule' | 'transform' | 'setting';
+  entity_id: number | null;
+  before_json: Record<string, unknown> | null;
+  after_json: Record<string, unknown> | null;
+  correlation_id: string;
+};
+
+/** Portable configuration document (export/import). */
+export type ConfigDocument = {
+  schema_version: number;
+  exported_at?: string | null;
+  sources: BrokerSourceIn[];
+  targets: BrokerTargetIn[];
+  rules: { source: string; target: string; priority: number; enabled: boolean }[];
+  transforms: {
+    name: string;
+    enabled: boolean;
+    priority: number;
+    source?: string | null;
+    target?: string | null;
+    operations: TransformOperation[];
+  }[];
+  settings: Record<string, string>;
+};
+
+export type ImportChange = {
+  entity: string;
+  action: 'create' | 'update';
+  name: string;
+  fields: Record<string, unknown>;
+};
+
+export type ImportPlan = {
+  schema_version: number;
+  dry_run: boolean;
+  changes: ImportChange[];
+  skipped: string[];
+  summary: { create: number; update: number; skipped: number };
+};
+
+export type RoutingDecision = {
+  accession: string;
+  study_uid: string;
+  matched_via: 'accession' | 'study_uid' | 'default' | 'none';
+  source_id: number | null;
+  source_name: string | null;
+  target_id: number | null;
+  target_name: string | null;
+  rule_id: number | null;
+  reason: string;
+};
+
+export type TagChange = { tag: string; before: string; after: string };
+
+export type TransformSimulation = RoutingDecision & {
+  rules_applied: string[];
+  changes: TagChange[];
+  errors: string[];
 };
 
 export type BrokerStatus = {
@@ -293,6 +362,36 @@ export const brokerApi = {
 
   health: {
     config: () => brokerFetch<BrokerHealth>('/api/v1/health/config'),
+  },
+
+  audit: {
+    config: (params: { entity?: string; limit?: number; offset?: number } = {}) => {
+      const query = new URLSearchParams();
+      if (params.entity) query.set('entity', params.entity);
+      query.set('limit', String(params.limit ?? 50));
+      if (params.offset) query.set('offset', String(params.offset));
+      return brokerFetch<ConfigAuditEntry[]>(`/api/v1/audit/config?${query.toString()}`);
+    },
+    rollback: (auditId: number) =>
+      brokerFetch<{ audit_id: number; entity: string; action: string; message: string }>(
+        `/api/v1/config/rollback/${auditId}`, post({}),
+      ),
+  },
+
+  config: {
+    export: () => brokerFetch<ConfigDocument>('/api/v1/config/export'),
+    import: (doc: ConfigDocument, dryRun = true) =>
+      brokerFetch<ImportPlan>(`/api/v1/config/import?dry_run=${dryRun}`, post(doc)),
+  },
+
+  simulate: {
+    route: (body: { accession?: string; study_uid?: string }) =>
+      brokerFetch<RoutingDecision>('/api/v1/simulate/route', post(body)),
+    transform: (body: {
+      accession?: string; study_uid?: string;
+      source_id?: number | null; target_id?: number | null;
+      values?: Record<string, string>;
+    }) => brokerFetch<TransformSimulation>('/api/v1/simulate/transform', post(body)),
   },
 
   logs: {

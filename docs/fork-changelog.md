@@ -22,6 +22,18 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
   `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
   Ressourcentypen).
 
+### Neu: Änderungsprotokoll, Export/Import und Simulation
+
+- Seite **`/broker/audit`** („Änderungsprotokoll"): jede
+  Konfigurationsänderung mit Feld-Diff (Vorher/Nachher), **Rollback** mit
+  Bestätigung, **Export** der Gesamtkonfiguration als Datei und **Import** mit
+  verpflichtendem Dry-Run-Diff (inkl. übersprungener Einträge) vor dem Anwenden.
+- **„Fall prüfen" (Simulation)** auf `/broker`: Accession/Study-UID plus
+  optionale `Tag=Wert`-Zeilen zeigen Routing-Entscheidung, angewendete
+  Modify-Regeln und den Tag-Diff — ohne Versand.
+- Mobile: Audit-Einträge als Cards; Rollback/Import laufen über auditierte
+  Mutations (`broker.config.*`, neuer Ressourcentyp `brokerConfig`).
+
 ### Neu: Broker-Health-Panel + Circuit-Breaker-Anzeige
 
 - `/broker` zeigt oben ein **Konfigurations-Check-Panel**: Befunde nach
@@ -52,10 +64,10 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ### Tests & Tooling
 
-- 348 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
-  Mobile 375×812, 25 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
-  (58 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
-- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 98,8 %.
+- 378 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
+  Mobile 375×812, 31 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
+  (66 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
+- Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 98 %.
 
 ---
 

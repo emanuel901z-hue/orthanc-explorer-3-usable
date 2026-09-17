@@ -19,6 +19,7 @@ const PAGES = [
   ['rules', '/oe3/broker/rules', /routing rules|routing-regeln/i],
   ['transforms', '/oe3/broker/transforms', /modify rules|modify-regeln/i],
   ['settings', '/oe3/broker/settings', /broker settings|broker-einstellungen/i],
+  ['audit', '/oe3/broker/audit', /change log|änderungsprotokoll/i],
 ];
 
 const results = [];
@@ -242,6 +243,21 @@ async function domReport(page) {
   await page.waitForTimeout(2500);
   const rtt = await page.getByText(/\d+\s*ms/).first().isVisible();
   record('sources: manueller C-ECHO liefert RTT im UI', rtt);
+
+  // case check (simulation): routing dry-run on the monitoring page
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  const casePanel = page.getByTestId('broker-case-check');
+  const caseVisible = await casePanel.count() > 0 && await casePanel.first().isVisible();
+  record('monitoring: Fall-Prüfen-Panel (Simulation) wird gerendert', caseVisible);
+  if (caseVisible) {
+    await casePanel.getByLabel(/accession number/i).fill('E2E-UNKNOWN');
+    await casePanel.getByRole('button', { name: /run check/i }).click();
+    const caseResult = casePanel.getByTestId('case-check-result');
+    await caseResult.waitFor({ timeout: 15000 }).catch(() => {});
+    const text = await caseResult.textContent().catch(() => '');
+    record('monitoring: Simulation liefert eine Routing-Entscheidung',
+      /default target/i.test(text || ''), (text || '').slice(0, 60));
+  }
 
   // health panel: configuration checks render on the monitoring page
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });

@@ -30,6 +30,7 @@ import { format } from 'date-fns';
 import { EchoBadge } from '../components/EchoBadge';
 import { BreakerBadge } from '../components/BreakerBadge';
 import { HealthPanel } from '../components/HealthPanel';
+import { CaseCheckPanel } from '../components/CaseCheckPanel';
 import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
 
 export default function BrokerPage() {
@@ -122,6 +123,8 @@ export default function BrokerPage() {
         health={healthQuery.data}
         onNavigate={(path) => navigate(path)}
       />
+
+      <CaseCheckPanel />
 
       {/* Status cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

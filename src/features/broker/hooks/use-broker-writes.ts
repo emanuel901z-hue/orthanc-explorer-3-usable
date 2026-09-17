@@ -19,7 +19,7 @@ type AuditedMutationOptions<TArgs, TResult> = {
   invalidate: string[][];
 };
 
-function useAuditedMutation<TArgs, TResult>({
+export function useAuditedMutation<TArgs, TResult>({
   action,
   resourceType,
   run,
@@ -56,7 +56,7 @@ function useAuditedMutation<TArgs, TResult>({
   });
 }
 
-const CONFIG_KEYS = [
+export const CONFIG_KEYS = [
   ['broker', 'sources'],
   ['broker', 'targets'],
   ['broker', 'rules'],

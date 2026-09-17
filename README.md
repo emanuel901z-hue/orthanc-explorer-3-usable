@@ -45,6 +45,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
 | **Study Sharing** | Share studies via Orthanc Shares plugin or instant viewer link. Share by email, copy link, expiration date, description. |
 | **Worklists** | DICOM Modality Worklist Management — list, upload, delete worklists via dedicated page and API. |
+| **MWL Broker — Change Log & Simulation** | A **change log** (`/broker/audit`) records every configuration change with its before/after diff and offers **one-click rollback**, **export** of the whole configuration and **import with a mandatory dry-run diff**. A **"Check a case"** panel on the dashboard simulates routing and modify rules — using the same resolver as the live path. |
 | **MWL Broker — Health & Circuit Breaker** | The broker dashboard shows a **configuration health panel** (consistency checks with severity, localized explanation and a deep link into the affected form) and a **circuit-breaker badge** per upstream source (open/half-open with cooldown, one-click operator reset). Also in the sidebar as a badge. |
 | **MWL Broker — Dashboard + Konfiguration** | Optional UI for a separate MWL broker service (C-FIND proxy/aggregator): monitoring (SCP/DB status, C-ECHO matrix with RTT, live query log) **plus full configuration** — upstream sources, store targets, routing rules, DICOM modify rules (tag set/remove/prefix/suffix/replace/copy) and runtime settings, all with audited writes. Gated by `brokerUrl` in `config.js` — invisible without a broker. See [docs/mwl-broker-integration.md](docs/mwl-broker-integration.md). |
 | **Custom HTTP Buttons** | Configurable buttons that open arbitrary URLs with template tokens (`{studyId}`, `{patientId}`, `{accession}`, etc.). Persisted to `localStorage`. |
@@ -173,7 +174,7 @@ Open [http://localhost:5173](http://localhost:5173). The dev server proxies `/or
 # Start dev server (requires Docker stack running)
 npm run dev
 
-# Run unit tests (single pass, 348 tests)
+# Run unit tests (single pass, 378 tests)
 npm run test
 
 # Run unit tests in watch mode
