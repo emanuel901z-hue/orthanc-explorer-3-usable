@@ -45,6 +45,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
 | **Study Sharing** | Share studies via Orthanc Shares plugin or instant viewer link. Share by email, copy link, expiration date, description. |
 | **Worklists** | DICOM Modality Worklist Management — list, upload, delete worklists via dedicated page and API. |
+| **MWL Broker Dashboard** | Optional monitoring UI for a separate MWL broker service (C-FIND proxy/aggregator): SCP/DB status, upstream sources, store targets, C-ECHO matrix with RTT, live query log. Gated by `brokerUrl` in `config.js` — invisible without a broker. See [docs/mwl-broker-integration.md](docs/mwl-broker-integration.md). |
 | **Custom HTTP Buttons** | Configurable buttons that open arbitrary URLs with template tokens (`{studyId}`, `{patientId}`, `{accession}`, etc.). Persisted to `localStorage`. |
 | **Add Series (Encapsulated)** | Upload PDF/JPEG/PNG/STL files as a new DICOM series within an existing study via Orthanc `/tools/create-dicom`. |
 | **Modify In-Place / Duplicate** | Choose between `KeepSource: false` (modify in-place) or `KeepSource: true` (create duplicate) in the Modify dialog. |

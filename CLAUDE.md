@@ -197,6 +197,9 @@ features: {
 | `src/api/tools.ts` | Tools API: lookup, createArchive (multi-resource ZIP), create-dicom (encapsulated series) |
 | `src/api/shares.ts` | Shares API: create, list, get, delete — Orthanc Shares plugin support |
 | `src/api/worklists.ts` | Worklists API: list, get, query, delete, upload — DICOM Modality Worklist Management |
+| `src/api/broker.ts` | Typed client for the external MWL broker REST API (`/api/v1/*` via `brokerUrl`) — only active when configured |
+| `src/features/broker/pages/BrokerPage.tsx` | MWL broker dashboard: SCP/DB status, echo matrix, live query log (route `/broker`) |
+| `docs/mwl-broker-integration.md` | Integration contract for the optional MWL broker feature (endpoints, config, deployment) |
 | `src/features/servers/pages/RemoteSourcesPage.tsx` | Remote query/retrieve (C-FIND/C-MOVE/C-ECHO) with results table |
 | `src/features/studies/components/ShareStudyDialog.tsx` | Share study via Shares plugin or instant viewer link, email, clipboard |
 | `src/features/studies/components/AddSeriesDialog.tsx` | Upload PDF/JPEG/PNG/STL as DICOM series via `/tools/create-dicom` |
