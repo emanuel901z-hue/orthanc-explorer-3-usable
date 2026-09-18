@@ -1572,7 +1572,7 @@
     "dialogHint": "{key} überall drücken um diesen Dialog zu öffnen"
   },
   "about": {
-    "description": "Modernes React/TypeScript-Frontend für den Orthanc DICOM-Server. Standalone SPA, die sich mit der REST-API von Orthanc verbindet — als Docker-Sidecar, Orthanc-Plugin oder hinter einem JWT-authentifizierten Backend-Proxy einsetzbar. Studienverwaltung, Merge/Migrate, intelligente Suche, Upload, Modalitäts- und DICOMweb-Konfiguration, Viewer-Integration und audit-gesicherte Aktionen.",
+    "description": "Modernes React/TypeScript-Frontend für den Orthanc DICOM-Server. Standalone SPA, die sich mit der REST-API von Orthanc verbindet — als Docker-Sidecar, Orthanc-Plugin oder hinter einem JWT-authentifizierten Backend-Proxy einsetzbar. Studienverwaltung, Merge/Migrate, intelligente Suche, Upload, Modalitäts- und DICOMweb-Konfiguration, Viewer-Integration und audit-gesicherte Aktionen. Zusätzlich enthält es den MWL-Broker: einen DICOM-Modality-Worklist-Proxy, der mehrere RIS/KIS-Systeme abfragt, deren Arbeitslisten zusammenführt und zwischenspeichert und die Bilder an das passende PACS weiterleitet — konfiguriert und überwacht in derselben Oberfläche.",
     "systemInfo": "Systeminformationen",
     "appVersion": "App-Version",
     "orthancVersion": "Orthanc-Version",
@@ -1605,7 +1605,20 @@
       "addSeries": "Serien-Upload (PDF/JPEG/STL)",
       "patientSafeMerge": "Patientensicherer Merge",
       "columnConfig": "Konfigurierbare Spalten",
-      "quickReport": "Schnellbericht"
-    }
+      "quickReport": "Schnellbericht",
+      "mwlBroker": "MWL-Broker (Worklist-Proxy)",
+      "mwlFanout": "Mehrere RIS abfragen + zusammenführen",
+      "mwlCache": "Worklist-Cache (Ausfall überbrücken)",
+      "mwlSpool": "C-STORE-Spool mit Wiederholung",
+      "mwlRouting": "Store-Routing & DICOM-Anpassungen",
+      "mwlLocal": "Lokale Worklist + HL7 ORM",
+      "mwlStations": "Regeln je Station",
+      "mwlAtna": "ATNA-Audit-Export",
+      "mwlTls": "DICOM TLS/mTLS",
+      "mwlOps": "Health, Alerting, Aufbewahrung",
+      "mwlRbac": "RBAC (Lesen/Schreiben) & Änderungsprotokoll"
+    },
+    "brokerFeatures": "MWL-Broker",
+    "brokerHint": "DICOM-Modality-Worklist-Proxy mit Worklist-Cache, Store-Routing und Monitoring — konfiguriert auf eigenen Seiten unter „MWL Broker“."
   }
 }

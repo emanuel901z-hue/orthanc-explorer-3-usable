@@ -1572,7 +1572,7 @@
     "dialogHint": "Press {key} anywhere to toggle this dialog"
   },
   "about": {
-    "description": "Modern React/TypeScript frontend for the Orthanc DICOM server. Standalone SPA that connects to Orthanc's REST API — deploy as a Docker sidecar, Orthanc plugin, or behind a JWT-authenticated backend proxy. Study management, merge/migrate, smart search, upload, modality and DICOMweb configuration, viewer integration, and audit-backed actions.",
+    "description": "Modern React/TypeScript frontend for the Orthanc DICOM server. Standalone SPA that connects to Orthanc's REST API — deploy as a Docker sidecar, Orthanc plugin, or behind a JWT-authenticated backend proxy. Study management, merge/migrate, smart search, upload, modality and DICOMweb configuration, viewer integration, and audit-backed actions. It also ships the MWL broker: a DICOM Modality Worklist proxy that queries several RIS/KIS systems, merges and caches their worklists, and routes the stored images to the right PACS — configured and monitored in the same UI.",
     "systemInfo": "System Information",
     "appVersion": "App Version",
     "orthancVersion": "Orthanc Version",
@@ -1605,7 +1605,20 @@
       "addSeries": "Series upload (PDF/JPEG/STL)",
       "patientSafeMerge": "Patient-safe merge",
       "columnConfig": "Configurable columns",
-      "quickReport": "Quick report"
-    }
+      "quickReport": "Quick report",
+      "mwlBroker": "MWL broker (worklist proxy)",
+      "mwlFanout": "Multi-RIS fan-out + merge",
+      "mwlCache": "Worklist cache (outage bridge)",
+      "mwlSpool": "C-STORE spool + retry",
+      "mwlRouting": "Store routing & DICOM transforms",
+      "mwlLocal": "Local worklist + HL7 ORM",
+      "mwlStations": "Per-station rules",
+      "mwlAtna": "ATNA audit export",
+      "mwlTls": "DICOM TLS/mTLS",
+      "mwlOps": "Health, alerting, retention",
+      "mwlRbac": "RBAC (read/write) & audit log"
+    },
+    "brokerFeatures": "MWL broker",
+    "brokerHint": "DICOM Modality Worklist proxy with worklist cache, store routing and monitoring — configured on its own pages under “MWL Broker”."
   }
 }

@@ -185,7 +185,10 @@ Open [http://localhost:5173](http://localhost:5173). The dev server proxies `/or
 # Start dev server (requires Docker stack running)
 npm run dev
 
-# Run unit tests (single pass, 488 tests)
+# Repository description/topics for GitHub:
+#   ../docs/github-repo-about.md
+
+# Run unit tests (single pass, 490 tests)
 
 # Check the translation coverage (all languages)
 npm run i18n:check

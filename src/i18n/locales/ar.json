@@ -866,7 +866,7 @@
     "dialogHint": "اضغط على {key} في أي مكان لفتح هذا الحوار"
   },
   "about": {
-    "description": "واجهة حديثة React/TypeScript لخادم Orthanc DICOM. تطبيق SPA مستقل يتصل بواجهة برمجة تطبيقات Orthanc REST — انشره كحاوية Docker مساعدة أو إضافة Orthanc أو خلف وكيل خلفية مصادق عليه بـ JWT. إدارة الدراسات، الدمج/الترحيل، البحث الذكي، التحميل، تكوين الأنماط وDICOMweb، تكامل العارض، والإجراءات المدعومة بالتدقيق.",
+    "description": "واجهة حديثة React/TypeScript لخادم Orthanc DICOM. تطبيق SPA مستقل يتصل بواجهة برمجة تطبيقات Orthanc REST — انشره كحاوية Docker مساعدة أو إضافة Orthanc أو خلف وكيل خلفية مصادق عليه بـ JWT. إدارة الدراسات، الدمج/الترحيل، البحث الذكي، التحميل، تكوين الأنماط وDICOMweb، تكامل العارض، والإجراءات المدعومة بالتدقيق. يتضمّن أيضًا وسيط MWL: وكيل قوائم عمل DICOM يستعلم من عدة أنظمة RIS/KIS ويدمج قوائمها ويخزّنها مؤقتًا ويوجّه الصور إلى نظام PACS المناسب — مع إمكانية الإعداد والمراقبة من الواجهة نفسها.",
     "systemInfo": "معلومات النظام",
     "appVersion": "إصدار التطبيق",
     "orthancVersion": "إصدار Orthanc",
@@ -899,8 +899,21 @@
       "addSeries": "رفع السلاسل (PDF/JPEG/STL)",
       "patientSafeMerge": "دمج آمن للمريض",
       "columnConfig": "أعمدة قابلة للتكوين",
-      "quickReport": "تقرير سريع"
-    }
+      "quickReport": "تقرير سريع",
+      "mwlBroker": "وسيط MWL (وكيل قوائم العمل)",
+      "mwlFanout": "الاستعلام من عدة RIS + الدمج",
+      "mwlCache": "ذاكرة قوائم العمل (جسر الانقطاع)",
+      "mwlSpool": "قائمة C-STORE مع إعادة المحاولة",
+      "mwlRouting": "توجيه الصور وتعديلات DICOM",
+      "mwlLocal": "قائمة محلية + HL7 ORM",
+      "mwlStations": "قواعد الأجهزة",
+      "mwlAtna": "تصدير تدقيق ATNA",
+      "mwlTls": "DICOM TLS/mTLS",
+      "mwlOps": "الحالة والتنبيهات والاحتفاظ",
+      "mwlRbac": "RBAC (قراءة/كتابة) وسجل التغييرات"
+    },
+    "brokerFeatures": "وسيط MWL",
+    "brokerHint": "وكيل قوائم عمل DICOM مع ذاكرة مؤقتة وتوجيه الصور والمراقبة — يُعد من صفحاته الخاصة."
   },
   "quickReport": {
     "accessionNumber": "Accession Number",

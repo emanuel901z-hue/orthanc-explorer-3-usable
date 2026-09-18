@@ -866,7 +866,7 @@
     "dialogHint": "Presiona {key} en cualquier lugar para abrir este diálogo"
   },
   "about": {
-    "description": "Interfaz moderna React/TypeScript para el servidor DICOM Orthanc. SPA independiente que se conecta a la API REST de Orthanc — despliegue como sidecar Docker, plugin de Orthanc, o detrás de un proxy backend autenticado con JWT. Gestión de estudios, fusión/migración, búsqueda inteligente, carga, configuración de modalidades y DICOMweb, integración de visores y acciones con auditoría.",
+    "description": "Interfaz moderna React/TypeScript para el servidor DICOM Orthanc. SPA independiente que se conecta a la API REST de Orthanc — despliegue como sidecar Docker, plugin de Orthanc, o detrás de un proxy backend autenticado con JWT. Gestión de estudios, fusión/migración, búsqueda inteligente, carga, configuración de modalidades y DICOMweb, integración de visores y acciones con auditoría. También incluye el broker MWL: un proxy de listas de trabajo DICOM que consulta varios sistemas RIS/KIS, fusiona y almacena en caché sus listas y dirige las imágenes al PACS correcto, todo configurado y supervisado en la misma interfaz.",
     "systemInfo": "Información del Sistema",
     "appVersion": "Versión de la App",
     "orthancVersion": "Versión de Orthanc",
@@ -899,8 +899,21 @@
       "addSeries": "Carga de series (PDF/JPEG/STL)",
       "patientSafeMerge": "Fusión segura por paciente",
       "columnConfig": "Columnas configurables",
-      "quickReport": "Informe rápido"
-    }
+      "quickReport": "Informe rápido",
+      "mwlBroker": "Broker MWL (proxy de listas)",
+      "mwlFanout": "Varios RIS + fusión",
+      "mwlCache": "Caché de listas (puente de caídas)",
+      "mwlSpool": "Cola C-STORE con reintentos",
+      "mwlRouting": "Enrutado y ajustes DICOM",
+      "mwlLocal": "Lista local + HL7 ORM",
+      "mwlStations": "Reglas por estación",
+      "mwlAtna": "Exportación de auditoría ATNA",
+      "mwlTls": "DICOM TLS/mTLS",
+      "mwlOps": "Estado, alertas, conservación",
+      "mwlRbac": "RBAC (lectura/escritura) e historial"
+    },
+    "brokerFeatures": "Broker MWL",
+    "brokerHint": "Proxy de listas de trabajo DICOM con caché, enrutado de imágenes y monitorización — se configura en sus propias páginas."
   },
   "quickReport": {
     "accessionNumber": "Accession Number",

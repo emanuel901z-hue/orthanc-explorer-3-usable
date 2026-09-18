@@ -866,7 +866,7 @@
     "dialogHint": "Bu diyaloğu açmak için herhangi bir yerde {key} tuşuna basın"
   },
   "about": {
-    "description": "Orthanc DICOM sunucusu için modern React/TypeScript arayüzü. Orthanc'ın REST API'sine bağlanan bağımsız SPA — Docker sidecar, Orthanc eklentisi veya JWT kimlik doğrulamalı arka uç proxy'si arkasında dağıtın. Çalışma yönetimi, birleştirme/taşıma, akıllı arama, yükleme, modalite ve DICOMweb yapılandırması, görüntüleyici entegrasyonu ve denetim destekli eylemler.",
+    "description": "Orthanc DICOM sunucusu için modern React/TypeScript arayüzü. Orthanc'ın REST API'sine bağlanan bağımsız SPA — Docker sidecar, Orthanc eklentisi veya JWT kimlik doğrulamalı arka uç proxy'si arkasında dağıtın. Çalışma yönetimi, birleştirme/taşıma, akıllı arama, yükleme, modalite ve DICOMweb yapılandırması, görüntüleyici entegrasyonu ve denetim destekli eylemler. Ayrıca MWL broker içerir: birden çok RIS/KIS sistemini sorgulayan, iş listelerini birleştirip önbelleğe alan ve görüntüleri doğru PACS'e yönlendiren bir DICOM iş listesi proxy'si — aynı arayüzden yapılandırılır ve izlenir.",
     "systemInfo": "Sistem Bilgileri",
     "appVersion": "Uygulama Sürümü",
     "orthancVersion": "Orthanc Sürümü",
@@ -899,8 +899,21 @@
       "addSeries": "Seri yükleme (PDF/JPEG/STL)",
       "patientSafeMerge": "Hasta-güvenli birleştirme",
       "columnConfig": "Yapılandırılabilir sütunlar",
-      "quickReport": "Hızlı rapor"
-    }
+      "quickReport": "Hızlı rapor",
+      "mwlBroker": "MWL broker (iş listesi proxy'si)",
+      "mwlFanout": "Birden çok RIS + birleştirme",
+      "mwlCache": "İş listesi önbelleği (kesinti köprüsü)",
+      "mwlSpool": "C-STORE kuyruğu ve yeniden deneme",
+      "mwlRouting": "Yönlendirme ve DICOM düzenlemeleri",
+      "mwlLocal": "Yerel iş listesi + HL7 ORM",
+      "mwlStations": "İstasyon kuralları",
+      "mwlAtna": "ATNA denetim dışa aktarımı",
+      "mwlTls": "DICOM TLS/mTLS",
+      "mwlOps": "Durum, uyarılar, saklama",
+      "mwlRbac": "RBAC (okuma/yazma) ve değişiklik günlüğü"
+    },
+    "brokerFeatures": "MWL broker",
+    "brokerHint": "Önbellek, görüntü yönlendirme ve izleme içeren DICOM iş listesi proxy'si — kendi sayfalarından yapılandırılır."
   },
   "quickReport": {
     "accessionNumber": "Accession Number",

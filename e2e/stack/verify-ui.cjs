@@ -284,6 +284,34 @@ async function domReport(page) {
   await page.getByRole('button', { name: /discard|verwerfen/i }).last().click().catch(() => {});
   await page.waitForTimeout(400);
 
+  // About dialog: it must describe the MWL broker, not only the base fork
+  await page.goto(`${OE3}/oe3/`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1200);
+  // the About entry lives in the user menu at the bottom left
+  const userMenu = page.getByRole('button').filter({ hasText: /admin|oe3-user/i }).first();
+  let aboutOpened = false;
+  if (await userMenu.count()) {
+    await userMenu.click();
+    const aboutItem = page.getByRole('menuitem', { name: /about/i }).first();
+    if (await aboutItem.count()) {
+      await aboutItem.click();
+      aboutOpened = true;
+    }
+  }
+  if (aboutOpened) {
+    const aboutDialog = page.getByRole('dialog').first();
+    await aboutDialog.waitFor({ timeout: 8000 }).catch(() => {});
+    const aboutText = (await aboutDialog.innerText().catch(() => '')) || '';
+    record('About: beschreibt den MWL-Broker', /MWL broker|MWL-Broker/i.test(aboutText)
+      && /worklist|Worklist/i.test(aboutText), `${aboutText.length} Zeichen`);
+    record('About: nennt die Broker-Fähigkeiten',
+      /spool|TLS|cache|Cache/i.test(aboutText));
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+  } else {
+    record('About: beschreibt den MWL-Broker', false, 'About-Menüeintrag nicht gefunden');
+  }
+
   // every shipped language: the broker pages must not show raw keys
   // (the detector remembers the language — restore it afterwards)
   const languageBefore = await page.evaluate(() => localStorage.getItem('oe3-language'));

@@ -866,7 +866,7 @@
     "dialogHint": "在任何地方按 {key} 打开此对话框"
   },
   "about": {
-    "description": "用于 Orthanc DICOM 服务器的现代 React/TypeScript 前端。连接到 Orthanc REST API 的独立 SPA — 可部署为 Docker 边车、Orthanc 插件，或在 JWT 认证的后端代理之后。研究管理、合并/迁移、智能搜索、上传、模态和 DICOMweb 配置、查看器集成以及审计支持的操作。",
+    "description": "用于 Orthanc DICOM 服务器的现代 React/TypeScript 前端。连接到 Orthanc REST API 的独立 SPA — 可部署为 Docker 边车、Orthanc 插件，或在 JWT 认证的后端代理之后。研究管理、合并/迁移、智能搜索、上传、模态和 DICOMweb 配置、查看器集成以及审计支持的操作。 同时内置 MWL 代理服务:一个 DICOM 工作列表代理,可查询多个 RIS/KIS 系统、合并并缓存其工作列表,并将影像转发到正确的 PACS —— 在同一界面中配置与监控。",
     "systemInfo": "系统信息",
     "appVersion": "应用版本",
     "orthancVersion": "Orthanc 版本",
@@ -899,8 +899,21 @@
       "addSeries": "序列上传 (PDF/JPEG/STL)",
       "patientSafeMerge": "患者安全合并",
       "columnConfig": "可配置列",
-      "quickReport": "快速报告"
-    }
+      "quickReport": "快速报告",
+      "mwlBroker": "MWL 代理服务 (工作列表代理)",
+      "mwlFanout": "多 RIS 查询与合并",
+      "mwlCache": "工作列表缓存 (故障桥接)",
+      "mwlSpool": "C-STORE 队列与重试",
+      "mwlRouting": "转发路由与 DICOM 调整",
+      "mwlLocal": "本地工作列表 + HL7 ORM",
+      "mwlStations": "按设备规则",
+      "mwlAtna": "ATNA 审计导出",
+      "mwlTls": "DICOM TLS/mTLS",
+      "mwlOps": "健康、告警、保留",
+      "mwlRbac": "RBAC (读写) 与变更日志"
+    },
+    "brokerFeatures": "MWL 代理服务",
+    "brokerHint": "具备缓存、影像转发与监控的 DICOM 工作列表代理 — 在专属页面中配置。"
   },
   "quickReport": {
     "accessionNumber": "Accession Number",

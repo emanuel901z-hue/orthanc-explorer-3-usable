@@ -60,6 +60,21 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     t('about.features.quickReport'),
   ];
 
+  // the MWL broker is the largest part of this fork — it gets its own group
+  const brokerFeatures = [
+    t('about.features.mwlBroker'),
+    t('about.features.mwlFanout'),
+    t('about.features.mwlCache'),
+    t('about.features.mwlSpool'),
+    t('about.features.mwlRouting'),
+    t('about.features.mwlLocal'),
+    t('about.features.mwlStations'),
+    t('about.features.mwlAtna'),
+    t('about.features.mwlTls'),
+    t('about.features.mwlOps'),
+    t('about.features.mwlRbac'),
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto w-[calc(100vw-2rem)] sm:w-full sm:max-w-lg">
@@ -101,6 +116,20 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
           <div className="flex flex-wrap gap-1.5">
             {forkFeatures.map((feature) => (
               <Badge key={feature} variant="outline" className="text-[10px] font-normal">
+                {feature}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium">{t('about.brokerFeatures')}</h4>
+          <p className="text-xs text-muted-foreground">{t('about.brokerHint')}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {brokerFeatures.map((feature) => (
+              <Badge key={feature} variant="secondary" className="text-[10px] font-normal">
                 {feature}
               </Badge>
             ))}

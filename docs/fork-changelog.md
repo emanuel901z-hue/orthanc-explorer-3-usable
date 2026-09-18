@@ -4,7 +4,16 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
-## Unreleased — MWL Broker UI + Standalone-Deployment-Härtungen
+## v2.4.0 — MWL Broker (Worklist-Proxy, Routing, TLS, Betrieb) (2026-09-18)
+
+Diese Version bringt den kompletten **MWL-Broker**: einen DICOM-Modality-
+Worklist-Proxy mit mehreren RIS/KIS-Quellen, Worklist-Cache, C-STORE-Spool,
+Routing/Transform-Regeln, lokaler Worklist mit HL7-ORM, Stationsregeln,
+ATNA-Audit-Export, DICOM-TLS/mTLS, RBAC, Aufbewahrungskonzepten, Alerting,
+Health-Panel, „Was ist das?"-Hilfe je Seite, Formular-Entwürfen und
+Übersetzungen für alle neun Sprachen (Rahmen). Details unten.
+
+### MWL Broker UI + Standalone-Deployment-Härtungen
 
 ### Neu: MWL-Broker-Konfiguration (nicht nur Monitoring)
 

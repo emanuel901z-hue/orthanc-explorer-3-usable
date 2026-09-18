@@ -866,7 +866,7 @@
     "dialogHint": "どこでも{key}を押してこのダイアログを開く"
   },
   "about": {
-    "description": "Orthanc DICOMサーバー用のモダンなReact/TypeScriptフロントエンド。OrthancのREST APIに接続するスタンドアロンSPA — Dockerサイドカー、Orthancプラグイン、またはJWT認証バックエンドプロキシの背後としてデプロイ。研究管理、マージ/移行、スマート検索、アップロード、モダリティおよびDICOMweb設定、ビューア統合、監査付きアクション。",
+    "description": "Orthanc DICOMサーバー用のモダンなReact/TypeScriptフロントエンド。OrthancのREST APIに接続するスタンドアロンSPA — Dockerサイドカー、Orthancプラグイン、またはJWT認証バックエンドプロキシの背後としてデプロイ。研究管理、マージ/移行、スマート検索、アップロード、モダリティおよびDICOMweb設定、ビューア統合、監査付きアクション。 MWL ブローカーも同梱しています。複数の RIS/KIS に問い合わせてワークリストを統合・キャッシュし、画像を適切な PACS へ転送する DICOM ワークリスト代理で、同じ画面から設定・監視できます。",
     "systemInfo": "システム情報",
     "appVersion": "アプリバージョン",
     "orthancVersion": "Orthancバージョン",
@@ -899,8 +899,21 @@
       "addSeries": "シリーズアップロード (PDF/JPEG/STL)",
       "patientSafeMerge": "患者安全マージ",
       "columnConfig": "設定可能な列",
-      "quickReport": "クイックレポート"
-    }
+      "quickReport": "クイックレポート",
+      "mwlBroker": "MWL ブローカー (ワークリスト代理)",
+      "mwlFanout": "複数 RIS の照会と統合",
+      "mwlCache": "ワークリストキャッシュ (障害時の代替)",
+      "mwlSpool": "C-STORE キューと再試行",
+      "mwlRouting": "転送ルーティングと DICOM 調整",
+      "mwlLocal": "ローカルワークリスト + HL7 ORM",
+      "mwlStations": "ステーション別ルール",
+      "mwlAtna": "ATNA 監査のエクスポート",
+      "mwlTls": "DICOM TLS/mTLS",
+      "mwlOps": "状態監視、アラート、保存期間",
+      "mwlRbac": "RBAC (読み書き) と変更履歴"
+    },
+    "brokerFeatures": "MWL ブローカー",
+    "brokerHint": "キャッシュ、転送ルーティング、監視を備えた DICOM ワークリスト代理 — 専用ページで設定します。"
   },
   "quickReport": {
     "accessionNumber": "Accession Number",
