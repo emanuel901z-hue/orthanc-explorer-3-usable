@@ -22,6 +22,20 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
   `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
   Ressourcentypen).
 
+### Neu: DICOM-TLS-Karte (mTLS + Zertifikatsverwaltung)
+
+- **TLS-Karte** auf der Broker-Settings-Seite: Listener mit Port und Zustand,
+  mTLS-Auswahl, Zertifikatsfelder mit **Ablauf-Badges**, Erzeugung
+  selbstsignierter Zertifikate (PEM-Anzeige zum Weitergeben) und eine
+  **Endpunkt-Prüfung** (echter Handshake mit Protokoll/Cipher/Peer-Zertifikat,
+  optional C-ECHO über TLS).
+- **TLS-Gruppe** im Quellen- und Ziel-Dialog (TLS an/aus, Verifikation mit
+  Warnhinweis).
+- Defaults bleiben unverändert: TLS ist aus, Verifikation an — eine
+  LAN/VPN-Installation läuft ohne Anpassung weiter.
+- 435 Unit-Tests (Vitest), Playwright-Suite mit 46 Tests, `verify-ui.cjs` mit
+  104 Checks.
+
 ### Neu: lokale Worklist, Stationsregeln, ATNA
 
 - **`/broker/worklist`**: lokale Worklist-Einträge (Notfälle, ungeplante
@@ -118,9 +132,9 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ### Tests & Tooling
 
-- 428 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
-  Mobile 375×812, 44 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
-  (100 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
+- 435 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
+  Mobile 375×812, 46 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
+  (104 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
 - Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 97,9 %.
 
 ---

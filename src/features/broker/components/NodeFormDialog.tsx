@@ -44,6 +44,8 @@ const DEFAULTS: NodeFormValues = {
   priority: 100,
   cache_stale_on_error: true,
   cache_refresh_s: 0,
+  tls: false,
+  tls_verify: true,
   is_default: false,
 };
 
@@ -60,6 +62,8 @@ function fromRow(kind: NodeKind, row: BrokerSource | BrokerTarget): NodeFormValu
     priority: 'priority' in row ? row.priority : DEFAULTS.priority,
     cache_stale_on_error: 'cache_stale_on_error' in row ? row.cache_stale_on_error : true,
     cache_refresh_s: 'cache_refresh_s' in row ? row.cache_refresh_s : 0,
+    tls: 'tls' in row ? row.tls : false,
+    tls_verify: 'tls_verify' in row ? row.tls_verify : true,
     is_default: kind === 'target' && 'is_default' in row ? row.is_default : false,
   };
   return base as NodeFormValues;
@@ -258,6 +262,38 @@ export function NodeFormDialog({
                   </div>
                 </div>
               )}
+
+              {/* DICOM TLS — off by default (LAN/VPN), per node switchable */}
+              <div className="space-y-3 rounded-md border p-3">
+                <p className="text-sm font-medium">{t('broker.tlsGroup')}</p>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <Label htmlFor="node-tls">{t('broker.tlsEnabled')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('broker.tlsEnabledHint')}</p>
+                  </div>
+                  <Switch
+                    id="node-tls"
+                    checked={values.tls ?? false}
+                    onCheckedChange={(checked) => set('tls', checked)}
+                  />
+                </div>
+                {values.tls && (
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <Label htmlFor="node-tls-verify">{t('broker.tlsVerify')}</Label>
+                      <p className="text-xs text-muted-foreground">{t('broker.tlsVerifyHint')}</p>
+                    </div>
+                    <Switch
+                      id="node-tls-verify"
+                      checked={values.tls_verify ?? true}
+                      onCheckedChange={(checked) => set('tls_verify', checked)}
+                    />
+                  </div>
+                )}
+                {values.tls && values.tls_verify === false && (
+                  <p className="text-xs text-amber-600">{t('broker.tlsVerifyWarning')}</p>
+                )}
+              </div>
             </>
           )}
 

@@ -45,6 +45,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
 | **Study Sharing** | Share studies via Orthanc Shares plugin or instant viewer link. Share by email, copy link, expiration date, description. |
 | **Worklists** | DICOM Modality Worklist Management — list, upload, delete worklists via dedicated page and API. |
+| **MWL Broker — DICOM TLS** | Encrypted DICOM for the modalities and/or RIS/PACS — **off by default**, so a LAN/VPN setup keeps working. A **second TLS listener** next to the plain port allows a staged rollout (one modality at a time); TLS is switchable per source/target. For installations without a PKI the settings page **generates a self-signed certificate** (public part to hand over, private key stays, mode 0600), shows every certificate with its **expiry badge**, and offers an **endpoint check** that performs a real handshake (protocol, cipher, peer certificate) plus a C-ECHO over TLS. |
 | **MWL Broker — Local Worklist & HL7** | Emergencies and unscheduled exams exist in no RIS — the broker holds them itself (`/broker/worklist`) and merges them into every matching C-FIND with the **highest priority** (they win against the RIS and are routable via the `local` pseudo source). Orders arrive as **HL7 ORM** over REST (with a dry-run) or through an **MLLP listener**; the panel shows the parser result, its warnings and the recent messages. |
 | **MWL Broker — Station Rules** | Each console sees its own worklist: a **per-station rule** (`/broker/stations`) hides sources from a station or shows only some, and can flip the merge order for that station. A preview answers "what would this console see?" using the same matching as the live C-FIND. |
 | **MWL Broker — ATNA Audit Trail** | IHE-conformant audit messages (DICOM PS3.15 XML in RFC 5424 syslog) over **TCP or TLS** to the hospital's own Audit Record Repository — query, import, export and security events. Off by default, never blocks DICOM traffic, and the settings card offers a test message plus the sample XML for the receiving team. |
@@ -180,7 +181,7 @@ Open [http://localhost:5173](http://localhost:5173). The dev server proxies `/or
 # Start dev server (requires Docker stack running)
 npm run dev
 
-# Run unit tests (single pass, 428 tests)
+# Run unit tests (single pass, 435 tests)
 npm run test
 
 # Run unit tests in watch mode

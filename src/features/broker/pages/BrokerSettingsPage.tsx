@@ -20,6 +20,7 @@ import { getConfig } from '@/config/runtime';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { NotificationsCard } from '../components/NotificationsCard';
 import { AtnaCard } from '../components/AtnaCard';
+import { TlsCard } from '../components/TlsCard';
 import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
 
 const isTrue = (value: string) => ['true', '1', 'yes', 'on'].includes(value.trim().toLowerCase());
@@ -123,8 +124,15 @@ export default function BrokerSettingsPage() {
     'atna_enabled', 'atna_syslog_host', 'atna_syslog_port', 'atna_syslog_protocol',
     'atna_tls_ca_file', 'atna_queue_max',
   ]);
+  const tlsKeys = new Set([
+    'tls_inbound_enabled', 'tls_inbound_port', 'tls_inbound_cert_file',
+    'tls_inbound_key_file', 'tls_inbound_ca_file', 'tls_inbound_client_auth',
+    'tls_outbound_verify', 'tls_outbound_ca_file',
+    'tls_outbound_client_cert_file', 'tls_outbound_client_key_file', 'tls_dir',
+  ]);
   const generic = all.filter(
-    (setting) => !notifyKeys.has(setting.key) && !atnaKeys.has(setting.key),
+    (setting) => !notifyKeys.has(setting.key) && !atnaKeys.has(setting.key)
+      && !tlsKeys.has(setting.key),
   );
 
   return (
@@ -134,6 +142,7 @@ export default function BrokerSettingsPage() {
     >
       <div className="space-y-3">
         {all.length > 0 && <NotificationsCard settings={all} />}
+        {all.length > 0 && <TlsCard settings={all} />}
         {all.length > 0 && <AtnaCard settings={all} />}
         {generic.map((setting) => (
           <SettingRow key={setting.key} setting={setting} />

@@ -30,6 +30,7 @@
  *   GET    /api/v1/station-rules      POST /api/v1/station-rules
  *   POST   /api/v1/simulate/station
  *   GET    /api/v1/atna/stats         POST /api/v1/atna/test   GET /api/v1/atna/sample
+ *   GET    /api/v1/tls/overview       POST /api/v1/tls/self-signed   POST /api/v1/tls/test
  *   GET    /api/v1/notify/events      POST /api/v1/notify/test
  *   GET    /api/v1/spool              GET /api/v1/spool/stats
  *   POST   /api/v1/spool/:id/retry    POST /api/v1/spool/retry-all
@@ -57,6 +58,10 @@ export type BrokerSource = {
   cache_stale_on_error: boolean;
   /** Background refresh interval of the cached snapshot (0 = off). */
   cache_refresh_s: number;
+  /** Use DICOM TLS towards this source. */
+  tls: boolean;
+  /** Verify the server certificate (off only for a self-signed lab system). */
+  tls_verify: boolean;
   created_at: string;
 };
 
@@ -67,9 +72,12 @@ export type BrokerSource = {
  */
 export type BrokerSourceIn = Omit<
   BrokerSource, 'id' | 'created_at' | 'cache_stale_on_error' | 'cache_refresh_s'
+  | 'tls' | 'tls_verify'
 > & {
   cache_stale_on_error?: boolean;
   cache_refresh_s?: number;
+  tls?: boolean;
+  tls_verify?: boolean;
 };
 
 export type BrokerTarget = {
@@ -81,10 +89,17 @@ export type BrokerTarget = {
   calling_aet: string;
   enabled: boolean;
   is_default: boolean;
+  /** Use DICOM TLS towards this PACS. */
+  tls: boolean;
+  /** Verify the PACS certificate (off only for a self-signed lab system). */
+  tls_verify: boolean;
   created_at: string;
 };
 
-export type BrokerTargetIn = Omit<BrokerTarget, 'id' | 'created_at'>;
+export type BrokerTargetIn = Omit<BrokerTarget, 'id' | 'created_at' | 'tls' | 'tls_verify'> & {
+  tls?: boolean;
+  tls_verify?: boolean;
+};
 
 export type BrokerRule = {
   id: number;
@@ -224,6 +239,75 @@ export type StationPreview = {
   mode: 'allow' | 'deny' | null;
   sources: { id: number; name: string; visible: boolean; effective_priority: number }[];
   reason: string;
+};
+
+/** State of one configured certificate file (never key material). */
+export type TlsCertificate = {
+  path: string;
+  exists: boolean;
+  ok: boolean;
+  error: string;
+  subject: string;
+  issuer: string;
+  self_signed: boolean;
+  serial: string;
+  not_before: string;
+  not_after: string;
+  days_left: number | null;
+  expired: boolean;
+  expiring_soon: boolean;
+  san: string[];
+  is_ca: boolean;
+  signature_algorithm: string;
+};
+
+/** State of one private key file. */
+export type TlsKey = {
+  path: string;
+  exists: boolean;
+  ok: boolean;
+  error: string;
+  mode: string;
+  world_readable: boolean;
+  type: string;
+  bits: number | null;
+};
+
+/** Certificate management overview. */
+export type TlsOverview = {
+  inbound_enabled: boolean;
+  inbound_port: number;
+  inbound_client_auth: string;
+  outbound_verify: boolean;
+  directory: string;
+  entries: Record<string, TlsCertificate | TlsKey | { ok: boolean | null }>;
+  certificates: {
+    role: string;
+    path: string;
+    subject: string;
+    days_left: number | null;
+    expired: boolean;
+    expiring_soon: boolean;
+    error: string;
+  }[];
+};
+
+/** Result of a TLS endpoint check. */
+export type TlsTestResult = {
+  host: string;
+  port: number;
+  ok: boolean;
+  error: string;
+  protocol: string;
+  cipher: string;
+  peer_subject: string;
+  peer_issuer: string;
+  peer_not_after: string;
+  peer_san: string[];
+  peer_days_left?: number;
+  peer_self_signed?: boolean;
+  echo_ok: boolean | null;
+  echo_error: string;
 };
 
 /** State of the ATNA audit trail. */
@@ -582,6 +666,17 @@ export const brokerApi = {
       brokerFetch<void>(`/api/v1/station-rules/${id}`, { method: 'DELETE' }),
     simulate: (stationAet: string) =>
       brokerFetch<StationPreview>('/api/v1/simulate/station', post({ station_aet: stationAet })),
+  },
+
+  tls: {
+    overview: () => brokerFetch<TlsOverview>('/api/v1/tls/overview'),
+    generate: (body: { common_name: string; days: number; san: string[]; is_ca: boolean; filename: string }) =>
+      brokerFetch<{ certificate_path: string; key_path: string; certificate_pem: string;
+                    certificate: TlsCertificate; key: TlsKey; is_ca: boolean }>(
+        '/api/v1/tls/self-signed', post(body)),
+    test: (body: { host: string; port: number; verify?: boolean | null; ca_file?: string;
+                   server_name?: string; echo_aet?: string; calling_aet?: string }) =>
+      brokerFetch<TlsTestResult>('/api/v1/tls/test', post(body)),
   },
 
   atna: {

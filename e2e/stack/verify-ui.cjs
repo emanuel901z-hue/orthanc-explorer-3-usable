@@ -247,6 +247,28 @@ async function domReport(page) {
   const rtt = await page.getByText(/\d+\s*ms/).first().isVisible();
   record('sources: manueller C-ECHO liefert RTT im UI', rtt);
 
+  // TLS card (certificates + endpoint check)
+  await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
+  const tlsCard = page.getByTestId('tls-card');
+  await tlsCard.first().waitFor({ timeout: 10000 }).catch(() => {});
+  const tlsVisible = await tlsCard.count() > 0 && await tlsCard.first().isVisible();
+  record('settings: TLS-Karte wird gerendert', tlsVisible);
+  if (tlsVisible) {
+    const tlsOverflow = await tlsCard.evaluate((el) => el.scrollWidth > el.clientWidth);
+    record('settings: TLS-Karte ohne Overflow', !tlsOverflow);
+    const tlsState = await page.evaluate(async () => {
+      const res = await fetch('/broker-api/api/v1/tls/overview');
+      return res.ok ? res.json() : null;
+    });
+    record('settings: TLS-Status ist abrufbar', tlsState !== null,
+      `listener=${tlsState?.inbound_enabled} port=${tlsState?.inbound_port}`);
+    const expected = (tlsState?.certificates ?? []).length;
+    const certCount = await page.getByTestId('tls-certificates').locator('li').count();
+    record('settings: konfigurierte Zertifikate werden gelistet',
+      expected === 0 ? certCount === 0 : certCount === expected,
+      `${certCount} von ${expected} Zertifikat(en)`);
+  }
+
   // ATNA card (audit trail)
   await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
   const atnaCard = page.getByTestId('atna-card');

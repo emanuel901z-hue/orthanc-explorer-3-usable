@@ -66,6 +66,9 @@ implements the endpoints below works — the reference implementation is the
 | `POST` | `/api/v1/hl7/orm?dry_run=`, `GET /api/v1/hl7/messages` | HL7 ORM intake + message log |
 | `GET/POST/PUT/DELETE` | `/api/v1/station-rules` | Per-station filter and priority |
 | `POST` | `/api/v1/simulate/station` | "What would this console see?" |
+| `GET` | `/api/v1/tls/overview` | TLS state + certificate/key details (no key material) |
+| `POST` | `/api/v1/tls/self-signed` | Generate a certificate (public PEM returned for hand-over) |
+| `POST` | `/api/v1/tls/test` | Real handshake (+ optional C-ECHO) against an endpoint |
 | `GET` | `/api/v1/atna/stats`, `POST /api/v1/atna/test`, `GET /api/v1/atna/sample` | ATNA audit trail |
 | `GET` | `/api/v1/notify/events` | Alerting card: the event catalog (code, severity, description) |
 | `POST` | `/api/v1/notify/test` | "Send test message" (returns the delivery result) |
@@ -93,6 +96,14 @@ Minimum fields the UI reads:
   — `before_json`/`after_json` drive the diff view; `id` drives the rollback
 - `config/import` (dry-run): `{dry_run, changes[], skipped[], summary}` —
   `changes` are `{entity,action,name,fields}`; the UI shows them before applying
+- `tls/overview`: `{inbound_enabled,inbound_port,inbound_client_auth,outbound_verify,
+  directory,entries{},certificates[]}` — `entries` carries `ok/error/subject/days_left/
+  expired/expiring_soon/san/is_ca` per role; private keys only report `mode` and
+  `world_readable`, never the key
+- `tls/self-signed`: `{certificate_path,key_path,certificate_pem,certificate,key,is_ca}`
+- `tls/test`: `{ok,error,protocol,cipher,peer_subject,peer_issuer,peer_not_after,
+  peer_san,echo_ok,echo_error}`
+- `sources[]`/`targets[]` carry `tls` and `tls_verify`
 - `local-items[]`: full item including the patient name — this is *actively
   maintained* data (the editor needs it), unlike the cache. The change log and
   the configuration export deliberately carry the schedule only, no patient data

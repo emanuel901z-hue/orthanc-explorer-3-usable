@@ -528,6 +528,39 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('TLS card shows the listener, the certificate and checks an endpoint', async ({ page }) => {
+    // the test-stack scenario enabled the TLS listener with a generated certificate
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/settings', /broker settings|broker-einstellungen/i);
+    const card = page.getByTestId('tls-card');
+    await expect(card).toBeVisible();
+    await expect(card).toContainText(/TLS listener on port|TLS-Listener auf Port/i);
+
+    const certificates = page.getByTestId('tls-certificates');
+    await expect(certificates).toBeVisible({ timeout: 15000 });
+    await expect(certificates).toContainText('MWL Broker');
+
+    // a real handshake against the broker's own TLS listener (the check runs
+    // on the broker, so the container-internal port is the right one)
+    await card.getByLabel(/^host$|^Host$/i).fill('127.0.0.1');
+    await card.getByLabel(/^port$|^Port$/i).fill('2762');
+    await card.getByLabel(/c-echo ae title/i).fill('MWLBROKER');
+    await card.getByRole('button', { name: /run check|prüfung starten/i }).click();
+
+    const result = page.getByTestId('tls-test-result');
+    await expect(result).toBeVisible({ timeout: 30000 });
+    await expect(result).toContainText(/TLSv1/);
+    await expect(result).toContainText(/answered|antwortet/i);
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-tls-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

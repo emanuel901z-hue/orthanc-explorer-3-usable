@@ -23,6 +23,15 @@ vi.mock('@/api/broker', () => ({
     rules: { list: vi.fn(() => Promise.resolve([])) },
     transforms: { list: vi.fn(() => Promise.resolve([])) },
     settings: { list: mockList, set: mockSet, reset: mockReset },
+    tls: {
+      overview: vi.fn(() => Promise.resolve({
+        inbound_enabled: false, inbound_port: 2762, inbound_client_auth: 'none',
+        outbound_verify: true, directory: '/var/lib/mwl-broker/tls',
+        entries: {}, certificates: [],
+      })),
+      generate: vi.fn(() => Promise.resolve({})),
+      test: vi.fn(() => Promise.resolve({ ok: false, error: 'not checked' })),
+    },
     atna: {
       stats: vi.fn(() => Promise.resolve({
         enabled: false, configured: false, host: '', port: 6514, protocol: 'tcp',
@@ -93,7 +102,9 @@ describe('BrokerSettingsPage', () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('Strict store status')).toBeInTheDocument());
 
-    fireEvent.click(screen.getAllByRole('switch')[0]);
+    // scoped: the TLS/alerting cards render switches of their own
+    const row = within(screen.getByTestId('setting-strict_store_status'));
+    fireEvent.click(row.getByRole('switch'));
 
     await waitFor(() => expect(mockSet).toHaveBeenCalledTimes(1));
     expect(mockSet.mock.calls[0]).toEqual(['strict_store_status', 'false']);
