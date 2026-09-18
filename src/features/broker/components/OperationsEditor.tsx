@@ -21,7 +21,17 @@ import type { TransformOperation, TransformOpKind } from '@/api/broker';
 
 const OP_KINDS: TransformOpKind[] = ['set', 'remove', 'prefix', 'suffix', 'replace', 'copy'];
 
+/** DICOM tag in the (gggg,eeee) form or a keyword (PatientName). */
+const TAG_RE = /^\(?[0-9A-Fa-f]{4}\s*,\s*[0-9A-Fa-f]{4}\)?$/;
+const KEYWORD_RE = /^[A-Za-z][A-Za-z0-9]{1,63}$/;
+
 const EMPTY_OPERATION: TransformOperation = { op: 'set', tag: '', value: '' };
+
+/** The server rejects anything that is neither a tag nor a keyword — say so early. */
+function tagError(op: { tag?: string }): boolean {
+  const tag = (op.tag ?? '').trim();
+  return Boolean(tag) && !TAG_RE.test(tag) && !KEYWORD_RE.test(tag);
+}
 
 export function OperationsEditor({
   operations,
@@ -89,8 +99,14 @@ export function OperationsEditor({
                 value={op.tag}
                 onChange={(e) => update(index, { tag: e.target.value })}
                 placeholder="PatientID"
+                aria-invalid={Boolean(tagError(op)) || undefined}
                 className="font-mono"
               />
+              {tagError(op) && (
+                <p role="alert" className="text-xs text-destructive">
+                  {t('broker.tagInvalid')}
+                </p>
+              )}
             </div>
 
             {op.op === 'copy' ? (

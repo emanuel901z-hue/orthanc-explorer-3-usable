@@ -237,6 +237,7 @@ export default function SourcesPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         initial={editing}
+        siblings={sources}
         pending={pending}
         error={create.error?.message ?? update.error?.message ?? null}
         onSubmit={submit}

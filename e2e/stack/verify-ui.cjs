@@ -168,7 +168,9 @@ async function domReport(page) {
   await page.goto(`${OE3}/oe3/broker/rules`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: /add rule|regel hinzufügen/i }).click();
   await page.getByLabel('Source', { exact: true }).click();
-  await page.getByRole('option', { name: /ris-a/ }).first().click();
+  // ris-b is free (the seed already has ris-a → pacs-peer); the duplicate guard
+  // would block a combination that already exists
+  await page.getByRole('option', { name: /ris-b/ }).first().click();
   await page.getByLabel('Target', { exact: true }).click();
   await page.getByRole('option', { name: /pacs-peer/ }).first().click();
   await page.getByLabel('Priority', { exact: true }).fill('77');
@@ -264,6 +266,50 @@ async function domReport(page) {
     `top=${dialogFit.top} height=${dialogFit.height} scrollbar=${dialogFit.scrollable}`);
   await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 1400, height: 900 });
+
+  // P2 fix: a rule that already exists cannot be created twice
+  await page.goto(`${OE3}/oe3/broker/rules`, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: /add rule|regel hinzufügen/i }).click();
+  await page.getByLabel('Source', { exact: true }).click();
+  await page.getByRole('option', { name: /ris-a/ }).first().click();
+  await page.getByLabel('Target', { exact: true }).click();
+  await page.getByRole('option', { name: /pacs-peer/ }).first().click();
+  const duplicateRule = await page.getByText(/already exists|existiert bereits/i)
+    .first().isVisible().catch(() => false);
+  const ruleSaveDisabled = await page.getByRole('button', { name: /^save$|^speichern$/i })
+    .isDisabled().catch(() => false);
+  record('rules: doppelte Quelle+Ziel werden vorab gemeldet',
+    duplicateRule && ruleSaveDisabled, `Hinweis=${duplicateRule} gesperrt=${ruleSaveDisabled}`);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /discard|verwerfen/i }).last().click().catch(() => {});
+  await page.waitForTimeout(400);
+
+  // P2 fix: closing a form with unsaved input asks first
+  await page.goto(`${OE3}/oe3/broker/sources`, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: /add source|quelle hinzufügen/i }).first().click();
+  await page.waitForSelector('[role="dialog"]', { timeout: 10000 });
+  await page.getByLabel(/^name$/i).fill('discard-check');
+  await page.keyboard.press('Escape');
+  const discardAsked = await page.getByText(/discard your input|eingaben verwerfen/i)
+    .first().isVisible().catch(() => false);
+  record('dialog: ungespeicherte Eingaben werden nicht stillschweigend verworfen', discardAsked);
+  if (discardAsked) {
+    await page.getByRole('button', { name: /discard|verwerfen/i }).last().click();
+    await page.waitForTimeout(400);
+  }
+  const dialogClosed = await page.locator('[role="dialog"]').count() === 0;
+  record('dialog: nach dem Verwerfen ist der Dialog geschlossen', dialogClosed);
+
+  // P2 fix: a duplicate AE title is pointed out while typing
+  await page.getByRole('button', { name: /add source|quelle hinzufügen/i }).first().click();
+  await page.waitForSelector('[role="dialog"]', { timeout: 10000 });
+  await page.getByLabel(/^name$/i).fill('dup-check');
+  await page.getByLabel(/^ae ?title$|^ae-titel$/i).fill('RIS_A');   // seeded source
+  const duplicateHint = await page.getByText(/already used by|bereits von/i)
+    .first().isVisible().catch(() => false);
+  record('dialog: doppelte AET wird beim Tippen gemeldet', duplicateHint);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /discard|verwerfen/i }).last().click().catch(() => {});
 
   // P2 fix: input guidance — typed fields, patterns, hints
   await page.goto(`${OE3}/oe3/broker/worklist`, { waitUntil: 'domcontentloaded' });

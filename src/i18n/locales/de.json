@@ -1377,7 +1377,16 @@
     "localUidInvalid": "Nur Ziffern und Punkte (z. B. 1.2.840.…).",
     "localStudyUidHint": "Optional; die Modalität erhält die UID zurück, wenn sie bekannt ist.",
     "settingInvalid": "Wert prüfen: {{error}}",
-    "targetDefaultWarning": "Das ist das Standard-Ziel: ohne Routing-Regel haben eingehende Bilder danach kein Ziel mehr."
+    "targetDefaultWarning": "Das ist das Standard-Ziel: ohne Routing-Regel haben eingehende Bilder danach kein Ziel mehr.",
+    "discardTitle": "Eingaben verwerfen?",
+    "discardHint": "Im Formular stehen noch nicht gespeicherte Änderungen.",
+    "discardKeep": "Weiter bearbeiten",
+    "discardConfirm": "Verwerfen",
+    "duplicateAet": "Diese AET wird bereits von {{name}} verwendet — zwei Knoten mit derselben AET sind nicht unterscheidbar.",
+    "duplicateRule": "Für diese Quelle und dieses Ziel existiert bereits eine Regel.",
+    "resetForm": "Zurücksetzen",
+    "tagInvalid": "DICOM-Tag oder Schlüsselwort erwartet, z. B. (0010,0010) oder PatientName.",
+    "i18nBrokerNote": "Der Broker-Bereich ist derzeit auf Deutsch und Englisch verfügbar; andere Sprachen fallen auf Englisch zurück."
   },
   "shortcuts": {
     "nav": {

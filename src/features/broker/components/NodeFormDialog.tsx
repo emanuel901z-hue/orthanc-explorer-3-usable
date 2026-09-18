@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { DiscardConfirm, useDiscardGuard } from './DiscardConfirm';
 import {
   Select,
   SelectContent,
@@ -87,6 +88,7 @@ export function NodeFormDialog({
   open,
   onOpenChange,
   initial,
+  siblings = [],
   pending,
   error,
   onSubmit,
@@ -95,6 +97,8 @@ export function NodeFormDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initial?: BrokerSource | BrokerTarget | null;
+  /** Other nodes of the same kind — used to spot a duplicate AE title. */
+  siblings?: (BrokerSource | BrokerTarget)[];
   pending: boolean;
   /** Server-side error (validation/conflict) from the last attempt. */
   error?: string | null;
@@ -104,19 +108,32 @@ export function NodeFormDialog({
   const [values, setValues] = useState<NodeFormValues>(DEFAULTS);
   const [submitted, setSubmitted] = useState(false);
 
+  // snapshot the siblings when the dialog opens: a refetch while it closes must
+  // not make the form warn about the entry that was just created
+  const [known, setKnown] = useState(siblings);
   useEffect(() => {
     if (!open) return;
     setSubmitted(false);
+    setKnown(siblings);
     setValues(initial ? fromRow(kind, initial) : DEFAULTS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initial, kind]);
 
   const errors = validate(values);
+  // two nodes with the same AE title cannot be told apart — warn while typing
+  const clash = !submitted && values.aet && known.find(
+    (node) => node.aet === values.aet && node.id !== initial?.id,
+  );
+  // did the operator change anything since the dialog opened?
+  const pristine = initial ? fromRow(kind, initial) : DEFAULTS;
+  const dirty = JSON.stringify(values) !== JSON.stringify(pristine);
+  const guard = useDiscardGuard(dirty, () => onOpenChange(false));
   const set = <K extends keyof NodeFormValues>(key: K, value: NodeFormValues[K]) =>
     setValues((v) => ({ ...v, [key]: value }));
   const showError = (field: string) => submitted && errors[field];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={guard.requestClose}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -151,6 +168,11 @@ export function NodeFormDialog({
               className="font-mono"
             />
             {showError('aet') && <p className="text-xs text-destructive">{t('broker.errAet')}</p>}
+            {clash && !showError('aet') && (
+              <p role="alert" className="text-xs text-amber-600">
+                {t('broker.duplicateAet', { name: clash.name })}
+              </p>
+            )}
           </div>
 
           <div className="space-y-1">
@@ -332,7 +354,7 @@ export function NodeFormDialog({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => guard.requestClose(false)}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button
@@ -346,6 +368,12 @@ export function NodeFormDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <DiscardConfirm
+        open={guard.confirmOpen}
+        onOpenChange={guard.setConfirmOpen}
+        onDiscard={() => { guard.setConfirmOpen(false); guard.close(); }}
+      />
     </Dialog>
   );
 }

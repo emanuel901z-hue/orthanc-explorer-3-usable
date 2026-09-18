@@ -1377,7 +1377,16 @@
     "localUidInvalid": "Only digits and dots (e.g. 1.2.840.…).",
     "localStudyUidHint": "Optional; the modality gets the UID back if it is known.",
     "settingInvalid": "Check the value: {{error}}",
-    "targetDefaultWarning": "This is the default target: without a routing rule, incoming images have no destination afterwards."
+    "targetDefaultWarning": "This is the default target: without a routing rule, incoming images have no destination afterwards.",
+    "discardTitle": "Discard your input?",
+    "discardHint": "The form contains changes that have not been saved yet.",
+    "discardKeep": "Keep editing",
+    "discardConfirm": "Discard",
+    "duplicateAet": "This AE title is already used by {{name}} — two nodes with the same AE title cannot be told apart.",
+    "duplicateRule": "A rule for this source and target already exists.",
+    "resetForm": "Reset",
+    "tagInvalid": "DICOM tag or keyword expected, e.g. (0010,0010) or PatientName.",
+    "i18nBrokerNote": "The broker section is currently available in German and English; other languages fall back to English."
   },
   "shortcuts": {
     "nav": {

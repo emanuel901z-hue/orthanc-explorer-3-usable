@@ -42,6 +42,7 @@ import { brokerApi, type BrokerTransform, type TransformOperation } from '@/api/
 import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
+import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { OperationsEditor } from '../components/OperationsEditor';
@@ -124,6 +125,9 @@ export default function TransformsPage() {
     form.name.trim().length > 0 &&
     form.operations.length > 0 &&
     form.operations.every((op) => op.tag.trim().length > 0);
+
+  const dirty = dialogOpen && form.name !== '' && form.name !== (editing?.name ?? '');
+  const guard = useDiscardGuard(dirty, () => { setDialogOpen(false); setEditing(null); });
 
   const submit = () => {
     setSubmitted(true);
@@ -307,7 +311,7 @@ export default function TransformsPage() {
       </Card>
       )}
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={guard.requestClose}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>

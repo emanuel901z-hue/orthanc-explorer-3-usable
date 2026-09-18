@@ -41,6 +41,7 @@ import { brokerApi, type BrokerRule } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
+import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useBrokerRuleWrites } from '../hooks/use-broker-writes';
@@ -94,6 +95,15 @@ export default function RulesPage() {
   }, [dialogOpen, editing]);
 
   const formValid = form.source_id !== null && form.target_id !== null;
+
+  const dirty = dialogOpen && JSON.stringify(form) !== JSON.stringify(editing
+    ? { source_id: editing.source_id, target_id: editing.target_id, priority: editing.priority, enabled: editing.enabled }
+    : EMPTY_FORM);
+  const guard = useDiscardGuard(dirty, () => { setDialogOpen(false); setEditing(null); });
+
+  // the same source+target twice would be ambiguous
+  const duplicate = rules.find((rule) => rule.source_id === form.source_id
+    && rule.target_id === form.target_id && rule.id !== editing?.id);
 
   const submit = () => {
     setSubmitted(true);
@@ -256,7 +266,7 @@ export default function RulesPage() {
       </Card>
       )}
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={guard.requestClose}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
@@ -343,7 +353,13 @@ export default function RulesPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </Button>
-            <Button onClick={submit} disabled={pending}>
+            {duplicate && (
+              <p role="alert" className="text-xs text-amber-600">
+                {t('broker.duplicateRule')}
+              </p>
+            )}
+
+            <Button onClick={submit} disabled={pending || Boolean(duplicate)}>
               {pending ? t('common.saving', { defaultValue: 'Saving…' }) : t('common.save', { defaultValue: 'Save' })}
             </Button>
           </DialogFooter>

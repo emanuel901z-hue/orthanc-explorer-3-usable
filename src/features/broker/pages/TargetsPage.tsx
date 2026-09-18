@@ -216,6 +216,7 @@ export default function TargetsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         initial={editing}
+        siblings={targets}
         pending={pending}
         error={create.error?.message ?? update.error?.message ?? null}
         onSubmit={submit}

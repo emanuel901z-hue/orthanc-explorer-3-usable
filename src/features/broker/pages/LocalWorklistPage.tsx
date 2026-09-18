@@ -45,6 +45,7 @@ import { AET_RE, UID_RE } from '../lib/setting-rules';
 import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
+import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useHl7Writes, useLocalItemWrites } from '../hooks/use-broker-local';
@@ -138,6 +139,10 @@ export default function LocalWorklistPage() {
     }
   }
   const hasErrors = Object.keys(fieldErrors).length > 0;
+  const pristineItem = items.find((item) => item.id === editId);
+  const pristine = pristineItem ? { ...EMPTY, ...pristineItem } : EMPTY;
+  const dirty = Boolean(editing) && JSON.stringify(editing) !== JSON.stringify(pristine);
+  const guard = useDiscardGuard(dirty, () => { setEditing(null); setEditId(null); });
 
   const save = () => {
     if (!editing) return;
@@ -369,7 +374,7 @@ export default function LocalWorklistPage() {
       </Card>
 
       {/* create/edit dialog */}
-      <Dialog open={editing !== null} onOpenChange={(open) => { if (!open) { setEditing(null); setEditId(null); } }}>
+      <Dialog open={editing !== null} onOpenChange={guard.requestClose}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
@@ -450,7 +455,7 @@ export default function LocalWorklistPage() {
               disabled={!editing?.accession || hasErrors || create.isPending || update.isPending}
               onClick={save}
             >
-              {t('broker.save')}
+              {t('common.save', { defaultValue: 'Save' })}
             </Button>
           </DialogFooter>
         </DialogContent>

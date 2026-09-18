@@ -44,6 +44,7 @@ import { brokerApi, type StationRule, type StationRuleIn } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
+import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useStationRuleWrites } from '../hooks/use-broker-stations';
@@ -132,6 +133,11 @@ export default function StationsPage() {
     { label: t('broker.stationSources'), value: rule.source_ids.map(sourceName).join(', ') || '—' },
     { label: t('broker.priority'), value: String(rule.priority) },
   ];
+
+  const pristineRule = rules.find((rule) => rule.id === editId);
+  const pristine = pristineRule ? { ...EMPTY, ...pristineRule } : EMPTY;
+  const dirty = Boolean(editing) && JSON.stringify(editing) !== JSON.stringify(pristine);
+  const guard = useDiscardGuard(dirty, () => { setEditing(null); setEditId(null); });
 
   return (
     <BrokerPageShell
@@ -272,7 +278,7 @@ export default function StationsPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={editing !== null} onOpenChange={(open) => { if (!open) { setEditing(null); setEditId(null); } }}>
+      <Dialog open={editing !== null} onOpenChange={guard.requestClose}>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editId === null ? t('broker.stationAdd') : t('broker.stationEdit')}</DialogTitle>
@@ -374,7 +380,7 @@ export default function StationsPage() {
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </Button>
             <Button disabled={!editing?.name || create.isPending || update.isPending} onClick={save}>
-              {t('broker.save')}
+              {t('common.save', { defaultValue: 'Save' })}
             </Button>
           </DialogFooter>
         </DialogContent>
