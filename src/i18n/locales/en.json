@@ -1386,7 +1386,7 @@
     "duplicateRule": "A rule for this source and target already exists.",
     "resetForm": "Reset",
     "tagInvalid": "DICOM tag or keyword expected, e.g. (0010,0010) or PatientName.",
-    "i18nBrokerNote": "The broker section is currently available in German and English; other languages fall back to English.",
+    "i18nBrokerNote": "The visible interface is translated; the detailed help texts are available in German and English (English fills the rest).",
     "errHost": "Enter the address only: no spaces, no slashes, no http://.",
     "helpButton": "What is this?",
     "helpIntro": "Short version: what the page is for, what to fill in and what usually goes wrong.",
@@ -1537,7 +1537,9 @@
       "Red or grey entries are the first thing to look at — a console with an empty worklist usually means an unreachable source.",
       "\"Spool\" entries that keep growing mean the PACS cannot be reached.",
       "If something was misconfigured, the change log on the audit page has the way back."
-    ]
+    ],
+    "addTitle": "Add entry",
+    "editTitle": "Edit entry"
   },
   "shortcuts": {
     "nav": {

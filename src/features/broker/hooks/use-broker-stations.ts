@@ -1,18 +1,19 @@
 /** Audited mutations for the per-station worklist rules. */
 import { brokerApi, type StationRuleIn } from '@/api/broker';
 import { CONFIG_KEYS, useAuditedMutation } from './use-broker-writes';
-import i18n from '@/i18n';
+import { useTranslation } from 'react-i18next';
 
 const STATION_KEYS = [...CONFIG_KEYS, ['broker', 'station-rules']];
 
 export function useStationRuleWrites() {
+  const { t } = useTranslation();
   const create = useAuditedMutation({
     action: 'broker.station_rule.create',
     resourceType: 'brokerConfig',
     run: (body: StationRuleIn) => brokerApi.stationRules.create(body),
     resourceId: (body) => body.name,
     invalidate: STATION_KEYS,
-    successMessage: i18n.t('broker.saved'),
+    successMessage: t('broker.saved'),
   });
 
   const update = useAuditedMutation({
@@ -22,7 +23,7 @@ export function useStationRuleWrites() {
       brokerApi.stationRules.update(id, body),
     resourceId: ({ body }) => body.name,
     invalidate: STATION_KEYS,
-    successMessage: i18n.t('broker.saved'),
+    successMessage: t('broker.saved'),
   });
 
   const remove = useAuditedMutation({
@@ -31,7 +32,7 @@ export function useStationRuleWrites() {
     run: (id: number) => brokerApi.stationRules.remove(id),
     resourceId: (id) => String(id),
     invalidate: STATION_KEYS,
-    successMessage: i18n.t('broker.saved'),
+    successMessage: t('broker.saved'),
   });
 
   return { create, update, remove };

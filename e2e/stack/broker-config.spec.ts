@@ -607,6 +607,30 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('the broker chrome follows the language (?lng=)', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/sources?lng=fr', /sources/i);
+    await expect(page.locator('h1')).toContainText('Sources (RIS/KIS)');
+    // a button label from the broker chrome, not the English fallback
+    await expect(page.getByRole('button', { name: 'Ajouter une source' }).first()).toBeVisible();
+
+    await page.goto('/oe3/broker/sources?lng=ar');
+    await expect(page.locator('h1')).toContainText('المصادر');
+    // right-to-left languages get a readable layout
+    const rtl = await page.evaluate(() => document.documentElement.dir || getComputedStyle(document.body).direction);
+    expect(['rtl', 'ltr']).toContain(rtl);
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-language-ar-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    // back to the default for the following tests (same browser profile)
+    await page.goto('/oe3/broker/sources?lng=en');
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

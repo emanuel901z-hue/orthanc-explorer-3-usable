@@ -6,8 +6,8 @@
  * Broker row IDs/names are configuration identifiers, never PHI.
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import i18n from '@/i18n';
 import { auditClient, type AuditResourceType } from '@/lib/audit';
 import { brokerApi } from '@/api/broker';
 
@@ -43,6 +43,7 @@ export function useAuditedMutation<TArgs, TResult>({
   successMessage,
   silentError,
 }: AuditedMutationOptions<TArgs, TResult>) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (args: TArgs) => {
@@ -76,13 +77,12 @@ export function useAuditedMutation<TArgs, TResult>({
     onError: (error) => {
       // always tell the operator what went wrong (unless the caller shows it)
       if (!silentError) {
-        toast.error(i18n.t('broker.writeFailed', { error: errorMessage(error) }));
+        toast.error(t('broker.writeFailed', { error: errorMessage(error) }));
       }
     },
   });
 }
 
-const SAVED = () => i18n.t('broker.saved');
 
 export const CONFIG_KEYS = [
   ['broker', 'sources'],
@@ -98,13 +98,14 @@ export const CONFIG_KEYS = [
 ];
 
 export function useBrokerSourceWrites() {
+  const { t } = useTranslation();
   const create = useAuditedMutation({
     action: 'broker.source.create',
     resourceType: 'brokerSource',
     run: (body: Parameters<typeof brokerApi.sources.create>[0]) => brokerApi.sources.create(body),
     resourceId: (args, result) => String(result?.id ?? args.name),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const update = useAuditedMutation({
     action: 'broker.source.update',
@@ -113,7 +114,7 @@ export function useBrokerSourceWrites() {
       brokerApi.sources.update(id, body),
     resourceId: (args) => String(args.id),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const remove = useAuditedMutation({
     action: 'broker.source.delete',
@@ -121,7 +122,7 @@ export function useBrokerSourceWrites() {
     run: (id: number) => brokerApi.sources.delete(id),
     resourceId: (id) => String(id),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const resetBreaker = useAuditedMutation({
     action: 'broker.source.breaker_reset',
@@ -129,19 +130,20 @@ export function useBrokerSourceWrites() {
     run: (id: number) => brokerApi.sources.resetBreaker(id),
     resourceId: (id) => String(id),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   return { create, update, remove, resetBreaker };
 }
 
 export function useBrokerTargetWrites() {
+  const { t } = useTranslation();
   const create = useAuditedMutation({
     action: 'broker.target.create',
     resourceType: 'brokerTarget',
     run: (body: Parameters<typeof brokerApi.targets.create>[0]) => brokerApi.targets.create(body),
     resourceId: (args, result) => String(result?.id ?? args.name),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const update = useAuditedMutation({
     action: 'broker.target.update',
@@ -150,7 +152,7 @@ export function useBrokerTargetWrites() {
       brokerApi.targets.update(id, body),
     resourceId: (args) => String(args.id),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const remove = useAuditedMutation({
     action: 'broker.target.delete',
@@ -158,12 +160,13 @@ export function useBrokerTargetWrites() {
     run: (id: number) => brokerApi.targets.delete(id),
     resourceId: (id) => String(id),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   return { create, update, remove };
 }
 
 export function useBrokerRuleWrites() {
+  const { t } = useTranslation();
   const create = useAuditedMutation({
     action: 'broker.rule.create',
     resourceType: 'brokerRule',
@@ -171,7 +174,7 @@ export function useBrokerRuleWrites() {
     resourceId: (args, result) =>
       String(result?.id ?? `${args.source_id}->${args.target_id}`),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const update = useAuditedMutation({
     action: 'broker.rule.update',
@@ -180,7 +183,7 @@ export function useBrokerRuleWrites() {
       brokerApi.rules.update(id, body),
     resourceId: (args) => String(args.id),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const remove = useAuditedMutation({
     action: 'broker.rule.delete',
@@ -188,12 +191,13 @@ export function useBrokerRuleWrites() {
     run: (id: number) => brokerApi.rules.delete(id),
     resourceId: (id) => String(id),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   return { create, update, remove };
 }
 
 export function useBrokerTransformWrites() {
+  const { t } = useTranslation();
   const create = useAuditedMutation({
     action: 'broker.transform.create',
     resourceType: 'brokerTransform',
@@ -201,7 +205,7 @@ export function useBrokerTransformWrites() {
       brokerApi.transforms.create(body),
     resourceId: (args, result) => String(result?.id ?? args.name),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const update = useAuditedMutation({
     action: 'broker.transform.update',
@@ -210,7 +214,7 @@ export function useBrokerTransformWrites() {
       brokerApi.transforms.update(id, body),
     resourceId: (args) => String(args.id),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const remove = useAuditedMutation({
     action: 'broker.transform.delete',
@@ -218,20 +222,21 @@ export function useBrokerTransformWrites() {
     run: (id: number) => brokerApi.transforms.delete(id),
     resourceId: (id) => String(id),
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   return { create, update, remove };
 }
 
 export function useBrokerSettingWrites() {
-  const successMessage = i18n.t('broker.saved');
+  const { t } = useTranslation();
+  const successMessage = t('broker.saved');
   const setValue = useAuditedMutation({
     action: 'broker.setting.update',
     resourceType: 'brokerSetting',
     run: ({ key, value }: { key: string; value: string }) => brokerApi.settings.set(key, value),
     resourceId: (args) => args.key,
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   const reset = useAuditedMutation({
     action: 'broker.setting.reset',
@@ -239,7 +244,7 @@ export function useBrokerSettingWrites() {
     run: (key: string) => brokerApi.settings.reset(key),
     resourceId: (key) => key,
     invalidate: CONFIG_KEYS,
-    successMessage: SAVED(),
+    successMessage: t('broker.saved'),
   });
   return { setValue, reset };
 }

@@ -22,6 +22,23 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
   `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
   Ressourcentypen).
 
+### Neu: i18n aufgeräumt (alle 9 Sprachen)
+
+- **Nur react-i18next**: `useTranslation()` in Komponenten **und** Hooks, kein
+  eigenes `t()` — abgesichert durch `src/features/broker/i18n-usage.test.ts`.
+- **Der Broker-Rahmen ist in allen neun OE3-Sprachen übersetzt** (Titel,
+  Untertitel, Tabellenköpfe, Knöpfe, Lösch-/Verwerfen-Dialoge, Hilfe-Überschriften);
+  die ausführlichen Texte liegen auf Deutsch und Englisch vor und fallen
+  schlüsselweise auf Englisch zurück — nie auf einen Rohschlüssel.
+- **Debuggen**: `?lng=fr` erzwingt eine Sprache, `?i18nDebug=1` schaltet das
+  i18next-Logging ein (fehlende Schlüssel werden gemeldet), `window.__i18n` steht
+  in der Konsole bereit; die Standardsprache kommt aus den Browser-Einstellungen.
+- **`npm run i18n:check`** zeigt die Abdeckung je Sprache und schlägt fehl, wenn
+  eine Sprache fehlt, die Referenzsprachen auseinanderlaufen oder ein
+  Rahmen-Schlüssel fehlt (läuft in `ci-local.sh` und im GitHub-Workflow).
+- Der Guard hat zwei echte Lücken gefunden: `broker.addTitle`/`broker.editTitle`
+  fehlten (der Fallback im Knoten-Dialog hätte den Rohschlüssel angezeigt).
+
 ### Neu: RBAC-Banner, Retention-Karte, flexibles Alerting
 
 - **RBAC**: der Proxy entscheidet über die Rollen (`X-OE3-Roles`), der Broker

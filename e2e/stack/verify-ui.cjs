@@ -284,6 +284,39 @@ async function domReport(page) {
   await page.getByRole('button', { name: /discard|verwerfen/i }).last().click().catch(() => {});
   await page.waitForTimeout(400);
 
+  // every shipped language: the broker pages must not show raw keys
+  // (the detector remembers the language — restore it afterwards)
+  const languageBefore = await page.evaluate(() => localStorage.getItem('oe3-language'));
+  const languages = ['en', 'de', 'es', 'fr', 'ja', 'zh', 'ru', 'tr', 'ar'];
+  const rawKeyLanguages = [];
+  for (const lng of languages) {
+    for (const path of ['/oe3/broker', '/oe3/broker/sources', '/oe3/broker/settings']) {
+      await page.goto(`${OE3}${path}?lng=${lng}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(600);
+      const text = await page.locator('main').first().innerText().catch(() => '');
+      // a raw key looks like "broker.sourcesTitle" / "common.save"
+      if (/\b(broker|common|nav|settings|shortcuts)\.[a-z][A-Za-z]+/.test(text)) {
+        rawKeyLanguages.push(`${lng}${path}`);
+      }
+    }
+  }
+  record('i18n: keine Rohschlüssel in allen 9 Sprachen', rawKeyLanguages.length === 0,
+    rawKeyLanguages.length ? `betroffen: ${rawKeyLanguages.join(', ')}` : '9 Sprachen geprüft');
+
+  // the chrome is really translated (not just the English text)
+  await page.goto(`${OE3}/oe3/broker/sources?lng=fr`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(600);
+  const frenchTitle = await page.locator('h1').first().innerText().catch(() => '');
+  record('i18n: der sichtbare Rahmen ist übersetzt (Französisch)', /sources/i.test(frenchTitle),
+    `h1 = ${frenchTitle}`);
+  // restore the language the run started with
+  await page.evaluate((previous) => {
+    if (previous === null) localStorage.removeItem('oe3-language');
+    else localStorage.setItem('oe3-language', previous);
+  }, languageBefore);
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(400);
+
   // "what is this?" help on every broker page
   const helpPages = ['/oe3/broker', '/oe3/broker/sources', '/oe3/broker/targets',
     '/oe3/broker/rules', '/oe3/broker/transforms', '/oe3/broker/stations',

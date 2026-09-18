@@ -19,8 +19,11 @@ import {
 } from '@/components/ui/dialog';
 
 export function PageHelp({ helpId }: { helpId: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
+  // the visible chrome is translated into every language; the detailed help
+  // bodies currently exist in German and English (English fills the rest)
+  const detailedHelpInEnglish = !['en', 'de'].includes(i18n.resolvedLanguage ?? 'en');
 
   // every help text has: what it is / what to fill in / what goes wrong
   const sections: { heading: string; items: string[] }[] = [
@@ -73,6 +76,11 @@ export function PageHelp({ helpId }: { helpId: string }) {
                 </ul>
               </div>
             ))}
+            {detailedHelpInEnglish && (
+              <p className="border-t pt-3 text-xs text-muted-foreground">
+                {t('broker.i18nBrokerNote')}
+              </p>
+            )}
           </div>
         </DialogContent>
       </Dialog>

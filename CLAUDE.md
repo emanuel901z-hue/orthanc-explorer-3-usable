@@ -28,7 +28,7 @@ npm run preview
 ### Testing
 
 ```bash
-# Run all unit tests (single pass, 474 tests)
+# Run all unit tests (single pass, 488 tests)
 npm run test
 
 # Watch mode
@@ -71,7 +71,8 @@ GitHub Actions CI (`.github/workflows/ci.yml`) laeuft bei Pull Requests und Push
 |-----|--------|-------|
 | `typecheck` | `tsc --noEmit -p tsconfig.app.json` | ~15s |
 | `lint` | `npm run lint` (ESLint) | ~10s |
-| `test` | `npm run test` (Vitest, 474 Tests) | ~15s |
+| `test` | `npm run test` (Vitest, 488 Tests) | ~15s |
+| `i18n:check` | `npm run i18n:check` (translation coverage) | ~1s |
 | `audit` | `npm run audit` (audit-ci, high+critical blocking) | ~10s |
 
 Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit jsdom.
@@ -101,7 +102,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (474 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (488 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -251,6 +252,35 @@ features: {
 | `docs/fork-changelog.md` | Fork-specific changes vs upstream |
 | `e2e/prod/prod-viewport.spec.ts` | Playwright production viewport tests (desktop + mobile) |
 | `e2e/prod/playwright.prod.config.ts` | Playwright config for production deployment tests |
+
+## i18n (i18next)
+
+The broker UI uses **react-i18next** only — `useTranslation()` in components and
+hooks, `t('broker.…')` for text. There is deliberately **no home-grown `t()`
+helper**: a custom translator is hard to debug and had to be reworked in another
+project. `src/features/broker/i18n-usage.test.ts` enforces this (it fails when a
+component translates without `useTranslation`, defines its own helper or reaches
+for the global `i18n` instance).
+
+**Debugging** (see `src/i18n/index.ts`):
+
+| What | How |
+|---|---|
+| Force a language for one visit | `?lng=fr` (what the E2E tests use) |
+| i18next logging | `?i18nDebug=1` or `localStorage['oe3-i18n-debug'] = '1'` |
+| Inspect in the console (dev) | `window.__i18n.t('broker.title')` |
+| Set the default | Browser language (`navigator`), remembered in `localStorage['oe3-language']` |
+
+**Languages:** nine ship with OE3 (en, es, fr, de, ja, zh, ru, tr, ar). The broker
+**chrome** (titles, subtitles, table headers, buttons, delete/discard dialogs,
+help headings) exists in all nine; the detailed content (long hints, help
+bodies, setting descriptions) is complete in German and English and falls back
+to English **per key** — never to a raw key (`returnNull: false`,
+`fallbackLng: 'en'`).
+
+`npm run i18n:check` prints the coverage per language and fails when a language
+file is missing, the two reference languages diverge or a chrome key is absent.
+It runs in `ci-local.sh` and in the GitHub workflow.
 
 ## Important Constraints
 

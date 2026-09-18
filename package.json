@@ -15,7 +15,9 @@
     "test:smoke:tests-only": "npx playwright test --config playwright.smoke.config.ts",
     "playwright:install": "npx playwright install --with-deps chromium",
     "bundle:visualize": "vite-bundle-visualizer",
-    "audit": "audit-ci --config .audit-ci.jsonc"
+    "audit": "audit-ci --config .audit-ci.jsonc",
+    "i18n:check": "node scripts/check-i18n.mjs",
+    "i18n:check:verbose": "node scripts/check-i18n.mjs --verbose"
   },
   "dependencies": {
     "@cornerstonejs/core": "^4.21.2",

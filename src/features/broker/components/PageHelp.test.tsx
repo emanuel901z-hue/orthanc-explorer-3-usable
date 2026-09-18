@@ -45,3 +45,18 @@ describe('PageHelp', () => {
     expect(dialog.className).toContain('overflow-y-auto');
   });
 });
+
+describe('PageHelp in a language without detailed help', () => {
+  it('says that the details are available in German and English', async () => {
+    const i18nModule = (await import('@/i18n')).default;
+    await i18nModule.changeLanguage('fr');
+    render(<PageHelp helpId="sources" />);
+
+    fireEvent.click(screen.getByTestId('page-help'));
+    const dialog = await screen.findByTestId('page-help-dialog');
+
+    // the chrome is French, the details fall back to English, and the note explains it
+    expect(dialog).toHaveTextContent(/détails|detail/i);
+    await i18nModule.changeLanguage('en');
+  });
+});

@@ -24,6 +24,36 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
 ] as const;
 
+export const SUPPORTED_LANGUAGE_CODES = SUPPORTED_LANGUAGES.map((l) => l.code);
+
+/** Where the chosen language is remembered (also what the detector reads). */
+export const LANGUAGE_STORAGE_KEY = 'oe3-language';
+
+/**
+ * Debugging i18next (see docs/fork-changelog.md):
+ *
+ * - `?lng=fr`          force a language for one visit (also what the E2E tests use)
+ * - `?i18nDebug=1`     i18next logs every lookup, missing key and language change
+ * - `localStorage['oe3-i18n-debug'] = '1'`   same, permanently for this browser
+ * - `window.__i18n`    the instance in the console (dev only): `__i18n.t('broker.title')`
+ *
+ * Missing keys are logged (dev only) instead of failing silently, and the
+ * fallback language fills every gap — a key that only exists in English is shown
+ * in English rather than as `broker.something`.
+ */
+function debugEnabled(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('i18nDebug') === '1') return true;
+    return window.localStorage.getItem('oe3-i18n-debug') === '1';
+  } catch {
+    return false;
+  }
+}
+
+export const I18N_DEBUG = debugEnabled();
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -39,15 +69,37 @@ i18n
       tr: { translation: tr },
       ar: { translation: ar },
     },
+    // only the nine shipped languages; `en-GB` resolves to `en`
+    supportedLngs: SUPPORTED_LANGUAGE_CODES,
+    nonExplicitSupportedLngs: true,
+    load: 'languageOnly',
     fallbackLng: 'en',
+    // a missing key must never render as "broker.someKey"
+    returnNull: false,
+    debug: I18N_DEBUG,
+    saveMissing: I18N_DEBUG,
+    missingKeyHandler: I18N_DEBUG
+      ? (lngs, ns, key) => {
+          // eslint-disable-next-line no-console
+          console.warn(`[i18n] missing key "${key}" for ${lngs.join(', ')}`);
+        }
+      : undefined,
     interpolation: {
       escapeValue: false, // React already escapes
     },
     detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
+      // `?lng=xx` first so a link can force a language (tests, support calls),
+      // then the remembered choice, then the browser setting
+      order: ['querystring', 'localStorage', 'navigator', 'htmlTag'],
+      lookupQuerystring: 'lng',
       caches: ['localStorage'],
-      lookupLocalStorage: 'oe3-language',
+      lookupLocalStorage: LANGUAGE_STORAGE_KEY,
     },
   });
+
+// handy in the browser console while developing
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>).__i18n = i18n;
+}
 
 export default i18n;

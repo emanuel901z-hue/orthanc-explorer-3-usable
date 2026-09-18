@@ -6,18 +6,19 @@
  */
 import { brokerApi } from '@/api/broker';
 import { CONFIG_KEYS, useAuditedMutation } from './use-broker-writes';
-import i18n from '@/i18n';
+import { useTranslation } from 'react-i18next';
 
 const SPOOL_KEYS = [...CONFIG_KEYS, ['broker', 'spool']];
 
 export function useBrokerSpoolWrites() {
+  const { t } = useTranslation();
   const retry = useAuditedMutation({
     action: 'broker.spool.retry',
     resourceType: 'brokerConfig',
     run: (id: number) => brokerApi.spool.retry(id),
     resourceId: (id) => String(id),
     invalidate: SPOOL_KEYS,
-    successMessage: i18n.t('broker.saved'),
+    successMessage: t('broker.saved'),
   });
 
   const discard = useAuditedMutation({
@@ -26,7 +27,7 @@ export function useBrokerSpoolWrites() {
     run: ({ id, reason }: { id: number; reason: string }) => brokerApi.spool.discard(id, reason),
     resourceId: ({ id }) => String(id),
     invalidate: SPOOL_KEYS,
-    successMessage: i18n.t('broker.saved'),
+    successMessage: t('broker.saved'),
   });
 
   return { retry, discard };
