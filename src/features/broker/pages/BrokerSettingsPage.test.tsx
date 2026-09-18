@@ -23,6 +23,10 @@ vi.mock('@/api/broker', () => ({
     rules: { list: vi.fn(() => Promise.resolve([])) },
     transforms: { list: vi.fn(() => Promise.resolve([])) },
     settings: { list: mockList, set: mockSet, reset: mockReset },
+    retention: {
+      overview: vi.fn(() => Promise.resolve({ tables: [] })),
+      purge: vi.fn(() => Promise.resolve({ removed: {}, total: 0 })),
+    },
     tls: {
       overview: vi.fn(() => Promise.resolve({
         inbound_enabled: false, inbound_port: 2762, inbound_client_auth: 'none',

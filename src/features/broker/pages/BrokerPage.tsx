@@ -33,6 +33,7 @@ import { HealthPanel } from '../components/HealthPanel';
 import { CaseCheckPanel } from '../components/CaseCheckPanel';
 import { CacheCard } from '../components/CacheCard';
 import { SpoolCard } from '../components/SpoolCard';
+import { RbacBanner } from '../components/RbacBanner';
 import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
 
 export default function BrokerPage() {
@@ -139,6 +140,9 @@ export default function BrokerPage() {
       />
 
       <CaseCheckPanel />
+
+      <RbacBanner />
+
 
       <SpoolCard />
 

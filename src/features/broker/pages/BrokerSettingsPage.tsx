@@ -21,6 +21,7 @@ import { BrokerPageShell } from '../components/BrokerPageShell';
 import { NotificationsCard } from '../components/NotificationsCard';
 import { AtnaCard } from '../components/AtnaCard';
 import { TlsCard } from '../components/TlsCard';
+import { RetentionCard } from '../components/RetentionCard';
 import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
 
 const isTrue = (value: string) => ['true', '1', 'yes', 'on'].includes(value.trim().toLowerCase());
@@ -142,6 +143,7 @@ export default function BrokerSettingsPage() {
     >
       <div className="space-y-3">
         {all.length > 0 && <NotificationsCard settings={all} />}
+        {all.length > 0 && <RetentionCard />}
         {all.length > 0 && <TlsCard settings={all} />}
         {all.length > 0 && <AtnaCard settings={all} />}
         {generic.map((setting) => (

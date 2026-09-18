@@ -247,7 +247,37 @@ async function domReport(page) {
   const rtt = await page.getByText(/\d+\s*ms/).first().isVisible();
   record('sources: manueller C-ECHO liefert RTT im UI', rtt);
 
-  // TLS card (certificates + endpoint check)
+  // retention card (deletion concept)
+  await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
+  const retentionCard = page.getByTestId('retention-card');
+  await retentionCard.first().waitFor({ timeout: 10000 }).catch(() => {});
+  const retentionVisible = await retentionCard.count() > 0 && await retentionCard.first().isVisible();
+  record('settings: Retention-Karte wird gerendert', retentionVisible);
+  if (retentionVisible) {
+    const retentionOverflow = await retentionCard.evaluate((el) => el.scrollWidth > el.clientWidth);
+    record('settings: Retention-Karte ohne Overflow', !retentionOverflow);
+    const retentionState = await page.evaluate(async () => {
+      const res = await fetch('/broker-api/api/v1/retention');
+      return res.ok ? res.json() : null;
+    });
+    record('settings: Retention-Status ist abrufbar',
+      retentionState !== null && (retentionState.tables?.length ?? 0) >= 5,
+      `${retentionState?.tables?.length ?? '?'} Tabellen`);
+  }
+
+  // rbac banner (read-only mode)
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  const rbacState = await page.evaluate(async () => {
+    const res = await fetch('/broker-api/api/v1/rbac/status');
+    return res.ok ? res.json() : null;
+  });
+  record('monitoring: RBAC-Status ist abrufbar', rbacState !== null && 'can_write' in (rbacState ?? {}),
+    `enforced=${rbacState?.enforced} can_write=${rbacState?.can_write}`);
+  const bannerCount = await page.getByTestId('rbac-banner').count();
+  record('monitoring: RBAC-Banner nur im Lesemodus',
+    rbacState?.can_write ? (await page.getByTestId('rbac-banner').count()) === 0 : true);
+
+  // ATNA card (audit trail)
   await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
   const tlsCard = page.getByTestId('tls-card');
   await tlsCard.first().waitFor({ timeout: 10000 }).catch(() => {});

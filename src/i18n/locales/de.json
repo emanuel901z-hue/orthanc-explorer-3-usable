@@ -1339,7 +1339,27 @@
     "health_tls_key_mismatch": "Ein privater Schlüssel passt nicht zu seinem Zertifikat.",
     "health_tls_key_world_readable": "Ein privater Schlüssel ist für andere Benutzer lesbar ({{mode}}).",
     "tlsKeyMode": "Modus {{mode}}",
-    "tlsKeyWorldReadable": "für andere lesbar ({{mode}})"
+    "tlsKeyWorldReadable": "für andere lesbar ({{mode}})",
+    "rbacReadonly": "Ihr Konto darf die Broker-Konfiguration nicht ändern (Rolle „{{role}}“ fehlt). Sie können alles ansehen, aber nichts ändern.",
+    "retentionTitle": "Aufbewahrung & Löschen",
+    "retentionHint": "Pro Tabelle sehen Sie, wie viele Einträge es gibt, wie alt der älteste ist und wie lange er aufbewahrt wird. „Für immer“ wird ausdrücklich angezeigt — nichts wird implizit gelöscht.",
+    "retentionPurge": "Jetzt aufräumen",
+    "retentionPurgeWarning": "Es werden alle Einträge gelöscht, die älter als die konfigurierte Aufbewahrung sind. Tabellen mit „für immer“ werden übersprungen.",
+    "retentionDeleted": "{{count}} Eintrag/Einträge gelöscht.",
+    "retentionRows": "{{rows}} Einträge",
+    "retentionOldest": "ältester {{age}}",
+    "retentionForever": "für immer",
+    "retentionDays": "{{days}} Tage",
+    "retentionWillDelete": "{{count}} würden gelöscht",
+    "setting_rbac_mode": "Zugriffsmodus (über den Proxy)",
+    "setting_rbac_roles_header": "Rollen-Header des Proxys",
+    "setting_rbac_write_role": "Rolle für Konfigurationsänderungen",
+    "setting_retention_query_log_days": "Aufbewahrung Query-Log (Tage)",
+    "setting_retention_store_log_days": "Aufbewahrung Store-Log (Tage)",
+    "setting_retention_local_items_days": "Zusätzliche Aufbewahrung lokaler Einträge (Tage)",
+    "setting_retention_hl7_days": "Aufbewahrung HL7-Nachrichten (Tage)",
+    "setting_retention_spool_days": "Aufbewahrung Spool-Einträge (Tage)",
+    "setting_retention_config_audit_days": "Aufbewahrung Änderungsprotokoll (Tage)"
   },
   "shortcuts": {
     "nav": {

@@ -561,6 +561,26 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('retention card lists the tables and the RBAC banner stays hidden', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/settings', /broker settings|broker-einstellungen/i);
+    // the retention card lists the tables with their configured windows
+    const list = page.getByTestId('retention-tables');
+    await expect(list).toBeVisible({ timeout: 15000 });
+    await expect(list).toContainText(/worklist queries|worklist-abfragen/i);
+
+    // the RBAC banner stays hidden for a caller that may write
+    await expect(page.getByTestId('rbac-banner')).toHaveCount(0);
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-retention-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

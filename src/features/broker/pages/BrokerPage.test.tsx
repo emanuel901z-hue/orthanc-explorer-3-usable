@@ -24,6 +24,10 @@ vi.mock('@/api/broker', () => ({
     targets: { list: mockTargets, echo: vi.fn() },
     rules: { list: vi.fn(() => Promise.resolve([])) },
     health: { config: mockHealth },
+    rbac: { status: vi.fn(() => Promise.resolve({
+      mode: 'off', enforced: false, roles_header: 'X-OE3-Roles',
+      write_role: 'brokerWrite', roles: [], can_write: true,
+    })) },
   },
 }));
 

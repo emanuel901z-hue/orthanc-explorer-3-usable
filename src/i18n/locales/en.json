@@ -1339,7 +1339,27 @@
     "health_tls_key_mismatch": "A private key does not belong to its certificate.",
     "health_tls_key_world_readable": "A private key is readable by other users ({{mode}}).",
     "tlsKeyMode": "mode {{mode}}",
-    "tlsKeyWorldReadable": "readable by others ({{mode}})"
+    "tlsKeyWorldReadable": "readable by others ({{mode}})",
+    "rbacReadonly": "Your account can look at everything, but changing the broker configuration needs the role '{{role}}'.",
+    "retentionTitle": "Retention & deletion",
+    "retentionHint": "How long the broker keeps operational data — configurable per table. 'Keep forever' is stated as such, so nothing is deleted implicitly. The change log is meant to live longer.",
+    "retentionRows": "{{rows}} rows",
+    "retentionOldest": "oldest {{age}}",
+    "retentionDays": "{{days}} days",
+    "retentionForever": "keep forever",
+    "retentionWillDelete": "{{count}} would be deleted",
+    "retentionPurge": "Purge now",
+    "retentionPurgeWarning": "Everything older than the configured retention windows is deleted now. Tables with 'keep forever' are skipped.",
+    "retentionDeleted": "{{count}} row(s) deleted.",
+    "setting_rbac_mode": "Access mode (read vs. write)",
+    "setting_rbac_roles_header": "Roles header from the proxy",
+    "setting_rbac_write_role": "Role that allows configuration changes",
+    "setting_retention_query_log_days": "Retention: query log (days)",
+    "setting_retention_store_log_days": "Retention: forwarded-instance log (days)",
+    "setting_retention_local_items_days": "Retention of local worklist items (days)",
+    "setting_retention_hl7_days": "Retention of inbound HL7 messages (days)",
+    "setting_retention_spool_days": "Retention of spool entries (days)",
+    "setting_retention_config_audit_days": "Retention of the change log (days)"
   },
   "shortcuts": {
     "nav": {

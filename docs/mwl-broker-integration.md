@@ -66,7 +66,9 @@ implements the endpoints below works — the reference implementation is the
 | `POST` | `/api/v1/hl7/orm?dry_run=`, `GET /api/v1/hl7/messages` | HL7 ORM intake + message log |
 | `GET/POST/PUT/DELETE` | `/api/v1/station-rules` | Per-station filter and priority |
 | `POST` | `/api/v1/simulate/station` | "What would this console see?" |
-| `GET` | `/api/v1/tls/overview` | TLS state + certificate/key details (no key material) |
+| `GET` | `/api/v1/rbac/status` | Access mode for this caller (the UI disables writes) |
+| `GET` | `/api/v1/retention`, `POST /api/v1/retention/purge` | Retention overview + audited cleanup |
+| `GET` | `/api/v1/atna/stats`, TLS state + certificate/key details (no key material) |
 | `POST` | `/api/v1/tls/self-signed` | Generate a certificate (public PEM returned for hand-over) |
 | `POST` | `/api/v1/tls/test` | Real handshake (+ optional C-ECHO) against an endpoint |
 | `GET` | `/api/v1/atna/stats`, `POST /api/v1/atna/test`, `GET /api/v1/atna/sample` | ATNA audit trail |
@@ -96,6 +98,10 @@ Minimum fields the UI reads:
   — `before_json`/`after_json` drive the diff view; `id` drives the rollback
 - `config/import` (dry-run): `{dry_run, changes[], skipped[], summary}` —
   `changes` are `{entity,action,name,fields}`; the UI shows them before applying
+- `rbac/status`: `{mode,enforced,roles_header,write_role,roles[],can_write}` —
+  the UI disables write actions when `can_write` is false and explains why
+- `retention`: `{tables[{table,description,rows,oldest,retention_days,will_delete}]}`
+  — `retention_days: 0` means keep forever; `POST /retention/purge` is audited
 - `tls/overview`: `{inbound_enabled,inbound_port,inbound_client_auth,outbound_verify,
   directory,entries{},certificates[]}` — `entries` carries `ok/error/subject/days_left/
   expired/expiring_soon/san/is_ca` per role; private keys only report `mode` and

@@ -22,7 +22,18 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
   `brokerTarget`, `brokerRule`, `brokerTransform`, `brokerSetting`
   Ressourcentypen).
 
-### Neu: DICOM-TLS-Karte (mTLS + Zertifikatsverwaltung)
+### Neu: RBAC-Banner, Retention-Karte, flexibles Alerting
+
+- **RBAC**: der Proxy entscheidet über die Rollen (`X-OE3-Roles`), der Broker
+  erzwingt Lesen vs. Schreiben. Die UI zeigt Lesern einen Banner („Rolle
+  `brokerWrite` fehlt") statt 403er-Fehlern; Default aus.
+- **Retention-Karte**: pro Tabelle Zeilen/ältester Eintrag/Aufbewahrung
+  („für immer" ausdrücklich als Text) + „Jetzt aufräumen" (bestätigt, auditiert).
+- **Alerting**: mehrere Webhook-Ziele (Komma-getrennt) werden parallel beliefert.
+- 441 Unit-Tests (Vitest), Playwright-Suite mit 48 Tests, `verify-ui.cjs` mit
+  109 Checks.
+
+### Neu: lokale Worklist, Stationsregeln, ATNA
 
 - **TLS-Karte** auf der Broker-Settings-Seite: Listener mit Port und Zustand,
   mTLS-Auswahl, Zertifikatsfelder mit **Ablauf-Badges**, Erzeugung
@@ -132,9 +143,9 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ### Tests & Tooling
 
-- 435 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
-  Mobile 375×812, 46 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
-  (104 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
+- 441 Unit-Tests (Vitest), `e2e/stack/` Playwright-Suite (Desktop 1280×800 +
+  Mobile 375×812, 48 Tests) und `e2e/stack/verify-ui.cjs` als Deep-Audit
+  (109 Checks, CRUD-Flows gegen die REST-API gegengeprüft, Screenshots).
 - Coverage-Tooling (`@vitest/coverage-v8`); Broker-UI bei 97,9 %.
 
 ---

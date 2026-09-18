@@ -31,6 +31,7 @@
  *   POST   /api/v1/simulate/station
  *   GET    /api/v1/atna/stats         POST /api/v1/atna/test   GET /api/v1/atna/sample
  *   GET    /api/v1/tls/overview       POST /api/v1/tls/self-signed   POST /api/v1/tls/test
+ *   GET    /api/v1/rbac/status        GET /api/v1/retention   POST /api/v1/retention/purge
  *   GET    /api/v1/notify/events      POST /api/v1/notify/test
  *   GET    /api/v1/spool              GET /api/v1/spool/stats
  *   POST   /api/v1/spool/:id/retry    POST /api/v1/spool/retry-all
@@ -239,6 +240,31 @@ export type StationPreview = {
   mode: 'allow' | 'deny' | null;
   sources: { id: number; name: string; visible: boolean; effective_priority: number }[];
   reason: string;
+};
+
+/** Access mode for this caller (decided by the proxy). */
+export type RbacStatus = {
+  mode: string;
+  enforced: boolean;
+  roles_header: string;
+  write_role: string;
+  roles: string[];
+  can_write: boolean;
+};
+
+/** Retention state of one table. */
+export type RetentionTable = {
+  table: string;
+  description: string;
+  rows: number;
+  oldest: string | null;
+  retention_days: number;
+  will_delete: number;
+};
+
+/** Retention overview for the UI. */
+export type RetentionOverview = {
+  tables: RetentionTable[];
 };
 
 /** State of one configured certificate file (never key material). */
@@ -666,6 +692,17 @@ export const brokerApi = {
       brokerFetch<void>(`/api/v1/station-rules/${id}`, { method: 'DELETE' }),
     simulate: (stationAet: string) =>
       brokerFetch<StationPreview>('/api/v1/simulate/station', post({ station_aet: stationAet })),
+  },
+
+  rbac: {
+    status: () => brokerFetch<RbacStatus>('/api/v1/rbac/status'),
+  },
+
+  retention: {
+    overview: () => brokerFetch<RetentionOverview>('/api/v1/retention'),
+    purge: (table?: string) =>
+      brokerFetch<{ removed: Record<string, number>; total: number }>(
+        `/api/v1/retention/purge${table ? `?table=${table}` : ''}`, post({})),
   },
 
   tls: {
