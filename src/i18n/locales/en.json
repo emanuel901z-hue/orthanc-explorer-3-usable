@@ -1359,7 +1359,13 @@
     "setting_retention_local_items_days": "Retention of local worklist items (days)",
     "setting_retention_hl7_days": "Retention of inbound HL7 messages (days)",
     "setting_retention_spool_days": "Retention of spool entries (days)",
-    "setting_retention_config_audit_days": "Retention of the change log (days)"
+    "setting_retention_config_audit_days": "Retention of the change log (days)",
+    "saved": "Saved.",
+    "writeFailed": "Not saved: {{error}}",
+    "settingRejected": "The value was rejected: {{error}}",
+    "settingRange": "Allowed: {{min}} to {{max}}",
+    "stationAllowEmptyWarning": "Mode 'allow' without a source hides every source — this console would receive an empty worklist. Select at least one source.",
+    "health_station_rule_hides_all": "Station rule(s) {{rules}} use mode 'allow' without any source — those consoles receive an empty worklist."
   },
   "shortcuts": {
     "nav": {

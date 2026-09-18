@@ -13,6 +13,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { brokerApi, type BrokerSetting } from '@/api/broker';
@@ -22,7 +29,7 @@ import { NotificationsCard } from '../components/NotificationsCard';
 import { AtnaCard } from '../components/AtnaCard';
 import { TlsCard } from '../components/TlsCard';
 import { RetentionCard } from '../components/RetentionCard';
-import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
 
 const isTrue = (value: string) => ['true', '1', 'yes', 'on'].includes(value.trim().toLowerCase());
 
@@ -81,12 +88,32 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
                 {isTrue(setting.value) ? t('common.yes', { defaultValue: 'yes' }) : t('common.no', { defaultValue: 'no' })}
               </span>
             </div>
+          ) : setting.kind.startsWith('enum:') ? (
+            <>
+              <Select
+                value={draft || setting.choices[0]}
+                onValueChange={(next) => setValue.mutate({ key: setting.key, value: next })}
+              >
+                <SelectTrigger id={`setting-${setting.key}`} className="max-w-md">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {setting.choices.map((choice) => (
+                    <SelectItem key={choice} value={choice}>{choice}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
           ) : (
             <>
               <Input
                 id={`setting-${setting.key}`}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
+                type={setting.kind === 'int' ? 'number' : setting.kind === 'url' ? 'url' : 'text'}
+                min={setting.kind === 'int' ? setting.min ?? undefined : undefined}
+                max={setting.kind === 'int' ? setting.max ?? undefined : undefined}
+                aria-invalid={Boolean(setValue.error) || undefined}
                 className="max-w-md font-mono text-sm"
                 placeholder={setting.default || t('broker.settingEmpty')}
               />
@@ -98,7 +125,19 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
                 <Save className="h-3.5 w-3.5 mr-1" />
                 {t('common.save', { defaultValue: 'Save' })}
               </Button>
+              {setting.kind === 'int' && setting.min !== undefined && setting.max !== undefined && (
+                <p className="text-xs text-muted-foreground">
+                  {t('broker.settingRange', { min: setting.min, max: setting.max })}
+                </p>
+              )}
             </>
+          )}
+
+          {/* the server validates every value — say so instead of failing silently */}
+          {setValue.error && (
+            <p role="alert" className="text-xs text-destructive break-words">
+              {t('broker.settingRejected', { error: errorMessage(setValue.error) })}
+            </p>
           )}
         </div>
 

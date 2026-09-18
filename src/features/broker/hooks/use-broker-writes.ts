@@ -6,6 +6,8 @@
  * Broker row IDs/names are configuration identifiers, never PHI.
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import i18n from '@/i18n';
 import { auditClient, type AuditResourceType } from '@/lib/audit';
 import { brokerApi } from '@/api/broker';
 
@@ -17,7 +19,20 @@ type AuditedMutationOptions<TArgs, TResult> = {
   resourceId: (args: TArgs, result: TResult | undefined) => string;
   /** Query keys to invalidate after a successful write. */
   invalidate: string[][];
+  /**
+   * Show a toast when the write succeeded. Every write gets feedback — an
+   * operator must never have to guess whether a click did anything.
+   */
+  successMessage?: string;
+  /** Suppress the error toast when the caller renders the error itself. */
+  silentError?: boolean;
 };
+
+/** Pull the operator-readable message out of a failed request. */
+export function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
 
 export function useAuditedMutation<TArgs, TResult>({
   action,
@@ -25,6 +40,8 @@ export function useAuditedMutation<TArgs, TResult>({
   run,
   resourceId,
   invalidate,
+  successMessage,
+  silentError,
 }: AuditedMutationOptions<TArgs, TResult>) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -52,6 +69,15 @@ export function useAuditedMutation<TArgs, TResult>({
     },
     onSuccess: () => {
       invalidate.forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
+      if (successMessage) {
+        toast.success(successMessage);
+      }
+    },
+    onError: (error) => {
+      // always tell the operator what went wrong (unless the caller shows it)
+      if (!silentError) {
+        toast.error(i18n.t('broker.writeFailed', { error: errorMessage(error) }));
+      }
     },
   });
 }
@@ -183,12 +209,14 @@ export function useBrokerTransformWrites() {
 }
 
 export function useBrokerSettingWrites() {
+  const successMessage = i18n.t('broker.saved');
   const setValue = useAuditedMutation({
     action: 'broker.setting.update',
     resourceType: 'brokerSetting',
     run: ({ key, value }: { key: string; value: string }) => brokerApi.settings.set(key, value),
     resourceId: (args) => args.key,
     invalidate: CONFIG_KEYS,
+    successMessage,
   });
   const reset = useAuditedMutation({
     action: 'broker.setting.reset',
@@ -196,6 +224,7 @@ export function useBrokerSettingWrites() {
     run: (key: string) => brokerApi.settings.reset(key),
     resourceId: (key) => key,
     invalidate: CONFIG_KEYS,
+    successMessage,
   });
   return { setValue, reset };
 }

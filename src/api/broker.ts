@@ -145,8 +145,15 @@ export type BrokerSetting = {
   default: string;
   /** 'db' = UI override active, 'env' = deployment default */
   source: 'db' | 'env';
-  kind: 'bool' | 'int' | 'aets';
+  /** Value type — `enum:<a,b>` carries its choices in the same string. */
+  kind: 'bool' | 'int' | 'aets' | 'str' | 'url' | 'path' | 'events' | string;
   description: string;
+  /** Lower bound for integer settings (null for other kinds). */
+  min?: number | null;
+  /** Upper bound for integer settings (null for other kinds). */
+  max?: number | null;
+  /** Allowed values for enum settings. */
+  choices?: string[];
 };
 
 /** Circuit-breaker state of an upstream source. */

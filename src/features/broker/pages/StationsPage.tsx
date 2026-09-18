@@ -273,7 +273,7 @@ export default function StationsPage() {
       </Card>
 
       <Dialog open={editing !== null} onOpenChange={(open) => { if (!open) { setEditing(null); setEditId(null); } }}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editId === null ? t('broker.stationAdd') : t('broker.stationEdit')}</DialogTitle>
             <DialogDescription>{t('broker.stationDialogHint')}</DialogDescription>
@@ -347,6 +347,13 @@ export default function StationsPage() {
                   )}
                 </div>
               </div>
+
+              {/* a rule that hides every source makes the console's worklist empty */}
+              {editing.mode === 'allow' && editing.source_ids.length === 0 && (
+                <p role="alert" className="rounded-md border border-amber-500/40 bg-amber-500/5 p-2 text-xs text-amber-700">
+                  {t('broker.stationAllowEmptyWarning')}
+                </p>
+              )}
 
               <div className="flex items-center justify-between gap-3">
                 <div>

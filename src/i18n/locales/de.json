@@ -1359,7 +1359,13 @@
     "setting_retention_local_items_days": "Zusätzliche Aufbewahrung lokaler Einträge (Tage)",
     "setting_retention_hl7_days": "Aufbewahrung HL7-Nachrichten (Tage)",
     "setting_retention_spool_days": "Aufbewahrung Spool-Einträge (Tage)",
-    "setting_retention_config_audit_days": "Aufbewahrung Änderungsprotokoll (Tage)"
+    "setting_retention_config_audit_days": "Aufbewahrung Änderungsprotokoll (Tage)",
+    "saved": "Gespeichert.",
+    "writeFailed": "Nicht gespeichert: {{error}}",
+    "settingRejected": "Der Wert wurde abgelehnt: {{error}}",
+    "settingRange": "Erlaubt: {{min}} bis {{max}}",
+    "stationAllowEmptyWarning": "Modus „allow“ ohne Quelle verbirgt alle Quellen — diese Konsole würde eine leere Arbeitsliste erhalten. Bitte mindestens eine Quelle auswählen.",
+    "health_station_rule_hides_all": "Stationsregel(n) {{rules}} nutzen „allow“ ohne Quelle — diese Konsolen erhalten eine leere Arbeitsliste."
   },
   "shortcuts": {
     "nav": {

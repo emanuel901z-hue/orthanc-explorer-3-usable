@@ -177,6 +177,18 @@ describe('LocalWorklistPage', () => {
     expect(within(list).getByText('created')).toBeInTheDocument();
   });
 
+  it('keeps the dialog scrollable on a small screen', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('EMERG-001')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: /add item/i }));
+    const dialog = await screen.findByRole('dialog');
+
+    // a 13-field form must not overflow a phone viewport without scrolling
+    expect(dialog.className).toContain('max-h-[90vh]');
+    expect(dialog.className).toContain('overflow-y-auto');
+  });
+
   it('renders the mobile card layout', async () => {
     mockMobileViewport();
     renderPage();

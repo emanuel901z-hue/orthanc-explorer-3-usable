@@ -314,7 +314,7 @@ export default function LocalWorklistPage() {
 
       {/* create/edit dialog */}
       <Dialog open={editing !== null} onOpenChange={(open) => { if (!open) { setEditing(null); setEditId(null); } }}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editId === null ? t('broker.localAdd') : t('broker.localEdit')}

@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { brokerApi, type BrokerSetting } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
-import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
 
 const SEVERITY_VARIANT: Record<string, 'destructive' | 'secondary' | 'outline'> = {
   error: 'destructive',
@@ -183,6 +183,13 @@ export function NotificationsCard({ settings }: { settings: BrokerSetting[] }) {
             {t('broker.save')}
           </Button>
         </div>
+
+        {/* the server validates every value — say so instead of failing silently */}
+        {setValue.error && (
+          <p role="alert" className="text-xs text-destructive break-words">
+            {t('broker.settingRejected', { error: errorMessage(setValue.error) })}
+          </p>
+        )}
 
         {/* de-bounce + test */}
         <div className="space-y-1">

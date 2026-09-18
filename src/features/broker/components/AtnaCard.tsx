@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { brokerApi, type BrokerSetting } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
-import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
 
 const KEYS = [
   'atna_enabled', 'atna_syslog_host', 'atna_syslog_port', 'atna_syslog_protocol',
@@ -204,6 +204,12 @@ export function AtnaCard({ settings }: { settings: BrokerSetting[] }) {
           >
             {sampleQuery.data?.xml ?? t('broker.atnaSampleLoading')}
           </pre>
+        )}
+
+        {setValue.error && (
+          <p role="alert" className="text-xs text-destructive break-words">
+            {t('broker.settingRejected', { error: errorMessage(setValue.error) })}
+          </p>
         )}
 
         {stats && (

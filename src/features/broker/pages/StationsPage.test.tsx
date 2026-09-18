@@ -128,6 +128,43 @@ describe('StationsPage', () => {
     await waitFor(() => expect(mockRemove).toHaveBeenCalledWith(1));
   });
 
+  it('warns when mode allow has no source (empty worklist)', async () => {
+    // an existing rule in that state is enough — the Radix Select interaction
+    // itself is covered by the Playwright suite (jsdom cannot drive it)
+    mockList.mockResolvedValue([{
+      ...RULE, name: 'broken', mode: 'allow' as const, source_ids: [],
+    }]);
+    renderPage();
+    await waitFor(() => expect(screen.getByText('broken')).toBeInTheDocument());
+
+    fireEvent.click(screen.getAllByRole('button', { name: /^edit$/i })[0]);
+    const dialog = await screen.findByRole('dialog');
+
+    expect(await within(dialog).findByRole('alert'))
+      .toHaveTextContent(/hides every source/i);
+  });
+
+  it('does not warn for a rule that names its sources', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('ct-hides-ris-b')).toBeInTheDocument());
+
+    fireEvent.click(screen.getAllByRole('button', { name: /^edit$/i })[0]);
+    const dialog = await screen.findByRole('dialog');
+
+    expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('keeps the dialog scrollable on a small screen', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('ct-hides-ris-b')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: /add rule/i }));
+    const dialog = await screen.findByRole('dialog');
+
+    expect(dialog.className).toContain('max-h-[90vh]');
+    expect(dialog.className).toContain('overflow-y-auto');
+  });
+
   it('renders the mobile card layout', async () => {
     mockMobileViewport();
     renderPage();

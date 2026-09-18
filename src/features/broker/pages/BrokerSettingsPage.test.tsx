@@ -6,11 +6,14 @@ import BrokerSettingsPage from './BrokerSettingsPage';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import '@/i18n';
 
-const { mockList, mockSet, mockReset } = vi.hoisted(() => ({
+const { mockList, mockSet, mockReset, mockToast } = vi.hoisted(() => ({
   mockList: vi.fn(),
   mockSet: vi.fn(),
   mockReset: vi.fn(),
+  mockToast: { success: vi.fn(), error: vi.fn() },
 }));
+
+vi.mock('sonner', () => ({ toast: mockToast }));
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
@@ -112,6 +115,72 @@ describe('BrokerSettingsPage', () => {
 
     await waitFor(() => expect(mockSet).toHaveBeenCalledTimes(1));
     expect(mockSet.mock.calls[0]).toEqual(['strict_store_status', 'false']);
+  });
+
+  it('constrains integer settings with bounds from the API', async () => {
+    mockList.mockResolvedValue([
+      {
+        key: 'echo_interval_s', value: '30', default: '30', source: 'env' as const,
+        kind: 'int' as const, description: 'Interval of the C-ECHO loop.',
+        min: 5, max: 3600, choices: [],
+      },
+    ]);
+    renderPage();
+
+    const input = await screen.findByLabelText(/Echo interval|echo_interval_s/i)
+      .catch(() => screen.findByLabelText(/Interval of the C-ECHO loop/i));
+    expect(input).toHaveAttribute('type', 'number');
+    expect(input).toHaveAttribute('min', '5');
+    expect(input).toHaveAttribute('max', '3600');
+    // the allowed range is stated in plain words
+    expect(screen.getByText(/allowed: 5 to 3600/i)).toBeInTheDocument();
+  });
+
+  it('renders enum settings as a choice instead of free text', async () => {
+    mockList.mockResolvedValue([
+      {
+        key: 'rbac_mode', value: 'off', default: 'off', source: 'env' as const,
+        kind: 'enum:off,enforce' as const, description: 'Access mode.',
+        choices: ['off', 'enforce'],
+      },
+    ]);
+    renderPage();
+
+    // no free-text field for a value with a fixed set of options
+    const row = await screen.findByTestId('setting-rbac_mode');
+    expect(within(row).getByLabelText(/Access mode/i)).toBeInTheDocument();
+    expect(within(row).queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('shows the server message when a value is rejected', async () => {
+    mockSet.mockRejectedValue(new Error('must be between 5 and 3600'));
+    renderPage();
+    await waitFor(() => expect(screen.getByText('Allowed calling AE titles')).toBeInTheDocument());
+
+    const row = within(screen.getByTestId('setting-allowed_calling_aets'));
+    fireEvent.change(row.getByLabelText('Allowed calling AE titles'), {
+      target: { value: 'nope!' },
+    });
+    fireEvent.click(row.getByRole('button', { name: /^save$/i }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(/rejected/i);
+    expect(alert).toHaveTextContent('must be between 5 and 3600');
+    expect(mockToast.error).toHaveBeenCalled();
+  });
+
+  it('confirms a successful save', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('Allowed calling AE titles')).toBeInTheDocument());
+
+    const row = within(screen.getByTestId('setting-allowed_calling_aets'));
+    fireEvent.change(row.getByLabelText('Allowed calling AE titles'), {
+      target: { value: 'CT_01,MR_01' },
+    });
+    fireEvent.click(row.getByRole('button', { name: /^save$/i }));
+
+    await waitFor(() => expect(mockSet).toHaveBeenCalled());
+    await waitFor(() => expect(mockToast.success).toHaveBeenCalled());
   });
 
   it('saves a text setting only when changed', async () => {

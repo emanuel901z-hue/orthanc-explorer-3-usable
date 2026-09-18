@@ -247,6 +247,54 @@ async function domReport(page) {
   const rtt = await page.getByText(/\d+\s*ms/).first().isVisible();
   record('sources: manueller C-ECHO liefert RTT im UI', rtt);
 
+  // P1 fix: dialogs must be fully reachable on a small screen
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto(`${OE3}/oe3/broker/worklist`, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: /add item|Eintrag anlegen/i }).click();
+  await page.waitForSelector('[role="dialog"]', { timeout: 10000 });
+  const dialogFit = await page.locator('[role="dialog"]').evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const scrollable = el.scrollHeight > el.clientHeight
+      && getComputedStyle(el).overflowY !== 'visible';
+    return { top: Math.round(rect.top), bottom: Math.round(rect.bottom),
+             height: Math.round(rect.height), scrollable };
+  });
+  record('mobile: Worklist-Dialog passt in den Viewport',
+    dialogFit.top >= 0 && dialogFit.scrollable,
+    `top=${dialogFit.top} height=${dialogFit.height} scrollbar=${dialogFit.scrollable}`);
+  await page.keyboard.press('Escape');
+  await page.setViewportSize({ width: 1400, height: 900 });
+
+  // P1 fix: numeric settings are constrained, and a rejected value is visible
+  await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[data-testid="setting-echo_interval_s"]', { timeout: 15000 });
+  const numeric = await page.locator('#setting-echo_interval_s').evaluate((el) => ({
+    type: el.getAttribute('type'), min: el.getAttribute('min'), max: el.getAttribute('max'),
+  }));
+  record('settings: Zahleneinstellung ist typisiert und begrenzt',
+    numeric.type === 'number' && numeric.min === '5' && numeric.max === '3600',
+    `type=${numeric.type} min=${numeric.min} max=${numeric.max}`);
+  const rangeHint = await page.getByTestId('setting-echo_interval_s')
+    .getByText(/allowed:|erlaubt:/i).count();
+  record('settings: erlaubter Bereich wird im Klartext genannt', rangeHint > 0);
+
+  // out-of-range values are still possible (the browser only blocks letters) —
+  // the server rejects them and the UI must say so
+  await page.locator('#setting-echo_interval_s').fill('99999');
+  await page.locator('[data-testid="setting-echo_interval_s"]')
+    .getByRole('button', { name: /save|speichern/i }).click();
+  const rejected = await page.waitForSelector(
+    '[data-testid="setting-echo_interval_s"] [role="alert"], [data-testid="setting-echo_interval_s"] .text-destructive',
+    { timeout: 8000 },
+  ).then(() => true).catch(() => false);
+  record('settings: abgelehnter Wert erzeugt eine sichtbare Meldung', rejected);
+  // the draft stays in the field (so it can be corrected), but nothing was stored
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#setting-echo_interval_s', { timeout: 15000 });
+  const persisted = await page.locator('#setting-echo_interval_s').inputValue();
+  record('settings: der abgelehnte Wert wurde nicht gespeichert',
+    persisted === '30', `nach Reload zeigt das Feld: ${persisted}`);
+
   // retention card (deletion concept)
   await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
   const retentionCard = page.getByTestId('retention-card');

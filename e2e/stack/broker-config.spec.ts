@@ -581,6 +581,32 @@ test.describe('stack: broker config pages', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('station rule warns when allow hides every source', async ({ page }) => {
+    const errors: string[] = [];
+    collectErrors(page, errors);
+
+    await openPage(page, '/oe3/broker/stations', /station rules|stationsregeln/i);
+
+    // create a rule in the dangerous state: mode 'allow' without a source
+    await page.getByRole('button', { name: /add rule|Regel anlegen/i }).first().click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await dialog.getByLabel(/^name$|^Name$/i).fill('e2e-allow-empty');
+    await dialog.getByLabel(/station ae title/i).fill('XR_99');
+    await dialog.getByLabel(/^mode$|^Modus$/i).click();
+    await page.getByRole('option', { name: /allow/i }).click();
+
+    // the warning explains the consequence before saving
+    await expect(dialog.getByRole('alert')).toContainText(/empty worklist|leere Arbeitsliste/i);
+
+    await page.screenshot({
+      path: join(SCREENSHOT_DIR, `broker-station-warning-${test.info().project.name}.png`),
+      fullPage: true,
+    });
+    await dialog.getByRole('button', { name: /cancel|abbrechen/i }).click();
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('sidebar sub-navigation reaches every configuration page', async ({ page }) => {
     const errors: string[] = [];
     collectErrors(page, errors);

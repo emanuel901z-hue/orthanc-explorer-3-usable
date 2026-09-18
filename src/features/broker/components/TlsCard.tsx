@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/select';
 import { brokerApi, type BrokerSetting, type TlsTestResult } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
-import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
 import { useTlsWrites } from '../hooks/use-broker-tls';
 
 const INBOUND_KEYS = [
@@ -284,6 +284,13 @@ export function TlsCard({ settings }: { settings: BrokerSetting[] }) {
               ))}
             </ul>
           </div>
+        )}
+
+        {/* the server validates every value — say so instead of failing silently */}
+        {setValue.error && (
+          <p role="alert" className="text-xs text-destructive break-words">
+            {t('broker.settingRejected', { error: errorMessage(setValue.error) })}
+          </p>
         )}
 
         {/* actions */}
