@@ -986,7 +986,7 @@
     "charset": "Zeichensatz",
     "timeout": "Timeout (s)",
     "priority": "Priorität",
-    "priorityHint": "Niedrigere Werte werden zuerst abgefragt (Dedupe-Reihenfolge).",
+    "priorityHint": "Kleinerer Wert = zuerst berücksichtigt. Das entscheidet, wer bei gleichem Auftrag gewinnt.",
     "enabled": "Aktiv",
     "actions": "Aktionen",
     "defaultTargetHint": "Fallback für Stores ohne passende Regel.",
@@ -1365,7 +1365,19 @@
     "settingRejected": "Der Wert wurde abgelehnt: {{error}}",
     "settingRange": "Erlaubt: {{min}} bis {{max}}",
     "stationAllowEmptyWarning": "Modus „allow“ ohne Quelle verbirgt alle Quellen — diese Konsole würde eine leere Arbeitsliste erhalten. Bitte mindestens eine Quelle auswählen.",
-    "health_station_rule_hides_all": "Stationsregel(n) {{rules}} nutzen „allow“ ohne Quelle — diese Konsolen erhalten eine leere Arbeitsliste."
+    "health_station_rule_hides_all": "Stationsregel(n) {{rules}} nutzen „allow“ ohne Quelle — diese Konsolen erhalten eine leere Arbeitsliste.",
+    "localNotSet": "— nicht gesetzt —",
+    "localAccessionHint": "Pflichtfeld. Die Auftragsnummer, nach der die Modalität sucht.",
+    "localAccessionRequired": "Eine Zugangsnummer ist erforderlich.",
+    "localSpsIdHint": "Schrittnummer, falls der Auftrag mehrere Schritte hat (Standard 1).",
+    "localPatientNameHint": "DICOM-Form: Nachname^Vorname (z. B. Mueller^Hans).",
+    "localModalityHint": "Modalität der Untersuchung (Vorschläge, Freitext erlaubt).",
+    "localStationHint": "1–16 Zeichen, A–Z 0–9 _ - (z. B. CT_01). Leer = jede Station.",
+    "localStationInvalid": "1–16 Zeichen, nur A–Z 0–9 _ -",
+    "localUidInvalid": "Nur Ziffern und Punkte (z. B. 1.2.840.…).",
+    "localStudyUidHint": "Optional; die Modalität erhält die UID zurück, wenn sie bekannt ist.",
+    "settingInvalid": "Wert prüfen: {{error}}",
+    "targetDefaultWarning": "Das ist das Standard-Ziel: ohne Routing-Regel haben eingehende Bilder danach kein Ziel mehr."
   },
   "shortcuts": {
     "nav": {

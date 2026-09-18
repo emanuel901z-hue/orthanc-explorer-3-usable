@@ -322,6 +322,7 @@ export default function StationsPage() {
                     value={editing.priority}
                     onChange={(event) => setEditing({ ...editing, priority: Number(event.target.value) })}
                   />
+                  <p className="text-xs text-muted-foreground">{t('broker.priorityHint')}</p>
                 </div>
               </div>
 

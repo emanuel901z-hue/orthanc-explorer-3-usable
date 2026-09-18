@@ -986,7 +986,7 @@
     "charset": "Charset",
     "timeout": "Timeout (s)",
     "priority": "Priority",
-    "priorityHint": "Lower values are queried first (deduplication order).",
+    "priorityHint": "Lower value = considered first. This decides who wins when two sources know the same order.",
     "enabled": "Enabled",
     "actions": "Actions",
     "defaultTargetHint": "Fallback for stores without a matching rule.",
@@ -1365,7 +1365,19 @@
     "settingRejected": "The value was rejected: {{error}}",
     "settingRange": "Allowed: {{min}} to {{max}}",
     "stationAllowEmptyWarning": "Mode 'allow' without a source hides every source — this console would receive an empty worklist. Select at least one source.",
-    "health_station_rule_hides_all": "Station rule(s) {{rules}} use mode 'allow' without any source — those consoles receive an empty worklist."
+    "health_station_rule_hides_all": "Station rule(s) {{rules}} use mode 'allow' without any source — those consoles receive an empty worklist.",
+    "localNotSet": "— not set —",
+    "localAccessionHint": "Required. The order number the modality searches for.",
+    "localAccessionRequired": "An accession number is required.",
+    "localSpsIdHint": "Step number if the order has several steps (default 1).",
+    "localPatientNameHint": "DICOM form: Last^First (e.g. Mueller^Hans).",
+    "localModalityHint": "Modality of the examination (suggestions, free text allowed).",
+    "localStationHint": "1–16 characters, A–Z 0–9 _ - (e.g. CT_01). Empty = every station.",
+    "localStationInvalid": "1–16 characters, only A–Z 0–9 _ -",
+    "localUidInvalid": "Only digits and dots (e.g. 1.2.840.…).",
+    "localStudyUidHint": "Optional; the modality gets the UID back if it is known.",
+    "settingInvalid": "Check the value: {{error}}",
+    "targetDefaultWarning": "This is the default target: without a routing rule, incoming images have no destination afterwards."
   },
   "shortcuts": {
     "nav": {

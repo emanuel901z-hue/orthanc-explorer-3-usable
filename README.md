@@ -183,7 +183,7 @@ Open [http://localhost:5173](http://localhost:5173). The dev server proxies `/or
 # Start dev server (requires Docker stack running)
 npm run dev
 
-# Run unit tests (single pass, 449 tests)
+# Run unit tests (single pass, 463 tests)
 npm run test
 
 # Run unit tests in watch mode

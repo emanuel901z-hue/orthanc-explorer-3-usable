@@ -37,6 +37,7 @@ import {
 import { brokerApi, type BrokerSetting, type TlsTestResult } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { useSettingDraft } from '../hooks/use-setting-draft';
 import { useTlsWrites } from '../hooks/use-broker-tls';
 
 const INBOUND_KEYS = [
@@ -56,7 +57,9 @@ export function TlsCard({ settings }: { settings: BrokerSetting[] }) {
   const { generate, test } = useTlsWrites();
 
   const byKey = new Map(settings.map((setting) => [setting.key, setting]));
-  const value = (key: string) => byKey.get(key)?.value ?? '';
+  // a local draft per field: the value is committed when the field is left
+  const draft = useSettingDraft(byKey, (key, next) => setValue.mutate({ key, value: next }));
+  const value = draft.value;
   const source = (key: string) => byKey.get(key)?.source ?? 'env';
   const isOn = (key: string) => ['true', '1', 'yes', 'on'].includes(value(key).toLowerCase());
 

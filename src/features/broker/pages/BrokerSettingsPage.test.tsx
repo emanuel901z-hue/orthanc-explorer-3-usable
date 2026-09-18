@@ -152,21 +152,37 @@ describe('BrokerSettingsPage', () => {
     expect(within(row).queryByRole('textbox')).not.toBeInTheDocument();
   });
 
-  it('shows the server message when a value is rejected', async () => {
+  it('catches an invalid value before sending it', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('Allowed calling AE titles')).toBeInTheDocument());
+
+    const row = within(screen.getByTestId('setting-allowed_calling_aets'));
+    fireEvent.change(row.getByLabelText('Allowed calling AE titles'), {
+      target: { value: 'nope!' },                       // invalid AE title
+    });
+
+    // the hint appears immediately and the value cannot be sent
+    const rowEl = screen.getByTestId('setting-allowed_calling_aets');
+    expect(within(rowEl).getByRole('alert')).toHaveTextContent(/invalid ae title/i);
+    expect(within(rowEl).getByRole('button', { name: /^save$/i })).toBeDisabled();
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it('shows the server message when the server rejects a valid-looking value', async () => {
     mockSet.mockRejectedValue(new Error('must be between 5 and 3600'));
     renderPage();
     await waitFor(() => expect(screen.getByText('Allowed calling AE titles')).toBeInTheDocument());
 
     const row = within(screen.getByTestId('setting-allowed_calling_aets'));
     fireEvent.change(row.getByLabelText('Allowed calling AE titles'), {
-      target: { value: 'nope!' },
+      target: { value: 'MR_01' },                       // valid and different
     });
     fireEvent.click(row.getByRole('button', { name: /^save$/i }));
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent(/rejected/i);
     expect(alert).toHaveTextContent('must be between 5 and 3600');
-    expect(mockToast.error).toHaveBeenCalled();
+    await waitFor(() => expect(mockToast.error).toHaveBeenCalled());
   });
 
   it('confirms a successful save', async () => {
@@ -175,7 +191,7 @@ describe('BrokerSettingsPage', () => {
 
     const row = within(screen.getByTestId('setting-allowed_calling_aets'));
     fireEvent.change(row.getByLabelText('Allowed calling AE titles'), {
-      target: { value: 'CT_01,MR_01' },
+      target: { value: 'CT_01,MR_01' },                 // valid
     });
     fireEvent.click(row.getByRole('button', { name: /^save$/i }));
 

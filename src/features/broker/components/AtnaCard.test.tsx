@@ -89,6 +89,9 @@ describe('AtnaCard', () => {
     const input = await screen.findByLabelText(/audit repository \(host\)/i);
 
     fireEvent.change(input, { target: { value: 'audit2.example' } });
+    // the value is committed when the field is left (one write per edit)
+    expect(mockSet).not.toHaveBeenCalled();
+    fireEvent.blur(input);
 
     await waitFor(() =>
       expect(mockSet).toHaveBeenCalledWith('atna_syslog_host', 'audit2.example'),

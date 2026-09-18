@@ -265,6 +265,36 @@ async function domReport(page) {
   await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 1400, height: 900 });
 
+  // P2 fix: input guidance — typed fields, patterns, hints
+  await page.goto(`${OE3}/oe3/broker/worklist`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[data-testid="broker-hl7"]', { timeout: 15000 });
+  await page.getByRole('button', { name: /add item|Eintrag anlegen/i }).click();
+  await page.waitForSelector('[role="dialog"]', { timeout: 10000 });
+  const fieldTypes = await page.locator('[role="dialog"] input').evaluateAll((els) =>
+    els.map((el) => el.getAttribute('type') ?? 'text'));
+  record('worklist: Datum/Zeit sind echte Picker', fieldTypes.includes('date') && fieldTypes.includes('time'),
+    `Typen: ${[...new Set(fieldTypes)].join(', ')}`);
+  const stationHint = await page.locator('[role="dialog"]')
+    .getByText(/1–16 characters|1–16 Zeichen/i).count();
+  record('worklist: Format-Hinweis an der Station-AET', stationHint > 0);
+  // an invalid AE title is caught before saving
+  await page.locator('#local-station_aet').fill('ct-01!');
+  const stationError = await page.locator('[role="dialog"]')
+    .getByText(/only A–Z|nur A–Z/i).count();
+  record('worklist: ungültige Station-AET wird vorab gemeldet', stationError > 0);
+  await page.keyboard.press('Escape');
+
+  // P2 fix: settings validate before sending
+  await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[data-testid="setting-allowed_calling_aets"]', { timeout: 15000 });
+  const aetRow = page.getByTestId('setting-allowed_calling_aets');
+  await aetRow.getByLabel(/allowed calling ae titles|erlaubte.*ae/i).fill('nope!');
+  const preCheck = await aetRow.getByText(/invalid ae title|ungültige/i).count();
+  const saveDisabled = await aetRow.getByRole('button', { name: /save|speichern/i }).isDisabled();
+  record('settings: ungültiger Wert wird vor dem Senden abgefangen',
+    preCheck > 0 && saveDisabled, `Hinweis=${preCheck > 0} Button gesperrt=${saveDisabled}`);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+
   // P1 fix: numeric settings are constrained, and a rejected value is visible
   await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('[data-testid="setting-echo_interval_s"]', { timeout: 15000 });
@@ -278,17 +308,16 @@ async function domReport(page) {
     .getByText(/allowed:|erlaubt:/i).count();
   record('settings: erlaubter Bereich wird im Klartext genannt', rangeHint > 0);
 
-  // out-of-range values are still possible (the browser only blocks letters) —
-  // the server rejects them and the UI must say so
+  // an out-of-range value is caught before sending (the client mirrors the
+  // server rules) — and a server rejection still reaches the operator as a toast
   await page.locator('#setting-echo_interval_s').fill('99999');
-  await page.locator('[data-testid="setting-echo_interval_s"]')
-    .getByRole('button', { name: /save|speichern/i }).click();
-  const rejected = await page.waitForSelector(
-    '[data-testid="setting-echo_interval_s"] [role="alert"], [data-testid="setting-echo_interval_s"] .text-destructive',
-    { timeout: 8000 },
-  ).then(() => true).catch(() => false);
-  record('settings: abgelehnter Wert erzeugt eine sichtbare Meldung', rejected);
-  // the draft stays in the field (so it can be corrected), but nothing was stored
+  const rangeError = await page.locator('[data-testid="setting-echo_interval_s"] [role="alert"]')
+    .first().textContent().catch(() => '');
+  const blocked = await page.locator('[data-testid="setting-echo_interval_s"]')
+    .getByRole('button', { name: /save|speichern/i }).isDisabled();
+  record('settings: Wert außerhalb des Bereichs wird vorab abgefangen',
+    blocked && /at most|höchstens|maximal/i.test(rangeError ?? ''),
+    `gesperrt=${blocked} Hinweis=${JSON.stringify(rangeError)}`);
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#setting-echo_interval_s', { timeout: 15000 });
   const persisted = await page.locator('#setting-echo_interval_s').inputValue();

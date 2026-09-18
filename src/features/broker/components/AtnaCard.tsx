@@ -25,6 +25,7 @@ import {
 import { brokerApi, type BrokerSetting } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { useSettingDraft } from '../hooks/use-setting-draft';
 
 const KEYS = [
   'atna_enabled', 'atna_syslog_host', 'atna_syslog_port', 'atna_syslog_protocol',
@@ -37,7 +38,9 @@ export function AtnaCard({ settings }: { settings: BrokerSetting[] }) {
   const { setValue, reset } = useBrokerSettingWrites();
 
   const byKey = new Map(settings.map((setting) => [setting.key, setting]));
-  const value = (key: string) => byKey.get(key)?.value ?? '';
+  // a local draft per field: the value is committed when the field is left
+  const draft = useSettingDraft(byKey, (key, next) => setValue.mutate({ key, value: next }));
+  const value = draft.value;
   const source = (key: string) => byKey.get(key)?.source ?? 'env';
 
   const [testResult, setTestResult] = useState<{ ok: boolean; error: string } | null>(null);
@@ -59,6 +62,7 @@ export function AtnaCard({ settings }: { settings: BrokerSetting[] }) {
 
   const stats = statsQuery.data;
   const pending = setValue.isPending || reset.isPending;
+
   const dirty = (key: string, draft: string) => draft !== value(key);
   const enabled = ['true', '1', 'yes', 'on'].includes(value('atna_enabled').toLowerCase());
 
@@ -88,9 +92,16 @@ export function AtnaCard({ settings }: { settings: BrokerSetting[] }) {
           type={type}
           className={mono ? 'max-w-[240px] font-mono' : 'max-w-[240px]'}
           value={value(key)}
-          onChange={(event) => setValue.mutate({ key, value: event.target.value })}
+          aria-invalid={Boolean(draft.error(key)) || undefined}
+          onChange={(event) => draft.change(key, event.target.value)}
+          onBlur={() => draft.save(key)}
           disabled={pending}
         />
+        {draft.error(key) && (
+          <p role="alert" className="text-xs text-destructive">
+            {t('broker.settingInvalid', { error: draft.error(key) })}
+          </p>
+        )}
       </div>
     </div>
   );

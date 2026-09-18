@@ -30,6 +30,7 @@ import { AtnaCard } from '../components/AtnaCard';
 import { TlsCard } from '../components/TlsCard';
 import { RetentionCard } from '../components/RetentionCard';
 import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { validateSetting } from '../lib/setting-rules';
 
 const isTrue = (value: string) => ['true', '1', 'yes', 'on'].includes(value.trim().toLowerCase());
 
@@ -42,6 +43,8 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
   useEffect(() => setDraft(setting.value), [setting.value]);
 
   const dirty = draft !== setting.value;
+  // the same rules the server applies — the operator sees it before sending
+  const draftError = validateSetting(setting, draft);
   const label = t(`broker.setting_${setting.key}`, { defaultValue: setting.key });
 
   return (
@@ -113,13 +116,13 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
                 type={setting.kind === 'int' ? 'number' : setting.kind === 'url' ? 'url' : 'text'}
                 min={setting.kind === 'int' ? setting.min ?? undefined : undefined}
                 max={setting.kind === 'int' ? setting.max ?? undefined : undefined}
-                aria-invalid={Boolean(setValue.error) || undefined}
+                aria-invalid={Boolean(draftError) || Boolean(setValue.error) || undefined}
                 className="max-w-md font-mono text-sm"
                 placeholder={setting.default || t('broker.settingEmpty')}
               />
               <Button
                 size="sm"
-                disabled={pending || !dirty}
+                disabled={pending || !dirty || Boolean(draftError)}
                 onClick={() => setValue.mutate({ key: setting.key, value: draft })}
               >
                 <Save className="h-3.5 w-3.5 mr-1" />
@@ -131,6 +134,13 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
                 </p>
               )}
             </>
+          )}
+
+          {/* caught before sending — the server still has the last word */}
+          {draftError && (
+            <p role="alert" className="text-xs text-destructive break-words">
+              {t('broker.settingInvalid', { error: draftError })}
+            </p>
           )}
 
           {/* the server validates every value — say so instead of failing silently */}

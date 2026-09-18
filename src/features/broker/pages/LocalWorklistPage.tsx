@@ -16,6 +16,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
@@ -34,12 +41,47 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { brokerApi, type Hl7Parse, type LocalItem, type LocalItemIn } from '@/api/broker';
+import { AET_RE, UID_RE } from '../lib/setting-rules';
 import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useHl7Writes, useLocalItemWrites } from '../hooks/use-broker-local';
+
+/** Common DICOM modalities as suggestions — the field stays free text. */
+const MODALITIES = ['CT', 'MR', 'DX', 'CR', 'US', 'XA', 'NM', 'PT', 'MG', 'RF', 'OT'];
+
+/** The 'nothing selected' entry for the optional choice fields. */
+const EMPTY_CHOICE = '__none__';
+
+type FieldSpec = {
+  key: keyof LocalItemIn;
+  labelKey: string;
+  type?: 'text' | 'date' | 'time';
+  options?: string[];
+  hintKey?: string;
+  datalist?: string[];
+  pattern?: RegExp;
+};
+
+const FIELD_SPECS: FieldSpec[] = [
+  { key: 'accession', labelKey: 'broker.localAccession', hintKey: 'broker.localAccessionHint' },
+  { key: 'sps_id', labelKey: 'broker.localSpsId', hintKey: 'broker.localSpsIdHint' },
+  { key: 'patient_id', labelKey: 'broker.localPatientId' },
+  { key: 'patient_name', labelKey: 'broker.localPatientName', hintKey: 'broker.localPatientNameHint' },
+  { key: 'birth_date', labelKey: 'broker.localBirthDate', type: 'date' },
+  { key: 'sex', labelKey: 'broker.localSex', options: ['M', 'F', 'O'] },
+  { key: 'modality', labelKey: 'broker.localModality', datalist: MODALITIES,
+    hintKey: 'broker.localModalityHint' },
+  { key: 'station_aet', labelKey: 'broker.localStation', hintKey: 'broker.localStationHint',
+    pattern: AET_RE },
+  { key: 'scheduled_date', labelKey: 'broker.localDate', type: 'date' },
+  { key: 'scheduled_time', labelKey: 'broker.localTime', type: 'time' },
+  { key: 'procedure_description', labelKey: 'broker.localProcedure' },
+  { key: 'study_uid', labelKey: 'broker.localStudyUid', hintKey: 'broker.localStudyUidHint',
+    pattern: UID_RE },
+];
 
 const EMPTY: LocalItemIn = {
   accession: '', sps_id: '1', patient_id: '', patient_name: '', birth_date: '', sex: '',
@@ -82,6 +124,20 @@ export default function LocalWorklistPage() {
   const { apply } = useHl7Writes();
 
   const items = itemsQuery.data ?? [];
+
+  // the same rules the API applies — a typo must not create an item that never
+  // shows up in a worklist query
+  const fieldErrors: Partial<Record<keyof LocalItemIn, string>> = {};
+  if (editing) {
+    for (const spec of FIELD_SPECS) {
+      const value = String(editing[spec.key] ?? '').trim();
+      if (spec.key === 'accession' && !value) fieldErrors.accession = 'localAccessionRequired';
+      if (value && spec.pattern && !spec.pattern.test(value)) {
+        fieldErrors[spec.key] = spec.key === 'station_aet' ? 'localStationInvalid' : 'localUidInvalid';
+      }
+    }
+  }
+  const hasErrors = Object.keys(fieldErrors).length > 0;
 
   const save = () => {
     if (!editing) return;
@@ -323,28 +379,54 @@ export default function LocalWorklistPage() {
           </DialogHeader>
           {editing && (
             <div className="grid gap-3 sm:grid-cols-2">
-              {([
-                ['accession', t('broker.localAccession')],
-                ['sps_id', t('broker.localSpsId')],
-                ['patient_id', t('broker.localPatientId')],
-                ['patient_name', t('broker.localPatientName')],
-                ['birth_date', t('broker.localBirthDate')],
-                ['sex', t('broker.localSex')],
-                ['modality', t('broker.localModality')],
-                ['station_aet', t('broker.localStation')],
-                ['scheduled_date', t('broker.localDate')],
-                ['scheduled_time', t('broker.localTime')],
-                ['procedure_description', t('broker.localProcedure')],
-                ['study_uid', t('broker.localStudyUid')],
-              ] as [keyof LocalItemIn, string][]).map(([key, label]) => (
+              {FIELD_SPECS.map(({ key, labelKey, type, options, hintKey, datalist }) => (
                 <div key={key} className="space-y-1">
-                  <Label htmlFor={`local-${key}`}>{label}</Label>
-                  <Input
-                    id={`local-${key}`}
-                    className="font-mono text-xs"
-                    value={String(editing[key] ?? '')}
-                    onChange={(event) => setEditing({ ...editing, [key]: event.target.value })}
-                  />
+                  <Label htmlFor={`local-${key}`}>{t(labelKey)}</Label>
+                  {options ? (
+                    <Select
+                      value={String(editing[key] ?? '') || EMPTY_CHOICE}
+                      onValueChange={(value) => setEditing({
+                        ...editing, [key]: value === EMPTY_CHOICE ? '' : value,
+                      })}
+                    >
+                      <SelectTrigger id={`local-${key}`}><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={EMPTY_CHOICE}>{t('broker.localNotSet')}</SelectItem>
+                        {options.map((option) => (
+                          <SelectItem key={option} value={option}>{option}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <>
+                      <Input
+                        id={`local-${key}`}
+                        type={type ?? 'text'}
+                        list={datalist ? `local-${key}-options` : undefined}
+                        className="font-mono text-xs"
+                        aria-invalid={Boolean(fieldErrors[key]) || undefined}
+                        value={String(editing[key] ?? '')}
+                        onChange={(event) => setEditing({
+                          ...editing,
+                          [key]: key === 'station_aet'
+                            ? event.target.value.toUpperCase()
+                            : event.target.value,
+                        })}
+                      />
+                      {datalist && (
+                        <datalist id={`local-${key}-options`}>
+                          {datalist.map((option) => <option key={option} value={option} />)}
+                        </datalist>
+                      )}
+                    </>
+                  )}
+                  {(hintKey || fieldErrors[key]) && (
+                    <p
+                      className={fieldErrors[key] ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}
+                    >
+                      {fieldErrors[key] ? t(`broker.${fieldErrors[key]}`) : t(hintKey!)}
+                    </p>
+                  )}
                 </div>
               ))}
               <div className="flex items-center justify-between gap-3 sm:col-span-2">
@@ -365,7 +447,7 @@ export default function LocalWorklistPage() {
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </Button>
             <Button
-              disabled={!editing?.accession || create.isPending || update.isPending}
+              disabled={!editing?.accession || hasErrors || create.isPending || update.isPending}
               onClick={save}
             >
               {t('broker.save')}

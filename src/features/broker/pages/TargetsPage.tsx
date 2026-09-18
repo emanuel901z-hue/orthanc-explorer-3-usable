@@ -225,7 +225,11 @@ export default function TargetsPage() {
         open={deleting !== null}
         onOpenChange={(open) => { if (!open) setDeleting(null); }}
         itemName={deleting?.name ?? ''}
-        warning={t('broker.confirmDeleteDependenciesTarget')}
+        warning={
+          deleting?.is_default
+            ? `${t('broker.confirmDeleteDependenciesTarget')} ${t('broker.targetDefaultWarning')}`
+            : t('broker.confirmDeleteDependenciesTarget')
+        }
         pending={remove.isPending}
         onConfirm={() => {
           if (!deleting) return;
