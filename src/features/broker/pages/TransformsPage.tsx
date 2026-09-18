@@ -43,6 +43,7 @@ import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
+import { clearDraft, loadDraft, useDraftPersistence, useUnsavedWarning } from '../hooks/use-form-draft';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { OperationsEditor } from '../components/OperationsEditor';
@@ -128,6 +129,7 @@ export default function TransformsPage() {
 
   const dirty = dialogOpen && form.name !== '' && form.name !== (editing?.name ?? '');
   const guard = useDiscardGuard(dirty, () => { setDialogOpen(false); setEditing(null); });
+  useUnsavedWarning(dirty);
 
   const submit = () => {
     setSubmitted(true);

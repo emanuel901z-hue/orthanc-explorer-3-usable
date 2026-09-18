@@ -7,6 +7,7 @@
  */
 import { brokerApi } from '@/api/broker';
 import { CONFIG_KEYS, useAuditedMutation } from './use-broker-writes';
+import i18n from '@/i18n';
 
 const TLS_KEYS = [...CONFIG_KEYS, ['broker', 'tls']];
 
@@ -18,6 +19,7 @@ export function useTlsWrites() {
       brokerApi.tls.generate(body),
     resourceId: (body) => body.common_name,
     invalidate: TLS_KEYS,
+    successMessage: i18n.t('broker.saved'),
   });
 
   const test = useAuditedMutation({
@@ -27,6 +29,7 @@ export function useTlsWrites() {
       brokerApi.tls.test(body),
     resourceId: (body) => `${body.host}:${body.port}`,
     invalidate: TLS_KEYS,
+    successMessage: i18n.t('broker.saved'),
   });
 
   return { generate, test };

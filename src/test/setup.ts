@@ -1,4 +1,15 @@
 import "@testing-library/jest-dom";
+import { beforeEach } from "vitest";
+
+// Form drafts live in sessionStorage (so Back/F5 keep the input). jsdom shares
+// it between tests in the same file — start every test with a clean slate.
+beforeEach(() => {
+  try {
+    sessionStorage.clear();
+  } catch {
+    /* not available */
+  }
+});
 
 // jsdom does not implement the Pointer Capture API, which Radix primitives
 // (Select, Dialog, Switch, …) rely on. Without these stubs any pointer

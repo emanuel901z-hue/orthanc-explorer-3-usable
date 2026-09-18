@@ -33,7 +33,7 @@ export default defineConfig({
   projects: [
     {
       name: 'desktop',
-      testMatch: /(stack-viewport|broker-config)\.spec\.ts/,
+      testMatch: /(stack-viewport|broker-config|mfa-journey)\.spec\.ts/,
       use: {
         viewport: { width: 1280, height: 800 },
         deviceScaleFactor: 1,
@@ -41,7 +41,7 @@ export default defineConfig({
     },
     {
       name: 'mobile',
-      testMatch: /(stack-viewport|broker-config)\.spec\.ts/,
+      testMatch: /(stack-viewport|broker-config|mfa-journey)\.spec\.ts/,
       use: {
         viewport: { width: 375, height: 812 },
         deviceScaleFactor: 2,

@@ -6,6 +6,7 @@
  */
 import { brokerApi, type ConfigDocument } from '@/api/broker';
 import { CONFIG_KEYS, useAuditedMutation } from './use-broker-writes';
+import i18n from '@/i18n';
 
 const AUDIT_KEYS = [...CONFIG_KEYS, ['broker', 'audit']];
 
@@ -16,6 +17,7 @@ export function useBrokerAuditWrites() {
     run: (auditId: number) => brokerApi.audit.rollback(auditId),
     resourceId: (auditId) => String(auditId),
     invalidate: AUDIT_KEYS,
+    successMessage: i18n.t('broker.saved'),
   });
 
   const importConfig = useAuditedMutation({
@@ -27,6 +29,7 @@ export function useBrokerAuditWrites() {
       `${doc.sources?.length ?? 0}s/${doc.targets?.length ?? 0}t/`
       + `${doc.rules?.length ?? 0}r/${doc.transforms?.length ?? 0}m`,
     invalidate: AUDIT_KEYS,
+    successMessage: i18n.t('broker.saved'),
   });
 
   return { rollback, importConfig };

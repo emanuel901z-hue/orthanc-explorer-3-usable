@@ -993,7 +993,7 @@
     "confirmDeleteTitle": "Delete configuration entry?",
     "confirmDeleteBody": "\"{{name}}\" will be removed. This cannot be undone.",
     "errRequired": "Required",
-    "errAet": "1-16 chars, A-Z 0-9 _ -",
+    "errAet": "AE title: 1-16 characters, only A-Z 0-9 _ - (upper case)",
     "errPort": "1-65535",
     "errTimeout": "1-120 seconds",
     "errOperationTag": "Every operation needs a DICOM tag",
@@ -1386,7 +1386,8 @@
     "duplicateRule": "A rule for this source and target already exists.",
     "resetForm": "Reset",
     "tagInvalid": "DICOM tag or keyword expected, e.g. (0010,0010) or PatientName.",
-    "i18nBrokerNote": "The broker section is currently available in German and English; other languages fall back to English."
+    "i18nBrokerNote": "The broker section is currently available in German and English; other languages fall back to English.",
+    "errHost": "Enter the address only: no spaces, no slashes, no http://."
   },
   "shortcuts": {
     "nav": {

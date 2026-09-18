@@ -45,6 +45,7 @@ import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
+import { clearDraft, loadDraft, useDraftPersistence, useUnsavedWarning } from '../hooks/use-form-draft';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useStationRuleWrites } from '../hooks/use-broker-stations';
@@ -113,7 +114,11 @@ export default function StationsPage() {
       <Button
         variant="ghost" size="sm" className="h-9 w-9 p-0"
         aria-label={t('broker.edit')}
-        onClick={() => { setEditing({ ...rule }); setEditId(rule.id); }}
+        onClick={() => {
+          const draft = loadDraft<StationRuleIn>(`station-${rule.id}`);
+          setEditing(draft ? { ...EMPTY, ...draft } : { ...rule });
+          setEditId(rule.id);
+        }}
       >
         <Pencil className="h-4 w-4" />
       </Button>
@@ -138,13 +143,19 @@ export default function StationsPage() {
   const pristine = pristineRule ? { ...EMPTY, ...pristineRule } : EMPTY;
   const dirty = Boolean(editing) && JSON.stringify(editing) !== JSON.stringify(pristine);
   const guard = useDiscardGuard(dirty, () => { setEditing(null); setEditId(null); });
+  useDraftPersistence(`station-${editId ?? 'new'}`, editing, dirty);
+  useUnsavedWarning(Boolean(editing) && dirty);
 
   return (
     <BrokerPageShell
       titleKey="broker.stationTitle"
       subtitleKey="broker.stationSubtitle"
       actions={
-        <Button size="sm" onClick={() => { setEditing({ ...EMPTY }); setEditId(null); }}>
+        <Button size="sm" onClick={() => {
+          const draft = loadDraft<StationRuleIn>('station-new');
+          setEditing(draft ? { ...EMPTY, ...draft } : { ...EMPTY });
+          setEditId(null);
+        }}>
           <Plus className="h-4 w-4 mr-1" />
           {t('broker.stationAdd')}
         </Button>

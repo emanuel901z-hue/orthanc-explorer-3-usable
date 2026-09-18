@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { DiscardConfirm, useDiscardGuard } from './DiscardConfirm';
+import { clearDraft, loadDraft, useDraftPersistence, useUnsavedWarning } from '../hooks/use-form-draft';
 import {
   Select,
   SelectContent,
@@ -32,6 +33,8 @@ export type NodeFormValues = BrokerSourceIn & { is_default?: boolean };
 
 const COMMON_CHARSETS = ['ISO_IR 100', 'ISO_IR 192', 'ISO_IR 6', 'ISO_IR 144', 'ISO_IR 148'];
 const AET_RE = /^[A-Z0-9_-]{1,16}$/;
+/** Hostname, IP address or docker service name — no scheme, no spaces, no path. */
+const HOST_RE = /^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$/;
 
 const DEFAULTS: NodeFormValues = {
   name: '',
@@ -74,7 +77,9 @@ function validate(values: NodeFormValues): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!values.name.trim()) errors.name = 'required';
   if (!AET_RE.test(values.aet)) errors.aet = 'aet';
-  if (!values.host.trim()) errors.host = 'host';
+  // an empty host is a missing entry, a host with spaces is a wrong one
+  if (!values.host.trim()) errors.host = 'required';
+  else if (!HOST_RE.test(values.host.trim())) errors.host = 'host';
   if (!Number.isInteger(values.port) || values.port < 1 || values.port > 65535) errors.port = 'port';
   if (values.calling_aet && !AET_RE.test(values.calling_aet)) errors.calling_aet = 'aet';
   if (values.timeout_s !== undefined && (values.timeout_s < 1 || values.timeout_s > 120)) {
@@ -105,6 +110,8 @@ export function NodeFormDialog({
   onSubmit: (values: NodeFormValues) => void;
 }) {
   const { t } = useTranslation();
+  // the draft lives in sessionStorage: Back/F5 must not throw the input away
+  const draftKey = `node-${kind}-${initial?.id ?? 'new'}`;
   const [values, setValues] = useState<NodeFormValues>(DEFAULTS);
   const [submitted, setSubmitted] = useState(false);
 
@@ -115,7 +122,9 @@ export function NodeFormDialog({
     if (!open) return;
     setSubmitted(false);
     setKnown(siblings);
-    setValues(initial ? fromRow(kind, initial) : DEFAULTS);
+    // an unfinished draft wins over the stored row — the operator typed it
+    const draft = loadDraft<NodeFormValues>(draftKey);
+    setValues(draft ?? (initial ? fromRow(kind, initial) : DEFAULTS));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initial, kind]);
 
@@ -128,9 +137,23 @@ export function NodeFormDialog({
   const pristine = initial ? fromRow(kind, initial) : DEFAULTS;
   const dirty = JSON.stringify(values) !== JSON.stringify(pristine);
   const guard = useDiscardGuard(dirty, () => onOpenChange(false));
+  // a reload/tab close with unsaved input asks first
+  useUnsavedWarning(open && dirty);
+  // keep the draft while the operator types, drop it once it is obsolete
+  const dropDraft = useDraftPersistence(draftKey, values, open && dirty);
   const set = <K extends keyof NodeFormValues>(key: K, value: NodeFormValues[K]) =>
     setValues((v) => ({ ...v, [key]: value }));
-  const showError = (field: string) => submitted && errors[field];
+
+  // the dialog was closed after a valid submit → the draft is obsolete
+  useEffect(() => {
+    if (!open && submitted && Object.keys(errors).length === 0) dropDraft();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+  // a field that was filled and left invalid gets its hint immediately — the
+  // operator should not have to press Save to learn what is wrong
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const showError = (field: string) =>
+    errors[field] && (submitted || touched[field] || values[field as keyof NodeFormValues] !== '');
 
   return (
     <Dialog open={open} onOpenChange={guard.requestClose}>
@@ -155,7 +178,9 @@ export function NodeFormDialog({
               onChange={(e) => set('name', e.target.value)}
               placeholder="ris-a"
             />
-            {showError('name') && <p className="text-xs text-destructive">{t('broker.errRequired')}</p>}
+            {showError('name') && (
+              <p role="alert" className="text-xs text-destructive">{t('broker.errRequired')}</p>
+            )}
           </div>
 
           <div className="space-y-1">
@@ -167,7 +192,9 @@ export function NodeFormDialog({
               placeholder="RIS_A"
               className="font-mono"
             />
-            {showError('aet') && <p className="text-xs text-destructive">{t('broker.errAet')}</p>}
+            {showError('aet') && (
+              <p role="alert" className="text-xs text-destructive">{t('broker.errAet')}</p>
+            )}
             {clash && !showError('aet') && (
               <p role="alert" className="text-xs text-amber-600">
                 {t('broker.duplicateAet', { name: clash.name })}
@@ -184,7 +211,11 @@ export function NodeFormDialog({
               placeholder="ris-a.hospital.local"
               className="font-mono"
             />
-            {showError('host') && <p className="text-xs text-destructive">{t('broker.errRequired')}</p>}
+            {showError('host') && (
+              <p role="alert" className="text-xs text-destructive">
+                {errors.host === 'required' ? t('broker.errRequired') : t('broker.errHost')}
+              </p>
+            )}
           </div>
 
           <div className="space-y-1">
@@ -197,7 +228,9 @@ export function NodeFormDialog({
               value={values.port}
               onChange={(e) => set('port', Number(e.target.value))}
             />
-            {showError('port') && <p className="text-xs text-destructive">{t('broker.errPort')}</p>}
+            {showError('port') && (
+              <p role="alert" className="text-xs text-destructive">{t('broker.errPort')}</p>
+            )}
           </div>
 
           <div className="space-y-1">
@@ -208,7 +241,9 @@ export function NodeFormDialog({
               onChange={(e) => set('calling_aet', e.target.value.toUpperCase())}
               className="font-mono"
             />
-            {showError('calling_aet') && <p className="text-xs text-destructive">{t('broker.errAet')}</p>}
+            {showError('calling_aet') && (
+              <p role="alert" className="text-xs text-destructive">{t('broker.errAet')}</p>
+            )}
           </div>
 
           {kind === 'source' && (
@@ -372,7 +407,7 @@ export function NodeFormDialog({
       <DiscardConfirm
         open={guard.confirmOpen}
         onOpenChange={guard.setConfirmOpen}
-        onDiscard={() => { guard.setConfirmOpen(false); guard.close(); }}
+        onDiscard={() => { guard.setConfirmOpen(false); dropDraft(); guard.close(); }}
       />
     </Dialog>
   );

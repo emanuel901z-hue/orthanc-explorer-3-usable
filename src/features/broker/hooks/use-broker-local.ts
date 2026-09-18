@@ -6,6 +6,7 @@
  */
 import { brokerApi, type LocalItemIn } from '@/api/broker';
 import { CONFIG_KEYS, useAuditedMutation } from './use-broker-writes';
+import i18n from '@/i18n';
 
 const LOCAL_KEYS = [...CONFIG_KEYS, ['broker', 'local-items'], ['broker', 'hl7']];
 
@@ -16,6 +17,7 @@ export function useLocalItemWrites() {
     run: (body: LocalItemIn) => brokerApi.localItems.create(body),
     resourceId: (body) => body.accession,
     invalidate: LOCAL_KEYS,
+    successMessage: i18n.t('broker.saved'),
   });
 
   const update = useAuditedMutation({
@@ -25,6 +27,7 @@ export function useLocalItemWrites() {
       brokerApi.localItems.update(id, body),
     resourceId: ({ body }) => body.accession,
     invalidate: LOCAL_KEYS,
+    successMessage: i18n.t('broker.saved'),
   });
 
   const remove = useAuditedMutation({
@@ -33,6 +36,7 @@ export function useLocalItemWrites() {
     run: (id: number) => brokerApi.localItems.remove(id),
     resourceId: (id) => String(id),
     invalidate: LOCAL_KEYS,
+    successMessage: i18n.t('broker.saved'),
   });
 
   return { create, update, remove };
@@ -46,6 +50,7 @@ export function useHl7Writes() {
       brokerApi.hl7.orm(message, dryRun),
     resourceId: (args, result) => result?.accession ?? args.dryRun ? 'dry-run' : 'orm',
     invalidate: LOCAL_KEYS,
+    successMessage: i18n.t('broker.saved'),
   });
 
   return { apply };

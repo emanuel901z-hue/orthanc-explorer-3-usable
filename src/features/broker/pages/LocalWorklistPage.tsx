@@ -46,6 +46,7 @@ import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
+import { clearDraft, loadDraft, useDraftPersistence, useUnsavedWarning } from '../hooks/use-form-draft';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useHl7Writes, useLocalItemWrites } from '../hooks/use-broker-local';
@@ -143,6 +144,9 @@ export default function LocalWorklistPage() {
   const pristine = pristineItem ? { ...EMPTY, ...pristineItem } : EMPTY;
   const dirty = Boolean(editing) && JSON.stringify(editing) !== JSON.stringify(pristine);
   const guard = useDiscardGuard(dirty, () => { setEditing(null); setEditId(null); });
+  // keep the draft while the operator types (Back/F5 must not lose it)
+  useDraftPersistence(`local-${editId ?? 'new'}`, editing, dirty);
+  useUnsavedWarning(Boolean(editing) && dirty);
 
   const save = () => {
     if (!editing) return;
@@ -163,7 +167,12 @@ export default function LocalWorklistPage() {
       <Button
         variant="ghost" size="sm" className="h-9 w-9 p-0"
         aria-label={t('broker.edit')}
-        onClick={() => { setEditing({ ...EMPTY, ...item }); setEditId(item.id); }}
+        onClick={() => {
+          // an unfinished draft for this entry wins over the stored values
+          const draft = loadDraft<LocalItemIn>(`local-${item.id}`);
+          setEditing(draft ? { ...EMPTY, ...draft } : { ...EMPTY, ...item });
+          setEditId(item.id);
+        }}
       >
         <Pencil className="h-4 w-4" />
       </Button>
@@ -184,7 +193,11 @@ export default function LocalWorklistPage() {
       actions={
         <Button
           size="sm"
-          onClick={() => { setEditing({ ...EMPTY }); setEditId(null); }}
+          onClick={() => {
+            const draft = loadDraft<LocalItemIn>('local-new');
+            setEditing(draft ? { ...EMPTY, ...draft } : { ...EMPTY });
+            setEditId(null);
+          }}
         >
           <Plus className="h-4 w-4 mr-1" />
           {t('broker.localAdd')}

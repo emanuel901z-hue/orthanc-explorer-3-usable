@@ -42,6 +42,7 @@ import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
+import { clearDraft, loadDraft, useDraftPersistence, useUnsavedWarning } from '../hooks/use-form-draft';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useBrokerRuleWrites } from '../hooks/use-broker-writes';
@@ -100,6 +101,7 @@ export default function RulesPage() {
     ? { source_id: editing.source_id, target_id: editing.target_id, priority: editing.priority, enabled: editing.enabled }
     : EMPTY_FORM);
   const guard = useDiscardGuard(dirty, () => { setDialogOpen(false); setEditing(null); });
+  useUnsavedWarning(dirty);
 
   // the same source+target twice would be ambiguous
   const duplicate = rules.find((rule) => rule.source_id === form.source_id
@@ -294,7 +296,7 @@ export default function RulesPage() {
                 </SelectContent>
               </Select>
               {submitted && form.source_id === null && (
-                <p className="text-xs text-destructive">{t('broker.errRequired')}</p>
+                <p role="alert" className="text-xs text-destructive">{t('broker.errRequired')}</p>
               )}
             </div>
 
@@ -316,7 +318,7 @@ export default function RulesPage() {
                 </SelectContent>
               </Select>
               {submitted && form.target_id === null && (
-                <p className="text-xs text-destructive">{t('broker.errRequired')}</p>
+                <p role="alert" className="text-xs text-destructive">{t('broker.errRequired')}</p>
               )}
             </div>
 
