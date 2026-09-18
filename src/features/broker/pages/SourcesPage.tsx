@@ -74,6 +74,7 @@ export default function SourcesPage() {
 
   return (
     <BrokerPageShell
+      helpId="sources"
       titleKey="broker.sourcesTitle"
       subtitleKey="broker.sourcesSubtitle"
       actions={

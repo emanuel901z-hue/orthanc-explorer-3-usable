@@ -1387,7 +1387,157 @@
     "resetForm": "Zurücksetzen",
     "tagInvalid": "DICOM-Tag oder Schlüsselwort erwartet, z. B. (0010,0010) oder PatientName.",
     "i18nBrokerNote": "Der Broker-Bereich ist derzeit auf Deutsch und Englisch verfügbar; andere Sprachen fallen auf Englisch zurück.",
-    "errHost": "Nur die Adresse eingeben: keine Leerzeichen, keine Schrägstriche, kein http://."
+    "errHost": "Nur die Adresse eingeben: keine Leerzeichen, keine Schrägstriche, kein http://.",
+    "helpButton": "Was ist das?",
+    "helpIntro": "Kurz erklärt: wofür die Seite ist, was Sie eintragen und was typischerweise schiefgeht.",
+    "helpWhat": "Worum geht es?",
+    "helpHow": "Was trage ich ein?",
+    "helpWrong": "Was geht am häufigsten schief?",
+    "help_sources_title": "Vorhandene Quellen (RIS/KIS)",
+    "help_sources_what": [
+      "Der Broker führt die Arbeitsliste nicht selbst — er fragt Ihre RIS/KIS-Systeme und gibt die Antworten an das Gerät weiter.",
+      "Jedes System, das abgefragt wird, ist hier eine Quelle. Das Gerät spricht nur mit dem Broker."
+    ],
+    "help_sources_how": [
+      "Name: ein beliebiger Name, den Sie wiedererkennen (z. B. „ris-haupt\"). Er erscheint nur hier und im Protokoll.",
+      "AET: der Name, den das RIS erwartet — Großbuchstaben, 1–16 Zeichen, nur A–Z 0–9 _ -.",
+      "Host und Port: Adresse und DICOM-Port des RIS. Fragen Sie im Zweifel Ihren RIS-Lieferanten.",
+      "Priorität: kleinere Zahl = zuerst gefragt. Wenn zwei Quellen denselben Auftrag kennen, gewinnt die kleinere Zahl."
+    ],
+    "help_sources_wrong": [
+      "Die Adresse als Satz eingetragen („ris server 1\") oder mit http:// — hier gehört nur die Adresse hin.",
+      "AET in Kleinbuchstaben: DICOM erwartet Großbuchstaben (das Feld korrigiert das automatisch).",
+      "Dieselbe AET zweimal — zwei Systeme mit gleichem Namen sind nicht unterscheidbar (Hinweis erscheint beim Tippen).",
+      "Nach dem Speichern den C-ECHO-Knopf in der Liste nutzen: er beweist, dass der Broker das System wirklich erreicht."
+    ],
+    "help_targets_title": "PACS-Ziele",
+    "help_targets_what": [
+      "Bilder, die das Gerät an den Broker schickt, werden an ein PACS weitergeleitet.",
+      "Ein Ziel ist ein PACS. Genau eines sollte als Standard markiert sein."
+    ],
+    "help_targets_how": [
+      "AET, Host und Port des PACS — dieselben drei Werte wie in der PACS-Konfiguration.",
+      "Standard: „ja\" für das PACS, das alles ohne Sonderregel bekommen soll."
+    ],
+    "help_targets_wrong": [
+      "Das Standard-Ziel löschen: danach haben Bilder ohne Routing-Regel überhaupt kein Ziel mehr.",
+      "Zwei Standard-Ziele: welches gewinnt, ist dann Glückssache — genau eines behalten.",
+      "Kein C-ECHO-Test nach einer Adressänderung: Bilder werden dann still gepuffert statt zugestellt."
+    ],
+    "help_rules_title": "Routing-Regeln",
+    "help_rules_what": [
+      "Eine Regel entscheidet, welches PACS Bilder aus welcher Quelle bekommt (z. B. alles aus dem Notfall-RIS ins Notfall-PACS).",
+      "Ohne passende Regel gehen Bilder an das Standard-Ziel."
+    ],
+    "help_rules_how": [
+      "Quelle: woher die Bilder kommen (inklusive der Pseudo-Quelle „local\" für Notfälle).",
+      "Ziel: welches PACS sie bekommen soll.",
+      "Priorität: wenn mehrere Regeln passen, gewinnt die kleinste Zahl."
+    ],
+    "help_rules_wrong": [
+      "Zwei Regeln für dieselbe Quelle und dasselbe Ziel — das ist mehrdeutig und wird hier blockiert.",
+      "Eine Regel, die eigentlich für ein einzelnes Gerät gedacht war, aber für die ganze Quelle gilt: Vorschau auf der Stationsseite prüfen.",
+      "Nur in der Produktion testen: Regel anlegen, ein Bild senden, dann ins Store-Log schauen."
+    ],
+    "help_transforms_title": "Modify-Regeln (DICOM-Felder)",
+    "help_transforms_what": [
+      "Vor dem Weiterleiten kann der Broker einzelne DICOM-Felder ändern — z. B. den Institutionsnamen ergänzen oder eine Zugangsnummer kürzen.",
+      "Das betrifft nur Metadaten; das Bild selbst wird nie verändert."
+    ],
+    "help_transforms_how": [
+      "Name: wofür die Regel ist (z. B. „Institutionsname setzen\").",
+      "Tag: entweder ein Schlüsselwort (PatientName) oder die Nummer in der Form (0010,0010).",
+      "Operation: setzen, entfernen, Präfix, Suffix, ersetzen oder aus einem anderen Tag kopieren."
+    ],
+    "help_transforms_wrong": [
+      "Ein Tag, den es nicht gibt — das Feld meldet das sofort.",
+      "Eine UID ändern: das lehnt der Broker ab, weil die Verknüpfung zu den Bildern brechen würde.",
+      "Nicht testen: erst die Simulation auf der Übersichtsseite nutzen, bevor echte Bilder durchlaufen."
+    ],
+    "help_stations_title": "Stationsregeln",
+    "help_stations_what": [
+      "Jede Konsole soll nur ihre eigene Arbeitsliste sehen. Eine Stationsregel legt fest, welche Quellen eine Konsole sehen darf.",
+      "Die Regel greift über die AET, die das Gerät mitschickt."
+    ],
+    "help_stations_how": [
+      "Stations-AET: genau so wie im Gerät konfiguriert (oder * für alle Stationen).",
+      "Modus: „deny\" verbirgt die genannten Quellen, „allow\" zeigt nur die genannten.",
+      "Priorität: bestimmt die Reihenfolge, in der die Quellen für diese Konsole zusammengeführt werden."
+    ],
+    "help_stations_wrong": [
+      "Modus „allow\" ohne Quelle: diese Konsole sieht dann eine leere Arbeitsliste (Warnung erscheint).",
+      "Ein Tippfehler in der AET: die Regel greift einfach nie — Schreibweise im Gerät prüfen.",
+      "Vorschau-Knopf nutzen: er zeigt, was diese Konsole gerade bekommen würde."
+    ],
+    "help_worklist_title": "Lokale Arbeitsliste und HL7-Aufträge",
+    "help_worklist_what": [
+      "Notfälle und ungeplante Untersuchungen stehen in keinem RIS. Der Broker führt sie hier und mischt sie in jede Arbeitslisten-Antwort.",
+      "Aufträge können auch automatisch als HL7-Nachricht ankommen (vom RIS oder vom Aufnahmesystem)."
+    ],
+    "help_worklist_how": [
+      "Zugangsnummer: Pflichtfeld — danach sucht das Gerät.",
+      "Patientenname in DICOM-Form: Nachname^Vorname (z. B. Mueller^Hans).",
+      "Datum und Uhrzeit: die Picker benutzen; der Eintrag passt nur zu dem Tag, den Sie hier setzen.",
+      "Station leer lassen, damit der Eintrag für jede Konsole sichtbar ist."
+    ],
+    "help_worklist_wrong": [
+      "Ein Datum von Hand statt über den Picker — dann taucht der Eintrag an diesem Tag nie auf.",
+      "Zugangsnummer fehlt: das Gerät findet den Eintrag nicht.",
+      "Gültigkeit vergessen: ohne Ablaufdatum bleibt der Eintrag stehen, bis er gelöscht wird."
+    ],
+    "help_spool_title": "Sendewarteschlange (Spool)",
+    "help_spool_what": [
+      "Ist ein PACS nicht erreichbar, behält der Broker die Bilder und schickt sie später — nichts geht verloren.",
+      "Diese Seite zeigt, was wartet, was wiederholt wird und was nicht zugestellt werden konnte."
+    ],
+    "help_spool_how": [
+      "Nach Status filtern, um nur das Nötige zu sehen („dead\" = Zustellung mehrfach fehlgeschlagen).",
+      "Erneut senden schickt einen Eintrag nochmal — sinnvoll, sobald das PACS erreichbar ist.",
+      "Verwerfen löscht einen Eintrag endgültig; eine Begründung ist Pflicht und landet im Änderungsprotokoll."
+    ],
+    "help_spool_wrong": [
+      "Verwerfen statt erneut senden: das Bild ist dann aus der Warteschlange weg.",
+      "Ein voller Spool heißt: das PACS ist lange nicht erreichbar — zuerst das Health-Panel prüfen."
+    ],
+    "help_audit_title": "Änderungsprotokoll",
+    "help_audit_what": [
+      "Jede Konfigurationsänderung wird hier mit Zeit, Benutzer und den geänderten Werten festgehalten.",
+      "Das ist die Spur für „wer hat wann was geändert?\" — und der Weg zurück, wenn etwas schiefging."
+    ],
+    "help_audit_how": [
+      "Eintrag öffnen, um den Unterschied vorher/nachher zu sehen.",
+      "Zurücksetzen stellt den Zustand vor dieser Änderung wieder her.",
+      "Export/Import überträgt eine ganze Konfiguration zwischen Installationen (Import zeigt immer erst eine Vorschau)."
+    ],
+    "help_audit_wrong": [
+      "Eine Änderung zurücknehmen, auf der spätere Änderungen aufbauen — danach den aktuellen Stand prüfen.",
+      "Eine Konfiguration importieren, ohne die Vorschau zu lesen: sie überschreibt passende Einträge."
+    ],
+    "help_settings_title": "Laufzeiteinstellungen",
+    "help_settings_how": [
+      "Jede Zeile zeigt den aktuellen Wert und woher er kommt („.env\" = Vorgabe der Installation, „override\" = hier geändert).",
+      "Speichern wirkt sofort; „Zurücksetzen\" stellt die Vorgabe wieder her.",
+      "Bei Zahlen steht der erlaubte Bereich darunter."
+    ],
+    "help_settings_wrong": [
+      "Ein Wert außerhalb des Bereichs: das Feld sagt es und blockiert das Speichern.",
+      "Vergessen, dass eine Änderung sofort wirkt — Echo-Intervall, Cache und Spool reagieren unmittelbar."
+    ],
+    "help_overview_title": "Broker-Übersicht",
+    "help_overview_what": [
+      "Der Broker sitzt zwischen den Geräten und Ihrem RIS/PACS: Er sammelt die Arbeitslisten ein und leitet die Bilder weiter.",
+      "Diese Seite zeigt auf einen Blick, ob alles erreichbar ist und ob etwas wartet."
+    ],
+    "help_overview_how": [
+      "Grün „ok\" neben einer Quelle oder einem Ziel heißt: Der C-ECHO-Test war gerade erfolgreich.",
+      "Die Karten darunter zeigen, was Aufmerksamkeit braucht: nicht erreichbare Systeme, wartende Bilder, zwischengespeicherte Arbeitslisten.",
+      "Über die Seitenleiste konfigurieren Sie: Quellen (RIS), Ziele (PACS), Regeln, Stationsregeln, Einstellungen."
+    ],
+    "help_overview_wrong": [
+      "Rote oder graue Einträge zuerst ansehen — eine leere Arbeitsliste an der Konsole heißt meist: eine Quelle ist nicht erreichbar.",
+      "Wachsende Spool-Einträge heißen: Das PACS ist nicht erreichbar.",
+      "Wenn etwas falsch konfiguriert wurde, führt das Änderungsprotokoll auf der Audit-Seite zurück."
+    ]
   },
   "shortcuts": {
     "nav": {

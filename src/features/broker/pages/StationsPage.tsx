@@ -148,6 +148,7 @@ export default function StationsPage() {
 
   return (
     <BrokerPageShell
+      helpId="stations"
       titleKey="broker.stationTitle"
       subtitleKey="broker.stationSubtitle"
       actions={

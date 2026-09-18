@@ -108,6 +108,7 @@ export default function SpoolPage() {
 
   return (
     <BrokerPageShell
+      helpId="spool"
       titleKey="broker.spoolPageTitle"
       subtitleKey="broker.spoolPageSubtitle"
       actions={

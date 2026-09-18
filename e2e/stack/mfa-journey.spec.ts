@@ -88,6 +88,20 @@ test.describe('MFA journey: an untrained user sets up and operates the broker', 
       && sidebarEntries.some((entry) => /target|ziel/i.test(entry)),
       `${sidebarEntries.length} Einträge`);
 
+    // 1b. Findet ein Neuling eine Erklärung, ohne das Haus zu verlassen?
+    const helpButton = page.getByTestId('page-help').first();
+    let helpText = '';
+    if (await helpButton.count()) {
+      await helpButton.click();
+      const helpDialog = page.getByTestId('page-help-dialog').first();
+      await helpDialog.waitFor({ timeout: 5000 }).catch(() => {});
+      helpText = (await helpDialog.innerText().catch(() => '')) || '';
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(200);
+    }
+    record('1 Orientierung', 'Jede Seite hat eine verständliche „Was ist das?"-Hilfe',
+      helpText.length > 120, `${helpText.length} Zeichen Hilfetext`);
+
     // ── 2. Quelle anlegen — mit den typischen Anfängerfehlern ─────────────
     await openPage(page, '/oe3/broker/sources', /upstream sources|upstream-quellen/i);
     await page.getByRole('button', { name: /add source|quelle hinzufügen/i }).first().click();

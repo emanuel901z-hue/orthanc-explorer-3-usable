@@ -34,6 +34,7 @@ import { CaseCheckPanel } from '../components/CaseCheckPanel';
 import { CacheCard } from '../components/CacheCard';
 import { SpoolCard } from '../components/SpoolCard';
 import { RbacBanner } from '../components/RbacBanner';
+import { PageHelp } from '../components/PageHelp';
 import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
 
 export default function BrokerPage() {
@@ -106,12 +107,15 @@ export default function BrokerPage() {
 
   return (
     <div className="p-3 sm:p-4 md:p-6 space-y-4 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <RadioTower className="h-6 w-6" />
-          {t('broker.title')}
-        </h1>
-        <p className="text-sm text-muted-foreground">{t('broker.subtitle')}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <RadioTower className="h-6 w-6" />
+            {t('broker.title')}
+          </h1>
+          <p className="text-sm text-muted-foreground">{t('broker.subtitle')}</p>
+        </div>
+        <PageHelp helpId="overview" />
       </div>
 
       {statusQuery.isError && (

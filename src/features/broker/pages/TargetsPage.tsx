@@ -72,6 +72,7 @@ export default function TargetsPage() {
 
   return (
     <BrokerPageShell
+      helpId="targets"
       titleKey="broker.targetsTitle"
       subtitleKey="broker.targetsSubtitle"
       actions={

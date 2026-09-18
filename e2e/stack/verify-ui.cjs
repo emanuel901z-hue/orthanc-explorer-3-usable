@@ -284,6 +284,26 @@ async function domReport(page) {
   await page.getByRole('button', { name: /discard|verwerfen/i }).last().click().catch(() => {});
   await page.waitForTimeout(400);
 
+  // "what is this?" help on every broker page
+  const helpPages = ['/oe3/broker', '/oe3/broker/sources', '/oe3/broker/targets',
+    '/oe3/broker/rules', '/oe3/broker/transforms', '/oe3/broker/stations',
+    '/oe3/broker/worklist', '/oe3/broker/spool', '/oe3/broker/audit', '/oe3/broker/settings'];
+  let helpOk = 0;
+  for (const path of helpPages) {
+    await page.goto(`${OE3}${path}`, { waitUntil: 'domcontentloaded' });
+    const button = page.getByTestId('page-help').first();
+    if (!(await button.count())) continue;
+    await button.click();
+    const dialog = page.getByTestId('page-help-dialog').first();
+    await dialog.waitFor({ timeout: 5000 }).catch(() => {});
+    const text = (await dialog.innerText().catch(() => '')) || '';
+    if (text.length > 120) helpOk += 1;
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+  }
+  record('Hilfe: jede Broker-Seite erklärt sich', helpOk >= helpPages.length - 1,
+    `${helpOk}/${helpPages.length} Seiten mit Hilfetext`);
+
   // P2 fix: closing a form with unsaved input asks first
   await page.goto(`${OE3}/oe3/broker/sources`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: /add source|quelle hinzufügen/i }).first().click();

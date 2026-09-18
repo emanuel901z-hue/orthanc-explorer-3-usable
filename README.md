@@ -45,6 +45,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
 | **Study Sharing** | Share studies via Orthanc Shares plugin or instant viewer link. Share by email, copy link, expiration date, description. |
 | **Worklists** | DICOM Modality Worklist Management — list, upload, delete worklists via dedicated page and API. |
+| **MWL Broker — Page help & drafts** | Every broker page answers "what is this?" in plain words — what the page is for, what to fill in and what usually goes wrong (including the traps: an address typed as a sentence, mode `allow` without a source, deleting the default target). Unfinished forms survive Back/F5 in `sessionStorage` and expire after an hour. |
 | **MWL Broker — DAU hardening** | Every setting reports back: success as a toast, a rejected value as a toast **and** an inline message with the server's text. Integer fields are `type="number"` with `min`/`max` plus a plain-language range hint (the API delivers the bounds), enums render as a picker, and a station rule that would hide every source warns before saving. Dialogs stay fully usable on 375 px. |
 | **MWL Broker — Access Control & Retention** | **Read vs. write, decided by the proxy**: with `rbac_mode=enforce` the broker requires the `brokerWrite` role in the roles header for every configuration change; read-only operators get a plain-language banner and the UI disables the write actions instead of letting them run into 403s. The **retention card** shows per table how many rows exist, how old the oldest is and what the configured window is — with an audited "purge now" button. "Keep forever" is stated as such; nothing is deleted implicitly. |
 | **MWL Broker — DICOM TLS** | Encrypted DICOM for the modalities and/or RIS/PACS — **off by default**, so a LAN/VPN setup keeps working. A **second TLS listener** next to the plain port allows a staged rollout (one modality at a time); TLS is switchable per source/target. For installations without a PKI the settings page **generates a self-signed certificate** (public part to hand over, private key stays, mode 0600), shows every certificate with its **expiry badge**, and offers an **endpoint check** that performs a real handshake (protocol, cipher, peer certificate) plus a C-ECHO over TLS. |
@@ -183,7 +184,7 @@ Open [http://localhost:5173](http://localhost:5173). The dev server proxies `/or
 # Start dev server (requires Docker stack running)
 npm run dev
 
-# Run unit tests (single pass, 467 tests)
+# Run unit tests (single pass, 474 tests)
 npm run test
 
 # Run unit tests in watch mode

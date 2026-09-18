@@ -188,6 +188,7 @@ export default function LocalWorklistPage() {
 
   return (
     <BrokerPageShell
+      helpId="worklist"
       titleKey="broker.localTitle"
       subtitleKey="broker.localSubtitle"
       actions={

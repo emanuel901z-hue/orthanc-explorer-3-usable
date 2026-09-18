@@ -1387,7 +1387,157 @@
     "resetForm": "Reset",
     "tagInvalid": "DICOM tag or keyword expected, e.g. (0010,0010) or PatientName.",
     "i18nBrokerNote": "The broker section is currently available in German and English; other languages fall back to English.",
-    "errHost": "Enter the address only: no spaces, no slashes, no http://."
+    "errHost": "Enter the address only: no spaces, no slashes, no http://.",
+    "helpButton": "What is this?",
+    "helpIntro": "Short version: what the page is for, what to fill in and what usually goes wrong.",
+    "helpWhat": "What is it?",
+    "helpHow": "What do I fill in?",
+    "helpWrong": "What goes wrong most often?",
+    "help_sources_title": "Upstream sources (RIS/KIS)",
+    "help_sources_what": [
+      "The broker does not keep the worklist itself — it asks your RIS/KIS systems and passes the answers to the modality.",
+      "Every system you ask is one source here. The modality only talks to the broker."
+    ],
+    "help_sources_how": [
+      "Name: any label you recognise (e.g. \"ris-main\"). It only appears in this UI and in the logs.",
+      "AE title: the name the RIS expects — upper case, 1–16 characters, only A–Z 0–9 _ -.",
+      "Host and port: address and DICOM port of the RIS. Ask your RIS vendor if you are unsure.",
+      "Priority: lower number = asked first. With two sources knowing the same order, the lower one wins."
+    ],
+    "help_sources_wrong": [
+      "The address typed as a sentence (\"ris server 1\") or with http:// — only the address belongs here.",
+      "A lower-case AE title: DICOM expects upper case (the field corrects it automatically).",
+      "The same AE title twice — two systems with the same name cannot be told apart (you get a warning while typing).",
+      "After saving, use the C-ECHO button in the list: it proves the broker really reaches the system."
+    ],
+    "help_targets_title": "PACS destinations",
+    "help_targets_what": [
+      "Images the modality sends to the broker are forwarded to a PACS.",
+      "A target is one PACS. Exactly one should be marked as the default."
+    ],
+    "help_targets_how": [
+      "AE title, host and port of the PACS — the same three values as in the PACS configuration.",
+      "Default: yes for the PACS that should receive everything without a special rule."
+    ],
+    "help_targets_wrong": [
+      "Deleting the default target: afterwards images without a routing rule have no destination at all.",
+      "Two defaults: which one wins is then a matter of luck — keep exactly one.",
+      "No C-ECHO test after changing the address: images are then quietly spooled instead of arriving."
+    ],
+    "help_rules_title": "Routing rules",
+    "help_rules_what": [
+      "A rule decides which PACS receives images from which source (e.g. everything from the emergency RIS goes to the emergency PACS).",
+      "Without a matching rule, images go to the default target."
+    ],
+    "help_rules_how": [
+      "Source: where the images come from (including the pseudo source \"local\" for emergencies).",
+      "Target: which PACS should receive them.",
+      "Priority: if several rules match, the lowest number wins."
+    ],
+    "help_rules_wrong": [
+      "Two rules for the same source and target — that is ambiguous and blocked here.",
+      "A rule that was meant for a single device but applies to the whole source: check the preview on the station page.",
+      "Testing only in production: create the rule, send one image, then check the store log."
+    ],
+    "help_transforms_title": "Modify rules (DICOM attributes)",
+    "help_transforms_what": [
+      "Before forwarding, the broker can change individual DICOM fields — e.g. add the institution name or shorten an accession number.",
+      "This is only cosmetic metadata; the image itself is never changed."
+    ],
+    "help_transforms_how": [
+      "Name: what the rule is for (e.g. \"set institution name\").",
+      "Tag: either a keyword (PatientName) or the number in the form (0010,0010).",
+      "Operation: set, remove, prefix, suffix, replace or copy from another tag."
+    ],
+    "help_transforms_wrong": [
+      "A tag that does not exist — the field says so immediately.",
+      "Changing a UID: the broker refuses this, it would break the link to the images.",
+      "Forgetting to test: use the simulation on the overview page before letting real images through."
+    ],
+    "help_stations_title": "Station rules",
+    "help_stations_what": [
+      "Every console should only see its own worklist. A station rule decides which sources a console may see.",
+      "The rule matches the station AE title the modality sends."
+    ],
+    "help_stations_how": [
+      "Station AE title: exactly as configured in the modality (or * for all stations).",
+      "Mode: \"deny\" hides the listed sources, \"allow\" shows only the listed ones.",
+      "Priority: controls the order in which sources are merged for this console."
+    ],
+    "help_stations_wrong": [
+      "Mode \"allow\" without a source: that console then sees an empty worklist (you get a warning).",
+      "A typo in the AE title: the rule simply never matches — check the exact spelling in the modality.",
+      "Use the preview button: it shows what this console would receive right now."
+    ],
+    "help_worklist_title": "Local worklist and HL7 orders",
+    "help_worklist_what": [
+      "Emergencies and unscheduled examinations exist in no RIS. The broker keeps them here and mixes them into every worklist answer.",
+      "Orders can also arrive automatically as HL7 messages (from the RIS or an admission system)."
+    ],
+    "help_worklist_how": [
+      "Accession number: required — this is what the modality searches for.",
+      "Patient name in DICOM form: Last^First (e.g. Mueller^Hans).",
+      "Date and time: use the pickers; the entry only matches the day you set here.",
+      "Leave the station empty to make the entry visible for every console."
+    ],
+    "help_worklist_wrong": [
+      "A date typed by hand instead of using the picker — then the entry never shows up on that day.",
+      "A missing accession number: the modality cannot find the entry.",
+      "Forgetting the expiry: without a validity date the entry stays until it is deleted."
+    ],
+    "help_spool_title": "Store queue (spool)",
+    "help_spool_what": [
+      "If a PACS is unreachable, the broker keeps the images and sends them later — nothing is lost.",
+      "This page shows what is waiting, what is being retried and what could not be delivered."
+    ],
+    "help_spool_how": [
+      "Filter by status to see only what needs attention (\"dead\" = delivery failed repeatedly).",
+      "Retry sends an entry again — use it after the PACS is reachable.",
+      "Discard removes an entry permanently; a reason is required and is written to the audit log."
+    ],
+    "help_spool_wrong": [
+      "Discarding instead of retrying: the image is then gone from the queue.",
+      "A full spool means the PACS has been unreachable for a long time — check the health panel first."
+    ],
+    "help_audit_title": "Change log",
+    "help_audit_what": [
+      "Every configuration change is recorded here with time, user and the changed values.",
+      "This is the trace for \"who changed what, and when?\" — and the way back if a change went wrong."
+    ],
+    "help_audit_how": [
+      "Open an entry to see the difference before/after.",
+      "Roll back restores the state from before that change.",
+      "Export/import moves a whole configuration between installations (import always shows a preview first)."
+    ],
+    "help_audit_wrong": [
+      "Rolling back a change that later changes depend on — check the current state afterwards.",
+      "Importing a configuration without reading the preview: it overwrites matching entries."
+    ],
+    "help_settings_title": "Runtime settings",
+    "help_settings_how": [
+      "Each row shows the current value and where it comes from (\".env\" = deployment default, \"override\" = changed here).",
+      "Save applies the value immediately; \"reset\" returns to the deployment default.",
+      "Numbers show their allowed range underneath."
+    ],
+    "help_settings_wrong": [
+      "A value outside the range: the field says so and blocks saving.",
+      "Forgetting that a change applies immediately — the echo interval, cache and spool react at once."
+    ],
+    "help_overview_title": "Broker overview",
+    "help_overview_what": [
+      "The broker sits between the modalities and your RIS/PACS: it collects the worklists and forwards the images.",
+      "This page shows at a glance whether everything is reachable and whether anything is waiting."
+    ],
+    "help_overview_how": [
+      "Green \"ok\" next to a source or target means the C-ECHO test just succeeded.",
+      "The cards below show what needs attention: unreachable systems, waiting images, cached worklists.",
+      "Use the sidebar to configure: sources (RIS), targets (PACS), rules, station rules, settings."
+    ],
+    "help_overview_wrong": [
+      "Red or grey entries are the first thing to look at — a console with an empty worklist usually means an unreachable source.",
+      "\"Spool\" entries that keep growing mean the PACS cannot be reached.",
+      "If something was misconfigured, the change log on the audit page has the way back."
+    ]
   },
   "shortcuts": {
     "nav": {

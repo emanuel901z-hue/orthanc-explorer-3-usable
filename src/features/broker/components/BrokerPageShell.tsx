@@ -7,15 +7,19 @@ import { useTranslation } from 'react-i18next';
 import { RadioTower } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { getConfig } from '@/config/runtime';
+import { PageHelp } from './PageHelp';
 
 export function BrokerPageShell({
   titleKey,
   subtitleKey,
+  helpId,
   actions,
   children,
 }: {
   titleKey: string;
   subtitleKey: string;
+  /** Page id for the "what is this?" help (see `broker.help_<id>_*` texts). */
+  helpId?: string;
   actions?: ReactNode;
   children: ReactNode;
 }) {
@@ -48,7 +52,10 @@ export function BrokerPageShell({
           </h1>
           <p className="text-sm text-muted-foreground">{t(subtitleKey)}</p>
         </div>
-        {actions}
+        <div className="flex flex-wrap items-center gap-2">
+          {helpId && <PageHelp helpId={helpId} />}
+          {actions}
+        </div>
       </div>
       {children}
     </div>

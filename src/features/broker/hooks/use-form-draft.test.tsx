@@ -6,6 +6,25 @@ import { NodeFormDialog } from '../components/NodeFormDialog';
 import '@/i18n';
 
 describe('form drafts', () => {
+  it('ignores and removes a draft that is older than an hour', () => {
+    // save with a timestamp two hours in the past
+    saveDraft('alt', { name: 'von-gestern' }, Date.now() - 2 * 60 * 60 * 1000);
+
+    expect(loadDraft('alt')).toBeNull();
+    expect(sessionStorage.getItem('broker.draft.alt')).toBeNull();   // cleaned up
+  });
+
+  it('keeps a draft that is still fresh', () => {
+    saveDraft('frisch', { name: 'gerade-eben' }, Date.now() - 5 * 60 * 1000);
+    expect(loadDraft<{ name: string }>('frisch')).toEqual({ name: 'gerade-eben' });
+  });
+
+  it('treats a leftover from an older build as expired', () => {
+    sessionStorage.setItem('broker.draft.legacy', JSON.stringify({ name: 'alt' }));
+    expect(loadDraft('legacy')).toBeNull();
+    expect(sessionStorage.getItem('broker.draft.legacy')).toBeNull();
+  });
+
   it('stores and restores a value', () => {
     saveDraft('x', { name: 'ris-a' });
     expect(loadDraft<{ name: string }>('x')).toEqual({ name: 'ris-a' });

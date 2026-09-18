@@ -6,26 +6,59 @@
  * `sessionStorage` (per tab, gone when the tab closes) and is loaded when the
  * form opens, kept while it differs from the stored values, and dropped once it
  * was saved or explicitly discarded.
+ *
+ * Drafts expire after an hour: an unfinished form from yesterday would only
+ * confuse ("why is this field already filled?").
  */
 import { useCallback, useEffect } from 'react';
+
+/** How long an unfinished draft stays useful. */
+export const DRAFT_TTL_MS = 60 * 60 * 1000;   // one hour
+
+type Envelope<T> = { value: T; savedAt: number };
 
 function storageKey(key: string): string {
   return `broker.draft.${key}`;
 }
 
-/** Read a draft (null when there is none or storage is unavailable). */
-export function loadDraft<T>(key: string): T | null {
+/**
+ * Read a draft (null when there is none, it is too old, or storage is
+ * unavailable). An expired draft is removed on the way out.
+ */
+export function loadDraft<T>(key: string, now = Date.now()): T | null {
+  let raw: string | null = null;
   try {
-    const raw = sessionStorage.getItem(storageKey(key));
-    return raw === null ? null : (JSON.parse(raw) as T);
+    raw = sessionStorage.getItem(storageKey(key));
   } catch {
+    return null;
+  }
+  if (raw === null) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as Envelope<T> | T;
+    // an envelope carries its timestamp; anything else is a leftover from an
+    // older build and is treated as expired
+    if (typeof parsed !== 'object' || parsed === null
+        || !('savedAt' in parsed) || !('value' in parsed)) {
+      clearDraft(key);
+      return null;
+    }
+    const envelope = parsed as Envelope<T>;
+    if (now - envelope.savedAt > DRAFT_TTL_MS) {
+      clearDraft(key);
+      return null;
+    }
+    return envelope.value;
+  } catch {
+    clearDraft(key);
     return null;
   }
 }
 
-export function saveDraft<T>(key: string, value: T): void {
+export function saveDraft<T>(key: string, value: T, now = Date.now()): void {
   try {
-    sessionStorage.setItem(storageKey(key), JSON.stringify(value));
+    const envelope: Envelope<T> = { value, savedAt: now };
+    sessionStorage.setItem(storageKey(key), JSON.stringify(envelope));
   } catch {
     /* private mode without storage — the form still works, just without memory */
   }

@@ -28,7 +28,7 @@ npm run preview
 ### Testing
 
 ```bash
-# Run all unit tests (single pass, 467 tests)
+# Run all unit tests (single pass, 474 tests)
 npm run test
 
 # Watch mode
@@ -71,7 +71,7 @@ GitHub Actions CI (`.github/workflows/ci.yml`) laeuft bei Pull Requests und Push
 |-----|--------|-------|
 | `typecheck` | `tsc --noEmit -p tsconfig.app.json` | ~15s |
 | `lint` | `npm run lint` (ESLint) | ~10s |
-| `test` | `npm run test` (Vitest, 467 Tests) | ~15s |
+| `test` | `npm run test` (Vitest, 474 Tests) | ~15s |
 | `audit` | `npm run audit` (audit-ci, high+critical blocking) | ~10s |
 
 Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit jsdom.
@@ -101,7 +101,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (467 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (474 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -211,6 +211,7 @@ features: {
 | `src/features/broker/components/AtnaCard.tsx` | ATNA audit trail: state, transport, test message, sample XML |
 | `src/features/broker/hooks/use-broker-local.ts` | Audited mutations for local items and the HL7 intake |
 | `src/features/broker/hooks/use-broker-stations.ts` | Audited mutations for the station rules |
+| `src/features/broker/components/PageHelp.tsx` | "What is this?" help per page (what it is / what to fill in / what goes wrong) |
 | `src/features/broker/hooks/use-form-draft.ts` | Form drafts in sessionStorage + unsaved-changes warning (Back/F5 keep the input) |
 | `e2e/stack/mfa-journey.spec.ts` | MFA journey: an untrained user makes the mistakes a novice makes |
 | `src/features/broker/components/DiscardConfirm.tsx` | Discard guard for the broker forms (unsaved input is not thrown away silently) |

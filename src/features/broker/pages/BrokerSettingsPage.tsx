@@ -187,6 +187,7 @@ export default function BrokerSettingsPage() {
 
   return (
     <BrokerPageShell
+      helpId="settings"
       titleKey="broker.settingsTitle"
       subtitleKey="broker.settingsSubtitle"
     >

@@ -128,6 +128,7 @@ export default function AuditPage() {
 
   return (
     <BrokerPageShell
+      helpId="audit"
       titleKey="broker.auditTitle"
       subtitleKey="broker.auditSubtitle"
       actions={

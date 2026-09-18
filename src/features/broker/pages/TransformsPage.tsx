@@ -130,6 +130,7 @@ export default function TransformsPage() {
   const dirty = dialogOpen && form.name !== '' && form.name !== (editing?.name ?? '');
   const guard = useDiscardGuard(dirty, () => { setDialogOpen(false); setEditing(null); });
   useUnsavedWarning(dirty);
+  const dropDraft = useDraftPersistence(`transform-${editing?.id ?? 'new'}`, form, dirty);
 
   const submit = () => {
     setSubmitted(true);
@@ -148,7 +149,7 @@ export default function TransformsPage() {
         ...(op.from_tag !== undefined && op.from_tag !== '' ? { from_tag: op.from_tag } : {}),
       })),
     };
-    const onDone = () => { setDialogOpen(false); setEditing(null); };
+    const onDone = () => { dropDraft(); setDialogOpen(false); setEditing(null); };
     if (editing) {
       update.mutate({ id: editing.id, body }, { onSuccess: onDone });
     } else {
@@ -158,10 +159,19 @@ export default function TransformsPage() {
 
   return (
     <BrokerPageShell
+      helpId="transforms"
       titleKey="broker.transformsTitle"
       subtitleKey="broker.transformsSubtitle"
       actions={
-        <Button onClick={() => { setEditing(null); setDialogOpen(true); }} size="sm">
+        <Button
+          onClick={() => {
+            const draft = loadDraft<TransformForm>('transform-new');
+            setForm(draft ?? EMPTY_FORM);
+            setEditing(null);
+            setDialogOpen(true);
+          }}
+          size="sm"
+        >
           <Plus className="h-4 w-4 mr-1" />
           {t('broker.addTransform')}
         </Button>
@@ -203,7 +213,16 @@ export default function TransformsPage() {
                   <Button
                     variant="ghost" size="sm" className="h-9 w-9 p-0"
                     aria-label={t('broker.editTransform')}
-                    onClick={() => { setEditing(rule); setDialogOpen(true); }}
+                    onClick={() => {
+                      const draft = loadDraft<TransformForm>(`transform-${rule.id}`);
+                      setForm(draft ?? {
+                        name: rule.name, enabled: rule.enabled, priority: rule.priority,
+                        source_id: rule.source_id, target_id: rule.target_id,
+                        operations: rule.operations.length ? rule.operations : [{ ...EMPTY_OPERATION }],
+                      });
+                      setEditing(rule);
+                      setDialogOpen(true);
+                    }}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -284,7 +303,16 @@ export default function TransformsPage() {
                       size="sm"
                       className="h-9 w-9 p-0"
                       aria-label={t('broker.editTransform')}
-                      onClick={() => { setEditing(rule); setDialogOpen(true); }}
+                      onClick={() => {
+                      const draft = loadDraft<TransformForm>(`transform-${rule.id}`);
+                      setForm(draft ?? {
+                        name: rule.name, enabled: rule.enabled, priority: rule.priority,
+                        source_id: rule.source_id, target_id: rule.target_id,
+                        operations: rule.operations.length ? rule.operations : [{ ...EMPTY_OPERATION }],
+                      });
+                      setEditing(rule);
+                      setDialogOpen(true);
+                    }}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>

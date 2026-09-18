@@ -102,6 +102,8 @@ export default function RulesPage() {
     : EMPTY_FORM);
   const guard = useDiscardGuard(dirty, () => { setDialogOpen(false); setEditing(null); });
   useUnsavedWarning(dirty);
+  // the draft survives Back/F5 (keyed per rule so two edits do not mix)
+  const dropDraft = useDraftPersistence(`rule-${editing?.id ?? 'new'}`, form, dirty);
 
   // the same source+target twice would be ambiguous
   const duplicate = rules.find((rule) => rule.source_id === form.source_id
@@ -116,7 +118,7 @@ export default function RulesPage() {
       priority: form.priority,
       enabled: form.enabled,
     };
-    const onDone = () => { setDialogOpen(false); setEditing(null); };
+    const onDone = () => { dropDraft(); setDialogOpen(false); setEditing(null); };
     if (editing) {
       update.mutate({ id: editing.id, body }, { onSuccess: onDone });
     } else {
@@ -126,11 +128,17 @@ export default function RulesPage() {
 
   return (
     <BrokerPageShell
+      helpId="rules"
       titleKey="broker.rulesTitle"
       subtitleKey="broker.rulesSubtitle"
       actions={
         <Button
-          onClick={() => { setEditing(null); setDialogOpen(true); }}
+          onClick={() => {
+            const draft = loadDraft<RuleForm>('rule-new');
+            setForm(draft ?? EMPTY_FORM);
+            setEditing(null);
+            setDialogOpen(true);
+          }}
           size="sm"
           disabled={sources.length === 0 || targets.length === 0}
         >
@@ -167,7 +175,15 @@ export default function RulesPage() {
                   <Button
                     variant="ghost" size="sm" className="h-9 w-9 p-0"
                     aria-label={t('broker.editRule')}
-                    onClick={() => { setEditing(rule); setDialogOpen(true); }}
+                    onClick={() => {
+                      const draft = loadDraft<RuleForm>(`rule-${rule.id}`);
+                      setForm(draft ?? {
+                        source_id: rule.source_id, target_id: rule.target_id,
+                        priority: rule.priority, enabled: rule.enabled,
+                      });
+                      setEditing(rule);
+                      setDialogOpen(true);
+                    }}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -239,7 +255,15 @@ export default function RulesPage() {
                       size="sm"
                       className="h-9 w-9 p-0"
                       aria-label={t('broker.editRule')}
-                      onClick={() => { setEditing(rule); setDialogOpen(true); }}
+                      onClick={() => {
+                      const draft = loadDraft<RuleForm>(`rule-${rule.id}`);
+                      setForm(draft ?? {
+                        source_id: rule.source_id, target_id: rule.target_id,
+                        priority: rule.priority, enabled: rule.enabled,
+                      });
+                      setEditing(rule);
+                      setDialogOpen(true);
+                    }}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
