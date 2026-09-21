@@ -103,7 +103,8 @@
     "failed": "（{{count}}个失败）",
     "clearCompleted": "清除已完成",
     "fileName": "文件名",
-    "progress": "进度"
+    "progress": "进度",
+    "title": "上传检查"
   },
   "activity": {
     "subtitle": "作业、审计跟踪和系统日志在一个时间线中",
@@ -1119,6 +1120,13 @@
     "tlsUploadKey": "私钥 (PEM)",
     "tlsUploadCa": "CA 包（可选）",
     "tlsUploadRun": "安装",
-    "saving": "保存中…"
+    "saving": "保存中…",
+    "entity_cache": "缓存",
+    "entity_spool": "发送队列",
+    "entity_tls": "TLS",
+    "entity_local_item": "本地条目",
+    "entity_hl7_message": "HL7 消息",
+    "entity_station": "工作站规则",
+    "entity_seen_item": "来源"
   }
 }

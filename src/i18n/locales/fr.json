@@ -103,7 +103,8 @@
     "failed": "({{count}} échoués)",
     "clearCompleted": "Effacer les Terminés",
     "fileName": "Nom du Fichier",
-    "progress": "Progression"
+    "progress": "Progression",
+    "title": "Téléverser des études"
   },
   "activity": {
     "subtitle": "Jobs, piste d'audit et journaux système dans une chronologie",
@@ -1119,6 +1120,13 @@
     "tlsUploadKey": "Clé privée (PEM)",
     "tlsUploadCa": "Bundle CA (optionnel)",
     "tlsUploadRun": "Installer",
-    "saving": "Enregistrement…"
+    "saving": "Enregistrement…",
+    "entity_cache": "Cache",
+    "entity_spool": "File d'envoi",
+    "entity_tls": "TLS",
+    "entity_local_item": "Entrée locale",
+    "entity_hl7_message": "Message HL7",
+    "entity_station": "Règle de poste",
+    "entity_seen_item": "Provenance"
   }
 }

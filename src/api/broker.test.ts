@@ -375,6 +375,105 @@ describe("brokerApi", () => {
   });
 });
 
+
+describe("brokerApi — sprints 3+4 (the newer calls)", () => {
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = BROKER_CFG;
+    loadConfig();
+  });
+  afterEach(() => { __resetConfigForTests(); vi.restoreAllMocks(); });
+
+  const ok = (body: unknown) =>
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify(body), { status: 200 }),
+    );
+
+  it("sources.query() posts to the per-source C-FIND test", async () => {
+    const fetchMock = ok({ source_id: 1, name: "ris-a", ok: true, answers: 2 });
+    await brokerApi.sources.query(1, { accession: "ACC-1" });
+
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/sources/1/query");
+    expect(fetchMock.mock.calls[0][1]?.method).toBe("POST");
+    expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify({ accession: "ACC-1" }));
+  });
+
+  it("worklistPreview() posts the station and the filter", async () => {
+    const fetchMock = ok({ answers: 0, items: [], sources: [] });
+    await brokerApi.worklistPreview({ station_aet: "CT_01" });
+
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/simulate/worklist");
+    expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify({ station_aet: "CT_01" }));
+  });
+
+  it("hl7.message() and hl7.reprocess() reach the detail endpoints", async () => {
+    let fetchMock = ok({ id: 7, replayable: true });
+    await brokerApi.hl7.message(7);
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/hl7/messages/7");
+
+    fetchMock = ok({ dry_run: true, action: "created-or-updated" });
+    await brokerApi.hl7.reprocess(7, true);
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/hl7/messages/7/reprocess?dry_run=true");
+
+    fetchMock = ok({ dry_run: false });
+    await brokerApi.hl7.reprocess(7, false);
+    expect(fetchMock.mock.calls[0][0]).toContain("dry_run=false");
+  });
+
+  it("cache.refresh() can target one source", async () => {
+    let fetchMock = ok({ sources: [] });
+    await brokerApi.cache.refresh();
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/cache/refresh");
+
+    fetchMock = ok({ sources: [] });
+    await brokerApi.cache.refresh(3);
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/cache/refresh?source_id=3");
+  });
+
+  it("tls.upload() posts the PEM material", async () => {
+    const fetchMock = ok({ certificate_path: "/tls/x.crt", key_path: "/tls/x.key" });
+    await brokerApi.tls.upload({ certificate_pem: "CERT", key_pem: "KEY", filename: "x" });
+
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/tls/upload");
+    expect(String(fetchMock.mock.calls[0][1]?.body)).toContain("CERT");
+  });
+
+  it("single reads address one row", async () => {
+    let fetchMock = ok({ id: 1, name: "ris-a" });
+    await brokerApi.sources.get(1);
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/sources/1");
+
+    fetchMock = ok({ id: 2 });
+    await brokerApi.targets.get(2);
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/targets/2");
+
+    fetchMock = ok({ key: "echo_interval_s" });
+    await brokerApi.settings.get("echo_interval_s");
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/settings/echo_interval_s");
+  });
+
+  it("log queries accept a date filter and keep the number form working", async () => {
+    let fetchMock = ok([]);
+    await brokerApi.logs.queries({ limit: 20, since: "2026-09-20" });
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "/broker-api/api/v1/logs/queries?limit=20&since=2026-09-20");
+
+    fetchMock = ok([]);
+    await brokerApi.logs.queries(10);
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/logs/queries?limit=10");
+  });
+
+  it("paged lists carry the offset", async () => {
+    let fetchMock = ok([]);
+    await brokerApi.spool.items({ limit: 100, offset: 100 });
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/spool?limit=100&offset=100");
+
+    fetchMock = ok([]);
+    await brokerApi.hl7.messages({ limit: 50, offset: 50 });
+    expect(fetchMock.mock.calls[0][0]).toBe("/broker-api/api/v1/hl7/messages?limit=50&offset=50");
+  });
+});
+
 describe("brokerApi without brokerUrl", () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

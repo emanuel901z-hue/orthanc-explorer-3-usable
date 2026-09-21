@@ -211,7 +211,8 @@
     "failed": "({{count}} failed)",
     "clearCompleted": "Clear Completed",
     "fileName": "File Name",
-    "progress": "Progress"
+    "progress": "Progress",
+    "title": "Upload studies"
   },
   "activity": {
     "subtitle": "Jobs, audit trail, and system logs in one timeline",
@@ -1694,7 +1695,14 @@
     "tlsUploadCa": "CA bundle (optional)",
     "tlsUploadRun": "Install",
     "tlsUploaded": "Certificate installed.",
-    "saving": "Saving…"
+    "saving": "Saving…",
+    "entity_cache": "Cache",
+    "entity_spool": "Store queue",
+    "entity_tls": "TLS",
+    "entity_local_item": "Local item",
+    "entity_hl7_message": "HL7 message",
+    "entity_station": "Station rule",
+    "entity_seen_item": "Worklist provenance"
   },
   "shortcuts": {
     "nav": {

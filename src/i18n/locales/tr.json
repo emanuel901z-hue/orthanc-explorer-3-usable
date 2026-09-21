@@ -156,7 +156,8 @@
     "failed": "({{count}} başarısız)",
     "clearCompleted": "Tamamlananları Temizle",
     "fileName": "Dosya Adı",
-    "progress": "İlerleme"
+    "progress": "İlerleme",
+    "title": "Çalışma yükle"
   },
   "activity": {
     "subtitle": "İşler, denetim izi ve sistem günlükleri tek bir zaman çizelgesinde",
@@ -1119,6 +1120,13 @@
     "tlsUploadKey": "Özel anahtar (PEM)",
     "tlsUploadCa": "CA paketi (isteğe bağlı)",
     "tlsUploadRun": "Yükle",
-    "saving": "Kaydediliyor…"
+    "saving": "Kaydediliyor…",
+    "entity_cache": "Önbellek",
+    "entity_spool": "Gönderi kuyruğu",
+    "entity_tls": "TLS",
+    "entity_local_item": "Yerel kayıt",
+    "entity_hl7_message": "HL7 mesajı",
+    "entity_station": "İstasyon kuralı",
+    "entity_seen_item": "Kaynak bilgisi"
   }
 }

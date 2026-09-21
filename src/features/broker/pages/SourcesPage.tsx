@@ -183,7 +183,7 @@ export default function SourcesPage() {
                 <TableHead className="hidden md:table-cell">{t('broker.timeout')}</TableHead>
                 <TableHead className="hidden lg:table-cell">{t('broker.priority')}</TableHead>
                 <TableHead className="w-[140px]">{t('broker.echo')}</TableHead>
-                <TableHead className="w-[110px] text-right">{t('broker.actions')}</TableHead>
+                <TableHead className="w-[150px] text-right">{t('broker.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

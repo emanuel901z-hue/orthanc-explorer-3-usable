@@ -68,3 +68,30 @@ describe('describeEntry', () => {
       .toEqual({ kind: 'create', name: '#7' });
   });
 });
+
+describe('describeEntry — entries without a name or ID', () => {
+  it('does not invent a "#?" for cache/spool/TLS actions', () => {
+    const entry = {
+      id: 1, ts: '2026-09-21T10:00:00Z', actor: 'api', action: 'cache.refresh',
+      entity: 'cache', entity_id: null, correlation_id: '',
+      before_json: null, after_json: { sources: 2 },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+
+    const { name, kind } = describeEntry(entry);
+    expect(name).toBe('');
+    expect(name).not.toContain('#');
+    expect(kind).toBe('create');
+  });
+
+  it('still shows the ID when there is one', () => {
+    const entry = {
+      id: 2, ts: '2026-09-21T10:00:00Z', actor: 'api', action: 'delete.source',
+      entity: 'source', entity_id: 42, correlation_id: '',
+      before_json: { host: 'h' }, after_json: null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+
+    expect(describeEntry(entry).name).toBe('#42');
+  });
+});

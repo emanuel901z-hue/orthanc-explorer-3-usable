@@ -103,7 +103,8 @@
     "failed": "({{count}} fallidos)",
     "clearCompleted": "Limpiar Completados",
     "fileName": "Nombre del Archivo",
-    "progress": "Progreso"
+    "progress": "Progreso",
+    "title": "Subir estudios"
   },
   "activity": {
     "subtitle": "Jobs, pista de auditoría y registros del sistema en una línea de tiempo",
@@ -1119,6 +1120,13 @@
     "tlsUploadKey": "Clave privada (PEM)",
     "tlsUploadCa": "Paquete CA (opcional)",
     "tlsUploadRun": "Instalar",
-    "saving": "Guardando…"
+    "saving": "Guardando…",
+    "entity_cache": "Caché",
+    "entity_spool": "Cola de envío",
+    "entity_tls": "TLS",
+    "entity_local_item": "Entrada local",
+    "entity_hl7_message": "Mensaje HL7",
+    "entity_station": "Regla de estación",
+    "entity_seen_item": "Procedencia"
   }
 }

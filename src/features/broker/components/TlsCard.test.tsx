@@ -7,14 +7,15 @@ import { auditClient } from '@/lib/audit';
 import type { BrokerSetting } from '@/api/broker';
 import '@/i18n';
 
-const { mockOverview, mockGenerate, mockTest, mockSet } = vi.hoisted(() => ({
+const { mockOverview, mockGenerate, mockTest, mockSet, mockUpload } = vi.hoisted(() => ({
   mockOverview: vi.fn(), mockGenerate: vi.fn(), mockTest: vi.fn(), mockSet: vi.fn(),
+  mockUpload: vi.fn(),
 }));
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
     rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
-    tls: { overview: mockOverview, generate: mockGenerate, test: mockTest },
+    tls: { overview: mockOverview, generate: mockGenerate, test: mockTest, upload: mockUpload },
     settings: { list: vi.fn(), set: mockSet, reset: vi.fn() },
   },
 }));
@@ -186,5 +187,48 @@ describe('TlsCard', () => {
 
     expect(await screen.findByTestId('tls-test-result'))
       .toHaveTextContent(/certificate verification failed/i);
+  });
+});
+
+
+describe('TlsCard — PKI upload (A10)', () => {
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    mockOverview.mockResolvedValue({ ...OVERVIEW, certificates: [] });
+  });
+
+  it('shows the server message when the key does not belong to the certificate', async () => {
+    mockUpload.mockRejectedValue(
+      new Error('the private key does not belong to this certificate'));
+    renderCard();
+
+    const upload = await screen.findByTestId('tls-upload');
+    const cert = new File(['CERT'], 'server.crt', { type: 'text/plain' });
+    const key = new File(['KEY'], 'server.key', { type: 'text/plain' });
+    fireEvent.change(upload.querySelector('#tls-cert-file') as HTMLInputElement, { target: { files: [cert] } });
+    fireEvent.change(upload.querySelector('#tls-key-file') as HTMLInputElement, { target: { files: [key] } });
+    fireEvent.click(within(upload).getByRole('button', { name: /install|einspielen/i }));
+
+    expect(await within(upload).findByRole('alert')).toHaveTextContent(/does not belong/i);
+  });
+
+  it('clears the file fields after a successful install', async () => {
+    mockUpload.mockResolvedValue({ certificate_path: '/tls/uploaded.crt', key_path: '/tls/uploaded.key',
+                                   ca_path: '', certificate: {}, key: {}, is_ca: false });
+    renderCard();
+
+    const upload = await screen.findByTestId('tls-upload');
+    fireEvent.change(upload.querySelector('#tls-cert-file') as HTMLInputElement,
+      { target: { files: [new File(['CERT'], 'server.crt')] } });
+    fireEvent.change(upload.querySelector('#tls-key-file') as HTMLInputElement,
+      { target: { files: [new File(['KEY'], 'server.key')] } });
+    fireEvent.click(within(upload).getByRole('button', { name: /install|einspielen/i }));
+
+    await waitFor(() => expect(mockUpload).toHaveBeenCalled());
+    // the button is disabled again: no files selected any more
+    await waitFor(() => expect(
+      within(upload).getByRole('button', { name: /install|einspielen/i })).toBeDisabled());
   });
 });

@@ -211,7 +211,8 @@
     "failed": "({{count}} fehlgeschlagen)",
     "clearCompleted": "Abgeschlossene löschen",
     "fileName": "Dateiname",
-    "progress": "Fortschritt"
+    "progress": "Fortschritt",
+    "title": "Studien hochladen"
   },
   "activity": {
     "subtitle": "Jobs, Audit-Trail und System-Logs in einer Zeitleiste",
@@ -1694,7 +1695,14 @@
     "tlsUploadCa": "CA-Bundle (optional)",
     "tlsUploadRun": "Einspielen",
     "tlsUploaded": "Zertifikat eingespielt.",
-    "saving": "Speichern…"
+    "saving": "Speichern…",
+    "entity_cache": "Cache",
+    "entity_spool": "Sendewarteschlange",
+    "entity_tls": "TLS",
+    "entity_local_item": "Lokaler Eintrag",
+    "entity_hl7_message": "HL7-Nachricht",
+    "entity_station": "Stationsregel",
+    "entity_seen_item": "Worklist-Herkunft"
   },
   "shortcuts": {
     "nav": {

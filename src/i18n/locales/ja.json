@@ -103,7 +103,8 @@
     "failed": "（{{count}}件失敗）",
     "clearCompleted": "完了分をクリア",
     "fileName": "ファイル名",
-    "progress": "進捗"
+    "progress": "進捗",
+    "title": "検査をアップロード"
   },
   "activity": {
     "subtitle": "ジョブ、監査証跡、システムログを一つのタイムラインに",
@@ -1119,6 +1120,13 @@
     "tlsUploadKey": "秘密鍵 (PEM)",
     "tlsUploadCa": "CA バンドル（任意）",
     "tlsUploadRun": "インストール",
-    "saving": "保存中…"
+    "saving": "保存中…",
+    "entity_cache": "キャッシュ",
+    "entity_spool": "送信キュー",
+    "entity_tls": "TLS",
+    "entity_local_item": "ローカル項目",
+    "entity_hl7_message": "HL7 メッセージ",
+    "entity_station": "ステーション規則",
+    "entity_seen_item": "由来情報"
   }
 }

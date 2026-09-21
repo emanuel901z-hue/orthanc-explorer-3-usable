@@ -708,6 +708,7 @@ export const brokerApi = {
   status: () => brokerFetch<BrokerStatus>('/api/v1/status'),
 
   sources: {
+    get: (id: number) => brokerFetch<BrokerSource>(`/api/v1/sources/${id}`),
     list: () => brokerFetch<BrokerSource[]>('/api/v1/sources'),
     create: (body: BrokerSourceIn) => brokerFetch<BrokerSource>('/api/v1/sources', post(body)),
     update: (id: number, body: BrokerSourceIn) =>
@@ -722,6 +723,7 @@ export const brokerApi = {
   },
 
   targets: {
+    get: (id: number) => brokerFetch<BrokerTarget>(`/api/v1/targets/${id}`),
     list: () => brokerFetch<BrokerTarget[]>('/api/v1/targets'),
     create: (body: BrokerTargetIn) => brokerFetch<BrokerTarget>('/api/v1/targets', post(body)),
     update: (id: number, body: BrokerTargetIn) =>
@@ -748,6 +750,7 @@ export const brokerApi = {
   },
 
   settings: {
+    get: (key: string) => brokerFetch<BrokerSetting>(`/api/v1/settings/${key}`),
     list: () => brokerFetch<BrokerSetting[]>('/api/v1/settings'),
     set: (key: string, value: string) =>
       brokerFetch<BrokerSetting>(`/api/v1/settings/${encodeURIComponent(key)}`, put({ value })),

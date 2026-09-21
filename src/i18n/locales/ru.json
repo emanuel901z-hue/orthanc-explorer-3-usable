@@ -156,7 +156,8 @@
     "failed": "({{count}} с ошибкой)",
     "clearCompleted": "Очистить завершённые",
     "fileName": "Имя файла",
-    "progress": "Прогресс"
+    "progress": "Прогресс",
+    "title": "Загрузить исследования"
   },
   "activity": {
     "subtitle": "Задания, журнал аудита и системные журналы на одной временной шкале",
@@ -1119,6 +1120,13 @@
     "tlsUploadKey": "Закрытый ключ (PEM)",
     "tlsUploadCa": "Пакет CA (необязательно)",
     "tlsUploadRun": "Установить",
-    "saving": "Сохранение…"
+    "saving": "Сохранение…",
+    "entity_cache": "Кэш",
+    "entity_spool": "Очередь",
+    "entity_tls": "TLS",
+    "entity_local_item": "Локальная запись",
+    "entity_hl7_message": "Сообщение HL7",
+    "entity_station": "Правило станции",
+    "entity_seen_item": "Происхождение"
   }
 }

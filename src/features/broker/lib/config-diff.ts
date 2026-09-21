@@ -38,7 +38,10 @@ export function describeEntry(entry: ConfigAuditEntry): {
     : entry.after_json === null ? 'delete'
     : 'update';
   const source = (entry.after_json ?? entry.before_json ?? {}) as Record<string, unknown>;
-  const name = String(source.name ?? source.key ?? `#${entry.entity_id ?? '?'}`);
+  // no name and no ID (cache/spool/TLS actions have neither) → show the entity
+  // kind only; a "#?" is noise, not information
+  const name = String(source.name ?? source.key
+    ?? (entry.entity_id !== null && entry.entity_id !== undefined ? `#${entry.entity_id}` : ''));
   return { kind, name };
 }
 

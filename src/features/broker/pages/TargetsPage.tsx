@@ -152,7 +152,7 @@ export default function TargetsPage() {
                 <TableHead>{t('broker.endpoint')}</TableHead>
                 <TableHead className="hidden md:table-cell">{t('broker.callingAet')}</TableHead>
                 <TableHead className="w-[140px]">{t('broker.echo')}</TableHead>
-                <TableHead className="w-[110px] text-right">{t('broker.actions')}</TableHead>
+                <TableHead className="w-[150px] text-right">{t('broker.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

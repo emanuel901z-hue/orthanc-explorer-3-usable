@@ -156,7 +156,8 @@
     "failed": "({{count}} فشل)",
     "clearCompleted": "مسح المكتملة",
     "fileName": "اسم الملف",
-    "progress": "التقدم"
+    "progress": "التقدم",
+    "title": "تحميل الفحوصات"
   },
   "activity": {
     "subtitle": "الوظائف ومسار التدقيق وسجلات النظام في جدول زمني واحد",
@@ -1119,6 +1120,13 @@
     "tlsUploadKey": "المفتاح الخاص (PEM)",
     "tlsUploadCa": "حزمة CA (اختياري)",
     "tlsUploadRun": "تثبيت",
-    "saving": "جارٍ الحفظ…"
+    "saving": "جارٍ الحفظ…",
+    "entity_cache": "الذاكرة المؤقتة",
+    "entity_spool": "قائمة الإرسال",
+    "entity_tls": "TLS",
+    "entity_local_item": "إدخال محلي",
+    "entity_hl7_message": "رسالة HL7",
+    "entity_station": "قاعدة المحطة",
+    "entity_seen_item": "المصدر"
   }
 }

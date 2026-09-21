@@ -48,7 +48,8 @@ import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useBrokerAuditWrites } from '../hooks/use-broker-audit';
 import { describeEntry, diffFields } from '../lib/config-diff';
 
-const ENTITIES = ['all', 'source', 'target', 'rule', 'transform', 'setting'] as const;
+const ENTITIES = ['all', 'source', 'target', 'rule', 'transform', 'setting',
+                  'cache', 'spool', 'tls', 'local_item', 'hl7_message'] as const;
 
 function downloadJson(doc: ConfigDocument) {
   const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json' });
