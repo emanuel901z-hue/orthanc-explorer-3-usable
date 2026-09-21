@@ -7,7 +7,8 @@ import prettierConfig from "eslint-config-prettier";
 
 export default tseslint.config(
   {
-    ignores: ["dist", "src/components/ui/**"],
+    ignores: [
+      'coverage/**',"dist", "src/components/ui/**"],
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended, prettierConfig],

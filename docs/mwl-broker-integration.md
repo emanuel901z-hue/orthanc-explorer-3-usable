@@ -106,6 +106,8 @@ implements the endpoints below works — the reference implementation is the
 | `POST` | `/api/v1/tls/upload` | Install a certificate/key pair from the hospital PKI (validated, key stored 0600 and never returned) |
 | `GET` | `/api/v1/atna/stats`, `POST /api/v1/atna/test`, `GET /api/v1/atna/sample` | ATNA audit trail |
 | `GET` | `/api/v1/hl7/messages/{id}`, `POST /api/v1/hl7/messages/{id}/reprocess?dry_run=` | HL7 message detail and replay (the raw text is only kept with `hl7_store_raw`) |
+| `GET` | `/api/v1/mpps?limit=&offset=&status=`, `/api/v1/mpps/{id}`, `/api/v1/mpps/stats` | Performed procedure steps: what the modalities reported and whether it reached the RIS |
+| `POST` | `/api/v1/mpps/{id}/forward`, `/api/v1/mpps/forward-pending` | Report the state to the RIS again (single step or all pending) |
 | `POST` | `/api/v1/cache/refresh` | Query the sources again and replace the cached snapshots (outage case) |
 | `GET` | `/api/v1/{sources,targets,rules,transforms,station-rules,local-items}/{id}`, `/api/v1/settings/{key}` | Single reads for scripts and integrations |
 | `GET` | `/api/v1/notify/events` | Alerting card: the event catalog (code, severity, description) |
@@ -140,6 +142,18 @@ POST routes that only look:
 
 The UI mirrors this: dry-runs and C-ECHO stay usable for a read-only operator,
 while the two test-message buttons hide (they would answer 403).
+
+### MPPS — the way back
+
+The broker accepts **MPPS** (`N-CREATE` IN PROGRESS, `N-SET` COMPLETED/
+DISCONTINUED) and reports the state to the RIS as `ORU^R01` (Z01/Z02/Z03) over
+MLLP or an HTTP webhook. Delivery happens in a background thread: a slow RIS
+never delays the DICOM answer. Finished steps are removed from the served
+worklist (switch `mpps_hide_completed`), and failed deliveries are counted,
+shown in the UI and retryable through the API.
+
+Without MPPS the order would stay open in the RIS — the reason this broker
+exists in front of the modalities.
 
 ### Deliberate boundaries
 

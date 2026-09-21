@@ -1127,6 +1127,15 @@
     "entity_local_item": "إدخال محلي",
     "entity_hl7_message": "رسالة HL7",
     "entity_station": "قاعدة المحطة",
-    "entity_seen_item": "المصدر"
+    "entity_seen_item": "المصدر",
+    "mppsTitle": "الخطوات المنفذة (MPPS)",
+    "mppsShowList": "عرض الخطوات",
+    "mppsHideList": "إخفاء",
+    "mppsRetry": "إعادة إرسال المعلّقة",
+    "mppsStatus": "الحالة",
+    "mppsWhen": "الوقت",
+    "mppsDelivered": "تم الإبلاغ",
+    "mppsPendingShort": "قيد الانتظار",
+    "mppsForwarded": "تم إبلاغ الخطوات."
   }
 }

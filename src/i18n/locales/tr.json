@@ -1127,6 +1127,15 @@
     "entity_local_item": "Yerel kayıt",
     "entity_hl7_message": "HL7 mesajı",
     "entity_station": "İstasyon kuralı",
-    "entity_seen_item": "Kaynak bilgisi"
+    "entity_seen_item": "Kaynak bilgisi",
+    "mppsTitle": "Gerçekleştirilen adımlar (MPPS)",
+    "mppsShowList": "Adımları göster",
+    "mppsHideList": "Gizle",
+    "mppsRetry": "Bekleyenleri yeniden gönder",
+    "mppsStatus": "Durum",
+    "mppsWhen": "Saat",
+    "mppsDelivered": "bildirildi",
+    "mppsPendingShort": "bekliyor",
+    "mppsForwarded": "Adımlar bildirildi."
   }
 }

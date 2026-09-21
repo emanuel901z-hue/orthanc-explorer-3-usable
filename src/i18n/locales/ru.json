@@ -1127,6 +1127,15 @@
     "entity_local_item": "Локальная запись",
     "entity_hl7_message": "Сообщение HL7",
     "entity_station": "Правило станции",
-    "entity_seen_item": "Происхождение"
+    "entity_seen_item": "Происхождение",
+    "mppsTitle": "Выполненные шаги (MPPS)",
+    "mppsShowList": "Показать шаги",
+    "mppsHideList": "Скрыть",
+    "mppsRetry": "Отправить повторно",
+    "mppsStatus": "Статус",
+    "mppsWhen": "Время",
+    "mppsDelivered": "отправлено",
+    "mppsPendingShort": "ожидает",
+    "mppsForwarded": "Шаги отправлены."
   }
 }

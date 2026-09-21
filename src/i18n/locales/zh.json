@@ -1127,6 +1127,15 @@
     "entity_local_item": "本地条目",
     "entity_hl7_message": "HL7 消息",
     "entity_station": "工作站规则",
-    "entity_seen_item": "来源"
+    "entity_seen_item": "来源",
+    "mppsTitle": "已执行步骤 (MPPS)",
+    "mppsShowList": "显示步骤",
+    "mppsHideList": "隐藏",
+    "mppsRetry": "重新上报待处理",
+    "mppsStatus": "状态",
+    "mppsWhen": "时间",
+    "mppsDelivered": "已上报",
+    "mppsPendingShort": "待处理",
+    "mppsForwarded": "步骤已上报。"
   }
 }

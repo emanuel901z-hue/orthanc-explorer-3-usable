@@ -1127,6 +1127,15 @@
     "entity_local_item": "ローカル項目",
     "entity_hl7_message": "HL7 メッセージ",
     "entity_station": "ステーション規則",
-    "entity_seen_item": "由来情報"
+    "entity_seen_item": "由来情報",
+    "mppsTitle": "実施ステップ (MPPS)",
+    "mppsShowList": "ステップを表示",
+    "mppsHideList": "非表示",
+    "mppsRetry": "未送信を再送",
+    "mppsStatus": "状態",
+    "mppsWhen": "時刻",
+    "mppsDelivered": "送信済み",
+    "mppsPendingShort": "未送信",
+    "mppsForwarded": "ステップを送信しました。"
   }
 }

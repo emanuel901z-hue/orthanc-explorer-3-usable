@@ -1127,6 +1127,15 @@
     "entity_local_item": "Entrée locale",
     "entity_hl7_message": "Message HL7",
     "entity_station": "Règle de poste",
-    "entity_seen_item": "Provenance"
+    "entity_seen_item": "Provenance",
+    "mppsTitle": "Étapes réalisées (MPPS)",
+    "mppsShowList": "Afficher les étapes",
+    "mppsHideList": "Masquer",
+    "mppsRetry": "Renvoyer les en attente",
+    "mppsStatus": "Statut",
+    "mppsWhen": "Heure",
+    "mppsDelivered": "signalé",
+    "mppsPendingShort": "en attente",
+    "mppsForwarded": "Étapes signalées."
   }
 }

@@ -1127,6 +1127,15 @@
     "entity_local_item": "Entrada local",
     "entity_hl7_message": "Mensaje HL7",
     "entity_station": "Regla de estación",
-    "entity_seen_item": "Procedencia"
+    "entity_seen_item": "Procedencia",
+    "mppsTitle": "Pasos realizados (MPPS)",
+    "mppsShowList": "Mostrar pasos",
+    "mppsHideList": "Ocultar",
+    "mppsRetry": "Reenviar pendientes",
+    "mppsStatus": "Estado",
+    "mppsWhen": "Hora",
+    "mppsDelivered": "informado",
+    "mppsPendingShort": "pendiente",
+    "mppsForwarded": "Pasos informados."
   }
 }

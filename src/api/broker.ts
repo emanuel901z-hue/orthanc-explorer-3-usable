@@ -599,6 +599,36 @@ export type CacheRefreshResult = {
              ok: boolean; error: string }[];
 };
 
+export type MppsStep = {
+  id: number;
+  ts: string;
+  sop_instance_uid: string;
+  status: string;
+  accession: string;
+  patient_id: string;
+  sps_id: string;
+  station_aet: string;
+  modality: string;
+  study_uid: string;
+  performed_procedure_step_id: string;
+  started_at: string | null;
+  ended_at: string | null;
+  forwarded: boolean;
+  forward_error: string;
+  forward_attempts: number;
+  forwarded_at: string | null;
+};
+
+export type MppsStats = {
+  total: number;
+  by_status: Record<string, number>;
+  forwarded: number;
+  pending_forward: number;
+  last_error: string;
+  forward_enabled: boolean;
+  hide_completed: boolean;
+};
+
 export type BrokerStatus = {
   /** Broker version that is running (which build is deployed). */
   version: string;
@@ -790,6 +820,14 @@ export const brokerApi = {
       if (opts.offset) query.set('offset', String(opts.offset));
       return brokerFetch<Hl7Message[]>(`/api/v1/hl7/messages?${query.toString()}`);
     },
+  },
+
+  mpps: {
+    list: (limit = 50) => brokerFetch<MppsStep[]>(`/api/v1/mpps?limit=${limit}`),
+    stats: () => brokerFetch<MppsStats>('/api/v1/mpps/stats'),
+    /** Report finished steps to the RIS again (they failed while it was down). */
+    forwardPending: () => brokerFetch<{ attempted: number; sent: number; failed: number }>(
+      '/api/v1/mpps/forward-pending', post({})),
   },
 
   /** Run the real C-FIND aggregation and show what a modality would receive. */

@@ -341,6 +341,17 @@ async function domReport(page) {
   record('broker: C-FIND-Test je Quelle liefert Treffer', /ACC-/.test(queryResult),
     queryResult.split('\n')[0].slice(0, 70));
 
+  // MPPS: the counterpart of the worklist (steps reported back to the RIS)
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2000);
+  const mppsCard = page.getByTestId('broker-mpps');
+  await mppsCard.first().waitFor({ timeout: 10000 }).catch(() => {});
+  record('broker: MPPS-Karte wird gerendert',
+    await mppsCard.count() > 0 && await mppsCard.first().isVisible());
+  const mppsText = await mppsCard.first().innerText().catch(() => '');
+  record('broker: MPPS-Karte erklärt die Rückmeldung',
+    /MPPS/.test(mppsText) && /RIS/i.test(mppsText), mppsText.split('\n')[1]?.slice(0, 60) || '');
+
   // About dialog: it must describe the MWL broker, not only the base fork
   await page.goto(`${OE3}/oe3/`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1200);
