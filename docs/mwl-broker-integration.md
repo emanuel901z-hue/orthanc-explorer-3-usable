@@ -112,6 +112,8 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/cache/stats`, `/api/v1/cache/items?source_id=&limit=&offset=` | Worklist cache card |
 | `DELETE` | `/api/v1/cache`, `/api/v1/cache/sources/{id}` | "Clear cache" (confirmed, **audited** — it removes the outage bridge) |
 | `POST` | `/api/v1/simulate/route`, `/api/v1/simulate/transform` | "Check a case" dry-run |
+| `POST` | `/api/v1/simulate/worklist` | "What would this console receive?" — runs the **real** aggregation (fan-out, merge, dedupe, station rule, cache) and returns the merged items with per-source provenance. Writes no routing provenance. PHI-free unless `simulate_show_phi` is on (health panel reports it) |
+| `POST` | `/api/v1/sources/{id}/query` | C-FIND test per source: does this RIS deliver worklists? (a C-ECHO only says it is alive) |
 | `POST` | `/api/v1/sources/{id}/reset-breaker` | Circuit-breaker badge: operator reset (**audited**) |
 | `POST` | `/api/v1/sources/{id}/echo` | "Run C-ECHO now" button |
 | `POST` | `/api/v1/targets/{id}/echo` | "Run C-ECHO now" button |
@@ -126,9 +128,9 @@ POST routes that only look:
 
 | Always allowed (read-only, also without the write role) | Needs the write role |
 |---|---|
-| `POST /api/v1/simulate/route`, `/station`, `/transform` | `POST/PUT/DELETE` on sources, targets, rules, transforms, station rules, local items |
+| `POST /api/v1/simulate/route`, `/station`, `/transform`, `/worklist` | `POST/PUT/DELETE` on sources, targets, rules, transforms, station rules, local items |
 | `POST /api/v1/sources/{id}/echo`, `/targets/{id}/echo` | `POST /api/v1/retention/purge` |
-| `POST /api/v1/tls/test` | `DELETE /api/v1/cache`, `/cache/sources/{id}` |
+| `POST /api/v1/tls/test`, `POST /api/v1/sources/{id}/query` | `DELETE /api/v1/cache`, `/cache/sources/{id}` |
 | `POST /api/v1/hl7/orm?dry_run=true`, `POST /api/v1/config/import?dry_run=true` | `POST /api/v1/atna/test`, `/notify/test` (they send a real message) |
 | `POST /api/v1/sources/{id}/reset-breaker` | the same routes without `dry_run=true` |
 

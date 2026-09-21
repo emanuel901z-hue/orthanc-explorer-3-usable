@@ -1097,6 +1097,19 @@
     "loadMore": "Cargar más",
     "sinceLabel": "Desde (fecha)",
     "sinceHint": "Solo entradas desde este día. Vacío = todo.",
-    "sinceAll": "Todo"
+    "sinceAll": "Todo",
+    "previewRun": "Ejecutar vista previa",
+    "previewRunning": "En curso…",
+    "close": "Cerrar",
+    "previewTitle": "¿Qué recibiría esta consola?",
+    "previewStation": "AET de estación",
+    "previewAccession": "Nº de acceso (opcional)",
+    "previewAccessionPlaceholder": "vacío = todo",
+    "queryTest": "Probar la consulta de worklist (C-FIND)",
+    "previewFrom": "de",
+    "accession": "Nº de acceso",
+    "modality": "Modalidad",
+    "station": "Estación",
+    "startDate": "Fecha"
   }
 }

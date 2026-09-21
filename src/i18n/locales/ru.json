@@ -1097,6 +1097,19 @@
     "loadMore": "Загрузить ещё",
     "sinceLabel": "С даты",
     "sinceHint": "Только записи с этого дня. Пусто = все.",
-    "sinceAll": "Все"
+    "sinceAll": "Все",
+    "previewRun": "Запустить предпросмотр",
+    "previewRunning": "Выполняется…",
+    "close": "Закрыть",
+    "previewTitle": "Что получит эта консоль?",
+    "previewStation": "AET станции",
+    "previewAccession": "Номер доступа (необязательно)",
+    "previewAccessionPlaceholder": "пусто = все",
+    "queryTest": "Проверить запрос worklist (C-FIND)",
+    "previewFrom": "из",
+    "accession": "Номер доступа",
+    "modality": "Модальность",
+    "station": "Станция",
+    "startDate": "Дата"
   }
 }

@@ -518,6 +518,59 @@ export type TransformSimulation = RoutingDecision & {
   errors: string[];
 };
 
+export type WorklistPreviewItem = {
+  accession: string;
+  study_uid: string;
+  requested_procedure_id: string;
+  sps_id: string;
+  station_aet: string;
+  modality: string;
+  start_date: string;
+  start_time: string;
+  /** Source that won the merge for this item. */
+  source: string;
+  /** Other sources that answered the same case (deduplicated). */
+  also_in: string[];
+  /** Only present when the operator switched `simulate_show_phi` on. */
+  patient_name?: string;
+  patient_id?: string;
+};
+
+export type WorklistPreviewSource = {
+  name: string;
+  source_id: number | null;
+  answers: number | string;
+  stale: boolean;
+  breaker_state?: string | null;
+};
+
+export type WorklistPreview = {
+  station: string;
+  rule: string | null;
+  status: string;
+  duration_ms: number;
+  answers: number;
+  hidden: number;
+  /** Whether patient name/ID are included (setting `simulate_show_phi`). */
+  phi: boolean;
+  served_stale: string[];
+  sources: WorklistPreviewSource[];
+  items: WorklistPreviewItem[];
+  truncated: boolean;
+};
+
+export type SourceQueryResult = {
+  source_id: number;
+  name: string;
+  ok: boolean;
+  error: string;
+  answers: number;
+  duration_ms: number;
+  phi: boolean;
+  items: WorklistPreviewItem[];
+  truncated: boolean;
+};
+
 export type BrokerStatus = {
   /** Broker version that is running (which build is deployed). */
   version: string;
@@ -633,6 +686,9 @@ export const brokerApi = {
       brokerFetch<BrokerSource>(`/api/v1/sources/${id}`, put(body)),
     delete: (id: number) => brokerFetch<void>(`/api/v1/sources/${id}`, { method: 'DELETE' }),
     echo: (id: number) => brokerFetch<EchoStatus>(`/api/v1/sources/${id}/echo`, post({})),
+    /** Ask one source directly whether it delivers worklists (real C-FIND). */
+    query: (id: number, body: { accession?: string; modality?: string; scheduled_date?: string } = {}) =>
+      brokerFetch<SourceQueryResult>(`/api/v1/sources/${id}/query`, post(body)),
     resetBreaker: (id: number) =>
       brokerFetch<BreakerResetResult>(`/api/v1/sources/${id}/reset-breaker`, post({})),
   },
@@ -700,6 +756,11 @@ export const brokerApi = {
       return brokerFetch<Hl7Message[]>(`/api/v1/hl7/messages?${query.toString()}`);
     },
   },
+
+  /** Run the real C-FIND aggregation and show what a modality would receive. */
+  worklistPreview: (body: {
+    station_aet?: string; accession?: string; modality?: string; scheduled_date?: string;
+  } = {}) => brokerFetch<WorklistPreview>('/api/v1/simulate/worklist', post(body)),
 
   stationRules: {
     list: () => brokerFetch<StationRule[]>('/api/v1/station-rules'),

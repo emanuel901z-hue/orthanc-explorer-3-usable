@@ -1097,6 +1097,19 @@
     "loadMore": "Daha fazla yükle",
     "sinceLabel": "Tarihten itibaren",
     "sinceHint": "Yalnızca bu günden itibaren kayıtlar. Boş = tümü.",
-    "sinceAll": "Tümü"
+    "sinceAll": "Tümü",
+    "previewRun": "Önizlemeyi çalıştır",
+    "previewRunning": "Çalışıyor…",
+    "close": "Kapat",
+    "previewTitle": "Bu konsol ne alırdı?",
+    "previewStation": "İstasyon AET",
+    "previewAccession": "Erişim numarası (isteğe bağlı)",
+    "previewAccessionPlaceholder": "boş = tümü",
+    "queryTest": "Worklist sorgusunu test et (C-FIND)",
+    "previewFrom": "kaynak",
+    "accession": "Erişim no",
+    "modality": "Modalite",
+    "station": "İstasyon",
+    "startDate": "Tarih"
   }
 }

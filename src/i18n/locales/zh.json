@@ -1097,6 +1097,19 @@
     "loadMore": "加载更多",
     "sinceLabel": "起始日期",
     "sinceHint": "仅显示该日期之后的条目。留空＝全部。",
-    "sinceAll": "全部"
+    "sinceAll": "全部",
+    "previewRun": "运行预览",
+    "previewRunning": "运行中…",
+    "close": "关闭",
+    "previewTitle": "此控制台会收到什么？",
+    "previewStation": "工作站 AET",
+    "previewAccession": "检查号（可选）",
+    "previewAccessionPlaceholder": "空 = 全部",
+    "queryTest": "测试工作列表查询 (C-FIND)",
+    "previewFrom": "来源",
+    "accession": "检查号",
+    "modality": "模态",
+    "station": "工作站",
+    "startDate": "日期"
   }
 }

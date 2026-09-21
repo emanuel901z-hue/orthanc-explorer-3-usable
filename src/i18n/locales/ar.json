@@ -1097,6 +1097,19 @@
     "loadMore": "تحميل المزيد",
     "sinceLabel": "من تاريخ",
     "sinceHint": "فقط السجلات من هذا اليوم. فارغ = الكل.",
-    "sinceAll": "الكل"
+    "sinceAll": "الكل",
+    "previewRun": "تشغيل المعاينة",
+    "previewRunning": "جارٍ التنفيذ…",
+    "close": "إغلاق",
+    "previewTitle": "ماذا ستتلقى هذه الوحدة؟",
+    "previewStation": "AET المحطة",
+    "previewAccession": "رقم الإحالة (اختياري)",
+    "previewAccessionPlaceholder": "فارغ = الكل",
+    "queryTest": "اختبار استعلام قائمة العمل (C-FIND)",
+    "previewFrom": "من",
+    "accession": "رقم الإحالة",
+    "modality": "الجهاز",
+    "station": "المحطة",
+    "startDate": "التاريخ"
   }
 }

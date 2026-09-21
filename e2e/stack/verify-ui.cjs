@@ -319,6 +319,28 @@ async function domReport(page) {
     else localStorage.setItem('oe3-language', previous);
   }, languageBeforeBrokerChecks);
 
+  // A9: the merged-worklist preview runs the real aggregation and shows provenance
+  await page.goto(`${OE3}/oe3/broker/stations`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2500);
+  await page.getByRole('button', { name: /vorschau starten|run preview/i }).click();
+  await page.waitForTimeout(4500);
+  const previewText = await page.getByTestId('preview-result').innerText().catch(() => '');
+  record('broker: Arbeitslisten-Vorschau zeigt die zusammengeführte Liste',
+    /ACC-/.test(previewText) && /ris-a/.test(previewText),
+    previewText.split('\n').slice(0, 2).join(' | ').slice(0, 80));
+  record('broker: Vorschau ist standardmäßig PHI-frei',
+    (await page.getByTestId('preview-phi').count()) === 0);
+
+  // A8: the per-source C-FIND test answers "does this RIS deliver worklists?"
+  await page.goto(`${OE3}/oe3/broker/sources`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('table tbody tr', { timeout: 15000 });
+  await page.locator('table tbody tr').first()
+    .getByRole('button', { name: /worklist-abfrage testen|c-find/i }).click();
+  await page.waitForTimeout(4000);
+  const queryResult = await page.getByTestId('query-test-result').innerText().catch(() => '');
+  record('broker: C-FIND-Test je Quelle liefert Treffer', /ACC-/.test(queryResult),
+    queryResult.split('\n')[0].slice(0, 70));
+
   // About dialog: it must describe the MWL broker, not only the base fork
   await page.goto(`${OE3}/oe3/`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1200);

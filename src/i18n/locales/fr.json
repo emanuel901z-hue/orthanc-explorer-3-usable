@@ -1097,6 +1097,19 @@
     "loadMore": "Charger plus",
     "sinceLabel": "Depuis (date)",
     "sinceHint": "Uniquement les entrées à partir de ce jour. Vide = tout.",
-    "sinceAll": "Tout"
+    "sinceAll": "Tout",
+    "previewRun": "Lancer l'aperçu",
+    "previewRunning": "En cours…",
+    "close": "Fermer",
+    "previewTitle": "Que recevrait cette console ?",
+    "previewStation": "AET station",
+    "previewAccession": "N° d'accès (optionnel)",
+    "previewAccessionPlaceholder": "vide = tout",
+    "queryTest": "Tester la requête worklist (C-FIND)",
+    "previewFrom": "de",
+    "accession": "N° d'accès",
+    "modality": "Modalité",
+    "station": "Station",
+    "startDate": "Date"
   }
 }

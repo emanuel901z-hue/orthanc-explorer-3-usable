@@ -5,11 +5,14 @@
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Loader2, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -62,6 +65,13 @@ export default function SourcesPage() {
 
   const sources = sourcesQuery.data ?? [];
   const pending = create.isPending || update.isPending || remove.isPending;
+
+  // "does this RIS deliver worklists?" — a real C-FIND, not just a C-ECHO
+  const [queryTarget, setQueryTarget] = useState<BrokerSource | null>(null);
+  const queryTest = useMutation({
+    mutationFn: (row: BrokerSource) => brokerApi.sources.query(row.id),
+  });
+  const closeQueryTest = () => { setQueryTarget(null); queryTest.reset(); };
 
   /** A click anywhere on a row opens the edit dialog (same as the pencil). */
   const openRow = (row: BrokerSource) => {
@@ -126,6 +136,15 @@ export default function SourcesPage() {
                     pending={echo.isPending}
                     onEcho={() => echo.mutate({ kind: 'source', id: row.id })}
                   />
+                  <Button
+                    variant="ghost" size="sm" className="h-9 w-9 p-0"
+                    aria-label={t('broker.queryTest')}
+                    title={t('broker.queryTest')}
+                    disabled={queryTest.isPending}
+                    onClick={() => { setQueryTarget(row); queryTest.mutate(row); }}
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost" size="sm" className="h-9 w-9 p-0"
                     aria-label={t('broker.editSource')}
@@ -222,6 +241,15 @@ export default function SourcesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
+                      variant="ghost" size="sm" className="h-9 w-9 p-0"
+                      aria-label={t('broker.queryTest')}
+                      title={t('broker.queryTest')}
+                      disabled={queryTest.isPending}
+                      onClick={() => { setQueryTarget(row); queryTest.mutate(row); }}
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                    <Button
                       variant="ghost"
                       size="sm"
                       className="h-9 w-9 p-0"
@@ -277,6 +305,46 @@ export default function SourcesPage() {
           remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) });
         }}
       />
+
+      {/* C-FIND test: the answer to "why does this console see nothing?" */}
+      <Dialog open={queryTarget !== null} onOpenChange={(open) => { if (!open) closeQueryTest(); }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {t('broker.queryTestTitle', { name: queryTarget?.name ?? '' })}
+            </DialogTitle>
+            <DialogDescription>{t('broker.queryTestHint')}</DialogDescription>
+          </DialogHeader>
+          {queryTest.isPending ? (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> {t('broker.previewRunning')}
+            </p>
+          ) : queryTest.data ? (
+            <div className="space-y-3 text-sm" data-testid="query-test-result">
+              <p className={queryTest.data.ok ? '' : 'text-destructive'}>
+                {queryTest.data.ok
+                  ? t('broker.queryTestOk', { count: queryTest.data.answers, ms: queryTest.data.duration_ms })
+                  : t('broker.queryTestFailed', { error: queryTest.data.error })}
+              </p>
+              {queryTest.data.items.length > 0 && (
+                <ul className="space-y-1 font-mono text-xs">
+                  {queryTest.data.items.map((item, index) => (
+                    <li key={index}>
+                      {item.accession} · {item.modality} · {item.station_aet} · {item.start_date}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {queryTest.data.truncated && (
+                <p className="text-xs text-muted-foreground">{t('broker.previewTruncated')}</p>
+              )}
+            </div>
+          ) : null}
+          <DialogFooter>
+            <Button variant="outline" onClick={closeQueryTest}>{t('broker.close')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </BrokerPageShell>
   );
 }

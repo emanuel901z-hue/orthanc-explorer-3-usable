@@ -1097,6 +1097,19 @@
     "loadMore": "さらに読み込む",
     "sinceLabel": "この日以降",
     "sinceHint": "この日以降の項目のみ。空欄＝すべて。",
-    "sinceAll": "すべて"
+    "sinceAll": "すべて",
+    "previewRun": "プレビュー実行",
+    "previewRunning": "実行中…",
+    "close": "閉じる",
+    "previewTitle": "このコンソールは何を受け取りますか？",
+    "previewStation": "ステーション AET",
+    "previewAccession": "アクセッション番号（任意）",
+    "previewAccessionPlaceholder": "空 = すべて",
+    "queryTest": "ワークリスト照会をテスト (C-FIND)",
+    "previewFrom": "取得元",
+    "accession": "アクセッション番号",
+    "modality": "モダリティ",
+    "station": "ステーション",
+    "startDate": "日付"
   }
 }
