@@ -23,6 +23,18 @@ export function useTlsWrites() {
     successMessage: t('broker.saved'),
   });
 
+  /** Install a certificate/key pair that came from the hospital PKI. */
+  const upload = useAuditedMutation({
+    action: 'broker.tls.upload',
+    resourceType: 'brokerConfig',
+    run: (body: { certificate_pem: string; key_pem: string; ca_pem?: string;
+                  filename?: string; is_ca?: boolean }) =>
+      brokerApi.tls.upload(body),
+    resourceId: (body) => body.filename ?? 'uploaded',
+    invalidate: TLS_KEYS,
+    successMessage: t('broker.tlsUploaded'),
+  });
+
   const test = useAuditedMutation({
     action: 'broker.tls.test',
     resourceType: 'brokerConfig',
@@ -33,5 +45,5 @@ export function useTlsWrites() {
     successMessage: t('broker.saved'),
   });
 
-  return { generate, test };
+  return { generate, upload, test };
 }

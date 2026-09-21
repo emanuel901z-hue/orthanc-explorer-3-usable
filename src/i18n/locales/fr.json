@@ -1110,6 +1110,15 @@
     "accession": "N° d'accès",
     "modality": "Modalité",
     "station": "Station",
-    "startDate": "Date"
+    "startDate": "Date",
+    "hl7Detail": "Détails",
+    "hl7Replay": "Appliquer à nouveau",
+    "cacheRefreshNow": "Actualiser",
+    "tlsUploadTitle": "Installer un certificat de la PKI",
+    "tlsUploadCert": "Certificat (PEM)",
+    "tlsUploadKey": "Clé privée (PEM)",
+    "tlsUploadCa": "Bundle CA (optionnel)",
+    "tlsUploadRun": "Installer",
+    "saving": "Enregistrement…"
   }
 }

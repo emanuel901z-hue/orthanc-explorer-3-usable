@@ -103,7 +103,11 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/atna/stats`, TLS state + certificate/key details (no key material) |
 | `POST` | `/api/v1/tls/self-signed` | Generate a certificate (public PEM returned for hand-over) |
 | `POST` | `/api/v1/tls/test` | Real handshake (+ optional C-ECHO) against an endpoint |
+| `POST` | `/api/v1/tls/upload` | Install a certificate/key pair from the hospital PKI (validated, key stored 0600 and never returned) |
 | `GET` | `/api/v1/atna/stats`, `POST /api/v1/atna/test`, `GET /api/v1/atna/sample` | ATNA audit trail |
+| `GET` | `/api/v1/hl7/messages/{id}`, `POST /api/v1/hl7/messages/{id}/reprocess?dry_run=` | HL7 message detail and replay (the raw text is only kept with `hl7_store_raw`) |
+| `POST` | `/api/v1/cache/refresh` | Query the sources again and replace the cached snapshots (outage case) |
+| `GET` | `/api/v1/{sources,targets,rules,transforms,station-rules,local-items}/{id}`, `/api/v1/settings/{key}` | Single reads for scripts and integrations |
 | `GET` | `/api/v1/notify/events` | Alerting card: the event catalog (code, severity, description) |
 | `POST` | `/api/v1/notify/test` | "Send test message" (returns the delivery result) |
 | `GET` | `/api/v1/spool?status=&limit=&offset=`, `/api/v1/spool/stats` | Store queue + spool card ("load more" pages with `offset`) |
@@ -149,6 +153,9 @@ report them again:
   disk; only metadata (UIDs, target, attempts, age) is returned.
 - **No API authentication of its own.** The reverse proxy authenticates and
   injects the roles header; the broker only decides read vs. write.
+- **No raw HL7 message by default.** It contains patient data, so it is only kept
+  when `hl7_store_raw` is switched on (health panel reports it); otherwise a
+  replay is impossible and the sender has to resend.
 - **No patient identifiers in logs, metrics or exports.** The query/store logs
   carry accession, station, modality and UIDs — never the patient name.
 

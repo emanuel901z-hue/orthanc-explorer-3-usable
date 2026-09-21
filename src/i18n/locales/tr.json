@@ -1110,6 +1110,15 @@
     "accession": "Erişim no",
     "modality": "Modalite",
     "station": "İstasyon",
-    "startDate": "Tarih"
+    "startDate": "Tarih",
+    "hl7Detail": "Ayrıntılar",
+    "hl7Replay": "Yeniden uygula",
+    "cacheRefreshNow": "Şimdi yenile",
+    "tlsUploadTitle": "PKI sertifikası yükle",
+    "tlsUploadCert": "Sertifika (PEM)",
+    "tlsUploadKey": "Özel anahtar (PEM)",
+    "tlsUploadCa": "CA paketi (isteğe bağlı)",
+    "tlsUploadRun": "Yükle",
+    "saving": "Kaydediliyor…"
   }
 }

@@ -1110,6 +1110,15 @@
     "accession": "رقم الإحالة",
     "modality": "الجهاز",
     "station": "المحطة",
-    "startDate": "التاريخ"
+    "startDate": "التاريخ",
+    "hl7Detail": "التفاصيل",
+    "hl7Replay": "تطبيق مرة أخرى",
+    "cacheRefreshNow": "تحديث الآن",
+    "tlsUploadTitle": "تثبيت شهادة من PKI",
+    "tlsUploadCert": "الشهادة (PEM)",
+    "tlsUploadKey": "المفتاح الخاص (PEM)",
+    "tlsUploadCa": "حزمة CA (اختياري)",
+    "tlsUploadRun": "تثبيت",
+    "saving": "جارٍ الحفظ…"
   }
 }

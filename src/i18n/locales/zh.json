@@ -1110,6 +1110,15 @@
     "accession": "检查号",
     "modality": "模态",
     "station": "工作站",
-    "startDate": "日期"
+    "startDate": "日期",
+    "hl7Detail": "详情",
+    "hl7Replay": "重新应用",
+    "cacheRefreshNow": "立即刷新",
+    "tlsUploadTitle": "安装 PKI 证书",
+    "tlsUploadCert": "证书 (PEM)",
+    "tlsUploadKey": "私钥 (PEM)",
+    "tlsUploadCa": "CA 包（可选）",
+    "tlsUploadRun": "安装",
+    "saving": "保存中…"
   }
 }

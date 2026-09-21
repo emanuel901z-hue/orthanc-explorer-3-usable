@@ -6,18 +6,25 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import type { BrokerSetting } from '@/api/broker';
 import i18n from '@/i18n';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import BrokerPage from '@/features/broker/pages/BrokerPage';
 import SourcesPage from '@/features/broker/pages/SourcesPage';
+import { TlsCard } from '@/features/broker/components/TlsCard';
+import { CacheCard } from '@/features/broker/components/CacheCard';
 import { RetentionCard } from '@/features/broker/components/RetentionCard';
 import '@/i18n';
 
-const { mockStatus, mockQueries, mockSources, mockRetention } = vi.hoisted(() => ({
+const { mockStatus, mockQueries, mockSources, mockRetention, mockTlsOverview,
+        mockCacheStats, mockCacheRefresh } = vi.hoisted(() => ({
   mockStatus: vi.fn(),
   mockQueries: vi.fn(),
   mockSources: vi.fn(),
   mockRetention: vi.fn(),
+  mockTlsOverview: vi.fn(),
+  mockCacheStats: vi.fn(),
+  mockCacheRefresh: vi.fn(),
 }));
 
 vi.mock('@/api/broker', () => ({
@@ -31,7 +38,9 @@ vi.mock('@/api/broker', () => ({
     rbac: { status: vi.fn(() => Promise.resolve({ enforced: false, can_write: true, write_role: 'brokerWrite', roles: [] })) },
     retention: { overview: mockRetention, purge: vi.fn() },
     settings: { list: vi.fn(() => Promise.resolve([])), set: vi.fn(), reset: vi.fn() },
-    cache: { stats: vi.fn(() => Promise.resolve(null)) },
+    cache: { stats: mockCacheStats, items: vi.fn(() => Promise.resolve([])),
+             clear: vi.fn(), clearSource: vi.fn(), refresh: mockCacheRefresh },
+    tls: { overview: mockTlsOverview, generate: vi.fn(), test: vi.fn(), upload: vi.fn() },
     spool: { stats: vi.fn(() => Promise.resolve(null)) },
   },
 }));
@@ -175,5 +184,52 @@ describe('API completeness follow-ups (A4/A5/A6)', () => {
     await waitFor(() => {
       expect(mockQueries).toHaveBeenCalledWith(expect.objectContaining({ since: '2026-09-20' }));
     });
+  });
+});
+
+describe('Sprint 4 UI (A10/A11/A12)', () => {
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+  });
+  afterEach(() => { vi.clearAllMocks(); });
+
+  it('offers a certificate upload that never asks for the key twice', async () => {
+    // shape of GET /tls/overview (see TlsOverview in src/api/broker.ts)
+    mockTlsOverview.mockResolvedValue({
+      inbound_enabled: false, inbound_port: 2762, inbound_client_auth: 'none',
+      outbound_verify: true, directory: '/var/lib/mwl-broker/tls',
+      entries: {}, certificates: [], keys: [],
+    });
+    const settings: BrokerSetting[] = [
+      { key: 'tls_inbound_enabled', value: 'false', default: 'false', source: 'env',
+        kind: 'bool', description: '', min: null, max: null, choices: null },
+      { key: 'tls_inbound_port', value: '2762', default: '2762', source: 'env',
+        kind: 'int', description: '', min: 1, max: 65535, choices: null },
+      { key: 'tls_inbound_cert_file', value: '', default: '', source: 'env',
+        kind: 'str', description: '', min: null, max: null, choices: null },
+      { key: 'tls_inbound_key_file', value: '', default: '', source: 'env',
+        kind: 'str', description: '', min: null, max: null, choices: null },
+      { key: 'tls_dir', value: '/var/lib/mwl-broker/tls', default: '/var/lib/mwl-broker/tls',
+        source: 'env', kind: 'str', description: '', min: null, max: null, choices: null },
+    ];
+    wrap(<TlsCard settings={settings} />);
+
+    const upload = await screen.findByTestId('tls-upload');
+    expect(within(upload).getByLabelText(/certificate \(pem\)|zertifikat \(pem\)/i)).toBeInTheDocument();
+    expect(within(upload).getByLabelText(/private key \(pem\)|privater schlüssel \(pem\)/i)).toBeInTheDocument();
+    // the button stays disabled until both files are chosen
+    expect(within(upload).getByRole('button', { name: /install|einspielen/i })).toBeDisabled();
+  });
+
+  it('lets the operator refresh the worklist cache', async () => {
+    mockCacheStats.mockResolvedValue([]);
+    wrap(<CacheCard />);
+
+    const button = await screen.findByRole('button', { name: /refresh now|jetzt aktualisieren/i });
+    fireEvent.click(button);
+
+    await waitFor(() => expect(mockCacheRefresh).toHaveBeenCalled());
   });
 });

@@ -1110,6 +1110,15 @@
     "accession": "Номер доступа",
     "modality": "Модальность",
     "station": "Станция",
-    "startDate": "Дата"
+    "startDate": "Дата",
+    "hl7Detail": "Подробности",
+    "hl7Replay": "Применить снова",
+    "cacheRefreshNow": "Обновить",
+    "tlsUploadTitle": "Установить сертификат из PKI",
+    "tlsUploadCert": "Сертификат (PEM)",
+    "tlsUploadKey": "Закрытый ключ (PEM)",
+    "tlsUploadCa": "Пакет CA (необязательно)",
+    "tlsUploadRun": "Установить",
+    "saving": "Сохранение…"
   }
 }

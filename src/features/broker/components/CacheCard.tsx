@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Database, Trash2 } from 'lucide-react';
+import { Database, RefreshCw, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +35,15 @@ export function CacheCard() {
     queryFn: () => brokerApi.cache.stats(),
     enabled: configured,
     refetchInterval: 15000,
+  });
+
+  const refreshCache = useAuditedMutation({
+    action: 'broker.cache.refresh',
+    resourceType: 'brokerConfig',
+    resourceId: () => undefined,
+    run: () => brokerApi.cache.refresh(),
+    invalidate: [['broker', 'cache']],
+    successMessage: t('broker.cacheRefreshed'),
   });
 
   const clearCache = useAuditedMutation({
@@ -99,6 +108,14 @@ export function CacheCard() {
           </ul>
         )}
       </CardContent>
+
+      <div className="flex flex-wrap gap-2 px-3 pb-3">
+        <Button variant="outline" size="sm" disabled={refreshCache.isPending}
+                onClick={() => refreshCache.mutate(undefined)}>
+          <RefreshCw className={`h-4 w-4 mr-1 ${refreshCache.isPending ? 'animate-spin' : ''}`} />
+          {t('broker.cacheRefreshNow')}
+        </Button>
+      </div>
 
       <ConfirmDeleteDialog
         open={confirmClear}

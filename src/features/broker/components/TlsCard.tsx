@@ -54,7 +54,23 @@ export function TlsCard({ settings }: { settings: BrokerSetting[] }) {
   const { t } = useTranslation();
   const configured = Boolean(getConfig().brokerUrl);
   const { setValue } = useBrokerSettingWrites();
-  const { generate, test } = useTlsWrites();
+  const { generate, upload, test } = useTlsWrites();
+  // PKI material arrives as files: read them, upload, never keep the key around
+  const [certFile, setCertFile] = useState<File | null>(null);
+  const [keyFile, setKeyFile] = useState<File | null>(null);
+  const [caFile, setCaFile] = useState<File | null>(null);
+
+  const handleUpload = async () => {
+    if (!certFile || !keyFile) return;
+    upload.mutate({
+      certificate_pem: await certFile.text(),
+      key_pem: await keyFile.text(),
+      ...(caFile ? { ca_pem: await caFile.text() } : {}),
+      filename: 'uploaded',
+    }, {
+      onSuccess: () => { setCertFile(null); setKeyFile(null); setCaFile(null); },
+    });
+  };
 
   const byKey = new Map(settings.map((setting) => [setting.key, setting]));
   // a local draft per field: the value is committed when the field is left
@@ -263,7 +279,47 @@ export function TlsCard({ settings }: { settings: BrokerSetting[] }) {
           </div>
         </div>
 
-        {/* certificate overview */}
+                {/* A10: certificates from the hospital PKI (validated, key never returned) */}
+        <div className="space-y-2 rounded-md border p-3" data-testid="tls-upload">
+          <p className="text-xs font-medium">{t('broker.tlsUploadTitle')}</p>
+          <p className="text-xs text-muted-foreground">{t('broker.tlsUploadHint')}</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div>
+              <Label htmlFor="tls-cert-file" className="text-xs">{t('broker.tlsUploadCert')}</Label>
+              <Input id="tls-cert-file" type="file" accept=".crt,.pem"
+                     className="h-9 text-xs"
+                     onChange={(event) => setCertFile(event.target.files?.[0] ?? null)} />
+            </div>
+            <div>
+              <Label htmlFor="tls-key-file" className="text-xs">{t('broker.tlsUploadKey')}</Label>
+              <Input id="tls-key-file" type="file" accept=".key,.pem"
+                     className="h-9 text-xs"
+                     onChange={(event) => setKeyFile(event.target.files?.[0] ?? null)} />
+            </div>
+            <div>
+              <Label htmlFor="tls-ca-file" className="text-xs">{t('broker.tlsUploadCa')}</Label>
+              <Input id="tls-ca-file" type="file" accept=".crt,.pem"
+                     className="h-9 text-xs"
+                     onChange={(event) => setCaFile(event.target.files?.[0] ?? null)} />
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" disabled={upload.isPending || !certFile || !keyFile}
+                    onClick={handleUpload}>
+              {upload.isPending ? t('broker.saving') : t('broker.tlsUploadRun')}
+            </Button>
+            {upload.isError && (
+              <span role="alert" className="text-xs text-destructive">
+                {(upload.error as Error).message}
+              </span>
+            )}
+            {upload.isSuccess && (
+              <span className="text-xs text-green-700">{t('broker.tlsUploaded')}</span>
+            )}
+          </div>
+        </div>
+
+{/* certificate overview */}
         {overview && overview.certificates.length > 0 && (
           <div className="space-y-1" data-testid="tls-certificates">
             <p className="text-xs font-medium">{t('broker.tlsCertificates')}</p>

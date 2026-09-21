@@ -571,6 +571,34 @@ export type SourceQueryResult = {
   truncated: boolean;
 };
 
+export type Hl7MessageDetail = {
+  id: number;
+  ts: string;
+  transport: string;
+  message_type: string;
+  control_id: string;
+  order_control: string;
+  accession: string;
+  action: string;
+  error: string;
+  /** The raw message — only present when `hl7_store_raw` is switched on (PHI). */
+  raw: string;
+  /** Whether the raw message is stored, so a replay is possible. */
+  replayable: boolean;
+};
+
+export type Hl7ReprocessResult = {
+  dry_run: boolean;
+  action: string;
+  item_id: number | null;
+  error: string;
+};
+
+export type CacheRefreshResult = {
+  sources: { name: string; source_id: number; items: number; duration_ms: number;
+             ok: boolean; error: string }[];
+};
+
 export type BrokerStatus = {
   /** Broker version that is running (which build is deployed). */
   version: string;
@@ -748,6 +776,10 @@ export const brokerApi = {
         headers: { 'Content-Type': 'text/plain' },
         body: message,
       }),
+    message: (id: number) => brokerFetch<Hl7MessageDetail>(`/api/v1/hl7/messages/${id}`),
+    reprocess: (id: number, dryRun = true) =>
+      brokerFetch<Hl7ReprocessResult>(
+        `/api/v1/hl7/messages/${id}/reprocess?dry_run=${dryRun ? 'true' : 'false'}`, post({})),
     messages: (params: number | { limit?: number; offset?: number } = {}) => {
       const opts = typeof params === 'number' ? { limit: params } : params;
       const query = new URLSearchParams();
@@ -791,6 +823,12 @@ export const brokerApi = {
       brokerFetch<{ certificate_path: string; key_path: string; certificate_pem: string;
                     certificate: TlsCertificate; key: TlsKey; is_ca: boolean }>(
         '/api/v1/tls/self-signed', post(body)),
+    /** Install a certificate/key pair from the hospital PKI (never returns the key). */
+    upload: (body: { certificate_pem: string; key_pem: string; ca_pem?: string;
+                     filename?: string; is_ca?: boolean }) =>
+      brokerFetch<{ certificate_path: string; key_path: string; ca_path: string;
+                    certificate: Record<string, unknown>; key: Record<string, unknown>;
+                    is_ca: boolean }>('/api/v1/tls/upload', post(body)),
     test: (body: { host: string; port: number; verify?: boolean | null; ca_file?: string;
                    server_name?: string; echo_aet?: string; calling_aet?: string }) =>
       brokerFetch<TlsTestResult>('/api/v1/tls/test', post(body)),
@@ -834,6 +872,10 @@ export const brokerApi = {
       query.set('limit', String(params.limit ?? 100));
       return brokerFetch<CacheItem[]>(`/api/v1/cache/items?${query.toString()}`);
     },
+    /** Query the sources again and replace the cached snapshots (outage case). */
+    refresh: (sourceId?: number) =>
+      brokerFetch<CacheRefreshResult>(
+        `/api/v1/cache/refresh${sourceId ? `?source_id=${sourceId}` : ''}`, post({})),
     clear: () => brokerFetch<void>('/api/v1/cache', { method: 'DELETE' }),
     clearSource: (sourceId: number) =>
       brokerFetch<void>(`/api/v1/cache/sources/${sourceId}`, { method: 'DELETE' }),

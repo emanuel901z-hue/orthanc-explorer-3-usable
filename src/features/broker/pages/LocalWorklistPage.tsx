@@ -8,7 +8,7 @@
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,6 +104,7 @@ export default function LocalWorklistPage() {
   const configured = Boolean(getConfig().brokerUrl);
   const isMobile = useMediaQuery('(max-width: 767px)');
 
+  const queryClient = useQueryClient();
   const [editing, setEditing] = useState<LocalItemIn | null>(null);
   const [editId, setEditId] = useState<number | null>(null);
   const [removing, setRemoving] = useState<LocalItem | null>(null);
@@ -116,6 +117,19 @@ export default function LocalWorklistPage() {
     queryFn: brokerApi.localItems.list,
     enabled: configured,
   });
+  // A failed message must be inspectable — and replayable when it was kept
+  const [detailId, setDetailId] = useState<number | null>(null);
+  const detail = useQuery({
+    queryKey: ['broker', 'hl7', 'message', detailId],
+    queryFn: () => brokerApi.hl7.message(detailId as number),
+    enabled: configured && detailId !== null,
+  });
+  const reprocess = useMutation({
+    mutationFn: ({ id, dryRun }: { id: number; dryRun: boolean }) =>
+      brokerApi.hl7.reprocess(id, dryRun),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['broker', 'hl7', 'messages'] }),
+  });
+
   const messagesQuery = useQuery({
     queryKey: ['broker', 'hl7', 'messages'],
     queryFn: () => brokerApi.hl7.messages(10),
@@ -365,7 +379,15 @@ export default function LocalWorklistPage() {
             <p className="text-xs font-medium">{t('broker.hl7Recent')}</p>
             <ul className="mt-1 space-y-1" data-testid="broker-hl7-messages">
               {(messagesQuery.data ?? []).map((message) => (
-                <li key={message.id} className="flex flex-wrap items-center gap-2 text-xs">
+                <li key={message.id}
+                    className="flex flex-wrap items-center gap-2 text-xs">
+                  <Button
+                    variant="ghost" size="sm" className="h-7 px-2"
+                    aria-label={t('broker.hl7Detail')}
+                    onClick={() => { setDetailId(message.id); reprocess.reset(); }}
+                  >
+                    {t('broker.hl7Detail')}
+                  </Button>
                   <span className="font-mono text-muted-foreground">
                     {message.ts.slice(11, 19)}
                   </span>
@@ -483,6 +505,65 @@ export default function LocalWorklistPage() {
         pending={remove.isPending}
         onConfirm={() => remove.mutate(removing!.id, { onSuccess: () => setRemoving(null) })}
       />
+
+      {/* A11: message detail — metadata, the raw text (only when stored) and a replay */}
+      <Dialog open={detailId !== null} onOpenChange={(open) => { if (!open) { setDetailId(null); reprocess.reset(); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('broker.hl7DetailTitle')}</DialogTitle>
+            <DialogDescription>{t('broker.hl7DetailHint')}</DialogDescription>
+          </DialogHeader>
+          {detail.isLoading && <p className="text-sm text-muted-foreground">{t('broker.previewRunning')}</p>}
+          {detail.data && (
+            <div className="space-y-3 text-sm" data-testid="hl7-detail">
+              <dl className="grid grid-cols-2 gap-2 text-xs">
+                <div><dt className="text-muted-foreground">{t('broker.hl7ControlId')}</dt>
+                  <dd className="font-mono">{detail.data.control_id || '—'}</dd></div>
+                <div><dt className="text-muted-foreground">{t('broker.hl7OrderControl')}</dt>
+                  <dd className="font-mono">{detail.data.order_control || '—'}</dd></div>
+                <div><dt className="text-muted-foreground">{t('broker.accession')}</dt>
+                  <dd className="font-mono">{detail.data.accession || '—'}</dd></div>
+                <div><dt className="text-muted-foreground">{t('broker.hl7Action')}</dt>
+                  <dd><Badge variant={detail.data.action === 'rejected' || detail.data.action === 'error' ? 'destructive' : 'secondary'}>{detail.data.action}</Badge></dd></div>
+              </dl>
+              {detail.data.error && (
+                <p role="alert" className="text-sm text-destructive">{detail.data.error}</p>
+              )}
+              {detail.data.replayable ? (
+                <>
+                  <pre className="max-h-40 overflow-auto rounded border p-2 text-[11px]">{detail.data.raw}</pre>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" disabled={reprocess.isPending}
+                            onClick={() => reprocess.mutate({ id: detail.data!.id, dryRun: true })}>
+                      {t('broker.hl7Check')}
+                    </Button>
+                    <Button size="sm" disabled={reprocess.isPending}
+                            onClick={() => reprocess.mutate({ id: detail.data!.id, dryRun: false })}>
+                      {t('broker.hl7Replay')}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">{t('broker.hl7NotReplayable')}</p>
+              )}
+              {reprocess.data && (
+                <p className="text-xs" data-testid="hl7-reprocess-result">
+                  {reprocess.data.dry_run ? t('broker.hl7DryRun') : t('broker.hl7Applied')}
+                  {' — '}{reprocess.data.action}
+                </p>
+              )}
+              {reprocess.isError && (
+                <p role="alert" className="text-xs text-destructive">
+                  {(reprocess.error as Error).message}
+                </p>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailId(null)}>{t('broker.close')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </BrokerPageShell>
   );
 }

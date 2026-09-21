@@ -1110,6 +1110,15 @@
     "accession": "アクセッション番号",
     "modality": "モダリティ",
     "station": "ステーション",
-    "startDate": "日付"
+    "startDate": "日付",
+    "hl7Detail": "詳細",
+    "hl7Replay": "再適用",
+    "cacheRefreshNow": "今すぐ更新",
+    "tlsUploadTitle": "PKI 証明書をインストール",
+    "tlsUploadCert": "証明書 (PEM)",
+    "tlsUploadKey": "秘密鍵 (PEM)",
+    "tlsUploadCa": "CA バンドル（任意）",
+    "tlsUploadRun": "インストール",
+    "saving": "保存中…"
   }
 }
