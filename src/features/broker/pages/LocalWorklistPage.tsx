@@ -48,6 +48,7 @@ import { BrokerPageShell } from '../components/BrokerPageShell';
 import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
 import { clearDraft, loadDraft, useDraftPersistence, useUnsavedWarning } from '../hooks/use-form-draft';
 import { ConfigRowCard } from '../components/ConfigRowCard';
+import { Hl7MappingCard } from '../components/Hl7MappingCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useHl7Writes, useLocalItemWrites } from '../hooks/use-broker-local';
 
@@ -564,6 +565,7 @@ export default function LocalWorklistPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Hl7MappingCard />
     </BrokerPageShell>
   );
 }

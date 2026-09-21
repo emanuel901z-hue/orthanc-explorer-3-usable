@@ -556,6 +556,8 @@ export type WorklistPreview = {
   served_stale: string[];
   sources: WorklistPreviewSource[];
   items: WorklistPreviewItem[];
+  /** What the field-level merge rules took from another source. */
+  field_changes: MergeFieldChange[];
   truncated: boolean;
 };
 
@@ -568,6 +570,8 @@ export type SourceQueryResult = {
   duration_ms: number;
   phi: boolean;
   items: WorklistPreviewItem[];
+  /** What the field-level merge rules took from another source. */
+  field_changes: MergeFieldChange[];
   truncated: boolean;
 };
 
@@ -627,6 +631,40 @@ export type MppsStats = {
   last_error: string;
   forward_enabled: boolean;
   hide_completed: boolean;
+};
+
+export type Hl7FieldMap = {
+  id: number;
+  /** HL7 segment, e.g. OBR. */
+  segment: string;
+  /** HL7 field number (1-based). */
+  field: number;
+  /** Component inside the field, counted the HL7 way (0 = whole field). */
+  component: number;
+  /** DICOM keyword that is filled. */
+  target_tag: string;
+  enabled: boolean;
+  created_at: string;
+};
+
+export type Hl7MappedField = { from: string; tag: string; value: string };
+
+export type MergeRule = {
+  id: number;
+  /** DICOM keyword, e.g. PatientName. */
+  tag: string;
+  /** Source names in the order they are asked (first hit wins). */
+  sources: string[];
+  enabled: boolean;
+  created_at: string;
+};
+
+export type MergeFieldChange = {
+  accession: string;
+  tag: string;
+  from: string;
+  before: string;
+  after: string;
 };
 
 export type BrokerStatus = {
@@ -820,6 +858,23 @@ export const brokerApi = {
       if (opts.offset) query.set('offset', String(opts.offset));
       return brokerFetch<Hl7Message[]>(`/api/v1/hl7/messages?${query.toString()}`);
     },
+  },
+
+  hl7FieldMaps: {
+    list: () => brokerFetch<Hl7FieldMap[]>('/api/v1/hl7/field-maps'),
+    create: (body: { segment: string; field: number; component?: number;
+                     target_tag: string; enabled?: boolean }) =>
+      brokerFetch<Hl7FieldMap>('/api/v1/hl7/field-maps', post(body)),
+    remove: (id: number) =>
+      brokerFetch<void>(`/api/v1/hl7/field-maps/${id}`, { method: 'DELETE' }),
+  },
+
+  mergeRules: {
+    list: () => brokerFetch<MergeRule[]>('/api/v1/merge-rules'),
+    create: (body: { tag: string; sources: string[]; enabled?: boolean }) =>
+      brokerFetch<MergeRule>('/api/v1/merge-rules', post(body)),
+    remove: (id: number) =>
+      brokerFetch<void>(`/api/v1/merge-rules/${id}`, { method: 'DELETE' }),
   },
 
   mpps: {

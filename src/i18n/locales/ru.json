@@ -1136,6 +1136,19 @@
     "mppsWhen": "Время",
     "mppsDelivered": "отправлено",
     "mppsPendingShort": "ожидает",
-    "mppsForwarded": "Шаги отправлены."
+    "mppsForwarded": "Шаги отправлены.",
+    "mergeTitle": "Слияние по полям",
+    "mergeAdd": "Добавить правило",
+    "mergeTag": "Атрибут DICOM",
+    "mergeSources": "Источники (порядок)",
+    "mergeEmpty": "Нет правил по полям.",
+    "mergeAddField": "Добавить правило поля",
+    "hl7MapTitle": "Читать дополнительные поля HL7",
+    "hl7MapAdd": "Добавить сопоставление",
+    "hl7MapSegment": "Сегмент",
+    "hl7MapField": "Поле",
+    "hl7MapComponent": "Компонент",
+    "hl7MapTag": "Атрибут DICOM",
+    "hl7MapEmpty": "Дополнительных сопоставлений нет."
   }
 }

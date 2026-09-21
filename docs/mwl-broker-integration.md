@@ -106,6 +106,8 @@ implements the endpoints below works — the reference implementation is the
 | `POST` | `/api/v1/tls/upload` | Install a certificate/key pair from the hospital PKI (validated, key stored 0600 and never returned) |
 | `GET` | `/api/v1/atna/stats`, `POST /api/v1/atna/test`, `GET /api/v1/atna/sample` | ATNA audit trail |
 | `GET` | `/api/v1/hl7/messages/{id}`, `POST /api/v1/hl7/messages/{id}/reprocess?dry_run=` | HL7 message detail and replay (the raw text is only kept with `hl7_store_raw`) |
+| `GET/POST/DELETE` | `/api/v1/merge-rules` | Field-level merge: which source wins for one DICOM attribute |
+| `GET/POST/DELETE` | `/api/v1/hl7/field-maps` | Read extra HL7 fields (OBR-18, ZDS) into worklist attributes |
 | `GET` | `/api/v1/mpps?limit=&offset=&status=`, `/api/v1/mpps/{id}`, `/api/v1/mpps/stats` | Performed procedure steps: what the modalities reported and whether it reached the RIS |
 | `POST` | `/api/v1/mpps/{id}/forward`, `/api/v1/mpps/forward-pending` | Report the state to the RIS again (single step or all pending) |
 | `POST` | `/api/v1/cache/refresh` | Query the sources again and replace the cached snapshots (outage case) |

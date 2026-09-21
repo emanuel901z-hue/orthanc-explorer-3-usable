@@ -47,7 +47,7 @@ describe('WorklistPreviewPanel', () => {
         station_aet: 'CT_01', modality: 'CT', start_date: '20260921', start_time: '',
         source: 'ris-a', also_in: ['ris-b'],
       }],
-      truncated: false,
+      field_changes: [],
     });
 
     renderPanel();
@@ -69,6 +69,7 @@ describe('WorklistPreviewPanel', () => {
       items: [{ accession: 'ACC-1', study_uid: '', requested_procedure_id: '', sps_id: '',
                 station_aet: '', modality: 'CT', start_date: '', start_time: '',
                 source: 'ris-a', also_in: [], patient_name: 'Muster^Max', patient_id: 'P1' }],
+      field_changes: [],
       truncated: false,
     });
 
@@ -81,7 +82,7 @@ describe('WorklistPreviewPanel', () => {
   it('passes the station and the accession to the API', async () => {
     mockPreview.mockResolvedValue({
       station: 'MR_01', rule: null, status: 'success', duration_ms: 5, answers: 0, hidden: 0,
-      phi: false, served_stale: [], sources: [], items: [], truncated: false,
+      phi: false, served_stale: [], sources: [], items: [], field_changes: [], truncated: false,
     });
 
     renderPanel();

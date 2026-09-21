@@ -1136,6 +1136,19 @@
     "mppsWhen": "时间",
     "mppsDelivered": "已上报",
     "mppsPendingShort": "待处理",
-    "mppsForwarded": "步骤已上报。"
+    "mppsForwarded": "步骤已上报。",
+    "mergeTitle": "按字段合并",
+    "mergeAdd": "添加规则",
+    "mergeTag": "DICOM 字段",
+    "mergeSources": "来源（顺序）",
+    "mergeEmpty": "没有字段规则。",
+    "mergeAddField": "添加字段规则",
+    "hl7MapTitle": "读取额外的 HL7 字段",
+    "hl7MapAdd": "添加映射",
+    "hl7MapSegment": "段",
+    "hl7MapField": "字段",
+    "hl7MapComponent": "组件",
+    "hl7MapTag": "DICOM 属性",
+    "hl7MapEmpty": "没有额外映射。"
   }
 }

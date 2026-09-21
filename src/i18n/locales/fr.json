@@ -1136,6 +1136,19 @@
     "mppsWhen": "Heure",
     "mppsDelivered": "signalé",
     "mppsPendingShort": "en attente",
-    "mppsForwarded": "Étapes signalées."
+    "mppsForwarded": "Étapes signalées.",
+    "mergeTitle": "Fusion par champ",
+    "mergeAdd": "Ajouter la règle",
+    "mergeTag": "Champ DICOM",
+    "mergeSources": "Sources (ordre)",
+    "mergeEmpty": "Aucune règle de champ.",
+    "mergeAddField": "Ajouter la règle de champ",
+    "hl7MapTitle": "Lire des champs HL7 supplémentaires",
+    "hl7MapAdd": "Ajouter le mappage",
+    "hl7MapSegment": "Segment",
+    "hl7MapField": "Champ",
+    "hl7MapComponent": "Composant",
+    "hl7MapTag": "Attribut DICOM",
+    "hl7MapEmpty": "Aucun mappage supplémentaire."
   }
 }

@@ -117,6 +117,20 @@ export function WorklistPreviewPanel() {
               ))}
             </div>
 
+            {(result.field_changes ?? []).length > 0 && (
+              <div className="rounded border p-2 text-xs" data-testid="preview-field-changes">
+                <p className="font-medium">{t('broker.previewFieldChanges')}</p>
+                <ul className="mt-1 space-y-0.5 font-mono">
+                  {(result.field_changes ?? []).slice(0, 5).map((change, index) => (
+                    <li key={index}>
+                      {change.accession}: {change.tag} ← {change.from}
+                      {' '}({change.before || '—'} → {change.after})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {result.items.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t('broker.previewEmpty')}</p>
             ) : (

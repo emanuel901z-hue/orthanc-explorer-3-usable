@@ -1136,6 +1136,19 @@
     "mppsWhen": "الوقت",
     "mppsDelivered": "تم الإبلاغ",
     "mppsPendingShort": "قيد الانتظار",
-    "mppsForwarded": "تم إبلاغ الخطوات."
+    "mppsForwarded": "تم إبلاغ الخطوات.",
+    "mergeTitle": "الدمج حسب الحقل",
+    "mergeAdd": "إضافة قاعدة",
+    "mergeTag": "حقل DICOM",
+    "mergeSources": "المصادر (بالترتيب)",
+    "mergeEmpty": "لا توجد قواعد حقول.",
+    "mergeAddField": "إضافة قاعدة حقل",
+    "hl7MapTitle": "قراءة حقول HL7 إضافية",
+    "hl7MapAdd": "إضافة تعيين",
+    "hl7MapSegment": "المقطع",
+    "hl7MapField": "الحقل",
+    "hl7MapComponent": "المكوّن",
+    "hl7MapTag": "حقل DICOM",
+    "hl7MapEmpty": "لا توجد تعيينات إضافية."
   }
 }

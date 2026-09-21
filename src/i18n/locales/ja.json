@@ -1136,6 +1136,19 @@
     "mppsWhen": "時刻",
     "mppsDelivered": "送信済み",
     "mppsPendingShort": "未送信",
-    "mppsForwarded": "ステップを送信しました。"
+    "mppsForwarded": "ステップを送信しました。",
+    "mergeTitle": "フィールド単位のマージ",
+    "mergeAdd": "ルールを追加",
+    "mergeTag": "DICOM 属性",
+    "mergeSources": "ソース（順序）",
+    "mergeEmpty": "フィールド規則はありません。",
+    "mergeAddField": "フィールド規則を追加",
+    "hl7MapTitle": "追加の HL7 フィールドを読み取る",
+    "hl7MapAdd": "マッピングを追加",
+    "hl7MapSegment": "セグメント",
+    "hl7MapField": "フィールド",
+    "hl7MapComponent": "コンポーネント",
+    "hl7MapTag": "DICOM 属性",
+    "hl7MapEmpty": "追加のマッピングはありません。"
   }
 }

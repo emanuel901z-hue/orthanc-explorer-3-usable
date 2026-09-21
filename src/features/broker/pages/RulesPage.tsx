@@ -44,6 +44,7 @@ import { BrokerPageShell } from '../components/BrokerPageShell';
 import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
 import { clearDraft, loadDraft, useDraftPersistence, useUnsavedWarning } from '../hooks/use-form-draft';
 import { ConfigRowCard } from '../components/ConfigRowCard';
+import { MergeRulesCard } from '../components/MergeRulesCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useBrokerRuleWrites } from '../hooks/use-broker-writes';
 
@@ -429,6 +430,7 @@ export default function RulesPage() {
           remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) });
         }}
       />
+      <MergeRulesCard />
     </BrokerPageShell>
   );
 }

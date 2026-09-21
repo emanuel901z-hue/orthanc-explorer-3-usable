@@ -1136,6 +1136,19 @@
     "mppsWhen": "Saat",
     "mppsDelivered": "bildirildi",
     "mppsPendingShort": "bekliyor",
-    "mppsForwarded": "Adımlar bildirildi."
+    "mppsForwarded": "Adımlar bildirildi.",
+    "mergeTitle": "Alan bazlı birleştirme",
+    "mergeAdd": "Kural ekle",
+    "mergeTag": "DICOM alanı",
+    "mergeSources": "Kaynaklar (sıra)",
+    "mergeEmpty": "Alan kuralı yok.",
+    "mergeAddField": "Alan kuralı ekle",
+    "hl7MapTitle": "Ek HL7 alanlarını oku",
+    "hl7MapAdd": "Eşleme ekle",
+    "hl7MapSegment": "Segment",
+    "hl7MapField": "Alan",
+    "hl7MapComponent": "Bileşen",
+    "hl7MapTag": "DICOM alanı",
+    "hl7MapEmpty": "Ek eşleme yok."
   }
 }
