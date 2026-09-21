@@ -5,6 +5,7 @@
  * counters, and the live C-FIND query log. Source/target/rule editors are
  * a later phase — the API client (src/api/broker.ts) already covers CRUD.
  */
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -14,6 +15,8 @@ import {
   Activity,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -37,6 +40,18 @@ import { RbacBanner } from '../components/RbacBanner';
 import { PageHelp } from '../components/PageHelp';
 import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
 
+/** Seconds → "3 d 4 h", "12 min" — what an operator reads at a glance. */
+function formatUptime(seconds?: number): string {
+  if (seconds === undefined) return '—';
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (days) return `${days} d ${hours} h`;
+  if (hours) return `${hours} h ${minutes} min`;
+  if (minutes) return `${minutes} min`;
+  return `${seconds} s`;
+}
+
 export default function BrokerPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -50,9 +65,12 @@ export default function BrokerPage() {
     refetchInterval: 5000,
   });
 
+  // "show me yesterday's failures": the API filters by date, so the operator
+  // does not have to page through weeks of log lines
+  const [logSince, setLogSince] = useState('');
   const queriesQuery = useQuery({
-    queryKey: ['broker', 'queries'],
-    queryFn: () => brokerApi.logs.queries(50),
+    queryKey: ['broker', 'queries', logSince],
+    queryFn: () => brokerApi.logs.queries({ limit: 50, ...(logSince ? { since: logSince } : {}) }),
     enabled: brokerConfigured,
     refetchInterval: 5000,
   });
@@ -190,6 +208,23 @@ export default function BrokerPage() {
         </Card>
       </div>
 
+      {/* which build is this? (an operator asks exactly that) */}
+      <Card data-testid="broker-build">
+        <CardContent className="p-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span>
+            {t('broker.buildVersion')}: <span className="font-medium text-foreground">{status?.version ?? '—'}</span>
+          </span>
+          <span>
+            {t('broker.uptime')}: <span className="font-medium text-foreground">
+              {formatUptime(status?.uptime_s)}
+            </span>
+          </span>
+          {status?.started_at && (
+            <span>{t('broker.startedAt')}: {new Date(status.started_at).toLocaleString()}</span>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Sources + targets */}
       <div className="grid lg:grid-cols-2 gap-4">
         <Card>
@@ -305,8 +340,22 @@ export default function BrokerPage() {
 
       {/* Live query log */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 flex flex-row items-center justify-between gap-2 space-y-0">
           <CardTitle className="text-sm font-medium">{t('broker.recentQueries')}</CardTitle>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="log-since" className="text-xs text-muted-foreground whitespace-nowrap">
+              {t('broker.sinceLabel')}
+            </Label>
+            <Input
+              id="log-since"
+              type="date"
+              className="h-9 w-[150px]"
+              value={logSince}
+              onChange={(event) => setLogSince(event.target.value)}
+              aria-describedby="log-since-hint"
+            />
+            <span id="log-since-hint" className="sr-only">{t('broker.sinceHint')}</span>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {queriesQuery.isLoading ? (

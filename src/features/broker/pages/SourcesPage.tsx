@@ -98,6 +98,7 @@ export default function SourcesPage() {
           {sources.map((row) => (
             <ConfigRowCard
               key={row.id}
+              onOpen={() => openRow(row)}
               title={row.name}
               badges={
                 <>

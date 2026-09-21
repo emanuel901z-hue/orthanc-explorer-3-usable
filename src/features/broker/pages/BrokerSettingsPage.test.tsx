@@ -17,6 +17,7 @@ vi.mock('sonner', () => ({ toast: mockToast }));
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
     status: vi.fn(() => Promise.resolve({
       scp_listening: true, db_ok: true, sources: [], targets: [],
       counts: { queries: 0, stores: 0, seen_items: 0 },

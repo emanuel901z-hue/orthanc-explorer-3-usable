@@ -1643,7 +1643,14 @@
     "eventDesc_spool_full": "The C-STORE spool is full — new instances are refused.",
     "eventDesc_target_down": "A PACS target stopped answering C-ECHO.",
     "eventDesc_target_recovered": "A PACS target answers again.",
-    "eventDesc_tls_certificate_expiring": "A configured TLS certificate expires soon."
+    "eventDesc_tls_certificate_expiring": "A configured TLS certificate expires soon.",
+    "buildVersion": "Running version",
+    "uptime": "Uptime",
+    "startedAt": "Started",
+    "loadMore": "Load more",
+    "sinceLabel": "Since (date)",
+    "sinceHint": "Only entries from this day on. Empty = all.",
+    "sinceAll": "All"
   },
   "shortcuts": {
     "nav": {

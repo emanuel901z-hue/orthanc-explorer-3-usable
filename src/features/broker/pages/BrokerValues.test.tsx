@@ -135,3 +135,45 @@ describe('table rows open the edit dialog', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });
+
+describe('API completeness follow-ups (A4/A5/A6)', () => {
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+  });
+  afterEach(() => { vi.clearAllMocks(); });
+
+  it('shows which build is running and for how long', async () => {
+    mockStatus.mockResolvedValue({
+      version: '1.0.0', started_at: '2026-09-21T08:00:00+00:00', uptime_s: 3 * 86400 + 4 * 3600,
+      scp_listening: true, db_ok: true, counts: { queries: 0, stores: 0, answers: 0 },
+      sources: [], targets: [], echo: [],
+    });
+    mockQueries.mockResolvedValue([]);
+
+    wrap(<BrokerPage />);
+
+    const build = await screen.findByTestId('broker-build');
+    // label and value sit in separate elements — assert on the card text
+    await waitFor(() => expect(build.textContent).toContain('1.0.0'));
+    expect(build.textContent).toContain('3 d 4 h');
+  });
+
+  it('filters the query log by date instead of paging through weeks', async () => {
+    mockStatus.mockResolvedValue({
+      version: '1.0.0', started_at: '2026-09-21T08:00:00+00:00', uptime_s: 10,
+      scp_listening: true, db_ok: true, counts: { queries: 0, stores: 0, answers: 0 },
+      sources: [], targets: [], echo: [],
+    });
+    mockQueries.mockResolvedValue([]);
+
+    wrap(<BrokerPage />);
+    const field = await screen.findByLabelText(/since \(date\)|ab datum/i);
+    fireEvent.change(field, { target: { value: '2026-09-20' } });
+
+    await waitFor(() => {
+      expect(mockQueries).toHaveBeenCalledWith(expect.objectContaining({ since: '2026-09-20' }));
+    });
+  });
+});

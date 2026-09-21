@@ -194,6 +194,7 @@ export default function TransformsPage() {
           {transforms.map((rule) => (
             <ConfigRowCard
               key={rule.id}
+              onOpen={() => openRow(rule)}
               title={rule.name}
               fields={[
                 {
@@ -273,7 +274,22 @@ export default function TransformsPage() {
             </TableHeader>
             <TableBody>
               {transforms.map((rule) => (
-                <TableRow key={rule.id}>
+                <TableRow
+                    key={rule.id}
+                    className="cursor-pointer"
+                    tabIndex={0}
+                    onClick={(event) => {
+                      // a click on a button/switch inside the row must keep working
+                      if ((event.target as HTMLElement).closest('button, a, input, select')) return;
+                      openRow(rule);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openRow(rule);
+                      }
+                    }}
+                  >
                   <TableCell className="font-medium">{rule.name}</TableCell>
                   <TableCell className="text-xs">
                     <span className="font-mono">{sourceName(rule.source_id)}</span>

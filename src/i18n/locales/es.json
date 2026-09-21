@@ -1090,6 +1090,13 @@
     "spoolStatus_failed": "reintentando",
     "spoolStatus_dead": "descartado",
     "localStatus_active": "activo",
-    "localStatus_expired": "caducado"
+    "localStatus_expired": "caducado",
+    "buildVersion": "Versión en ejecución",
+    "uptime": "Tiempo activo",
+    "startedAt": "Iniciado",
+    "loadMore": "Cargar más",
+    "sinceLabel": "Desde (fecha)",
+    "sinceHint": "Solo entradas desde este día. Vacío = todo.",
+    "sinceAll": "Todo"
   }
 }

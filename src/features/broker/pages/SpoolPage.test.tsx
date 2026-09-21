@@ -16,6 +16,7 @@ const { mockItems, mockRetry, mockDiscard } = vi.hoisted(() => ({
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
     spool: { items: mockItems, retry: mockRetry, discard: mockDiscard, stats: vi.fn(), retryAll: vi.fn() },
   },
 }));
@@ -128,5 +129,29 @@ describe('SpoolPage', () => {
 
     await waitFor(() => expect(mockDiscard).toHaveBeenCalledWith(7, 'duplicate of a manual import'));
     expect(emit.mock.calls[0][0]).toMatchObject({ action: 'broker.spool.discard' });
+  });
+});
+
+describe('SpoolPage — paging (A5)', () => {
+  it('loads a second page when the operator asks for more', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    const firstPage = Array.from({ length: 100 }, (_, i) => ({
+      id: i + 1, sop_instance_uid: `1.2.3.${i}`, study_uid: '1.2.3', target_name: 'pacs',
+      status: 'queued', attempts: 0, last_error: '', payload_bytes: 8,
+      age_s: 10, next_attempt_at: null, sent_at: null,
+    }));
+    mockItems.mockResolvedValue(firstPage);
+
+    renderPage();
+
+    // a full page means there may be more
+    const more = await screen.findByRole('button', { name: /load more|mehr laden/i });
+    fireEvent.click(more);
+
+    await waitFor(() => {
+      expect(mockItems).toHaveBeenCalledWith(expect.objectContaining({ limit: 200 }));
+    });
   });
 });

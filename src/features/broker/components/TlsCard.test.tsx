@@ -13,6 +13,7 @@ const { mockOverview, mockGenerate, mockTest, mockSet } = vi.hoisted(() => ({
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
     tls: { overview: mockOverview, generate: mockGenerate, test: mockTest },
     settings: { list: vi.fn(), set: mockSet, reset: vi.fn() },
   },

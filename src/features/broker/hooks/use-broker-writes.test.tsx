@@ -29,6 +29,7 @@ const {
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
     sources: {
       create: mockCreate, update: vi.fn(), delete: vi.fn(), list: vi.fn(), echo: vi.fn(),
       resetBreaker: mockResetBreaker,

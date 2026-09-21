@@ -1090,6 +1090,13 @@
     "spoolStatus_failed": "nouvelle tentative",
     "spoolStatus_dead": "abandonné",
     "localStatus_active": "actif",
-    "localStatus_expired": "expiré"
+    "localStatus_expired": "expiré",
+    "buildVersion": "Version en cours",
+    "uptime": "Durée de service",
+    "startedAt": "Démarré",
+    "loadMore": "Charger plus",
+    "sinceLabel": "Depuis (date)",
+    "sinceHint": "Uniquement les entrées à partir de ce jour. Vide = tout.",
+    "sinceAll": "Tout"
   }
 }

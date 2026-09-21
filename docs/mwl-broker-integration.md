@@ -87,15 +87,15 @@ implements the endpoints below works — the reference implementation is the
 | Method | Path | Used by |
 |---|---|---|
 | `GET` | `/api/v1/status` | Status cards + echo matrix (5 s polling) |
-| `GET` | `/api/v1/logs/queries?limit=` | Live C-FIND query log (5 s polling) |
+| `GET` | `/api/v1/logs/queries?limit=&offset=&since=` | Live C-FIND query log (5 s polling); `since` = ISO date/timestamp |
 | `GET` | `/api/v1/sources` | Endpoint details next to echo badges |
 | `GET` | `/api/v1/targets` | Default-target badge, endpoint details |
 | `GET` | `/api/v1/health/config` | Configuration health panel (findings + summary) |
-| `GET` | `/api/v1/audit/config` | Change log (diff + rollback) |
+| `GET` | `/api/v1/audit/config?entity=&limit=&offset=&since=` | Change log (diff + rollback); `since` = "show me yesterday's changes" |
 | `GET/POST` | `/api/v1/config/export`, `/api/v1/config/import?dry_run=` | Configuration export/import |
 | `POST` | `/api/v1/config/rollback/{id}` | Roll a change back |
 | `GET/POST/PUT/DELETE` | `/api/v1/local-items` | Local worklist items (emergencies) |
-| `POST` | `/api/v1/hl7/orm?dry_run=`, `GET /api/v1/hl7/messages` | HL7 ORM intake + message log |
+| `POST` | `/api/v1/hl7/orm?dry_run=`, `GET /api/v1/hl7/messages?limit=&offset=` | HL7 ORM intake + message log |
 | `GET/POST/PUT/DELETE` | `/api/v1/station-rules` | Per-station filter and priority |
 | `POST` | `/api/v1/simulate/station` | "What would this console see?" |
 | `GET` | `/api/v1/rbac/status` | Access mode for this caller (the UI disables writes) |
@@ -106,16 +106,49 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/atna/stats`, `POST /api/v1/atna/test`, `GET /api/v1/atna/sample` | ATNA audit trail |
 | `GET` | `/api/v1/notify/events` | Alerting card: the event catalog (code, severity, description) |
 | `POST` | `/api/v1/notify/test` | "Send test message" (returns the delivery result) |
-| `GET` | `/api/v1/spool`, `/api/v1/spool/stats` | Store queue + spool card |
+| `GET` | `/api/v1/spool?status=&limit=&offset=`, `/api/v1/spool/stats` | Store queue + spool card ("load more" pages with `offset`) |
 | `POST` | `/api/v1/spool/{id}/retry`, `/api/v1/spool/retry-all` | "Retry now" / "Retry all" |
 | `DELETE` | `/api/v1/spool/{id}?reason=` | Discard (reason required, audited) |
-| `GET` | `/api/v1/cache/stats`, `/api/v1/cache/items` | Worklist cache card |
-| `DELETE` | `/api/v1/cache`, `/api/v1/cache/sources/{id}` | "Clear cache" (confirmed) |
+| `GET` | `/api/v1/cache/stats`, `/api/v1/cache/items?source_id=&limit=&offset=` | Worklist cache card |
+| `DELETE` | `/api/v1/cache`, `/api/v1/cache/sources/{id}` | "Clear cache" (confirmed, **audited** — it removes the outage bridge) |
 | `POST` | `/api/v1/simulate/route`, `/api/v1/simulate/transform` | "Check a case" dry-run |
-| `POST` | `/api/v1/sources/{id}/reset-breaker` | Circuit-breaker badge: operator reset |
+| `POST` | `/api/v1/sources/{id}/reset-breaker` | Circuit-breaker badge: operator reset (**audited**) |
 | `POST` | `/api/v1/sources/{id}/echo` | "Run C-ECHO now" button |
 | `POST` | `/api/v1/targets/{id}/echo` | "Run C-ECHO now" button |
-| `POST/PUT/DELETE` | `/api/v1/sources`, `/api/v1/targets`, `/api/v1/rules` | Typed client is ready (`src/api/broker.ts`) — CRUD editors are a planned UI phase |
+| `POST/PUT/DELETE` | `/api/v1/sources`, `/api/v1/targets`, `/api/v1/rules`, `/api/v1/transforms` | CRUD editors (dialog per row, incl. transforms) |
+| `GET` | `/api/v1/status` (`version`, `started_at`, `uptime_s`) | "Which build runs here, and since when?" |
+
+### Read/write split (RBAC)
+
+With `rbac_mode=enforce` the broker requires the write role for every request
+that *changes* something. Read-only work stays open for everyone — including the
+POST routes that only look:
+
+| Always allowed (read-only, also without the write role) | Needs the write role |
+|---|---|
+| `POST /api/v1/simulate/route`, `/station`, `/transform` | `POST/PUT/DELETE` on sources, targets, rules, transforms, station rules, local items |
+| `POST /api/v1/sources/{id}/echo`, `/targets/{id}/echo` | `POST /api/v1/retention/purge` |
+| `POST /api/v1/tls/test` | `DELETE /api/v1/cache`, `/cache/sources/{id}` |
+| `POST /api/v1/hl7/orm?dry_run=true`, `POST /api/v1/config/import?dry_run=true` | `POST /api/v1/atna/test`, `/notify/test` (they send a real message) |
+| `POST /api/v1/sources/{id}/reset-breaker` | the same routes without `dry_run=true` |
+
+The UI mirrors this: dry-runs and C-ECHO stay usable for a read-only operator,
+while the two test-message buttons hide (they would answer 403).
+
+### Deliberate boundaries
+
+These are **not** gaps — they are decisions, listed so a later review does not
+report them again:
+
+- **No MPPS** (`N-CREATE`/`N-SET`). IHE separates MWL (pull) from MPPS (push);
+  the RIS closes orders, the broker only delivers worklists. Completed steps are
+  never served from the cache.
+- **No spool payload over the API.** The stored instance is PHI and stays on
+  disk; only metadata (UIDs, target, attempts, age) is returned.
+- **No API authentication of its own.** The reverse proxy authenticates and
+  injects the roles header; the broker only decides read vs. write.
+- **No patient identifiers in logs, metrics or exports.** The query/store logs
+  carry accession, station, modality and UIDs — never the patient name.
 
 Minimum fields the UI reads:
 

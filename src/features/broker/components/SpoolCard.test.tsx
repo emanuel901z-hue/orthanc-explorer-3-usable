@@ -13,7 +13,8 @@ const { mockStats, mockRetryAll } = vi.hoisted(() => ({
 }));
 
 vi.mock('@/api/broker', () => ({
-  brokerApi: { spool: { stats: mockStats, retryAll: mockRetryAll, items: vi.fn(), retry: vi.fn(), discard: vi.fn() } },
+  brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) }, spool: { stats: mockStats, retryAll: mockRetryAll, items: vi.fn(), retry: vi.fn(), discard: vi.fn() } },
 }));
 
 const emit = vi.spyOn(auditClient, 'emit');

@@ -12,6 +12,7 @@ const { mockRollback, mockImport } = vi.hoisted(() => ({
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
     audit: { rollback: mockRollback },
     config: { import: mockImport, export: vi.fn() },
   },

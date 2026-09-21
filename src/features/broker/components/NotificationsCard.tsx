@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BellRing, Send } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useCanWrite } from '@/features/broker/hooks/use-can-write';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,6 +43,8 @@ export function NotificationsCard({ settings }: { settings: BrokerSetting[] }) {
   );
   const [testResult, setTestResult] = useState<{ ok: boolean; error: string } | null>(null);
   const [testing, setTesting] = useState(false);
+  // a test message has a real side effect — hide it for read-only operators
+  const { canWrite } = useCanWrite();
 
   useEffect(() => setUrl(urlSetting?.value ?? ''), [urlSetting?.value]);
   useEffect(() => setInterval(intervalSetting?.value ?? '300'), [intervalSetting?.value]);
@@ -217,10 +220,13 @@ export function NotificationsCard({ settings }: { settings: BrokerSetting[] }) {
             >
               {t('broker.save')}
             </Button>
-            <Button variant="outline" size="sm" disabled={testing} onClick={runTest}>
-              <Send className="h-4 w-4 mr-1" />
-              {testing ? t('broker.notifyTesting') : t('broker.notifyTest')}
-            </Button>
+            {/* fires a real webhook — needs the write role */}
+            {canWrite && (
+              <Button variant="outline" size="sm" disabled={testing} onClick={runTest}>
+                <Send className="h-4 w-4 mr-1" />
+                {testing ? t('broker.notifyTesting') : t('broker.notifyTest')}
+              </Button>
+            )}
           </div>
           <p className="text-xs text-muted-foreground">{t('broker.notifyIntervalHint')}</p>
           {testResult && (

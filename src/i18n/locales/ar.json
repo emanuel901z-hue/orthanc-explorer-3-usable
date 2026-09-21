@@ -1090,6 +1090,13 @@
     "spoolStatus_failed": "إعادة المحاولة",
     "spoolStatus_dead": "تم التخلي",
     "localStatus_active": "نشط",
-    "localStatus_expired": "منتهي"
+    "localStatus_expired": "منتهي",
+    "buildVersion": "الإصدار الحالي",
+    "uptime": "مدة التشغيل",
+    "startedAt": "بدأ في",
+    "loadMore": "تحميل المزيد",
+    "sinceLabel": "من تاريخ",
+    "sinceHint": "فقط السجلات من هذا اليوم. فارغ = الكل.",
+    "sinceAll": "الكل"
   }
 }

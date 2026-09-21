@@ -180,6 +180,7 @@ export default function StationsPage() {
           {rules.map((rule) => (
             <ConfigRowCard
               key={rule.id}
+              onOpen={() => openRow(rule)}
               title={rule.name}
               badges={
                 <>
@@ -217,7 +218,22 @@ export default function StationsPage() {
               </TableHeader>
               <TableBody>
                 {rules.map((rule) => (
-                  <TableRow key={rule.id}>
+                  <TableRow
+                    key={rule.id}
+                    className="cursor-pointer"
+                    tabIndex={0}
+                    onClick={(event) => {
+                      // a click on a button/switch inside the row must keep working
+                      if ((event.target as HTMLElement).closest('button, a, input, select')) return;
+                      openRow(rule);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openRow(rule);
+                      }
+                    }}
+                  >
                     <TableCell className="text-xs">
                       <span className="font-medium">{rule.name}</span>
                       {!rule.enabled && (

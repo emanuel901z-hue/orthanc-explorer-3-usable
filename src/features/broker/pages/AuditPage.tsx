@@ -11,6 +11,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Download, History, RotateCcw, Upload } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
@@ -73,9 +75,14 @@ export default function AuditPage() {
   const [importError, setImportError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
 
+  // "show me yesterday's changes" instead of paging through weeks
+  const [since, setSince] = useState('');
   const auditQuery = useQuery({
-    queryKey: ['broker', 'audit', entity],
-    queryFn: () => brokerApi.audit.config(entity === 'all' ? {} : { entity }),
+    queryKey: ['broker', 'audit', entity, since],
+    queryFn: () => brokerApi.audit.config({
+      ...(entity === 'all' ? {} : { entity }),
+      ...(since ? { since } : {}),
+    }),
     enabled: configured,
     refetchInterval: 15000,
   });
@@ -145,6 +152,20 @@ export default function AuditPage() {
               ))}
             </SelectContent>
           </Select>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="audit-since" className="text-xs text-muted-foreground whitespace-nowrap">
+              {t('broker.sinceLabel')}
+            </Label>
+            <Input
+              id="audit-since"
+              type="date"
+              className="h-9 w-[150px]"
+              value={since}
+              onChange={(event) => setSince(event.target.value)}
+              aria-describedby="audit-since-hint"
+            />
+            <span id="audit-since-hint" className="sr-only">{t('broker.sinceHint')}</span>
+          </div>
           <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
             <Download className="h-4 w-4 mr-1" />
             {t('broker.auditExport')}

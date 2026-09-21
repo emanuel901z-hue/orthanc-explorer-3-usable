@@ -1090,6 +1090,13 @@
     "spoolStatus_failed": "повтор",
     "spoolStatus_dead": "отброшено",
     "localStatus_active": "активна",
-    "localStatus_expired": "истекла"
+    "localStatus_expired": "истекла",
+    "buildVersion": "Текущая версия",
+    "uptime": "Время работы",
+    "startedAt": "Запущено",
+    "loadMore": "Загрузить ещё",
+    "sinceLabel": "С даты",
+    "sinceHint": "Только записи с этого дня. Пусто = все.",
+    "sinceAll": "Все"
   }
 }

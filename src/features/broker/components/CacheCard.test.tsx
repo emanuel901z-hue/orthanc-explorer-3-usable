@@ -12,7 +12,8 @@ const { mockStats, mockClear } = vi.hoisted(() => ({
 }));
 
 vi.mock('@/api/broker', () => ({
-  brokerApi: { cache: { stats: mockStats, clear: mockClear, clearSource: vi.fn() } },
+  brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) }, cache: { stats: mockStats, clear: mockClear, clearSource: vi.fn() } },
 }));
 
 const emit = vi.spyOn(auditClient, 'emit');

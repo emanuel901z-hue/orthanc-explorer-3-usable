@@ -1643,7 +1643,14 @@
     "eventDesc_spool_full": "Die Sendewarteschlange ist voll — neue Bilder werden abgewiesen.",
     "eventDesc_target_down": "Ein PACS antwortet nicht mehr auf C-ECHO.",
     "eventDesc_target_recovered": "Ein PACS antwortet wieder.",
-    "eventDesc_tls_certificate_expiring": "Ein konfiguriertes TLS-Zertifikat läuft bald ab."
+    "eventDesc_tls_certificate_expiring": "Ein konfiguriertes TLS-Zertifikat läuft bald ab.",
+    "buildVersion": "Laufende Version",
+    "uptime": "Laufzeit",
+    "startedAt": "Gestartet",
+    "loadMore": "Mehr laden",
+    "sinceLabel": "Ab Datum",
+    "sinceHint": "Nur Einträge ab diesem Tag. Leer = alle.",
+    "sinceAll": "Alle"
   },
   "shortcuts": {
     "nav": {

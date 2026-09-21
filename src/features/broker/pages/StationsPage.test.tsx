@@ -15,6 +15,7 @@ const { mockList, mockCreate, mockUpdate, mockRemove, mockSources, mockSimulate 
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
     stationRules: { list: mockList, create: mockCreate, update: mockUpdate, remove: mockRemove, simulate: mockSimulate },
     sources: { list: mockSources },
   },

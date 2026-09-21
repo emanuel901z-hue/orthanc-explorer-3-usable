@@ -1090,6 +1090,13 @@
     "spoolStatus_failed": "yeniden deniyor",
     "spoolStatus_dead": "vazgeçildi",
     "localStatus_active": "etkin",
-    "localStatus_expired": "süresi geçti"
+    "localStatus_expired": "süresi geçti",
+    "buildVersion": "Çalışan sürüm",
+    "uptime": "Çalışma süresi",
+    "startedAt": "Başlangıç",
+    "loadMore": "Daha fazla yükle",
+    "sinceLabel": "Tarihten itibaren",
+    "sinceHint": "Yalnızca bu günden itibaren kayıtlar. Boş = tümü.",
+    "sinceAll": "Tümü"
   }
 }

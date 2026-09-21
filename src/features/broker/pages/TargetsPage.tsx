@@ -93,6 +93,7 @@ export default function TargetsPage() {
           {targets.map((row) => (
             <ConfigRowCard
               key={row.id}
+              onOpen={() => openRow(row)}
               title={row.name}
               badges={
                 <>

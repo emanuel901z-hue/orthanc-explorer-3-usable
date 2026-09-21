@@ -1090,6 +1090,13 @@
     "spoolStatus_failed": "再試行中",
     "spoolStatus_dead": "打ち切り",
     "localStatus_active": "有効",
-    "localStatus_expired": "期限切れ"
+    "localStatus_expired": "期限切れ",
+    "buildVersion": "実行中のバージョン",
+    "uptime": "稼働時間",
+    "startedAt": "開始",
+    "loadMore": "さらに読み込む",
+    "sinceLabel": "この日以降",
+    "sinceHint": "この日以降の項目のみ。空欄＝すべて。",
+    "sinceAll": "すべて"
   }
 }

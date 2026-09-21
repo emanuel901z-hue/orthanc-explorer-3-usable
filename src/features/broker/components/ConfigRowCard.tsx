@@ -13,14 +13,35 @@ export function ConfigRowCard({
   badges,
   fields,
   actions,
+  onOpen,
 }: {
   title: ReactNode;
   badges?: ReactNode;
   fields: { label: string; value: ReactNode }[];
   actions?: ReactNode;
+  /** Opens the edit dialog — the mobile counterpart of clicking a table row. */
+  onOpen?: () => void;
 }) {
+  const openProps = onOpen
+    ? {
+        role: 'button' as const,
+        tabIndex: 0,
+        className: 'cursor-pointer',
+        onClick: (event: React.MouseEvent) => {
+          // the action buttons inside the card must keep working
+          if ((event.target as HTMLElement).closest('button, a, input, select')) return;
+          onOpen();
+        },
+        onKeyDown: (event: React.KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onOpen();
+          }
+        },
+      }
+    : {};
   return (
-    <Card data-testid="config-row">
+    <Card data-testid="config-row" {...openProps}>
       <CardContent className="p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">

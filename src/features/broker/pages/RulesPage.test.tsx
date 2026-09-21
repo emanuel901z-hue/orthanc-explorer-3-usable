@@ -18,6 +18,7 @@ const { mockRules, mockSources, mockTargets, mockCreate, mockUpdate, mockDelete 
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
     status: vi.fn(() => Promise.resolve({
       scp_listening: true, db_ok: true, sources: [], targets: [],
       counts: { queries: 0, stores: 0, seen_items: 0 },
@@ -145,5 +146,37 @@ describe('RulesPage', () => {
     renderPage();
     await waitFor(() => expect(screen.getByText(/no routing rules/i)).toBeInTheDocument());
     expect(screen.getByRole('button', { name: /add rule/i })).toBeDisabled();
+  });
+});
+
+describe('RulesPage — row click (API completeness follow-up)', () => {
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    mockRules.mockResolvedValue([
+      { id: 1, source_id: 1, target_id: 1, priority: 10, enabled: true },
+    ]);
+    mockSources.mockResolvedValue([
+      { id: 1, name: 'ris-a', aet: 'RIS_A', host: '10.0.1.20', port: 104,
+        calling_aet: 'MWLBROKER', charset: 'ISO_IR 100', enabled: true, timeout_s: 10,
+        priority: 10, cache_stale_on_error: true, cache_refresh_s: 0, tls: false,
+        tls_verify: true, created_at: '2026-09-21T00:00:00Z' },
+    ]);
+    mockTargets.mockResolvedValue([
+      { id: 1, name: 'pacs', aet: 'PACS', host: '10.0.1.30', port: 104,
+        calling_aet: 'MWLBROKER', enabled: true, is_default: true, tls: false,
+        tls_verify: true, created_at: '2026-09-21T00:00:00Z' },
+    ]);
+  });
+
+  it('opens the edit dialog when a rule row is clicked', async () => {
+    renderPage();
+    // desktop table: source and target live in separate cells
+    const cell = await screen.findByText('ris-a');
+
+    fireEvent.click(cell);
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 });

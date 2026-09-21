@@ -54,6 +54,9 @@ function formatBytes(bytes: number): string {
   return `${Math.round(bytes / 1024 ** 2)} MB`;
 }
 
+/** Entries per page — "load more" grows this instead of hiding older ones. */
+const PAGE_SIZE = 100;
+
 export default function SpoolPage() {
   const { t } = useTranslation();
   const configured = Boolean(getConfig().brokerUrl);
@@ -63,9 +66,14 @@ export default function SpoolPage() {
   const [discarding, setDiscarding] = useState<SpoolItem | null>(null);
   const [reason, setReason] = useState('');
 
+  // one page at a time: the spool budget allows 20 000 entries, so a fixed
+  // first page would hide everything older (offset is the API's answer)
+  const [limit, setLimit] = useState(PAGE_SIZE);
   const spoolQuery = useQuery({
-    queryKey: ['broker', 'spool', 'items', status],
-    queryFn: () => brokerApi.spool.items(status === 'all' ? {} : { status }),
+    queryKey: ['broker', 'spool', 'items', status, limit],
+    queryFn: () => brokerApi.spool.items(
+      status === 'all' ? { limit } : { status, limit },
+    ),
     enabled: configured,
     refetchInterval: 10000,
   });
@@ -236,6 +244,15 @@ export default function SpoolPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* the API pages with offset; a full page means there may be more */}
+      {entries.length >= limit && (
+        <div className="flex justify-center pt-2">
+          <Button variant="outline" size="sm" onClick={() => setLimit((n) => n + PAGE_SIZE)}>
+            {t('broker.loadMore')}
+          </Button>
+        </div>
+      )}
     </BrokerPageShell>
   );
 }

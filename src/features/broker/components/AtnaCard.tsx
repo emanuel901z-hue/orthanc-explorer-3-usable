@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FileCode2, Send, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useCanWrite } from '@/features/broker/hooks/use-can-write';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,6 +46,8 @@ export function AtnaCard({ settings }: { settings: BrokerSetting[] }) {
 
   const [testResult, setTestResult] = useState<{ ok: boolean; error: string } | null>(null);
   const [testing, setTesting] = useState(false);
+  // a test message has a real side effect — hide it for read-only operators
+  const { canWrite } = useCanWrite();
   const [showSample, setShowSample] = useState(false);
 
   const statsQuery = useQuery({
@@ -174,10 +177,13 @@ export function AtnaCard({ settings }: { settings: BrokerSetting[] }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" disabled={testing} onClick={runTest}>
-            <Send className="h-4 w-4 mr-1" />
-            {testing ? t('broker.atnaTesting') : t('broker.atnaTest')}
-          </Button>
+          {/* sends a real audit message — needs the write role */}
+          {canWrite && (
+            <Button variant="outline" size="sm" disabled={testing} onClick={runTest}>
+              <Send className="h-4 w-4 mr-1" />
+              {testing ? t('broker.atnaTesting') : t('broker.atnaTest')}
+            </Button>
+          )}
           <Button variant="ghost" size="sm" onClick={() => setShowSample((open) => !open)}>
             <FileCode2 className="h-4 w-4 mr-1" />
             {t('broker.atnaSample')}

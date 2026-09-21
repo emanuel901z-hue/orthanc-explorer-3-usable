@@ -7,7 +7,8 @@ import '@/i18n';
 
 const { mockTransform } = vi.hoisted(() => ({ mockTransform: vi.fn() }));
 vi.mock('@/api/broker', () => ({
-  brokerApi: { simulate: { transform: mockTransform, route: vi.fn() } },
+  brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) }, simulate: { transform: mockTransform, route: vi.fn() } },
 }));
 
 function renderPanel() {

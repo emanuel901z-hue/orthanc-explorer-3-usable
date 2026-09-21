@@ -163,6 +163,7 @@ export default function RulesPage() {
           {rules.map((rule) => (
             <ConfigRowCard
               key={rule.id}
+              onOpen={() => openRow(rule)}
               title={`${sourceName(rule.source_id)} → ${targetName(rule.target_id)}`}
               badges={targets.find((tg) => tg.id === rule.target_id)?.is_default ? (
                 <Badge variant="secondary" className="text-xs">{t('broker.defaultTarget')}</Badge>
@@ -232,7 +233,22 @@ export default function RulesPage() {
             </TableHeader>
             <TableBody>
               {rules.map((rule) => (
-                <TableRow key={rule.id}>
+                <TableRow
+                    key={rule.id}
+                    className="cursor-pointer"
+                    tabIndex={0}
+                    onClick={(event) => {
+                      // a click on a button/switch inside the row must keep working
+                      if ((event.target as HTMLElement).closest('button, a, input, select')) return;
+                      openRow(rule);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openRow(rule);
+                      }
+                    }}
+                  >
                   <TableCell className="font-medium">{sourceName(rule.source_id)}</TableCell>
                   <TableCell>
                     {targetName(rule.target_id)}

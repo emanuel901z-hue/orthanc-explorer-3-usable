@@ -1090,6 +1090,13 @@
     "spoolStatus_failed": "重试中",
     "spoolStatus_dead": "已放弃",
     "localStatus_active": "有效",
-    "localStatus_expired": "已过期"
+    "localStatus_expired": "已过期",
+    "buildVersion": "运行版本",
+    "uptime": "运行时间",
+    "startedAt": "启动于",
+    "loadMore": "加载更多",
+    "sinceLabel": "起始日期",
+    "sinceHint": "仅显示该日期之后的条目。留空＝全部。",
+    "sinceAll": "全部"
   }
 }

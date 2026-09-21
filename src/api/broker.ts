@@ -519,6 +519,12 @@ export type TransformSimulation = RoutingDecision & {
 };
 
 export type BrokerStatus = {
+  /** Broker version that is running (which build is deployed). */
+  version: string;
+  /** ISO timestamp the process started. */
+  started_at: string;
+  /** Seconds since the process started. */
+  uptime_s: number;
   scp_listening: boolean;
   db_ok: boolean;
   sources: EchoStatus[];
@@ -686,7 +692,13 @@ export const brokerApi = {
         headers: { 'Content-Type': 'text/plain' },
         body: message,
       }),
-    messages: (limit = 50) => brokerFetch<Hl7Message[]>(`/api/v1/hl7/messages?limit=${limit}`),
+    messages: (params: number | { limit?: number; offset?: number } = {}) => {
+      const opts = typeof params === 'number' ? { limit: params } : params;
+      const query = new URLSearchParams();
+      query.set('limit', String(opts.limit ?? 50));
+      if (opts.offset) query.set('offset', String(opts.offset));
+      return brokerFetch<Hl7Message[]>(`/api/v1/hl7/messages?${query.toString()}`);
+    },
   },
 
   stationRules: {
@@ -736,10 +748,11 @@ export const brokerApi = {
 
   spool: {
     stats: () => brokerFetch<SpoolStats>('/api/v1/spool/stats'),
-    items: (params: { status?: string; limit?: number } = {}) => {
+    items: (params: { status?: string; limit?: number; offset?: number } = {}) => {
       const query = new URLSearchParams();
       if (params.status) query.set('status', params.status);
       query.set('limit', String(params.limit ?? 100));
+      if (params.offset) query.set('offset', String(params.offset));
       return brokerFetch<SpoolItem[]>(`/api/v1/spool?${query.toString()}`);
     },
     retry: (id: number) =>
@@ -766,11 +779,12 @@ export const brokerApi = {
   },
 
   audit: {
-    config: (params: { entity?: string; limit?: number; offset?: number } = {}) => {
+    config: (params: { entity?: string; limit?: number; offset?: number; since?: string } = {}) => {
       const query = new URLSearchParams();
       if (params.entity) query.set('entity', params.entity);
       query.set('limit', String(params.limit ?? 50));
       if (params.offset) query.set('offset', String(params.offset));
+      if (params.since) query.set('since', params.since);
       return brokerFetch<ConfigAuditEntry[]>(`/api/v1/audit/config?${query.toString()}`);
     },
     rollback: (auditId: number) =>
@@ -796,7 +810,19 @@ export const brokerApi = {
   },
 
   logs: {
-    queries: (limit = 50) => brokerFetch<QueryLogRow[]>(`/api/v1/logs/queries?limit=${limit}`),
-    stores: (limit = 50) => brokerFetch<StoreLogRow[]>(`/api/v1/logs/stores?limit=${limit}`),
+    queries: (params: number | { limit?: number; since?: string } = {}) => {
+      const opts = typeof params === 'number' ? { limit: params } : params;
+      const query = new URLSearchParams();
+      query.set('limit', String(opts.limit ?? 50));
+      if (opts.since) query.set('since', opts.since);
+      return brokerFetch<QueryLogRow[]>(`/api/v1/logs/queries?${query.toString()}`);
+    },
+    stores: (params: number | { limit?: number; since?: string } = {}) => {
+      const opts = typeof params === 'number' ? { limit: params } : params;
+      const query = new URLSearchParams();
+      query.set('limit', String(opts.limit ?? 50));
+      if (opts.since) query.set('since', opts.since);
+      return brokerFetch<StoreLogRow[]>(`/api/v1/logs/stores?${query.toString()}`);
+    },
   },
 };

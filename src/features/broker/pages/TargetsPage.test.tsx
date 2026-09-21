@@ -17,6 +17,7 @@ const { mockList, mockCreate, mockUpdate, mockDelete, mockStatus } = vi.hoisted(
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
     status: mockStatus,
     sources: { list: vi.fn(() => Promise.resolve([])), echo: vi.fn(() => Promise.resolve({})) },
     targets: {
