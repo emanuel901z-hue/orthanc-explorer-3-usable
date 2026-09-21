@@ -1072,6 +1072,24 @@
     "help_audit_title": "Journal des modifications",
     "help_settings_title": "Paramètres à l'exécution",
     "addTitle": "Ajouter une entrée",
-    "editTitle": "Modifier l'entrée"
+    "editTitle": "Modifier l'entrée",
+    "queryStatus_success": "réussi",
+    "queryStatus_partial": "partiel",
+    "queryStatus_error": "erreur",
+    "queryStatus_empty": "sans réponse",
+    "breakerState_closed": "fermé",
+    "breakerState_open": "ouvert",
+    "breakerState_half_open": "semi-ouvert",
+    "severity_info": "info",
+    "severity_warning": "avertissement",
+    "severity_error": "erreur",
+    "echoOk": "joignable",
+    "echoFail": "injoignable",
+    "spoolStatus_queued": "en attente",
+    "spoolStatus_sent": "envoyé",
+    "spoolStatus_failed": "nouvelle tentative",
+    "spoolStatus_dead": "abandonné",
+    "localStatus_active": "actif",
+    "localStatus_expired": "expiré"
   }
 }

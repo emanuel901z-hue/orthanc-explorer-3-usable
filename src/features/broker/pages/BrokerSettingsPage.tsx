@@ -60,7 +60,10 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
                 {setting.source === 'db' ? t('broker.settingOverridden') : t('broker.settingFromEnv')}
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">{setting.description}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {/* the API delivers the description in English; a translation wins */}
+              {t(`broker.settingDesc_${setting.key}`, { defaultValue: setting.description })}
+            </p>
           </div>
 
           {setting.source === 'db' && (

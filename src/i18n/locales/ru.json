@@ -1072,6 +1072,24 @@
     "help_audit_title": "Журнал изменений",
     "help_settings_title": "Настройки во время работы",
     "addTitle": "Добавить запись",
-    "editTitle": "Изменить запись"
+    "editTitle": "Изменить запись",
+    "queryStatus_success": "успешно",
+    "queryStatus_partial": "частично",
+    "queryStatus_error": "ошибка",
+    "queryStatus_empty": "нет ответа",
+    "breakerState_closed": "закрыт",
+    "breakerState_open": "открыт",
+    "breakerState_half_open": "полуоткрыт",
+    "severity_info": "инфо",
+    "severity_warning": "предупреждение",
+    "severity_error": "ошибка",
+    "echoOk": "доступен",
+    "echoFail": "недоступен",
+    "spoolStatus_queued": "в очереди",
+    "spoolStatus_sent": "отправлено",
+    "spoolStatus_failed": "повтор",
+    "spoolStatus_dead": "отброшено",
+    "localStatus_active": "активна",
+    "localStatus_expired": "истекла"
   }
 }

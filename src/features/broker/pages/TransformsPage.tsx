@@ -132,6 +132,18 @@ export default function TransformsPage() {
   useUnsavedWarning(dirty);
   const dropDraft = useDraftPersistence(`transform-${editing?.id ?? 'new'}`, form, dirty);
 
+  /** A click anywhere on a row opens the edit dialog (same as the pencil). */
+  const openRow = (rule: BrokerTransform) => {
+    const draft = loadDraft<TransformForm>(`transform-${rule.id}`);
+    setForm(draft ?? {
+      name: rule.name, enabled: rule.enabled, priority: rule.priority,
+      source_id: rule.source_id, target_id: rule.target_id,
+      operations: rule.operations.length ? rule.operations : [{ ...EMPTY_OPERATION }],
+    });
+    setEditing(rule);
+    setDialogOpen(true);
+  };
+
   const submit = () => {
     setSubmitted(true);
     if (!formValid) return;

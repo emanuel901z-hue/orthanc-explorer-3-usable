@@ -284,6 +284,41 @@ async function domReport(page) {
   await page.getByRole('button', { name: /discard|verwerfen/i }).last().click().catch(() => {});
   await page.waitForTimeout(400);
 
+  // the reported console errors: no request to the disabled worklists plugin
+  const languageBeforeBrokerChecks = await page.evaluate(() => localStorage.getItem('oe3-language'));
+  await page.goto(`${OE3}/oe3/`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2000);
+  const sidebarText = await page.locator('aside').innerText().catch(() => '');
+  record('worklists: Eintrag fehlt, wenn das Plugin-API aus ist', !/Worklists/i.test(sidebarText));
+
+  // the broker overview shows translated status labels, not the raw API values
+  await page.goto(`${OE3}/oe3/broker?lng=de`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2500);
+  const overviewText = await page.locator('main').first().innerText().catch(() => '');
+  record('broker: Status-Chips sind übersetzt',
+    !/\b(success|partial|error)\b/.test(overviewText.split('C-ECHO')[0] || ''),
+    overviewText.includes('erfolgreich') || overviewText.includes('teilweise') ? 'übersetzt' : 'keine Chips sichtbar');
+
+  // a click on a table row opens the edit dialog (prefilled)
+  await page.goto(`${OE3}/oe3/broker/sources?lng=de`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('table tbody tr', { timeout: 15000 });
+  await page.locator('table tbody tr').first().click();
+  await page.waitForTimeout(700);
+  const rowDialog = page.locator('[role="dialog"]').first();
+  const rowDialogOpen = await rowDialog.count() > 0;
+  const prefilled = rowDialogOpen
+    ? (await page.locator('#node-name').inputValue().catch(() => '')) : '';
+  record('broker: Zeilenklick öffnet die Bearbeitung', rowDialogOpen && prefilled.length > 0,
+    `Dialog=${rowDialogOpen} Name=${prefilled}`);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /verwerfen|discard/i }).last().click().catch(() => {});
+  await page.waitForTimeout(300);
+  // leave the language as we found it (the later checks assume it)
+  await page.evaluate((previous) => {
+    if (previous === null) localStorage.removeItem('oe3-language');
+    else localStorage.setItem('oe3-language', previous);
+  }, languageBeforeBrokerChecks);
+
   // About dialog: it must describe the MWL broker, not only the base fork
   await page.goto(`${OE3}/oe3/`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1200);
@@ -593,7 +628,7 @@ async function domReport(page) {
   const caseVisible = await casePanel.count() > 0 && await casePanel.first().isVisible();
   record('monitoring: Fall-Prüfen-Panel (Simulation) wird gerendert', caseVisible);
   if (caseVisible) {
-    await casePanel.getByLabel(/accession number/i).fill('E2E-UNKNOWN');
+    await casePanel.getByLabel(/accession number|zugangsnummer/i).fill('E2E-UNKNOWN');
     await casePanel.getByRole('button', { name: /run check/i }).click();
     const caseResult = casePanel.getByTestId('case-check-result');
     await caseResult.waitFor({ timeout: 15000 }).catch(() => {});

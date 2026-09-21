@@ -146,6 +146,13 @@ export default function StationsPage() {
   useDraftPersistence(`station-${editId ?? 'new'}`, editing, dirty);
   useUnsavedWarning(Boolean(editing) && dirty);
 
+  /** A click anywhere on a row opens the edit dialog (same as the pencil). */
+  const openRow = (rule: StationRule) => {
+    const draft = loadDraft<StationRuleIn>(`station-${rule.id}`);
+    setEditing(draft ? { ...EMPTY, ...draft } : { ...rule });
+    setEditId(rule.id);
+  };
+
   return (
     <BrokerPageShell
       helpId="stations"

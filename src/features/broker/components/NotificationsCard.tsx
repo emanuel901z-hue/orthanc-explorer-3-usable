@@ -167,10 +167,16 @@ export function NotificationsCard({ settings }: { settings: BrokerSetting[] }) {
                     <span className="font-mono text-xs">{event.code}</span>
                     <Badge variant={SEVERITY_VARIANT[event.severity] ?? 'outline'}
                            className="text-[10px]">
-                      {event.severity}
+                      {/* the API sends the severity, the UI translates the label */}
+                      {t(`broker.severity_${event.severity}`, { defaultValue: event.severity })}
                     </Badge>
                   </span>
-                  <span className="block text-xs text-muted-foreground">{event.description}</span>
+                  <span className="block text-xs font-medium">
+                    {t(`broker.event_${event.code}`, { defaultValue: event.code })}
+                  </span>
+                  <span className="block text-xs text-muted-foreground">
+                    {t(`broker.eventDesc_${event.code}`, { defaultValue: event.description })}
+                  </span>
                 </span>
               </label>
             ))}

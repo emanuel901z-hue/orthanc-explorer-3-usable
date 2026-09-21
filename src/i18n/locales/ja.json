@@ -1072,6 +1072,24 @@
     "help_audit_title": "変更履歴",
     "help_settings_title": "実行時の設定",
     "addTitle": "項目を追加",
-    "editTitle": "項目を編集"
+    "editTitle": "項目を編集",
+    "queryStatus_success": "成功",
+    "queryStatus_partial": "一部",
+    "queryStatus_error": "エラー",
+    "queryStatus_empty": "応答なし",
+    "breakerState_closed": "閉",
+    "breakerState_open": "開",
+    "breakerState_half_open": "半開",
+    "severity_info": "情報",
+    "severity_warning": "警告",
+    "severity_error": "エラー",
+    "echoOk": "到達可能",
+    "echoFail": "到達不可",
+    "spoolStatus_queued": "待機中",
+    "spoolStatus_sent": "送信済み",
+    "spoolStatus_failed": "再試行中",
+    "spoolStatus_dead": "打ち切り",
+    "localStatus_active": "有効",
+    "localStatus_expired": "期限切れ"
   }
 }

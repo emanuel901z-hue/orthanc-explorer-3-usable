@@ -10,6 +10,7 @@ export type FeatureKey =
   | "editLabels"
   | "modalityManagement"
   | "dicomWebManagement"
+  | "worklists"
   | "mwlBroker";
 
 export type UserProfile = { permissions: string[] } | null;
@@ -53,6 +54,10 @@ const FEATURE_ALIASES: Record<FeatureKey, string[]> = {
   editLabels: ['enableEditLabels'],
   modalityManagement: ['enableModalityConfig', 'enableModalityManagement'],
   dicomWebManagement: ['enableDicomWebConfig', 'enableDicomWebManagement'],
+  // Orthanc's worklists plugin REST API — off in this deployment, the MWL
+  // broker serves the modalities. The page is hidden unless it is switched on
+  // (Orthanc `"Worklists": {"Enable": true}` + `enableWorklists: true`).
+  worklists: ['enableWorklists'],
   mwlBroker: ['enableMwlBroker'],
 };
 

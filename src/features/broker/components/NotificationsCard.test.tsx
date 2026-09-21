@@ -69,9 +69,11 @@ describe('NotificationsCard', () => {
     expect(within(events).getByLabelText('source_down')).toBeChecked();
     expect(within(events).getByLabelText('spool_dead_letter')).not.toBeChecked();
     expect(within(events).getByLabelText('source_recovered')).not.toBeChecked();
-    // severity and description come from the API
+    // severity label, event title and description are rendered through i18n
+    // (the API text is only the fallback for a language without a translation)
     expect(within(events).getAllByText('error').length).toBe(2);
-    expect(within(events).getByText('A source stopped answering.')).toBeInTheDocument();
+    expect(within(events).getByText('Source unreachable')).toBeInTheDocument();
+    expect(within(events).getByText(/stopped answering C-ECHO/i)).toBeInTheDocument();
   });
 
   it('reports an unconfigured webhook', async () => {

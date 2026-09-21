@@ -282,6 +282,20 @@ to English **per key** — never to a raw key (`returnNull: false`,
 file is missing, the two reference languages diverge or a chrome key is absent.
 It runs in `ci-local.sh` and in the GitHub workflow.
 
+**Values the API delivers** are translated the same way, with the API text as the
+fallback (`t(key, { defaultValue: apiText })`):
+
+| What | Key pattern |
+|---|---|
+| Query/echo/breaker/spool status, severity | `broker.queryStatus_*`, `broker.breakerState_*`, `broker.spoolStatus_*`, `broker.severity_*` |
+| Alerting event catalog | `broker.event_<code>` (title) + `broker.eventDesc_<code>` |
+| Retention tables | `broker.retentionTable_<table>` |
+| Setting labels and descriptions | `broker.setting_<key>` + `broker.settingDesc_<key>` |
+| Health findings | `broker.health_<code>` |
+
+Short labels exist in all nine languages; the longer texts in German and English
+(the fallback fills the rest). Add a translation key, never a hardcoded string.
+
 ## Important Constraints
 
 - Never edit `public/config.js` for production values — it is a dev placeholder; production config is injected by the deployment target

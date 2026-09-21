@@ -1072,6 +1072,24 @@
     "help_audit_title": "سجل التغييرات",
     "help_settings_title": "إعدادات وقت التشغيل",
     "addTitle": "إضافة إدخال",
-    "editTitle": "تعديل الإدخال"
+    "editTitle": "تعديل الإدخال",
+    "queryStatus_success": "ناجح",
+    "queryStatus_partial": "جزئي",
+    "queryStatus_error": "خطأ",
+    "queryStatus_empty": "لا استجابة",
+    "breakerState_closed": "مغلق",
+    "breakerState_open": "مفتوح",
+    "breakerState_half_open": "نصف مفتوح",
+    "severity_info": "معلومة",
+    "severity_warning": "تحذير",
+    "severity_error": "خطأ",
+    "echoOk": "يمكن الوصول",
+    "echoFail": "غير قابل للوصول",
+    "spoolStatus_queued": "في الانتظار",
+    "spoolStatus_sent": "تم الإرسال",
+    "spoolStatus_failed": "إعادة المحاولة",
+    "spoolStatus_dead": "تم التخلي",
+    "localStatus_active": "نشط",
+    "localStatus_expired": "منتهي"
   }
 }

@@ -418,7 +418,8 @@ test.describe('stack: broker config pages', () => {
     const rows = page.locator('tr, [data-testid="config-row"]');
     const row = rows.filter({ hasText: 'ACC-SPOOL-2' }).first();
     await expect(row).toBeVisible({ timeout: 15000 });
-    await expect(row).toContainText(/dead letter/i);
+    // the stack runs in German — accept both labels
+    await expect(row).toContainText(/dead letter|aufgegeben/i);
 
     await page.screenshot({
       path: join(SCREENSHOT_DIR, `broker-spool-page-${test.info().project.name}.png`),

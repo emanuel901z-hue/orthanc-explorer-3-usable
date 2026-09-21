@@ -1072,6 +1072,24 @@
     "help_audit_title": "Değişiklik günlüğü",
     "help_settings_title": "Çalışma zamanı ayarları",
     "addTitle": "Kayıt ekle",
-    "editTitle": "Kaydı düzenle"
+    "editTitle": "Kaydı düzenle",
+    "queryStatus_success": "başarılı",
+    "queryStatus_partial": "kısmi",
+    "queryStatus_error": "hata",
+    "queryStatus_empty": "yanıt yok",
+    "breakerState_closed": "kapalı",
+    "breakerState_open": "açık",
+    "breakerState_half_open": "yarı açık",
+    "severity_info": "bilgi",
+    "severity_warning": "uyarı",
+    "severity_error": "hata",
+    "echoOk": "erişilebilir",
+    "echoFail": "erişilemiyor",
+    "spoolStatus_queued": "kuyrukta",
+    "spoolStatus_sent": "gönderildi",
+    "spoolStatus_failed": "yeniden deniyor",
+    "spoolStatus_dead": "vazgeçildi",
+    "localStatus_active": "etkin",
+    "localStatus_expired": "süresi geçti"
   }
 }

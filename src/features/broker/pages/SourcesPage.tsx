@@ -63,6 +63,12 @@ export default function SourcesPage() {
   const sources = sourcesQuery.data ?? [];
   const pending = create.isPending || update.isPending || remove.isPending;
 
+  /** A click anywhere on a row opens the edit dialog (same as the pencil). */
+  const openRow = (row: BrokerSource) => {
+    setEditing(row);
+    setDialogOpen(true);
+  };
+
   const submit = (values: NodeFormValues) => {
     const onDone = () => { setDialogOpen(false); setEditing(null); };
     if (editing) {
@@ -162,7 +168,22 @@ export default function SourcesPage() {
             </TableHeader>
             <TableBody>
               {sources.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                    key={row.id}
+                    className="cursor-pointer"
+                    tabIndex={0}
+                    onClick={(event) => {
+                      // a click on a button/switch inside the row must keep working
+                      if ((event.target as HTMLElement).closest('button, a, input, select')) return;
+                      openRow(row);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openRow(row);
+                      }
+                    }}
+                  >
                   <TableCell className="font-medium">
                     {row.name}
                     {!row.enabled && (

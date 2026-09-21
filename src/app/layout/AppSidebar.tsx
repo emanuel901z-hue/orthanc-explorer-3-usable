@@ -46,6 +46,8 @@ export function AppSidebar() {
   const { t } = useTranslation();
   const { appName, logoUrl } = useUiStore();
   const brokerEnabled = useFeature('mwlBroker') && Boolean(getConfig().brokerUrl);
+  // the worklists page needs Orthanc's worklists plugin REST API
+  const worklistsEnabled = useFeature('worklists');
 
   // Configuration health for the sidebar badge — refreshed lazily (60 s),
   // the dashboard polls the same key every 30 s while it is open.
@@ -74,7 +76,9 @@ export function AppSidebar() {
     { title: t('nav.upload'), url: '/upload', icon: Upload },
     { title: t('nav.activity'), url: '/activity', icon: ActivityIcon },
     { title: t('nav.auditLogs', { defaultValue: 'Audit Logs' }), url: '/audit-logs', icon: Shield },
-    { title: t('nav.worklists', { defaultValue: 'Worklists' }), url: '/worklists', icon: ClipboardList },
+    ...(worklistsEnabled
+      ? [{ title: t('nav.worklists', { defaultValue: 'Worklists' }), url: '/worklists', icon: ClipboardList }]
+      : []),
     ...(brokerEnabled
       ? [{
           title: t('nav.broker', { defaultValue: 'MWL Broker' }),

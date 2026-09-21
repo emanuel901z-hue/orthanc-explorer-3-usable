@@ -109,6 +109,17 @@ export default function RulesPage() {
   const duplicate = rules.find((rule) => rule.source_id === form.source_id
     && rule.target_id === form.target_id && rule.id !== editing?.id);
 
+  /** A click anywhere on a row opens the edit dialog (same as the pencil). */
+  const openRow = (rule: BrokerRule) => {
+    const draft = loadDraft<RuleForm>(`rule-${rule.id}`);
+    setForm(draft ?? {
+      source_id: rule.source_id, target_id: rule.target_id,
+      priority: rule.priority, enabled: rule.enabled,
+    });
+    setEditing(rule);
+    setDialogOpen(true);
+  };
+
   const submit = () => {
     setSubmitted(true);
     if (!formValid) return;

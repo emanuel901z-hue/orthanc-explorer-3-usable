@@ -1072,6 +1072,24 @@
     "help_audit_title": "变更日志",
     "help_settings_title": "运行时设置",
     "addTitle": "添加条目",
-    "editTitle": "编辑条目"
+    "editTitle": "编辑条目",
+    "queryStatus_success": "成功",
+    "queryStatus_partial": "部分",
+    "queryStatus_error": "错误",
+    "queryStatus_empty": "无响应",
+    "breakerState_closed": "已关闭",
+    "breakerState_open": "已打开",
+    "breakerState_half_open": "半开",
+    "severity_info": "信息",
+    "severity_warning": "警告",
+    "severity_error": "错误",
+    "echoOk": "可达",
+    "echoFail": "不可达",
+    "spoolStatus_queued": "排队中",
+    "spoolStatus_sent": "已发送",
+    "spoolStatus_failed": "重试中",
+    "spoolStatus_dead": "已放弃",
+    "localStatus_active": "有效",
+    "localStatus_expired": "已过期"
   }
 }

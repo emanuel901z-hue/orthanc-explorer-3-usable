@@ -75,7 +75,9 @@ export function RetentionCard() {
         <ul className="divide-y" data-testid="retention-tables">
           {tables.map((entry) => (
             <li key={entry.table} className="flex flex-wrap items-center gap-2 py-2 text-sm">
-              <span className="font-medium">{entry.description}</span>
+              <span className="font-medium">
+                {t(`broker.retentionTable_${entry.table}`, { defaultValue: entry.description })}
+              </span>
               <span className="text-xs text-muted-foreground">
                 {t('broker.retentionRows', { rows: entry.rows })}
                 {entry.oldest

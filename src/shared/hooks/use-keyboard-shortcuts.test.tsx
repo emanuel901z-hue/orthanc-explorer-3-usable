@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { useKeyboardShortcuts } from './use-keyboard-shortcuts';
+import { loadConfig } from '@/config/runtime';
 
 /* ── Test harness — renders a component that uses the hook ── */
 function TestHarness({ onToggleHelp }: { onToggleHelp: () => void }) {
@@ -28,6 +29,11 @@ function renderHook() {
 
 describe('useKeyboardShortcuts — "/" focus search', () => {
   beforeEach(() => {
+    // the hook resolves the worklists feature flag, which reads the runtime config
+    (window as unknown as Record<string, unknown>).__OE3_CONFIG__ = {
+      orthancUrl: '/orthanc-proxy', authMode: 'none', features: {},
+    };
+    loadConfig();
     // Ensure focus starts at body
     (document.activeElement as HTMLElement | null)?.blur?.();
   });

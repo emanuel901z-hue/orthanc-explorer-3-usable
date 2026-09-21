@@ -362,7 +362,7 @@ export default function BrokerPage() {
                         variant={row.status === 'success' ? 'default' : 'destructive'}
                         className="text-xs"
                       >
-                        {row.status}
+                        {t(`broker.queryStatus_${row.status}`, { defaultValue: row.status })}
                       </Badge>
                     </TableCell>
                   </TableRow>

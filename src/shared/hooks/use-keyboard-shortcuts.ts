@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useFeature } from '@/config/features';
 
 export interface Shortcut {
   key: string;
@@ -41,6 +42,8 @@ export function useKeyboardShortcuts(onToggleHelp: () => void) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  // the worklists page only exists when its feature flag is on
+  const worklistsEnabled = useFeature('worklists');
 
   useEffect(() => {
     let gPrefix = false;
@@ -140,7 +143,7 @@ export function useKeyboardShortcuts(onToggleHelp: () => void) {
           u: '/upload',
           a: '/activity',
           l: '/audit-logs',
-          w: '/worklists',
+          ...(worklistsEnabled ? { w: '/worklists' } : {}),
           r: '/remote-sources',
           e: '/settings',
         };

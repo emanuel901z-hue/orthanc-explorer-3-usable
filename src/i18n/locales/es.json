@@ -1072,6 +1072,24 @@
     "help_audit_title": "Historial de cambios",
     "help_settings_title": "Ajustes en tiempo de ejecución",
     "addTitle": "Añadir entrada",
-    "editTitle": "Editar entrada"
+    "editTitle": "Editar entrada",
+    "queryStatus_success": "correcto",
+    "queryStatus_partial": "parcial",
+    "queryStatus_error": "error",
+    "queryStatus_empty": "sin respuesta",
+    "breakerState_closed": "cerrado",
+    "breakerState_open": "abierto",
+    "breakerState_half_open": "semiabierto",
+    "severity_info": "info",
+    "severity_warning": "aviso",
+    "severity_error": "error",
+    "echoOk": "accesible",
+    "echoFail": "no accesible",
+    "spoolStatus_queued": "en cola",
+    "spoolStatus_sent": "enviado",
+    "spoolStatus_failed": "reintentando",
+    "spoolStatus_dead": "descartado",
+    "localStatus_active": "activo",
+    "localStatus_expired": "caducado"
   }
 }
