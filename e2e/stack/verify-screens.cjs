@@ -100,7 +100,23 @@ async function checkView(page, view, viewport) {
   });
 
   const tag = `${view.name}-${viewport.name}`;
-  await page.screenshot({ path: join(SHOTS, `${tag}.png`), fullPage: true });
+  // The app scrolls inside a container, so `fullPage` would only capture the
+  // first screenful and hide everything below — the reason a review of those
+  // images missed cards. Grow the viewport to the content height for the shot
+  // (capped) and restore it afterwards.
+  const contentHeight = await page.evaluate(() => {
+    const main = document.querySelector('main') || document.body;
+    return Math.min(Math.max(main.scrollHeight, window.innerHeight), 5000);
+  });
+  if (contentHeight > viewport.height) {
+    await page.setViewportSize({ width: viewport.width, height: contentHeight });
+    await page.waitForTimeout(400);
+  }
+  await page.screenshot({ path: join(SHOTS, `${tag}.png`), fullPage: false });
+  if (contentHeight > viewport.height) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.waitForTimeout(200);
+  }
 
   record(`${tag}: keine Konsolenfehler`, errors.length === 0, errors.slice(0, 2).join(' | '));
   record(`${tag}: genau eine H1`, snapshot.h1 === 1, `h1=${snapshot.h1}`);
