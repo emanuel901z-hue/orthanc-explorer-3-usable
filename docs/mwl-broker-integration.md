@@ -122,6 +122,7 @@ implements the endpoints below works — the reference implementation is the
 | `GET` | `/api/v1/cache/stats`, `/api/v1/cache/items?source_id=&limit=&offset=` | Worklist cache card |
 | `DELETE` | `/api/v1/cache`, `/api/v1/cache/sources/{id}` | "Clear cache" (confirmed, **audited** — it removes the outage bridge) |
 | `POST` | `/api/v1/simulate/route`, `/api/v1/simulate/transform` | "Check a case" dry-run |
+| `POST` | `/api/v1/simulate/stations` | Which console sees which sources? (matrix for a rollout check) |
 | `POST` | `/api/v1/simulate/worklist` | "What would this console receive?" — runs the **real** aggregation (fan-out, merge, dedupe, station rule, cache) and returns the merged items with per-source provenance. Writes no routing provenance. PHI-free unless `simulate_show_phi` is on (health panel reports it) |
 | `POST` | `/api/v1/sources/{id}/query` | C-FIND test per source: does this RIS deliver worklists? (a C-ECHO only says it is alive) |
 | `POST` | `/api/v1/sources/{id}/reset-breaker` | Circuit-breaker badge: operator reset (**audited**) |

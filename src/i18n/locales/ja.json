@@ -1160,6 +1160,14 @@
     "statsAnswersShort": "件数",
     "statsFailedShort": "失敗",
     "statsStoresShort": "画像",
-    "statsEmpty": "この期間のデータはありません。"
+    "statsEmpty": "この期間のデータはありません。",
+    "matrixTitle": "各コンソールが見るもの",
+    "matrixRun": "比較",
+    "matrixRule": "規則",
+    "matrixVisible": "表示されるソース",
+    "matrixHidden": "非表示",
+    "matrixNoRule": "規則なし",
+    "matrixStations": "ステーション AET（カンマ区切り）",
+    "mppsByModality": "モダリティ別"
   }
 }

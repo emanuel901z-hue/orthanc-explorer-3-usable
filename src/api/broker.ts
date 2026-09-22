@@ -664,6 +664,8 @@ export type MppsStep = {
 export type MppsStats = {
   total: number;
   by_status: Record<string, number>;
+  /** Counts per modality — which modality reports nothing? */
+  by_modality: Record<string, number>;
   forwarded: number;
   pending_forward: number;
   last_error: string;
@@ -910,6 +912,11 @@ export const brokerApi = {
   /** Reporting view derived from the existing logs (PHI-free). */
   statsOverview: (days = 7, groupBy: 'source' | 'modality' | 'station' = 'source') =>
     brokerFetch<StatsOverview>(`/api/v1/stats/overview?days=${days}&group_by=${groupBy}`),
+
+  /** What would each of these consoles see? (configuration check before a rollout) */
+  stationsPreview: (stationAets: string[] = []) =>
+    brokerFetch<{ stations: StationPreview[]; source_count: number }>(
+      '/api/v1/simulate/stations', post({ station_aets: stationAets })),
 
   mergeRules: {
     list: () => brokerFetch<MergeRule[]>('/api/v1/merge-rules'),

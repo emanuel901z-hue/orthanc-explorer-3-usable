@@ -1160,6 +1160,14 @@
     "statsAnswersShort": "Entrées",
     "statsFailedShort": "Échecs",
     "statsStoresShort": "Images",
-    "statsEmpty": "Aucune donnée sur cette période."
+    "statsEmpty": "Aucune donnée sur cette période.",
+    "matrixTitle": "Quelle console voit quoi ?",
+    "matrixRun": "Comparer",
+    "matrixRule": "Règle",
+    "matrixVisible": "Sources visibles",
+    "matrixHidden": "Masquées",
+    "matrixNoRule": "aucune règle",
+    "matrixStations": "AET des postes (séparés par virgule)",
+    "mppsByModality": "par modalité"
   }
 }

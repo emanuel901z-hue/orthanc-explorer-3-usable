@@ -1160,6 +1160,14 @@
     "statsAnswersShort": "条目",
     "statsFailedShort": "失败",
     "statsStoresShort": "影像",
-    "statsEmpty": "该周期没有数据。"
+    "statsEmpty": "该周期没有数据。",
+    "matrixTitle": "各控制台看到什么？",
+    "matrixRun": "比较",
+    "matrixRule": "规则",
+    "matrixVisible": "可见来源",
+    "matrixHidden": "隐藏",
+    "matrixNoRule": "无规则",
+    "matrixStations": "工作站 AET（逗号分隔）",
+    "mppsByModality": "按模态"
   }
 }

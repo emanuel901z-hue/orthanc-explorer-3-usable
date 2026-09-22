@@ -1160,6 +1160,14 @@
     "statsAnswersShort": "Entradas",
     "statsFailedShort": "Fallos",
     "statsStoresShort": "Imágenes",
-    "statsEmpty": "Sin datos en este periodo."
+    "statsEmpty": "Sin datos en este periodo.",
+    "matrixTitle": "¿Qué ve cada consola?",
+    "matrixRun": "Comparar",
+    "matrixRule": "Regla",
+    "matrixVisible": "Fuentes visibles",
+    "matrixHidden": "Ocultas",
+    "matrixNoRule": "sin regla",
+    "matrixStations": "AET de estaciones (separados por coma)",
+    "mppsByModality": "por modalidad"
   }
 }

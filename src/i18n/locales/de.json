@@ -1765,7 +1765,20 @@
     "statsAnswersShort": "Einträge",
     "statsFailedShort": "Fehler",
     "statsStoresShort": "Bilder",
-    "statsEmpty": "Keine Daten in diesem Zeitraum."
+    "statsEmpty": "Keine Daten in diesem Zeitraum.",
+    "matrixTitle": "Welche Konsole sieht was?",
+    "matrixHint": "Vergleicht mehrere Stationen auf einmal — die Prüfung vor einem Rollout. Leer = alle Stationen mit Regel.",
+    "matrixStations": "Station-AETs (Komma-getrennt)",
+    "matrixPlaceholder": "CT_01, MR_01 (leer = alle Regeln)",
+    "matrixRun": "Vergleichen",
+    "matrixRule": "Regel",
+    "matrixVisible": "Sichtbare Quellen",
+    "matrixHidden": "Verborgen",
+    "matrixNoRule": "keine Regel",
+    "matrixNone": "keine — leere Arbeitsliste!",
+    "matrixAny": "(beliebig)",
+    "matrixWarning": "Mindestens eine Konsole würde eine leere Arbeitsliste sehen.",
+    "mppsByModality": "je Modalität"
   },
   "shortcuts": {
     "nav": {

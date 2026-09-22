@@ -76,6 +76,14 @@ export function MppsCard() {
             {!stats.forward_enabled && (
               <span className="text-muted-foreground">{t('broker.mppsForwardOff')}</span>
             )}
+            {Object.keys(stats.by_modality ?? {}).length > 1 && (
+              <span className="text-muted-foreground">
+                {t('broker.mppsByModality')}:{' '}
+                {Object.entries(stats.by_modality).map(([modality, count]) => (
+                  <span key={modality} className="font-mono mr-2">{modality} {count}</span>
+                ))}
+              </span>
+            )}
             {stats.hide_completed && (
               <span className="text-muted-foreground">{t('broker.mppsHideCompleted')}</span>
             )}

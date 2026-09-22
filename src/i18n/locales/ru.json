@@ -1160,6 +1160,14 @@
     "statsAnswersShort": "Записи",
     "statsFailedShort": "Ошибки",
     "statsStoresShort": "Снимки",
-    "statsEmpty": "Нет данных за этот период."
+    "statsEmpty": "Нет данных за этот период.",
+    "matrixTitle": "Что видит каждая консоль?",
+    "matrixRun": "Сравнить",
+    "matrixRule": "Правило",
+    "matrixVisible": "Видимые источники",
+    "matrixHidden": "Скрытые",
+    "matrixNoRule": "нет правила",
+    "matrixStations": "AET станций (через запятую)",
+    "mppsByModality": "по модальности"
   }
 }

@@ -1160,6 +1160,14 @@
     "statsAnswersShort": "Kayıtlar",
     "statsFailedShort": "Hatalar",
     "statsStoresShort": "Görüntüler",
-    "statsEmpty": "Bu dönemde veri yok."
+    "statsEmpty": "Bu dönemde veri yok.",
+    "matrixTitle": "Hangi konsol neyi görür?",
+    "matrixRun": "Karşılaştır",
+    "matrixRule": "Kural",
+    "matrixVisible": "Görünür kaynaklar",
+    "matrixHidden": "Gizli",
+    "matrixNoRule": "kural yok",
+    "matrixStations": "İstasyon AET'leri (virgülle)",
+    "mppsByModality": "modaliteye göre"
   }
 }

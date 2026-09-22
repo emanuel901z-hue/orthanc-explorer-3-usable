@@ -48,6 +48,7 @@ import { DiscardConfirm, useDiscardGuard } from '../components/DiscardConfirm';
 import { clearDraft, loadDraft, useDraftPersistence, useUnsavedWarning } from '../hooks/use-form-draft';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { WorklistPreviewPanel } from '../components/WorklistPreviewPanel';
+import { StationMatrixCard } from '../components/StationMatrixCard';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useStationRuleWrites } from '../hooks/use-broker-stations';
 
@@ -430,6 +431,8 @@ export default function StationsPage() {
         onConfirm={() => remove.mutate(removing!.id, { onSuccess: () => setRemoving(null) })}
       />
       <WorklistPreviewPanel />
+
+      <StationMatrixCard />
     </BrokerPageShell>
   );
 }

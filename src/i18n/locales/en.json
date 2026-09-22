@@ -1765,7 +1765,20 @@
     "statsAnswersShort": "Entries",
     "statsFailedShort": "Failed",
     "statsStoresShort": "Images",
-    "statsEmpty": "No data in this period."
+    "statsEmpty": "No data in this period.",
+    "matrixTitle": "Which console sees what?",
+    "matrixHint": "Compares several stations at once — the check before a rollout. Empty = every station with a rule.",
+    "matrixStations": "Station AETs (comma separated)",
+    "matrixPlaceholder": "CT_01, MR_01 (empty = all rules)",
+    "matrixRun": "Compare",
+    "matrixRule": "Rule",
+    "matrixVisible": "Visible sources",
+    "matrixHidden": "Hidden",
+    "matrixNoRule": "no rule",
+    "matrixNone": "none — empty worklist!",
+    "matrixAny": "(any)",
+    "matrixWarning": "At least one console would see an empty worklist.",
+    "mppsByModality": "per modality"
   },
   "shortcuts": {
     "nav": {

@@ -1160,6 +1160,14 @@
     "statsAnswersShort": "الإدخالات",
     "statsFailedShort": "الأخطاء",
     "statsStoresShort": "الصور",
-    "statsEmpty": "لا توجد بيانات في هذه الفترة."
+    "statsEmpty": "لا توجد بيانات في هذه الفترة.",
+    "matrixTitle": "ماذا ترى كل وحدة؟",
+    "matrixRun": "مقارنة",
+    "matrixRule": "القاعدة",
+    "matrixVisible": "المصادر الظاهرة",
+    "matrixHidden": "المخفية",
+    "matrixNoRule": "لا قاعدة",
+    "matrixStations": "AET المحطات (مفصولة بفواصل)",
+    "mppsByModality": "حسب الجهاز"
   }
 }
