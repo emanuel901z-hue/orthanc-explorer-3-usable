@@ -7,8 +7,18 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
-const OE3 = 'http://127.0.0.1:18082';
-const API = 'http://127.0.0.1:18081/api/v1';
+// The stack under test must be selectable: in the CI this runs against the
+// ephemeral test stack (19082), not against a developer's stack (18082).
+// Ignoring that meant the audit silently tested a stale image — which cost us a
+// long hunt for a 404 that the code did not have.
+const OE3 = (() => {
+  const flag = process.argv.indexOf('--url');
+  if (flag >= 0 && process.argv[flag + 1]) return process.argv[flag + 1];
+  return process.env.OE3_BASE || 'http://127.0.0.1:18082';
+})();
+// Der Broker wird über den Proxy des Stacks unter Test erreicht — sonst prüft
+// die UI den Test-Stack und die API einen anderen (genau das war der Fehler).
+const API = process.env.BROKER_API_URL || `${OE3}/broker-api/api/v1`;
 const SHOTS = path.join(__dirname, 'screenshots');
 fs.mkdirSync(SHOTS, { recursive: true });
 

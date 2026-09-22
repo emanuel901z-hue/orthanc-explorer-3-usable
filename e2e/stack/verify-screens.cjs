@@ -73,8 +73,11 @@ async function checkView(page, view, viewport) {
   const errors = [];
   const onConsole = (msg) => { if (msg.type() === 'error') errors.push(msg.text().slice(0, 160)); };
   const onResponse = (res) => {
-    if (res.status() >= 400 && res.url().includes('/oe3/')) {
-      errors.push(`HTTP_${res.status()} ${res.url().slice(-60)}`);
+    if (res.status() >= 400) {
+      // any failed request, not only the SPA's own — a broker 404 used to be
+      // invisible here and cost a long hunt for a bug that did not exist
+      const url = res.url().replace(/^https?:\/\/[^/]+/, '');
+      errors.push(`HTTP_${res.status()} ${url.slice(0, 80)}`);
     }
   };
   page.on('console', onConsole);
