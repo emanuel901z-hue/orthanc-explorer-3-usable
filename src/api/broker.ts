@@ -616,6 +616,9 @@ export type PatientMerge = {
   /** merge = the old identifier is retired (ADT A40); link = both stay valid (A24). */
   kind: 'merge' | 'link';
   active: boolean;
+  /** Only in the response to creating one: what the merge moved (a link moves nothing). */
+  moved_items?: number;
+  moved_seen?: number;
 };
 
 export type StatsTotals = {

@@ -1792,12 +1792,16 @@
     "matrixWarning": "Mindestens eine Konsole würde eine leere Arbeitsliste sehen.",
     "mppsByModality": "je Modalität",
     "pirTitle": "Patienten-IDs (Zusammenführung / Verknüpfung)",
+    "pirHint": "Eine alte Patienten-ID gehört jetzt zur aktuellen. Eine Zusammenführung (ADT A40) entzieht die alte ID — die Arbeitslisten-Antwort folgt der neuen; eine Verknüpfung (A24) hält nur fest, dass beide Datensätze dieselbe Person sind, beide IDs bleiben gültig.",
+    "pirSameId": "Alte und aktuelle ID sind gleich — es gibt nichts zu tun.",
+    "pirSavedMerge": "Zusammenführung gespeichert: {{items}} Arbeitslisten-Einträge und {{provenance}} Routing-Zeilen tragen jetzt die aktuelle ID.",
+    "pirSavedLink": "Verknüpfung gespeichert — beide IDs bleiben gültig, es wurde nichts umgezogen.",
     "pirOld": "alte ID",
     "pirNew": "aktuelle ID",
     "pirReason": "Grund",
     "pirKind": "Art",
-    "pirKindMerge": "Zusammenführen (alte ID entfällt)",
-    "pirKindLink": "Verknüpfen (beide bleiben gültig)",
+    "pirKindMerge": "Zusammenführen",
+    "pirKindLink": "Verknüpfen",
     "pirAdd": "Eintragen",
     "pirEmpty": "Nichts eingetragen.",
     "pirProbe": "ID prüfen",
@@ -1812,7 +1816,9 @@
     "pirResolvedTo": "→ {{resolved}}",
     "pirFromAdt": "vom RIS (ADT)",
     "mergeTitle": "Feldweiser Merge",
-    "mergeAdd": "Regel anlegen"
+    "mergeAdd": "Regel anlegen",
+    "pirEffectMerge": "Eine Zusammenführung entzieht die alte ID: Arbeitslisten-Antwort und Routing folgen der aktuellen.",
+    "pirEffectLink": "Eine Verknüpfung lässt beide IDs gültig: es wird nichts umgezogen und keine Antwort umgeschrieben."
   },
   "shortcuts": {
     "nav": {

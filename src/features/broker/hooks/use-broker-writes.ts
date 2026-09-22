@@ -22,8 +22,12 @@ type AuditedMutationOptions<TArgs, TResult> = {
   /**
    * Show a toast when the write succeeded. Every write gets feedback — an
    * operator must never have to guess whether a click did anything.
+   *
+   * A function gets the response: some writes know more afterwards than before
+   * (a patient merge reports how many entries it moved), and that answer is
+   * exactly what the operator wants to read.
    */
-  successMessage?: string;
+  successMessage?: string | ((result: TResult) => string);
   /** Suppress the error toast when the caller renders the error itself. */
   silentError?: boolean;
 };
@@ -68,10 +72,10 @@ export function useAuditedMutation<TArgs, TResult>({
         throw err;
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       invalidate.forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
       if (successMessage) {
-        toast.success(successMessage);
+        toast.success(typeof successMessage === 'function' ? successMessage(result) : successMessage);
       }
     },
     onError: (error) => {

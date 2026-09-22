@@ -774,6 +774,21 @@ async function domReport(page) {
   const pirVisible = await pir.count() > 0 && await pir.first().isVisible();
   record('PIR: Karte wird gerendert', pirVisible);
   if (pirVisible) {
+    // the card used to show the *field*-merge hint ("which source wins per
+    // attribute") — a different feature explained on the wrong card
+    const pirText = await pir.first().innerText();
+    record('PIR: die Karte erklärt sich selbst, nicht die Feldregeln',
+      /ADT A40/i.test(pirText) && !/highest-priority source|höchsten Priorität/i.test(pirText),
+      pirText.split('\n')[1]?.slice(0, 60) || '');
+
+    // two identical IDs must be refused before a request is sent
+    await pir.getByLabel(/alte id|old id/i).fill('E2E-PIR-SAME');
+    await pir.getByLabel(/aktuelle id|current id/i).fill('E2E-PIR-SAME');
+    const sameHint = await pir.getByTestId('pir-same-id').count();
+    const blocked = await pir.getByRole('button', { name: /^(eintragen|record)$/i }).isDisabled();
+    record('PIR: identische IDs werden vorab abgefangen', sameHint > 0 && blocked,
+      `Hinweis=${sameHint > 0} gesperrt=${blocked}`);
+
     await pir.getByLabel(/alte id|old id/i).fill('E2E-PIR-ALT');
     await pir.getByLabel(/aktuelle id|current id/i).fill('E2E-PIR-NEU');
     await pir.getByRole('button', { name: /^(eintragen|record)$/i }).click();
@@ -784,6 +799,11 @@ async function domReport(page) {
     // the same form, but as a link (the kind selector decides)
     await pir.getByLabel(/^art$|^type$/i).click();
     await page.getByRole('option', { name: /verknüpfen|link/i }).first().click();
+    // …and the consequence has to follow the choice, in full words
+    const effect = await pir.getByTestId('pir-effect').innerText();
+    record('PIR: die Wirkung der gewählten Art steht im Klartext',
+      /gültig|valid/i.test(effect) && !/entzieht|retires/i.test(effect),
+      effect.slice(0, 70));
     await pir.getByLabel(/alte id|old id/i).fill('E2E-PIR-LINK');
     await pir.getByLabel(/aktuelle id|current id/i).fill('E2E-PIR-NEU');
     await pir.getByRole('button', { name: /^(eintragen|record)$/i }).click();

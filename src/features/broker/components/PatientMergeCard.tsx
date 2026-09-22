@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { brokerApi } from '@/api/broker';
+import { brokerApi, type PatientMerge } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { useCanWrite } from '@/features/broker/hooks/use-can-write';
 import { useAuditedMutation } from '@/features/broker/hooks/use-broker-writes';
@@ -48,7 +48,7 @@ export function PatientMergeCard() {
   });
 
   const create = useAuditedMutation<{ old: string; current: string; kind: 'merge' | 'link';
-                                      reason: string }, unknown>({
+                                      reason: string }, PatientMerge>({
     action: 'broker.patient_merge.create',
     resourceType: 'brokerConfig',
     resourceId: (body) => body.old,
@@ -57,7 +57,11 @@ export function PatientMergeCard() {
       reason: body.reason,
     }),
     invalidate: [['broker', 'merges']],
-    successMessage: t('broker.pirSaved'),
+    // "what did that do?" — a merge retires an ID, so it should say how much moved
+    successMessage: (row) => (row.kind === 'link'
+      ? t('broker.pirSavedLink')
+      : t('broker.pirSavedMerge', { items: row.moved_items ?? 0,
+                                     provenance: row.moved_seen ?? 0 })),
   });
 
   const remove = useMutation({
@@ -75,6 +79,8 @@ export function PatientMergeCard() {
   });
 
   const rows = merges.data ?? [];
+  // the server refuses two identical IDs; say it here instead of after a round trip
+  const sameId = Boolean(oldId.trim()) && oldId.trim() === newId.trim();
 
   return (
     <Card data-testid="patient-merge-card">
@@ -83,11 +89,16 @@ export function PatientMergeCard() {
           <Users className="h-4 w-4" />
           {t('broker.pirTitle')}
         </CardTitle>
-        <p className="text-xs text-muted-foreground">{t('broker.mergeHint')}</p>
+        <p className="text-xs text-muted-foreground">{t('broker.pirHint')}</p>
       </CardHeader>
       <CardContent className="space-y-3">
         {canWrite && (
           <div className="flex flex-wrap items-end gap-2">
+            {sameId && (
+              <p role="alert" className="w-full text-xs text-destructive" data-testid="pir-same-id">
+                {t('broker.pirSameId')}
+              </p>
+            )}
             <div>
               <Label htmlFor="merge-old" className="text-xs">{t('broker.pirOld')}</Label>
               <Input id="merge-old" className="h-9 w-[150px] font-mono" value={oldId}
@@ -108,7 +119,7 @@ export function PatientMergeCard() {
             <div>
               <Label htmlFor="merge-kind" className="text-xs">{t('broker.pirKind')}</Label>
               <Select value={kind} onValueChange={(value) => setKind(value as 'merge' | 'link')}>
-                <SelectTrigger id="merge-kind" className="h-9 w-[170px]">
+                <SelectTrigger id="merge-kind" className="h-9 w-[190px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -117,7 +128,7 @@ export function PatientMergeCard() {
                 </SelectContent>
               </Select>
             </div>
-            <Button size="sm" disabled={!oldId.trim() || !newId.trim() || create.isPending}
+            <Button size="sm" disabled={!oldId.trim() || !newId.trim() || sameId || create.isPending}
                     onClick={() => {
                       create.mutate({ old: oldId.trim(), current: newId.trim(), kind,
                                       reason: reason.trim() });
@@ -126,6 +137,10 @@ export function PatientMergeCard() {
               <Plus className="h-4 w-4 mr-1" />
               {t('broker.pirAdd')}
             </Button>
+            {/* the consequence in full words — a select label is too short for it */}
+            <p className="w-full text-xs text-muted-foreground" data-testid="pir-effect">
+              {kind === 'link' ? t('broker.pirEffectLink') : t('broker.pirEffectMerge')}
+            </p>
           </div>
         )}
 
@@ -153,15 +168,17 @@ export function PatientMergeCard() {
         ) : (
           <ul className="space-y-1" data-testid="merge-list">
             {rows.map((row) => (
-              <li key={row.id} className="flex items-center gap-2 text-xs">
+              <li key={row.id} className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="font-mono">{row.old_patient_id}</span>
                 <ArrowRight className="h-3 w-3 text-muted-foreground" />
                 <span className="font-mono font-medium">{row.new_patient_id}</span>
                 <Badge variant={row.kind === 'link' ? 'outline' : 'default'}
-                       className="text-[10px]" data-testid={`merge-kind-${row.id}`}>
+                       className="whitespace-nowrap text-[10px]"
+                       data-testid={`merge-kind-${row.id}`}>
                   {row.kind === 'link' ? t('broker.pirKindLink') : t('broker.pirKindMerge')}
                 </Badge>
-                <Badge variant={row.origin === 'adt' ? 'secondary' : 'outline'} className="text-[10px]">
+                <Badge variant={row.origin === 'adt' ? 'secondary' : 'outline'}
+                       className="whitespace-nowrap text-[10px]">
                   {row.origin === 'adt' ? t('broker.pirFromAdt') : t('broker.pirManual')}
                 </Badge>
                 {row.reason && <span className="text-muted-foreground">{row.reason}</span>}

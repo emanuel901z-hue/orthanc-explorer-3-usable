@@ -1792,12 +1792,16 @@
     "matrixWarning": "At least one console would see an empty worklist.",
     "mppsByModality": "per modality",
     "pirTitle": "Patient identifiers (merge / link)",
+    "pirHint": "An old patient ID now belongs to the current one. A merge (ADT A40) retires the old ID — the worklist answer follows it; a link (A24) only records that both records are the same person, both IDs stay valid.",
+    "pirSameId": "Old and current ID are the same — nothing to do.",
+    "pirSavedMerge": "Merge recorded: {{items}} worklist entries and {{provenance}} routing rows now use the current ID.",
+    "pirSavedLink": "Link recorded — both IDs stay valid, nothing was moved.",
     "pirOld": "old ID",
     "pirNew": "current ID",
     "pirReason": "reason",
     "pirKind": "type",
-    "pirKindMerge": "merge (old ID is retired)",
-    "pirKindLink": "link (both stay valid)",
+    "pirKindMerge": "Merge",
+    "pirKindLink": "Link",
     "pirAdd": "Record",
     "pirEmpty": "Nothing recorded.",
     "pirProbe": "Check an ID",
@@ -1812,7 +1816,9 @@
     "pirResolvedTo": "→ {{resolved}}",
     "pirFromAdt": "from RIS (ADT)",
     "mergeTitle": "Field-level merge",
-    "mergeAdd": "Add rule"
+    "mergeAdd": "Add rule",
+    "pirEffectMerge": "A merge retires the old ID: the worklist answer and the routing follow the current one.",
+    "pirEffectLink": "A link keeps both IDs valid: nothing is moved and no answer is rewritten."
   },
   "shortcuts": {
     "nav": {
