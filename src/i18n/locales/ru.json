@@ -1137,11 +1137,8 @@
     "mppsDelivered": "отправлено",
     "mppsPendingShort": "ожидает",
     "mppsForwarded": "Шаги отправлены.",
-    "mergeTitle": "Слияние по полям",
-    "mergeAdd": "Добавить правило",
     "mergeTag": "Атрибут DICOM",
     "mergeSources": "Источники (порядок)",
-    "mergeEmpty": "Нет правил по полям.",
     "mergeAddField": "Добавить правило поля",
     "hl7MapTitle": "Читать дополнительные поля HL7",
     "hl7MapAdd": "Добавить сопоставление",
@@ -1168,6 +1165,17 @@
     "matrixHidden": "Скрытые",
     "matrixNoRule": "нет правила",
     "matrixStations": "AET станций (через запятую)",
-    "mppsByModality": "по модальности"
+    "mppsByModality": "по модальности",
+    "pirTitle": "Идентификаторы пациентов (объединение)",
+    "pirOld": "старый ID",
+    "pirNew": "текущий ID",
+    "pirAdd": "Записать",
+    "pirEmpty": "Объединений нет.",
+    "pirProbe": "Проверить ID",
+    "pirSaved": "Объединение сохранено",
+    "pirProbeRun": "Разрешить",
+    "mergeTitle": "Слияние по полям",
+    "mergeAdd": "Добавить правило",
+    "mergeEmpty": "Нет правил по полям."
   }
 }

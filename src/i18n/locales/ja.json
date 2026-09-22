@@ -1137,11 +1137,8 @@
     "mppsDelivered": "送信済み",
     "mppsPendingShort": "未送信",
     "mppsForwarded": "ステップを送信しました。",
-    "mergeTitle": "フィールド単位のマージ",
-    "mergeAdd": "ルールを追加",
     "mergeTag": "DICOM 属性",
     "mergeSources": "ソース（順序）",
-    "mergeEmpty": "フィールド規則はありません。",
     "mergeAddField": "フィールド規則を追加",
     "hl7MapTitle": "追加の HL7 フィールドを読み取る",
     "hl7MapAdd": "マッピングを追加",
@@ -1168,6 +1165,17 @@
     "matrixHidden": "非表示",
     "matrixNoRule": "規則なし",
     "matrixStations": "ステーション AET（カンマ区切り）",
-    "mppsByModality": "モダリティ別"
+    "mppsByModality": "モダリティ別",
+    "pirTitle": "患者 ID（統合）",
+    "pirOld": "旧 ID",
+    "pirNew": "現在の ID",
+    "pirAdd": "記録",
+    "pirEmpty": "統合はありません。",
+    "pirProbe": "ID を確認",
+    "pirSaved": "統合を保存しました",
+    "pirProbeRun": "解決",
+    "mergeTitle": "フィールド単位のマージ",
+    "mergeAdd": "ルールを追加",
+    "mergeEmpty": "フィールド規則はありません。"
   }
 }

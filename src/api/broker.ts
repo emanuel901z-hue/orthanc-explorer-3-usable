@@ -603,6 +603,17 @@ export type CacheRefreshResult = {
              ok: boolean; error: string }[];
 };
 
+export type PatientMerge = {
+  id: number;
+  ts: string;
+  old_patient_id: string;
+  new_patient_id: string;
+  reason: string;
+  actor: string;
+  origin: string;
+  active: boolean;
+};
+
 export type StatsTotals = {
   days: number;
   from: string;
@@ -912,6 +923,18 @@ export const brokerApi = {
   /** Reporting view derived from the existing logs (PHI-free). */
   statsOverview: (days = 7, groupBy: 'source' | 'modality' | 'station' = 'source') =>
     brokerFetch<StatsOverview>(`/api/v1/stats/overview?days=${days}&group_by=${groupBy}`),
+
+  /** IHE PIR: which old patient ID now belongs to which current one. */
+  patientMerges: {
+    list: (activeOnly = true) =>
+      brokerFetch<PatientMerge[]>(`/api/v1/merges?active_only=${activeOnly}`),
+    create: (body: { old_patient_id: string; new_patient_id: string; reason?: string }) =>
+      brokerFetch<PatientMerge>('/api/v1/merges', post(body)),
+    remove: (id: number) => brokerFetch<void>(`/api/v1/merges/${id}`, { method: 'DELETE' }),
+    resolve: (patientId: string) =>
+      brokerFetch<{ patient_id: string; resolved: string; merged: boolean }>(
+        `/api/v1/merges/resolve/${encodeURIComponent(patientId)}`),
+  },
 
   /** What would each of these consoles see? (configuration check before a rollout) */
   stationsPreview: (stationAets: string[] = []) =>

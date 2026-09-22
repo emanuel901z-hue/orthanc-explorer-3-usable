@@ -1137,11 +1137,8 @@
     "mppsDelivered": "informado",
     "mppsPendingShort": "pendiente",
     "mppsForwarded": "Pasos informados.",
-    "mergeTitle": "Fusión por campo",
-    "mergeAdd": "Añadir regla",
     "mergeTag": "Campo DICOM",
     "mergeSources": "Fuentes (orden)",
-    "mergeEmpty": "Sin reglas de campo.",
     "mergeAddField": "Añadir regla de campo",
     "hl7MapTitle": "Leer campos HL7 adicionales",
     "hl7MapAdd": "Añadir asignación",
@@ -1168,6 +1165,17 @@
     "matrixHidden": "Ocultas",
     "matrixNoRule": "sin regla",
     "matrixStations": "AET de estaciones (separados por coma)",
-    "mppsByModality": "por modalidad"
+    "mppsByModality": "por modalidad",
+    "pirTitle": "Identificadores de paciente (fusión)",
+    "pirOld": "ID anterior",
+    "pirNew": "ID actual",
+    "pirAdd": "Registrar",
+    "pirEmpty": "No hay fusiones registradas.",
+    "pirProbe": "Comprobar un ID",
+    "pirSaved": "Fusión registrada",
+    "pirProbeRun": "Resolver",
+    "mergeTitle": "Fusión por campo",
+    "mergeAdd": "Añadir regla",
+    "mergeEmpty": "Sin reglas de campo."
   }
 }

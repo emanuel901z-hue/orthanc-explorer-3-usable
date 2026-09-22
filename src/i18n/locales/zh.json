@@ -1137,11 +1137,8 @@
     "mppsDelivered": "已上报",
     "mppsPendingShort": "待处理",
     "mppsForwarded": "步骤已上报。",
-    "mergeTitle": "按字段合并",
-    "mergeAdd": "添加规则",
     "mergeTag": "DICOM 字段",
     "mergeSources": "来源（顺序）",
-    "mergeEmpty": "没有字段规则。",
     "mergeAddField": "添加字段规则",
     "hl7MapTitle": "读取额外的 HL7 字段",
     "hl7MapAdd": "添加映射",
@@ -1168,6 +1165,17 @@
     "matrixHidden": "隐藏",
     "matrixNoRule": "无规则",
     "matrixStations": "工作站 AET（逗号分隔）",
-    "mppsByModality": "按模态"
+    "mppsByModality": "按模态",
+    "pirTitle": "患者标识（合并）",
+    "pirOld": "旧 ID",
+    "pirNew": "当前 ID",
+    "pirAdd": "记录",
+    "pirEmpty": "没有合并记录。",
+    "pirProbe": "检查 ID",
+    "pirSaved": "已保存合并",
+    "pirProbeRun": "解析",
+    "mergeTitle": "按字段合并",
+    "mergeAdd": "添加规则",
+    "mergeEmpty": "没有字段规则。"
   }
 }

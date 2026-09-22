@@ -1137,11 +1137,8 @@
     "mppsDelivered": "تم الإبلاغ",
     "mppsPendingShort": "قيد الانتظار",
     "mppsForwarded": "تم إبلاغ الخطوات.",
-    "mergeTitle": "الدمج حسب الحقل",
-    "mergeAdd": "إضافة قاعدة",
     "mergeTag": "حقل DICOM",
     "mergeSources": "المصادر (بالترتيب)",
-    "mergeEmpty": "لا توجد قواعد حقول.",
     "mergeAddField": "إضافة قاعدة حقل",
     "hl7MapTitle": "قراءة حقول HL7 إضافية",
     "hl7MapAdd": "إضافة تعيين",
@@ -1168,6 +1165,17 @@
     "matrixHidden": "المخفية",
     "matrixNoRule": "لا قاعدة",
     "matrixStations": "AET المحطات (مفصولة بفواصل)",
-    "mppsByModality": "حسب الجهاز"
+    "mppsByModality": "حسب الجهاز",
+    "pirTitle": "معرّفات المريض (الدمج)",
+    "pirOld": "المعرّف القديم",
+    "pirNew": "المعرّف الحالي",
+    "pirAdd": "تسجيل",
+    "pirEmpty": "لا توجد عمليات دمج.",
+    "pirProbe": "تحقّق من المعرّف",
+    "pirSaved": "تم تسجيل الدمج",
+    "pirProbeRun": "تحليل",
+    "mergeTitle": "الدمج حسب الحقل",
+    "mergeAdd": "إضافة قاعدة",
+    "mergeEmpty": "لا توجد قواعد حقول."
   }
 }

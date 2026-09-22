@@ -1137,11 +1137,8 @@
     "mppsDelivered": "bildirildi",
     "mppsPendingShort": "bekliyor",
     "mppsForwarded": "Adımlar bildirildi.",
-    "mergeTitle": "Alan bazlı birleştirme",
-    "mergeAdd": "Kural ekle",
     "mergeTag": "DICOM alanı",
     "mergeSources": "Kaynaklar (sıra)",
-    "mergeEmpty": "Alan kuralı yok.",
     "mergeAddField": "Alan kuralı ekle",
     "hl7MapTitle": "Ek HL7 alanlarını oku",
     "hl7MapAdd": "Eşleme ekle",
@@ -1168,6 +1165,17 @@
     "matrixHidden": "Gizli",
     "matrixNoRule": "kural yok",
     "matrixStations": "İstasyon AET'leri (virgülle)",
-    "mppsByModality": "modaliteye göre"
+    "mppsByModality": "modaliteye göre",
+    "pirTitle": "Hasta kimlikleri (birleştirme)",
+    "pirOld": "eski ID",
+    "pirNew": "güncel ID",
+    "pirAdd": "Kaydet",
+    "pirEmpty": "Kayıtlı birleştirme yok.",
+    "pirProbe": "ID kontrol et",
+    "pirSaved": "Birleştirme kaydedildi",
+    "pirProbeRun": "Çöz",
+    "mergeTitle": "Alan bazlı birleştirme",
+    "mergeAdd": "Kural ekle",
+    "mergeEmpty": "Alan kuralı yok."
   }
 }
