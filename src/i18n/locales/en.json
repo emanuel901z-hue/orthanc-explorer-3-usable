@@ -1526,6 +1526,11 @@
       "Importing a configuration without reading the preview: it overwrites matching entries."
     ],
     "help_settings_title": "Runtime settings",
+    "help_settings_what": [
+      "The runtime settings of the broker: timeouts, worklist cache, C-STORE spool, circuit breaker, HL7 intake, retention, audit trail (ATNA), alerting and DICOM TLS.",
+      "Below the list sit the cards for the things that need more than one value: alerting (webhook and events), retention, TLS certificates and the audit trail.",
+      "Nothing here is a one-way street: every value shows where it comes from, and 'reset' brings back the value the installation was built with."
+    ],
     "help_settings_how": [
       "Each row shows the current value and where it comes from (\".env\" = deployment default, \"override\" = changed here).",
       "Save applies the value immediately; \"reset\" returns to the deployment default.",

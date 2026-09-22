@@ -1526,6 +1526,11 @@
       "Eine Konfiguration importieren, ohne die Vorschau zu lesen: sie überschreibt passende Einträge."
     ],
     "help_settings_title": "Laufzeiteinstellungen",
+    "help_settings_what": [
+      "Die Laufzeit-Einstellungen des Brokers: Timeouts, Worklist-Cache, C-STORE-Spool, Circuit Breaker, HL7-Eingang, Aufbewahrung, Audit-Trail (ATNA), Alarmierung und DICOM-TLS.",
+      "Unter der Liste stehen die Karten für alles, was mehr als einen Wert braucht: Alarmierung (Webhook und Ereignisse), Aufbewahrung, TLS-Zertifikate und der Audit-Trail.",
+      "Nichts hier ist eine Einbahnstraße: jeder Wert zeigt, woher er kommt, und „Zurücksetzen“ stellt die Vorgabe der Installation wieder her."
+    ],
     "help_settings_how": [
       "Jede Zeile zeigt den aktuellen Wert und woher er kommt („.env\" = Vorgabe der Installation, „override\" = hier geändert).",
       "Speichern wirkt sofort; „Zurücksetzen\" stellt die Vorgabe wieder her.",
