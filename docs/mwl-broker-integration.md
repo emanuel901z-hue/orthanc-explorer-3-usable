@@ -106,6 +106,7 @@ implements the endpoints below works — the reference implementation is the
 | `POST` | `/api/v1/tls/upload` | Install a certificate/key pair from the hospital PKI (validated, key stored 0600 and never returned) |
 | `GET` | `/api/v1/atna/stats`, `POST /api/v1/atna/test`, `GET /api/v1/atna/sample` | ATNA audit trail |
 | `GET` | `/api/v1/hl7/messages/{id}`, `POST /api/v1/hl7/messages/{id}/reprocess?dry_run=` | HL7 message detail and replay (the raw text is only kept with `hl7_store_raw`) |
+| `GET/POST/PUT` | `/api/v1/dicom-web/workitems…` | UPS-RS-Subset: Work Items suchen, abrufen, anlegen, Status setzen (DICOM JSON) |
 | `GET` | `/api/v1/stats/overview?days=&group_by=` | Reporting: Auslastung, Fehler, Tagesreihe (PHI-frei) |
 | `GET/POST/DELETE` | `/api/v1/merge-rules` | Field-level merge: which source wins for one DICOM attribute |
 | `GET/POST/DELETE` | `/api/v1/hl7/field-maps` | Read extra HL7 fields (OBR-18, ZDS) into worklist attributes |
