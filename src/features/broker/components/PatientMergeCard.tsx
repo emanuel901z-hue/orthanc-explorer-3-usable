@@ -1,9 +1,11 @@
 /**
  * PatientMergeCard — IHE PIR: an old patient ID now belongs to the current one.
  *
- * The RIS announces that with an ADT A40; when it does not (or when someone
- * needs it fixed now), the operator can record it here. The effect is the same
- * for both: the worklist answer and the routing provenance use the current ID.
+ * The RIS announces that with an ADT `A40` (merge) or `A24` (link); when it does
+ * not (or when someone needs it fixed now), the operator can record it here. The
+ * two are not the same thing: a **merge** retires the old identifier, so the
+ * worklist answer and the routing provenance follow the new one — a **link** only
+ * records that both records are the same person, and both identifiers stay valid.
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +16,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { brokerApi } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { useCanWrite } from '@/features/broker/hooks/use-can-write';
@@ -28,6 +37,7 @@ export function PatientMergeCard() {
   const [oldId, setOldId] = useState('');
   const [newId, setNewId] = useState('');
   const [reason, setReason] = useState('');
+  const [kind, setKind] = useState<'merge' | 'link'>('merge');
   const [probe, setProbe] = useState('');
   const [probeResult, setProbeResult] = useState<string | null>(null);
 
@@ -37,12 +47,14 @@ export function PatientMergeCard() {
     enabled: configured,
   });
 
-  const create = useAuditedMutation<{ old: string; current: string; reason: string }, unknown>({
+  const create = useAuditedMutation<{ old: string; current: string; kind: 'merge' | 'link';
+                                      reason: string }, unknown>({
     action: 'broker.patient_merge.create',
     resourceType: 'brokerConfig',
     resourceId: (body) => body.old,
     run: (body) => brokerApi.patientMerges.create({
-      old_patient_id: body.old, new_patient_id: body.current, reason: body.reason,
+      old_patient_id: body.old, new_patient_id: body.current, kind: body.kind,
+      reason: body.reason,
     }),
     invalidate: [['broker', 'merges']],
     successMessage: t('broker.pirSaved'),
@@ -93,9 +105,22 @@ export function PatientMergeCard() {
                      placeholder={t('broker.pirReasonHint')}
                      onChange={(event) => setReason(event.target.value)} />
             </div>
+            <div>
+              <Label htmlFor="merge-kind" className="text-xs">{t('broker.pirKind')}</Label>
+              <Select value={kind} onValueChange={(value) => setKind(value as 'merge' | 'link')}>
+                <SelectTrigger id="merge-kind" className="h-9 w-[170px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="merge">{t('broker.pirKindMerge')}</SelectItem>
+                  <SelectItem value="link">{t('broker.pirKindLink')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button size="sm" disabled={!oldId.trim() || !newId.trim() || create.isPending}
                     onClick={() => {
-                      create.mutate({ old: oldId.trim(), current: newId.trim(), reason: reason.trim() });
+                      create.mutate({ old: oldId.trim(), current: newId.trim(), kind,
+                                      reason: reason.trim() });
                       setOldId(''); setNewId(''); setReason('');
                     }}>
               <Plus className="h-4 w-4 mr-1" />
@@ -132,6 +157,10 @@ export function PatientMergeCard() {
                 <span className="font-mono">{row.old_patient_id}</span>
                 <ArrowRight className="h-3 w-3 text-muted-foreground" />
                 <span className="font-mono font-medium">{row.new_patient_id}</span>
+                <Badge variant={row.kind === 'link' ? 'outline' : 'default'}
+                       className="text-[10px]" data-testid={`merge-kind-${row.id}`}>
+                  {row.kind === 'link' ? t('broker.pirKindLink') : t('broker.pirKindMerge')}
+                </Badge>
                 <Badge variant={row.origin === 'adt' ? 'secondary' : 'outline'} className="text-[10px]">
                   {row.origin === 'adt' ? t('broker.pirFromAdt') : t('broker.pirManual')}
                 </Badge>

@@ -611,6 +611,8 @@ export type PatientMerge = {
   reason: string;
   actor: string;
   origin: string;
+  /** merge = the old identifier is retired (ADT A40); link = both stay valid (A24). */
+  kind: 'merge' | 'link';
   active: boolean;
 };
 
@@ -928,7 +930,8 @@ export const brokerApi = {
   patientMerges: {
     list: (activeOnly = true) =>
       brokerFetch<PatientMerge[]>(`/api/v1/merges?active_only=${activeOnly}`),
-    create: (body: { old_patient_id: string; new_patient_id: string; reason?: string }) =>
+    create: (body: { old_patient_id: string; new_patient_id: string;
+                     kind?: 'merge' | 'link'; reason?: string }) =>
       brokerFetch<PatientMerge>('/api/v1/merges', post(body)),
     remove: (id: number) => brokerFetch<void>(`/api/v1/merges/${id}`, { method: 'DELETE' }),
     resolve: (patientId: string) =>

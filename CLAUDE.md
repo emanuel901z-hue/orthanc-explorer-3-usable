@@ -232,6 +232,7 @@ features: {
 | `src/features/broker/hooks/use-broker-audit.ts` | Audited mutations for rollback and configuration import |
 | `src/test/viewport.ts` | Test helper to simulate the mobile viewport (`matchMedia`) |
 | `src/lib/viewer-session.ts` | `POST /api/v1/pacs/viewer-session` before opening a viewer — skipped with `viewerSession: false` |
+| `src/features/broker/components/PatientMergeCard.tsx` | IHE PIR: record a **merge** (the old ID is retired) or a **link** (both stay valid) — the card has to keep the two apart, the worklist answer only follows a merge |
 | `src/features/viewer/pages/InvokeImageDisplayPage.tsx` | IHE Invoke Image Display (RAD-106) entry point — resolves study UID / accession number / patient ID and opens the viewer |
 | `src/features/viewer/lib/iid.ts` | IID request parsing and URL building (pure, no React) |
 | `src/features/viewer/lib/viewer-config.ts` | Which web viewer an image display request opens (`oe3-viewers`, OHIF by default) |

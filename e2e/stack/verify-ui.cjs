@@ -123,6 +123,19 @@ async function domReport(page) {
   // ── 2. interactive flows (desktop, verified against the API) ─────────────
   const { ctx, page, errors } = await newPage(browser, { width: 1400, height: 900 });
 
+  // An interrupted run leaves its rows behind — and then the duplicate guard
+  // disables "Save" and this audit hangs on a click that never becomes possible.
+  // Clean up first, so a re-run after a crash is really a re-run.
+  const leftovers = [
+    ...(await api('/rules')).filter((r) => r.priority === 77).map((r) => `/rules/${r.id}`),
+    ...(await api('/sources')).filter((s) => s.name.startsWith('verify-')).map((s) => `/sources/${s.id}`),
+    ...(await api('/targets')).filter((t) => t.name.startsWith('verify-')).map((t) => `/targets/${t.id}`),
+    ...(await api('/transforms')).filter((t) => t.name.startsWith('verify-')).map((t) => `/transforms/${t.id}`),
+    ...(await api('/merges')).filter((m) => m.old_patient_id.startsWith('E2E-PIR-')).map((m) => `/merges/${m.id}`),
+  ];
+  for (const path of leftovers) await api(path, { method: 'DELETE' });
+  if (leftovers.length) console.log(`  (${leftovers.length} leftover row(s) from an earlier run removed)`);
+
   // sources: create → edit → delete
   await page.goto(`${OE3}/oe3/broker/sources`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: /add source|quelle hinzufügen/i }).click();
@@ -721,6 +734,58 @@ async function domReport(page) {
     /studyUID/.test(iidAlert) && /accessionNumber/.test(iidAlert) && !/ohif/.test(page.url()),
     iidAlert.slice(0, 70));
   await page.unroute('**/ohif/viewer**');
+
+  // IHE PIR: a merge retires the old identifier, a link does not — both kinds
+  // must reach the API, and the card has to say which one it recorded
+  const waitForRow = async (path, predicate, timeoutMs = 8000) => {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      const hit = (await api(path)).find(predicate);
+      if (hit || Date.now() > deadline) return hit || null;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+  };
+
+  await page.goto(`${OE3}/oe3/broker/worklist`, { waitUntil: 'domcontentloaded' });
+  const pir = page.getByTestId('patient-merge-card');
+  await pir.first().waitFor({ timeout: 10000 }).catch(() => {});
+  const pirVisible = await pir.count() > 0 && await pir.first().isVisible();
+  record('PIR: Karte wird gerendert', pirVisible);
+  if (pirVisible) {
+    await pir.getByLabel(/alte id|old id/i).fill('E2E-PIR-ALT');
+    await pir.getByLabel(/aktuelle id|current id/i).fill('E2E-PIR-NEU');
+    await pir.getByRole('button', { name: /^(eintragen|record)$/i }).click();
+    const merge = await waitForRow('/merges', (r) => r.old_patient_id === 'E2E-PIR-ALT');
+    record('PIR: Zusammenführung landet in der API', Boolean(merge) && merge.kind === 'merge',
+      merge && merge.kind);
+
+    // the same form, but as a link (the kind selector decides)
+    await pir.getByLabel(/^art$|^type$/i).click();
+    await page.getByRole('option', { name: /verknüpfen|link/i }).first().click();
+    await pir.getByLabel(/alte id|old id/i).fill('E2E-PIR-LINK');
+    await pir.getByLabel(/aktuelle id|current id/i).fill('E2E-PIR-NEU');
+    await pir.getByRole('button', { name: /^(eintragen|record)$/i }).click();
+    const link = await waitForRow('/merges', (r) => r.old_patient_id === 'E2E-PIR-LINK');
+    record('PIR: Verknüpfung landet als Verknüpfung in der API',
+      Boolean(link) && link.kind === 'link', link && link.kind);
+
+    if (merge && link) {
+      const mergeBadge = await pir.getByTestId(`merge-kind-${merge.id}`).innerText().catch(() => '');
+      const linkBadge = await pir.getByTestId(`merge-kind-${link.id}`).innerText().catch(() => '');
+      record('PIR: die Karte kennzeichnet beide Arten',
+        /merge|zusammenführen/i.test(mergeBadge) && /link|verknüpfen/i.test(linkBadge),
+        `${mergeBadge.trim()} / ${linkBadge.trim()}`);
+    } else {
+      record('PIR: die Karte kennzeichnet beide Arten', false, 'eine Zeile fehlt');
+    }
+
+    // leave the stack as we found it
+    for (const row of [merge, link]) {
+      if (row) await api(`/merges/${row.id}`, { method: 'DELETE' }).catch(() => {});
+    }
+    record('PIR: der Audit räumt seine Einträge wieder ab',
+      !(await api('/merges')).some((r) => r.old_patient_id.startsWith('E2E-PIR-')));
+  }
 
   // the 422 from the deliberate validation test is expected
   const unexpected = errors.filter((e) => !/422/.test(e) && !/broker\.fetch\.failed/.test(e)
