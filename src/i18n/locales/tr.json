@@ -1149,6 +1149,17 @@
     "hl7MapField": "Alan",
     "hl7MapComponent": "Bileşen",
     "hl7MapTag": "DICOM alanı",
-    "hl7MapEmpty": "Ek eşleme yok."
+    "hl7MapEmpty": "Ek eşleme yok.",
+    "statsTitle": "Hacim ve hatalar",
+    "statsPeriod": "Dönem",
+    "statsGroupBy": "Kırılım",
+    "statsBy_source": "Kaynak",
+    "statsBy_modality": "Modalite",
+    "statsBy_station": "İstasyon",
+    "statsQueriesShort": "Sorgular",
+    "statsAnswersShort": "Kayıtlar",
+    "statsFailedShort": "Hatalar",
+    "statsStoresShort": "Görüntüler",
+    "statsEmpty": "Bu dönemde veri yok."
   }
 }

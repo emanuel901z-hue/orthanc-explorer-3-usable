@@ -1149,6 +1149,17 @@
     "hl7MapField": "الحقل",
     "hl7MapComponent": "المكوّن",
     "hl7MapTag": "حقل DICOM",
-    "hl7MapEmpty": "لا توجد تعيينات إضافية."
+    "hl7MapEmpty": "لا توجد تعيينات إضافية.",
+    "statsTitle": "الحجم والأخطاء",
+    "statsPeriod": "الفترة",
+    "statsGroupBy": "التصنيف حسب",
+    "statsBy_source": "المصدر",
+    "statsBy_modality": "الجهاز",
+    "statsBy_station": "المحطة",
+    "statsQueriesShort": "الاستعلامات",
+    "statsAnswersShort": "الإدخالات",
+    "statsFailedShort": "الأخطاء",
+    "statsStoresShort": "الصور",
+    "statsEmpty": "لا توجد بيانات في هذه الفترة."
   }
 }

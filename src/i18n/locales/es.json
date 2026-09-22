@@ -1149,6 +1149,17 @@
     "hl7MapField": "Campo",
     "hl7MapComponent": "Componente",
     "hl7MapTag": "Atributo DICOM",
-    "hl7MapEmpty": "Sin asignaciones adicionales."
+    "hl7MapEmpty": "Sin asignaciones adicionales.",
+    "statsTitle": "Volumen y errores",
+    "statsPeriod": "Periodo",
+    "statsGroupBy": "Desglose por",
+    "statsBy_source": "Fuente",
+    "statsBy_modality": "Modalidad",
+    "statsBy_station": "Estación",
+    "statsQueriesShort": "Consultas",
+    "statsAnswersShort": "Entradas",
+    "statsFailedShort": "Fallos",
+    "statsStoresShort": "Imágenes",
+    "statsEmpty": "Sin datos en este periodo."
   }
 }

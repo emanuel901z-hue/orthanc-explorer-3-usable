@@ -1149,6 +1149,17 @@
     "hl7MapField": "Champ",
     "hl7MapComponent": "Composant",
     "hl7MapTag": "Attribut DICOM",
-    "hl7MapEmpty": "Aucun mappage supplémentaire."
+    "hl7MapEmpty": "Aucun mappage supplémentaire.",
+    "statsTitle": "Volume et erreurs",
+    "statsPeriod": "Période",
+    "statsGroupBy": "Répartition par",
+    "statsBy_source": "Source",
+    "statsBy_modality": "Modalité",
+    "statsBy_station": "Poste",
+    "statsQueriesShort": "Requêtes",
+    "statsAnswersShort": "Entrées",
+    "statsFailedShort": "Échecs",
+    "statsStoresShort": "Images",
+    "statsEmpty": "Aucune donnée sur cette période."
   }
 }

@@ -326,10 +326,22 @@ test.describe('stack: broker config pages', () => {
 
     // 4. rollback removes the source again
     await row.getByRole('button', { name: /roll this change back|zurücksetzen/i }).click();
-    await page.getByRole('button', { name: /^delete$|^löschen$/i }).click();
+    // wait for the confirmation before clicking its button — on mobile the dialog
+    // needs a moment and a click into the void would silently skip the rollback
+    const confirm = page.getByRole('alertdialog').or(page.getByRole('dialog')).last();
+    await expect(confirm).toBeVisible({ timeout: 10000 });
+    await confirm.getByRole('button', { name: /^delete$|^löschen$/i }).click();
+    await expect(confirm).toBeHidden({ timeout: 15000 });
+
+    // the state is what matters: ask the API, then confirm the list refreshed
+    await expect.poll(async () => {
+      const response = await page.request.get('/broker-api/api/v1/sources');
+      const sources = (await response.json()) as { name: string }[];
+      return sources.some((s) => s.name === name);
+    }, { timeout: 20000, message: 'the rolled-back source is still in the API' }).toBe(false);
 
     await openPage(page, '/oe3/broker/sources', /upstream sources|upstream-quellen/i);
-    await expect(page.getByText(name)).toHaveCount(0, { timeout: 15000 });
+    await expect(page.getByText(name)).toHaveCount(0, { timeout: 20000 });
 
     expect(errors, errors.join('\n')).toEqual([]);
   });

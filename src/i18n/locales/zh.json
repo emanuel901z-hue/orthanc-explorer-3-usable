@@ -1149,6 +1149,17 @@
     "hl7MapField": "字段",
     "hl7MapComponent": "组件",
     "hl7MapTag": "DICOM 属性",
-    "hl7MapEmpty": "没有额外映射。"
+    "hl7MapEmpty": "没有额外映射。",
+    "statsTitle": "量与错误",
+    "statsPeriod": "周期",
+    "statsGroupBy": "分组",
+    "statsBy_source": "来源",
+    "statsBy_modality": "模态",
+    "statsBy_station": "工作站",
+    "statsQueriesShort": "查询",
+    "statsAnswersShort": "条目",
+    "statsFailedShort": "失败",
+    "statsStoresShort": "影像",
+    "statsEmpty": "该周期没有数据。"
   }
 }

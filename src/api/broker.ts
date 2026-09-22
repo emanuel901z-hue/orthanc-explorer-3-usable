@@ -603,6 +603,44 @@ export type CacheRefreshResult = {
              ok: boolean; error: string }[];
 };
 
+export type StatsTotals = {
+  days: number;
+  from: string;
+  to: string;
+  queries: number;
+  answers: number;
+  queries_failed: number;
+  queries_from_cache: number;
+  avg_duration_ms: number;
+  stores: number;
+  stores_forwarded: number;
+  stores_failed: number;
+  stores_unrouted: number;
+  mpps_steps: number;
+  mpps_completed: number;
+  mpps_pending_forward: number;
+  spool_open: number;
+  spool_dead: number;
+};
+
+export type StatsGroup = {
+  name: string;
+  queries: number;
+  answers: number;
+  queries_failed: number;
+  stores: number;
+  stores_failed: number;
+};
+
+export type StatsDay = { day: string; queries: number; stores: number; mpps: number };
+
+export type StatsOverview = {
+  totals: StatsTotals;
+  groups: StatsGroup[];
+  series: StatsDay[];
+  group_by: string;
+};
+
 export type MppsStep = {
   id: number;
   ts: string;
@@ -868,6 +906,10 @@ export const brokerApi = {
     remove: (id: number) =>
       brokerFetch<void>(`/api/v1/hl7/field-maps/${id}`, { method: 'DELETE' }),
   },
+
+  /** Reporting view derived from the existing logs (PHI-free). */
+  statsOverview: (days = 7, groupBy: 'source' | 'modality' | 'station' = 'source') =>
+    brokerFetch<StatsOverview>(`/api/v1/stats/overview?days=${days}&group_by=${groupBy}`),
 
   mergeRules: {
     list: () => brokerFetch<MergeRule[]>('/api/v1/merge-rules'),

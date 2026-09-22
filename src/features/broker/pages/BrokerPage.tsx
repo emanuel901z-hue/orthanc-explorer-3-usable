@@ -36,6 +36,7 @@ import { HealthPanel } from '../components/HealthPanel';
 import { CaseCheckPanel } from '../components/CaseCheckPanel';
 import { CacheCard } from '../components/CacheCard';
 import { MppsCard } from '../components/MppsCard';
+import { StatsCard } from '../components/StatsCard';
 import { SpoolCard } from '../components/SpoolCard';
 import { RbacBanner } from '../components/RbacBanner';
 import { PageHelp } from '../components/PageHelp';
@@ -172,6 +173,8 @@ export default function BrokerPage() {
       <CacheCard />
 
       <MppsCard />
+
+      <StatsCard />
 
       {/* Status cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

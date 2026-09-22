@@ -1149,6 +1149,17 @@
     "hl7MapField": "フィールド",
     "hl7MapComponent": "コンポーネント",
     "hl7MapTag": "DICOM 属性",
-    "hl7MapEmpty": "追加のマッピングはありません。"
+    "hl7MapEmpty": "追加のマッピングはありません。",
+    "statsTitle": "件数とエラー",
+    "statsPeriod": "期間",
+    "statsGroupBy": "内訳",
+    "statsBy_source": "ソース",
+    "statsBy_modality": "モダリティ",
+    "statsBy_station": "ステーション",
+    "statsQueriesShort": "照会",
+    "statsAnswersShort": "件数",
+    "statsFailedShort": "失敗",
+    "statsStoresShort": "画像",
+    "statsEmpty": "この期間のデータはありません。"
   }
 }

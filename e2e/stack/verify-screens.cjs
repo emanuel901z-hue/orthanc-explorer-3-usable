@@ -91,7 +91,9 @@ async function checkView(page, view, viewport) {
       length: text.length,
       h1: document.querySelectorAll('h1').length,
       overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
-      rawKeys: (text.match(/\bbroker\.[a-zA-Z_]+/g) || []).slice(0, 3),
+      // a real translation key, not a file name like "mwl-broker.crt":
+      // require a word boundary before "broker" that is not a path separator
+      rawKeys: (text.match(/(?<![\w/.\-])broker\.[a-zA-Z_]{3,}/g) || []).slice(0, 3),
       scrollWidth: document.documentElement.scrollWidth,
       innerWidth: window.innerWidth,
     };

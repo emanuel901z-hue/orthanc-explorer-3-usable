@@ -1149,6 +1149,17 @@
     "hl7MapField": "Поле",
     "hl7MapComponent": "Компонент",
     "hl7MapTag": "Атрибут DICOM",
-    "hl7MapEmpty": "Дополнительных сопоставлений нет."
+    "hl7MapEmpty": "Дополнительных сопоставлений нет.",
+    "statsTitle": "Объём и ошибки",
+    "statsPeriod": "Период",
+    "statsGroupBy": "Разбивка по",
+    "statsBy_source": "Источник",
+    "statsBy_modality": "Модальность",
+    "statsBy_station": "Станция",
+    "statsQueriesShort": "Запросы",
+    "statsAnswersShort": "Записи",
+    "statsFailedShort": "Ошибки",
+    "statsStoresShort": "Снимки",
+    "statsEmpty": "Нет данных за этот период."
   }
 }
