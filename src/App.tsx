@@ -9,6 +9,7 @@ import StudyDetailPage from "@/features/studies/pages/StudyDetailPage";
 import SeriesDetailPage from "@/features/series/pages/SeriesDetailPage";
 import InstanceDetailPage from "@/features/instances/pages/InstanceDetailPage";
 import ViewerPage from "@/features/viewer/pages/ViewerPage";
+import InvokeImageDisplayPage from "@/features/viewer/pages/InvokeImageDisplayPage";
 import UploadPage from "@/features/upload/pages/UploadPage";
 import RemoteSourcesPage from "@/features/servers/pages/RemoteSourcesPage";
 import ActivityPage from "@/features/activity/pages/ActivityPage";
@@ -58,6 +59,8 @@ const App = () => (
               <Route path="settings" element={<SettingsPage />} />
             </Route>
             <Route path="viewer/:studyId" element={<ViewerPage />} />
+            {/* IHE Invoke Image Display (RAD-106) — what a RIS/KIS calls */}
+            <Route path="IHEInvokeImageDisplay" element={<InvokeImageDisplayPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -115,6 +115,7 @@ implements the endpoints below works — the reference implementation is the
 | `POST` | `/api/v1/cache/refresh` | Query the sources again and replace the cached snapshots (outage case) |
 | `GET` | `/api/v1/{sources,targets,rules,transforms,station-rules,local-items}/{id}`, `/api/v1/settings/{key}` | Single reads for scripts and integrations |
 | `GET` | `/api/v1/notify/events` | Alerting card: the event catalog (code, severity, description) |
+| `GET` | `/api/v1/orders/context?study_uid=&accession=` | Not consumed by this UI: the accession ↔ study correlation for external integrations (IHE MADO manifest creators). PHI-free — no patient name |
 | `POST` | `/api/v1/notify/test` | "Send test message" (returns the delivery result) |
 | `GET` | `/api/v1/spool?status=&limit=&offset=`, `/api/v1/spool/stats` | Store queue + spool card ("load more" pages with `offset`) |
 | `POST` | `/api/v1/spool/{id}/retry`, `/api/v1/spool/retry-all` | "Retry now" / "Retry all" |

@@ -696,8 +696,35 @@ async function domReport(page) {
   const logRows = await page.locator('tbody tr').count();
   record('monitoring: Query-Log rendert Zeilen', logRows > 0, `${logRows} Zeilen`);
 
+  // IHE Invoke Image Display (RAD-106): the entry point a RIS/KIS calls.
+  // The viewer itself is stubbed — what is under test is the translation
+  // (request → viewer URL), not OHIF. The viewer runs behind an optional
+  // compose profile, so a real /ohif/ request may legitimately 502 here.
+  await page.route('**/ohif/viewer**', (route) => route.fulfill({
+    status: 200, contentType: 'text/html', body: '<html><body>viewer stub</body></html>',
+  }));
+  await page.goto(`${OE3}/oe3/IHEInvokeImageDisplay?requestType=STUDY&studyUID=1.2.3.4.5`,
+    { waitUntil: 'commit' });
+  const iidRedirected = await page
+    .waitForURL(/\/ohif\/viewer\?StudyInstanceUIDs=1\.2\.3\.4\.5/, { timeout: 10000 })
+    .then(() => true).catch(() => false);
+  record('IID: STUDY/studyUID öffnet den Viewer', iidRedirected,
+    page.url().replace(OE3, ''));
+
+  // a contradictory request is refused instead of half-executed
+  await page.goto(
+    `${OE3}/oe3/IHEInvokeImageDisplay?requestType=STUDY&studyUID=1.2.3&accessionNumber=A1`,
+    { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(800);
+  const iidAlert = await page.getByRole('alert').first().innerText().catch(() => '');
+  record('IID: widersprüchliche Anfrage wird abgelehnt statt ausgeführt',
+    /studyUID/.test(iidAlert) && /accessionNumber/.test(iidAlert) && !/ohif/.test(page.url()),
+    iidAlert.slice(0, 70));
+  await page.unroute('**/ohif/viewer**');
+
   // the 422 from the deliberate validation test is expected
-  const unexpected = errors.filter((e) => !/422/.test(e) && !/broker\.fetch\.failed/.test(e));
+  const unexpected = errors.filter((e) => !/422/.test(e) && !/broker\.fetch\.failed/.test(e)
+    && !/\/ohif\//.test(e));
   record('interaktiv: keine unerwarteten Console-/Netzwerk-Fehler',
     unexpected.length === 0, unexpected.slice(0, 3).join(' ; '));
 

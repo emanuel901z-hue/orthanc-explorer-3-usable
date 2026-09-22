@@ -1875,5 +1875,19 @@
     },
     "brokerFeatures": "MWL broker",
     "brokerHint": "DICOM Modality Worklist proxy with worklist cache, store routing and monitoring — configured on its own pages under “MWL Broker”."
+  },
+  "iid": {
+    "title": "Invoke image display",
+    "redirecting": "Opening the viewer…",
+    "resolving": "Looking up the study…",
+    "notFound": "No study found for this request.",
+    "failed": "The PACS could not be queried. Try again, or open the study from the list.",
+    "hint": "Accepted: ?requestType=STUDY&studyUID=<uid> (or accessionNumber=<number>) or ?requestType=PATIENT&patientID=<id>.",
+    "err_missingRequestType": "The request is missing “requestType” (STUDY or PATIENT).",
+    "err_unknownRequestType": "“requestType” must be STUDY or PATIENT.",
+    "err_missingStudyKey": "A STUDY request needs “studyUID” or “accessionNumber”.",
+    "err_bothStudyKeys": "Give either “studyUID” or “accessionNumber” — not both.",
+    "err_missingPatientID": "A PATIENT request needs “patientID”.",
+    "err_badMostRecentResults": "“mostRecentResults” must be a whole number."
   }
 }

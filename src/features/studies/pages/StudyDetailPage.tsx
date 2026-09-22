@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useStudy, useStudySeries, useInstancePreview, useStudySharedTags } from '@/features/studies/hooks/use-studies';
 import { ModalityBadge, formatPatientName, formatDiskSize } from '@/shared/components/ModalityBadge';
 import { requestViewerSession } from '@/lib/viewer-session';
+import { buildIidUrl } from '@/features/viewer/lib/iid';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import MigrateStudyDialog from '@/features/studies/components/MigrateStudyDialog';
 import ShareStudyDialog from '@/features/studies/components/ShareStudyDialog';
@@ -339,7 +340,12 @@ export default function StudyDetailPage() {
               // Set httpOnly cookie for OHIF/DICOMweb access (8h PACS token);
               // skipped in standalone deployments (viewerSession: false).
               await requestViewerSession();
-              window.open(`/ohif/viewer?StudyInstanceUIDs=${study.studyInstanceUID}`, '_blank', 'noopener,noreferrer');
+              // Through the IHE Invoke Image Display entry point, so the same
+              // path an external RIS uses is the one we exercise ourselves.
+              window.open(buildIidUrl(`${import.meta.env.BASE_URL}IHEInvokeImageDisplay`, {
+                requestType: 'STUDY',
+                studyUIDs: [study.studyInstanceUID],
+              }), '_blank', 'noopener,noreferrer');
             }}
           >
             <Eye className="h-3.5 w-3.5" /> {t('actions.openInOhif')}

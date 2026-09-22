@@ -232,6 +232,9 @@ features: {
 | `src/features/broker/hooks/use-broker-audit.ts` | Audited mutations for rollback and configuration import |
 | `src/test/viewport.ts` | Test helper to simulate the mobile viewport (`matchMedia`) |
 | `src/lib/viewer-session.ts` | `POST /api/v1/pacs/viewer-session` before opening a viewer — skipped with `viewerSession: false` |
+| `src/features/viewer/pages/InvokeImageDisplayPage.tsx` | IHE Invoke Image Display (RAD-106) entry point — resolves study UID / accession number / patient ID and opens the viewer |
+| `src/features/viewer/lib/iid.ts` | IID request parsing and URL building (pure, no React) |
+| `src/features/viewer/lib/viewer-config.ts` | Which web viewer an image display request opens (`oe3-viewers`, OHIF by default) |
 | `e2e/stack/` | Playwright stack suite (desktop+mobile) + `verify-ui.cjs` deep audit (DOM checks, CRUD flows vs. REST API) |
 | `docs/mwl-broker-integration.md` | Integration contract for the optional MWL broker feature (endpoints, config, deployment) |
 | `src/features/servers/pages/RemoteSourcesPage.tsx` | Remote query/retrieve (C-FIND/C-MOVE/C-ECHO) with results table |
