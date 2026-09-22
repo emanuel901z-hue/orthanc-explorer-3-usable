@@ -21,7 +21,8 @@ const emit = vi.spyOn(auditClient, 'emit');
 
 function stats(overrides = {}) {
   return {
-    queued: 0, failed: 0, dead: 0, sent: 0, open: 0, bytes: 0, oldest_age_s: null,
+    queued: 0, failed: 0, dead: 0, sent: 0, claimed: 0, open: 0, bytes: 0,
+    oldest_age_s: null,
     capacity: { items: 0, bytes: 0, max_items: 20000, max_bytes: 10_737_418_240, full: false },
     enabled: true, accept_when_queued: true,
     ...overrides,
@@ -67,6 +68,16 @@ describe('SpoolCard', () => {
     expect(screen.getByText(/oldest 15 min/i)).toBeInTheDocument();
     expect(screen.getByText(/238 MB/)).toBeInTheDocument();
     expect(screen.getByText(/15 of 20000 entries/i)).toBeInTheDocument();
+  });
+
+  it('shows how many entries another instance is forwarding right now', async () => {
+    // in an HA deployment the operator has to see that work is in progress —
+    // otherwise a claimed entry looks like a stuck one
+    mockStats.mockResolvedValue(stats({ queued: 5, open: 5, claimed: 2 }));
+    renderCard();
+
+    await waitFor(() => expect(screen.getByTestId('spool-claimed')).toBeInTheDocument());
+    expect(screen.getByTestId('spool-claimed').textContent).toMatch(/2 being forwarded/i);
   });
 
   it('flags dead letters and a full spool', async () => {

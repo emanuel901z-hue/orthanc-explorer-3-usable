@@ -368,6 +368,8 @@ export type SpoolStats = {
   failed: number;
   dead: number;
   sent: number;
+  /** Entries another instance is forwarding right now (high availability). */
+  claimed: number;
   open: number;
   bytes: number;
   oldest_age_s: number | null;
@@ -720,9 +722,30 @@ export type MergeFieldChange = {
   after: string;
 };
 
+/** One broker instance that has ever written a heartbeat (high availability). */
+export type BrokerInstance = {
+  instance_id: string;
+  started_at: string;
+  last_seen: string;
+  age_s: number | null;
+  /** Seen within the heartbeat timeout — it is running. */
+  active: boolean;
+  /** True for the instance that answered this request. */
+  current: boolean;
+  version: string;
+  hostname: string;
+  pid: number;
+};
+
 export type BrokerStatus = {
   /** Broker version that is running (which build is deployed). */
   version: string;
+  /** Name of the instance that answered this request. */
+  instance_id: string;
+  /** All known instances, newest activity first. */
+  instances: BrokerInstance[];
+  /** Instances seen within the heartbeat timeout. */
+  instances_active: number;
   /** ISO timestamp the process started. */
   started_at: string;
   /** Seconds since the process started. */

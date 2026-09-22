@@ -106,6 +106,11 @@ export function SpoolCard() {
               {' · '}
               {formatBytes(stats?.bytes ?? 0)}
             </span>
+            {(stats?.claimed ?? 0) > 0 && (
+              <span className="text-xs text-muted-foreground" data-testid="spool-claimed">
+                {t('broker.spoolClaimed', { count: stats?.claimed ?? 0 })}
+              </span>
+            )}
             <span className="ml-auto text-xs text-muted-foreground">
               {t('broker.spoolUsage', {
                 items: stats?.capacity.items ?? 0,

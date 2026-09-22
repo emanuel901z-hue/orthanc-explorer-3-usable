@@ -375,6 +375,28 @@ async function domReport(page) {
   record('broker: MPPS-Karte erklärt die Rückmeldung',
     /MPPS/.test(mppsText) && /RIS/i.test(mppsText), mppsText.split('\n')[1]?.slice(0, 60) || '');
 
+  // High availability: the instance card must name the instance that answered,
+  // and a single instance (the normal case) must not look like a warning
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  const ha = page.getByTestId('broker-instances');
+  await ha.first().waitFor({ timeout: 10000 }).catch(() => {});
+  const haVisible = await ha.count() > 0 && await ha.first().isVisible();
+  record('HA: Instanzen-Karte wird gerendert', haVisible);
+  if (haVisible) {
+    const statusBody = await api('/status');
+    const haText = await ha.first().innerText().catch(() => '');
+    record('HA: die Karte nennt die antwortende Instanz',
+      haText.includes(statusBody.instance_id) && statusBody.instance_id.length > 0,
+      statusBody.instance_id);
+    record('HA: eine einzelne Instanz erzeugt keine Warnung',
+      statusBody.instances_active === 1 && (await ha.getByTestId('ha-warning').count()) === 0,
+      `aktiv=${statusBody.instances_active}`);
+    const listText = await page.getByTestId('ha-instance-list').innerText().catch(() => '');
+    record('HA: die Instanzliste zeigt den Herzschlag',
+      listText.includes(statusBody.instance_id) && /running|läuft/i.test(listText),
+      listText.split('\n')[0]?.slice(0, 60) || '');
+  }
+
   // About dialog: it must describe the MWL broker, not only the base fork
   await page.goto(`${OE3}/oe3/`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1200);

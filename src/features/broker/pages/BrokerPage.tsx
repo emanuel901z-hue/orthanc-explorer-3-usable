@@ -35,6 +35,7 @@ import { BreakerBadge } from '../components/BreakerBadge';
 import { HealthPanel } from '../components/HealthPanel';
 import { CaseCheckPanel } from '../components/CaseCheckPanel';
 import { CacheCard } from '../components/CacheCard';
+import { InstancesCard } from '../components/InstancesCard';
 import { MppsCard } from '../components/MppsCard';
 import { StatsCard } from '../components/StatsCard';
 import { SpoolCard } from '../components/SpoolCard';
@@ -169,6 +170,8 @@ export default function BrokerPage() {
 
 
       <SpoolCard />
+
+      <InstancesCard />
 
       <CacheCard />
 
