@@ -4,6 +4,51 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.5.0 — Broker-Betrieb, PIR, Barrierefreiheit und Standalone (2026-09-23)
+
+Seit v2.4.0 ist der Broker-UI-Slice deutlich gewachsen. Die wichtigsten
+Änderungen dieser Runde:
+
+### Neu: OE3 allein betreiben
+
+- **Der Broker ist abschaltbar**: ohne `brokerUrl` **und** mit
+  `enableMwlBroker: false` verschwindet der Abschnitt aus der Navigation, und die
+  Routen zeigen eine Erklärung (`BrokerGate`) statt einer Konsole, deren jede
+  Anfrage scheitert.
+- **Viewer-Liste aus der Konfiguration**: `viewers` in `config.js` schlägt die
+  Browser-Liste (vorher lag sie nur im `localStorage` jedes Anwenders),
+  `viewersLocked: true` macht sie schreibgeschützt. Auch der IHE-Bildaufruf
+  (RAD-106) folgt der Vorgabe.
+- Vollständige Referenz: [`docs/oe3-standalone.md`](oe3-standalone.md).
+
+### Neu: drei API-Fähigkeiten, die keine Oberfläche hatten
+
+- **MPPS-Einzelschritt nachmelden** (die Karte zeigte, *welcher* Schritt vom RIS
+  abgelehnt wurde — nachmelden konnte man nur alle).
+- **Cache je Quelle verwerfen** (der Zustand stand je Quelle da, die Aktion nicht).
+- **Store-Log** (Zeit, Calling-AET, Zugangsnr., Status, Fehler) — und genau dieser
+  bis dahin ungenutzte Endpunkt antwortete **500** für Altzeilen
+  (`applied_transforms = NULL`); der Backend-Fix steht im Broker-Repo.
+
+### Weitere Änderungen
+
+- **MWL-Interop-Schalter** je Quelle: `QueryRetrieveLevel (0008,0052)` weglassen —
+  manche fremden MWL-SCPs matchen darauf und liefern sonst nichts.
+- **Änderungsprotokoll**: vier Entities (PIR-Merge, Feldregeln, MPPS-Schritte,
+  HL7-Feldzuordnung) zeigten rohe Schlüssel — jetzt in allen neun Sprachen
+  beschriftet.
+- **Einstellungen**: 15 Werte (HA, MPPS, HL7) hatten keinen Klartext im UI.
+- **Barrierefreiheit/Mobile**: Tabellenzeilen klickbar (Maus + Enter/Leertaste),
+  Dialoge passen auf 375 px, Badges brechen nicht mehr um, Formularentwürfe
+  gegen Datenverlust.
+- **i18n**: die neuen Texte liegen in **allen neun** Sprachen; die
+  Chrome-Prüfliste (`scripts/check-i18n.mjs`) erzwingt sie.
+- **Audits**: `verify-ui.cjs` prüft 154 Punkte (Desktop + Mobil, inkl.
+  „keine rohen Schlüssel" auf jeder Seite), `verify-screens.cjs` 225 über alle
+  Ansichten und Dialoge.
+
+---
+
 ## v2.4.0 — MWL Broker (Worklist-Proxy, Routing, TLS, Betrieb) (2026-09-18)
 
 Diese Version bringt den kompletten **MWL-Broker**: einen DICOM-Modality-

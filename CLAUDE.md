@@ -71,7 +71,7 @@ GitHub Actions CI (`.github/workflows/ci.yml`) laeuft bei Pull Requests und Push
 |-----|--------|-------|
 | `typecheck` | `tsc --noEmit -p tsconfig.app.json` | ~15s |
 | `lint` | `npm run lint` (ESLint) | ~10s |
-| `test` | `npm run test` (Vitest, 490 Tests) | ~15s |
+| `test` | `npm run test` (Vitest, 606 Tests) | ~15s |
 | `i18n:check` | `npm run i18n:check` (translation coverage) | ~1s |
 | `audit` | `npm run audit` (audit-ci, high+critical blocking) | ~10s |
 
@@ -102,7 +102,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (490 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (606 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -232,6 +232,9 @@ features: {
 | `src/features/broker/hooks/use-broker-audit.ts` | Audited mutations for rollback and configuration import |
 | `src/test/viewport.ts` | Test helper to simulate the mobile viewport (`matchMedia`) |
 | `src/lib/viewer-session.ts` | `POST /api/v1/pacs/viewer-session` before opening a viewer — skipped with `viewerSession: false` |
+| `src/features/broker/components/BrokerGate.tsx` | Broker-Routen-Gate: ohne `enableMwlBroker`/`brokerUrl` erscheint eine Erklärung statt einer kaputten Konsole |
+| `docs/oe3-standalone.md` | OE3 ohne Broker betreiben, Aktionen sperren, Viewer-Liste vorbelegen (`config.js`-Referenz) |
+| `src/features/viewer/lib/viewer-config.ts` | Viewer-Quelle: Runtime-Config schlägt `localStorage`; `viewersLocked` macht sie schreibgeschützt |
 | `src/features/broker/components/PatientMergeCard.tsx` | IHE PIR: record a **merge** (the old ID is retired) or a **link** (both stay valid) — the card has to keep the two apart, the worklist answer only follows a merge |
 | `src/features/viewer/pages/InvokeImageDisplayPage.tsx` | IHE Invoke Image Display (RAD-106) entry point — resolves study UID / accession number / patient ID and opens the viewer |
 | `src/features/viewer/lib/iid.ts` | IID request parsing and URL building (pure, no React) |

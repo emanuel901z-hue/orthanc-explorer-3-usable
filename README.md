@@ -39,7 +39,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Study/Series Merge** | Merge source studies into a target study, or migrate a series to a different study, via Orthanc `POST /studies/:id/merge`. Searchable source/target lists with same-SIUID highlighting. Optional source deletion after merge. |
 | **Smart Multi-Token Search** | Client-side search with umlaut tolerance ("ü" matches "ue", "ä" matches "ae", "ö" matches "oe", "ß" matches "ss") and date pattern matching ("2908" matches "2026-08-29"). Combined queries like "Müller, CT, 29.08" or "Mueller ct 2908" work across all study fields. |
 | **Live Activity Timeline** | Unified timeline merging audit events, live Orthanc jobs (3s polling), client-side jobs, and change events. Detail panel with action icons and navigation to related resources. |
-| **Viewer Configuration** | Manage external viewer integrations (OHIF, Stone, VolView) in settings — add/edit/remove viewers, set default, enable/disable, with status indicators. |
+| **Viewer Configuration** | Manage external viewer integrations (OHIF, Stone, VolView, MedDream, Weasis) in settings — add/edit/remove, set default, enable/disable, with status indicators. A deployment can **preset** the list (`viewers` in `config.js`) and make it read-only (`viewersLocked: true`) — previously it lived only in each browser's `localStorage`. See [docs/oe3-standalone.md](docs/oe3-standalone.md). |
 | **DICOMweb Server Management** | Enhanced DICOMweb server config with auth type indicators (bearer/basic/oauth2/none) and external PACS QIDO/WADO configuration display. |
 | **Embedded Theming** | White-labeling card for embedded deployments — app name, primary/accent colors, font presets, border radius, compact mode, sidebar/header visibility. Persists to `localStorage`. |
 | **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
@@ -58,7 +58,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **MWL Broker — Worklist Cache** | Bridges an unreachable RIS: the dashboard shows a **cache card** (items/age/state per source, "clear cache" with confirmation), a **warning banner** while answers come from the cache, and a "from cache" marker in the query log. A live answer always *replaces* the snapshot, so completed orders disappear immediately — the RIS stays the source of truth (same lifecycle as Medavis/dcm4chee handle it). |
 | **MWL Broker — Change Log & Simulation** | A **change log** (`/broker/audit`) records every configuration change with its before/after diff and offers **one-click rollback**, **export** of the whole configuration and **import with a mandatory dry-run diff**. A **"Check a case"** panel on the dashboard simulates routing and modify rules — using the same resolver as the live path. |
 | **MWL Broker — Health & Circuit Breaker** | The broker dashboard shows a **configuration health panel** (consistency checks with severity, localized explanation and a deep link into the affected form) and a **circuit-breaker badge** per upstream source (open/half-open with cooldown, one-click operator reset). Also in the sidebar as a badge. |
-| **MWL Broker — Dashboard + Konfiguration** | Optional UI for a separate MWL broker service (C-FIND proxy/aggregator): monitoring (SCP/DB status, C-ECHO matrix with RTT, live query log) **plus full configuration** — upstream sources, store targets, routing rules, DICOM modify rules (tag set/remove/prefix/suffix/replace/copy) and runtime settings, all with audited writes. Gated by `brokerUrl` in `config.js` — invisible without a broker. See [docs/mwl-broker-integration.md](docs/mwl-broker-integration.md). |
+| **MWL Broker — Dashboard + Konfiguration** | Optional UI for a separate MWL broker service (C-FIND proxy/aggregator): monitoring (SCP/DB status, C-ECHO matrix with RTT, live query log) **plus full configuration** — upstream sources, store targets, routing rules, DICOM modify rules (tag set/remove/prefix/suffix/replace/copy) and runtime settings, all with audited writes. Gated by `brokerUrl` **and** `enableMwlBroker` in `config.js` — without them the section disappears *and* the routes explain themselves. See [docs/mwl-broker-integration.md](docs/mwl-broker-integration.md) and, for running OE3 alone with preset, locked settings, [docs/oe3-standalone.md](docs/oe3-standalone.md). |
 | **Custom HTTP Buttons** | Configurable buttons that open arbitrary URLs with template tokens (`{studyId}`, `{patientId}`, `{accession}`, etc.). Persisted to `localStorage`. |
 | **Add Series (Encapsulated)** | Upload PDF/JPEG/PNG/STL files as a new DICOM series within an existing study via Orthanc `/tools/create-dicom`. |
 | **Modify In-Place / Duplicate** | Choose between `KeepSource: false` (modify in-place) or `KeepSource: true` (create duplicate) in the Modify dialog. |
@@ -123,7 +123,7 @@ Orthanc Explorer 2 (the official UI) is a Vue.js plugin compiled into C++ — up
 | Routing | React Router v6 |
 | Validation | Zod |
 | i18n | i18next (9 languages) |
-| Testing | Vitest + React Testing Library (191 unit tests) |
+| Testing | Vitest + React Testing Library (606 unit tests) |
 | E2E Testing | Playwright (production viewport tests) |
 | Backend | Orthanc DICOM server (external, via REST API) |
 
@@ -228,7 +228,7 @@ npm run build
 
 ### Unit Tests (Vitest)
 
-191 unit tests covering the API layer, audit seam, health tracker, DICOM tag utilities, auth context, session store, and feature components.
+606 unit tests covering the API layer, audit seam, health tracker, DICOM tag utilities, auth context, session store, the whole MWL broker slice and feature components.
 
 ```bash
 npm run test          # Single pass
