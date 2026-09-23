@@ -9,7 +9,8 @@
     "settings": "Einstellungen",
     "demoMode": "Demo-Modus",
     "collapse": "Einklappen",
-    "expand": "Ausklappen"
+    "expand": "Ausklappen",
+    "auditLogs": "Änderungsprotokoll"
   },
   "settings": {
     "title": "Einstellungen",
@@ -424,7 +425,8 @@
     "reset": "Zurücksetzen",
     "export": "Exportieren",
     "status": "Status",
-    "size": "Größe"
+    "size": "Größe",
+    "toggleSidebar": "Seitenleiste ein-/ausklappen"
   },
   "search": {
     "hintText": "Trenne Suchbegriffe mit Komma oder Leerzeichen. Datum: 29.08, 2908, 290826. Umlaute: Müller=Mueller. Beispiel: Müller, CT, 29.08",

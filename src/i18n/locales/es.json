@@ -9,7 +9,8 @@
     "demoMode": "Modo Demo",
     "collapse": "Contraer",
     "expand": "Expandir",
-    "broker": "Broker MWL"
+    "broker": "Broker MWL",
+    "auditLogs": "Registro de auditoría"
   },
   "settings": {
     "title": "Configuración",
@@ -317,7 +318,8 @@
     "reset": "Restablecer",
     "export": "Exportar",
     "status": "Estado",
-    "size": "Tamaño"
+    "size": "Tamaño",
+    "toggleSidebar": "Mostrar/ocultar el panel"
   },
   "search": {
     "hintText": "Separe términos con coma o espacio. Fecha: 29.08, 2908, 290826. Umlauts: Müller=Mueller. Ejemplo: Müller, CT, 29.08",

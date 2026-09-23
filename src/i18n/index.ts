@@ -11,6 +11,7 @@ import zh from './locales/zh.json';
 import ru from './locales/ru.json';
 import tr from './locales/tr.json';
 import ar from './locales/ar.json';
+import { applyDocumentDirection } from './direction';
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
@@ -96,6 +97,11 @@ i18n
       lookupLocalStorage: LANGUAGE_STORAGE_KEY,
     },
   });
+
+// Arabic is written right-to-left — <html dir> follows the chosen language,
+// otherwise the layout stays mirrored (sidebar on the left, wrong punctuation).
+applyDocumentDirection(i18n.resolvedLanguage ?? i18n.language);
+i18n.on('languageChanged', (language) => applyDocumentDirection(language));
 
 // handy in the browser console while developing
 if (import.meta.env.DEV && typeof window !== 'undefined') {

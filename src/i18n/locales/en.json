@@ -9,7 +9,8 @@
     "settings": "Settings",
     "demoMode": "Demo Mode",
     "collapse": "Collapse",
-    "expand": "Expand"
+    "expand": "Expand",
+    "auditLogs": "Audit Logs"
   },
   "settings": {
     "title": "Settings",
@@ -424,7 +425,8 @@
     "reset": "Reset",
     "export": "Export",
     "status": "Status",
-    "size": "Size"
+    "size": "Size",
+    "toggleSidebar": "Toggle sidebar"
   },
   "search": {
     "hintText": "Separate terms with comma or space. Date: 29.08, 2908, 290826. Umlauts: Müller=Mueller. Example: Müller, CT, 29.08",

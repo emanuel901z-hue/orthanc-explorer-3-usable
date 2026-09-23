@@ -29,7 +29,7 @@ export function EchoBadge({ echo, onEcho, pending }: {
       {echo.last_check === null
         ? t('broker.neverChecked')
         : echo.ok
-          ? `${echo.rtt_ms ?? '?'} ms`
+          ? <span className="ltr-value">{`${echo.rtt_ms ?? '?'} ms`}</span>
           : (echo.error ?? t('broker.echoFailed'))}
       <Button
         variant="ghost"

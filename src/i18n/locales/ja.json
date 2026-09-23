@@ -9,7 +9,8 @@
     "demoMode": "デモモード",
     "collapse": "折りたたむ",
     "expand": "展開",
-    "broker": "MWL ブローカー"
+    "broker": "MWL ブローカー",
+    "auditLogs": "監査ログ"
   },
   "settings": {
     "title": "設定",
@@ -317,7 +318,8 @@
     "reset": "リセット",
     "export": "エクスポート",
     "status": "ステータス",
-    "size": "サイズ"
+    "size": "サイズ",
+    "toggleSidebar": "サイドバーの表示/非表示"
   },
   "search": {
     "hintText": "コンマまたはスペースで区切る。日付: 29.08, 2908, 290826。ウムラウト: Müller=Mueller。例: Müller, CT, 29.08",

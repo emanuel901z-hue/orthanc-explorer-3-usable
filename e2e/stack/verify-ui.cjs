@@ -541,6 +541,7 @@ async function domReport(page) {
   const languageBefore = await page.evaluate(() => localStorage.getItem('oe3-language'));
   const languages = ['en', 'de', 'es', 'fr', 'ja', 'zh', 'ru', 'tr', 'ar'];
   const rawKeyLanguages = [];
+  const wrongDirection = [];
   for (const lng of languages) {
     for (const path of ['/oe3/broker', '/oe3/broker/sources', '/oe3/broker/settings']) {
       await page.goto(`${OE3}${path}?lng=${lng}`, { waitUntil: 'domcontentloaded' });
@@ -550,8 +551,15 @@ async function domReport(page) {
       if (/\b(broker|common|nav|settings|shortcuts)\.[a-z][A-Za-z]+/.test(text)) {
         rawKeyLanguages.push(`${lng}${path}`);
       }
+      // Arabic is written right-to-left: without <html dir> the whole layout
+      // stays mirrored (sidebar on the left, units in front of their numbers)
+      const dir = await page.evaluate(() => document.documentElement.getAttribute('dir'));
+      const expected = lng === 'ar' ? 'rtl' : 'ltr';
+      if (dir !== expected) wrongDirection.push(`${lng}${path}=${dir}`);
     }
   }
+  record('i18n: Schreibrichtung folgt der Sprache (Arabisch = rtl)', wrongDirection.length === 0,
+    wrongDirection.slice(0, 3).join(', ') || '9 Sprachen geprüft');
   record('i18n: keine Rohschlüssel in allen 9 Sprachen', rawKeyLanguages.length === 0,
     rawKeyLanguages.length ? `betroffen: ${rawKeyLanguages.join(', ')}` : '9 Sprachen geprüft');
 
