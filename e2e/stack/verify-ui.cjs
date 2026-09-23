@@ -307,6 +307,40 @@ async function domReport(page) {
   await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 1400, height: 900 });
 
+  // The MWL interoperability switch (found with the DVTk RIS emulator): an
+  // operator has to see *why* it exists before touching it — and on a small
+  // screen the (now taller) source dialog must still fit and scroll.
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await page.goto(`${OE3}/oe3/broker/sources`, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: /add source|quelle hinzufügen/i }).click();
+  await page.waitForSelector('[role="dialog"]', { timeout: 10000 });
+  const mwlGroup = await page.getByText(/MWL interoperability|MWL-Interoperabilität/i)
+    .first().isVisible().catch(() => false);
+  const mwlSwitch = await page
+    .getByRole('switch', { name: /leave out QueryRetrieveLevel|QueryRetrieveLevel weglassen/i })
+    .isVisible().catch(() => false);
+  const mwlHint = await page.getByText(/QueryRetrieveLevel \(0008,0052\)/).first()
+    .textContent().catch(() => '');
+  const reasonShown = /worklist model|Arbeitslisten-Modell/i.test(mwlHint || '');
+  record('sources: der Interop-Schalter ist da und nennt den Grund',
+    mwlGroup && mwlSwitch && reasonShown,
+    `Gruppe=${mwlGroup} Schalter=${mwlSwitch} Grund=${reasonShown}`);
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.waitForTimeout(300);
+  const qrlFit = await page.locator('[role="dialog"]').evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const scrollable = el.scrollHeight > el.clientHeight
+      && getComputedStyle(el).overflowY !== 'visible';
+    return { top: Math.round(rect.top), bottom: Math.round(rect.bottom),
+             height: Math.round(rect.height), scrollable };
+  });
+  record('mobile: Quellen-Dialog (mit Interop-Schalter) passt in den Viewport',
+    qrlFit.top >= 0 && qrlFit.bottom <= 812 + 1 && qrlFit.scrollable,
+    `top=${qrlFit.top} bottom=${qrlFit.bottom} height=${qrlFit.height} scrollbar=${qrlFit.scrollable}`);
+  await page.keyboard.press('Escape');
+  await page.setViewportSize({ width: 1400, height: 900 });
+
   // P2 fix: a rule that already exists cannot be created twice
   await page.goto(`${OE3}/oe3/broker/rules`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: /add rule|regel hinzufügen/i }).click();

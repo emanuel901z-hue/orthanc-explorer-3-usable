@@ -160,7 +160,7 @@ export function NodeFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={guard.requestClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {initial
@@ -323,24 +323,6 @@ export function NodeFormDialog({
                 </div>
               )}
 
-              {/* MWL interoperability: a per-source decision, never a silent rewrite */}
-              {kind === 'source' && (
-                <div className="space-y-3 rounded-md border p-3">
-                  <p className="text-sm font-medium">{t('broker.mwlInteropGroup')}</p>
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <Label htmlFor="node-strip-qrl">{t('broker.stripQrl')}</Label>
-                      <p className="text-xs text-muted-foreground">{t('broker.stripQrlHint')}</p>
-                    </div>
-                    <Switch
-                      id="node-strip-qrl"
-                      checked={values.strip_query_retrieve_level ?? false}
-                      onCheckedChange={(checked) => set('strip_query_retrieve_level', checked)}
-                    />
-                  </div>
-                </div>
-              )}
-
               {/* DICOM TLS — off by default (LAN/VPN), per node switchable */}
               <div className="space-y-3 rounded-md border p-3">
                 <p className="text-sm font-medium">{t('broker.tlsGroup')}</p>
@@ -372,6 +354,24 @@ export function NodeFormDialog({
                   <p className="text-xs text-amber-600">{t('broker.tlsVerifyWarning')}</p>
                 )}
               </div>
+              {/* MWL interoperability: a per-source decision, never a silent rewrite.
+                  Full width — the explanation has to be readable, not squeezed. */}
+              {kind === 'source' && (
+                <div className="space-y-3 rounded-md border p-3 sm:col-span-2">
+                  <p className="text-sm font-medium">{t('broker.mwlInteropGroup')}</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <Label htmlFor="node-strip-qrl">{t('broker.stripQrl')}</Label>
+                      <p className="text-xs text-muted-foreground">{t('broker.stripQrlHint')}</p>
+                    </div>
+                    <Switch
+                      id="node-strip-qrl"
+                      checked={values.strip_query_retrieve_level ?? false}
+                      onCheckedChange={(checked) => set('strip_query_retrieve_level', checked)}
+                    />
+                  </div>
+                </div>
+              )}
             </>
           )}
 
