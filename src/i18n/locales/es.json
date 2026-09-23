@@ -868,7 +868,7 @@
     "dialogHint": "Presiona {key} en cualquier lugar para abrir este diálogo"
   },
   "about": {
-    "description": "Interfaz moderna React/TypeScript para el servidor DICOM Orthanc. SPA independiente que se conecta a la API REST de Orthanc — despliegue como sidecar Docker, plugin de Orthanc, o detrás de un proxy backend autenticado con JWT. Gestión de estudios, fusión/migración, búsqueda inteligente, carga, configuración de modalidades y DICOMweb, integración de visores y acciones con auditoría. También incluye el broker MWL: un proxy de listas de trabajo DICOM que consulta varios sistemas RIS/KIS, fusiona y almacena en caché sus listas y dirige las imágenes al PACS correcto, todo configurado y supervisado en la misma interfaz.",
+    "description": "Frontend moderno en React/TypeScript para el servidor DICOM Orthanc — SPA autónoma (sidecar Docker, plugin de Orthanc o detrás de un proxy backend autenticado con JWT) con escrituras auditadas y una configuración que la instalación puede predefinir y bloquear. Gestión de estudios, fusión/migración, búsqueda inteligente, carga, configuración de modalidades y DICOMweb, integración de visores, incluida la entrada de visualización de imágenes IHE (RAD-106). También incluye el broker MWL: un proxy de lista de trabajo DICOM que consulta varios sistemas RIS/KIS, fusiona y almacena en caché sus listas, las sirve a las modalidades, devuelve los MPPS al RIS, acepta órdenes HL7 (ORM/OMG/OMI) y actualizaciones de paciente ADT (incl. PIR), y enruta las imágenes al PACS adecuado — con cola C-STORE, caché por origen, registro de envíos, TLS/mTLS, ATNA y retención. Verificado con DCMTK, dcm4che y DVTk.",
     "systemInfo": "Información del Sistema",
     "appVersion": "Versión de la App",
     "orthancVersion": "Versión de Orthanc",
@@ -912,7 +912,13 @@
       "mwlAtna": "Exportación de auditoría ATNA",
       "mwlTls": "DICOM TLS/mTLS",
       "mwlOps": "Estado, alertas, conservación",
-      "mwlRbac": "RBAC (lectura/escritura) e historial"
+      "mwlRbac": "RBAC (lectura/escritura) e historial",
+      "mwlMpps": "MPPS SCP + estado de vuelta al RIS",
+      "mwlPir": "HL7 ADT (A08/A24/A40/A47/A31) + PIR",
+      "mwlIid": "Entrada de visualización IHE (RAD-106)",
+      "mwlUps": "Subconjunto UPS-RS (lista de trabajo DICOMweb)",
+      "mwlStats": "Estadísticas e informes",
+      "interop": "Verificado con DCMTK, dcm4che y DVTk"
     },
     "brokerFeatures": "Broker MWL",
     "brokerHint": "Proxy de listas de trabajo DICOM con caché, enrutado de imágenes y monitorización — se configura en sus propias páginas."

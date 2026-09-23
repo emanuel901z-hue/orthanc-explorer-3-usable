@@ -58,6 +58,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     t('about.features.customButtons'),
     t('about.features.addSeries'),
     t('about.features.quickReport'),
+    t('about.features.interop'),
   ];
 
   // the MWL broker is the largest part of this fork — it gets its own group
@@ -69,10 +70,15 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     t('about.features.mwlRouting'),
     t('about.features.mwlLocal'),
     t('about.features.mwlStations'),
+    t('about.features.mwlMpps'),
+    t('about.features.mwlPir'),
     t('about.features.mwlAtna'),
     t('about.features.mwlTls'),
     t('about.features.mwlOps'),
     t('about.features.mwlRbac'),
+    t('about.features.mwlIid'),
+    t('about.features.mwlUps'),
+    t('about.features.mwlStats'),
   ];
 
   return (

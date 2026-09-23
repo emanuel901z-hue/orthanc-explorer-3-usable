@@ -868,7 +868,7 @@
     "dialogHint": "Bu diyaloğu açmak için herhangi bir yerde {key} tuşuna basın"
   },
   "about": {
-    "description": "Orthanc DICOM sunucusu için modern React/TypeScript arayüzü. Orthanc'ın REST API'sine bağlanan bağımsız SPA — Docker sidecar, Orthanc eklentisi veya JWT kimlik doğrulamalı arka uç proxy'si arkasında dağıtın. Çalışma yönetimi, birleştirme/taşıma, akıllı arama, yükleme, modalite ve DICOMweb yapılandırması, görüntüleyici entegrasyonu ve denetim destekli eylemler. Ayrıca MWL broker içerir: birden çok RIS/KIS sistemini sorgulayan, iş listelerini birleştirip önbelleğe alan ve görüntüleri doğru PACS'e yönlendiren bir DICOM iş listesi proxy'si — aynı arayüzden yapılandırılır ve izlenir.",
+    "description": "Orthanc DICOM sunucusu için modern React/TypeScript arayüzü — bağımsız SPA (Docker sidecar, Orthanc eklentisi veya JWT kimlik doğrulamalı arka uç proxy'si arkasında), yazma işlemleri denetlenir ve kurulum yapılandırmayı önceden tanımlayıp kilitleyebilir. İnceleme yönetimi, birleştirme/taşıma, akıllı arama, yükleme, modalite ve DICOMweb yapılandırması, görüntüleyici entegrasyonu (IHE görüntü gösterim girişi RAD-106 dahil). Ayrıca MWL broker'ı içerir: birden fazla RIS/KIS sistemine sorgu gönderen, iş listelerini birleştirip önbelleğe alan ve modalitelere sunan, MPPS'i RIS'e geri bildiren, HL7 siparişlerini (ORM/OMG/OMI) ve ADT hasta güncellemelerini (PIR dahil) kabul eden ve görüntüleri uygun PACS'e yönlendiren DICOM modalite iş listesi proxy'si — C-STORE kuyruğu, kaynak başına önbellek, gönderim günlüğü, TLS/mTLS, ATNA ve saklama ile. DCMTK, dcm4che ve DVTk ile doğrulandı.",
     "systemInfo": "Sistem Bilgileri",
     "appVersion": "Uygulama Sürümü",
     "orthancVersion": "Orthanc Sürümü",
@@ -912,7 +912,13 @@
       "mwlAtna": "ATNA denetim dışa aktarımı",
       "mwlTls": "DICOM TLS/mTLS",
       "mwlOps": "Durum, uyarılar, saklama",
-      "mwlRbac": "RBAC (okuma/yazma) ve değişiklik günlüğü"
+      "mwlRbac": "RBAC (okuma/yazma) ve değişiklik günlüğü",
+      "mwlMpps": "MPPS SCP + RIS'e durum bildirimi",
+      "mwlPir": "HL7 ADT (A08/A24/A40/A47/A31) + PIR",
+      "mwlIid": "IHE görüntü gösterim girişi (RAD-106)",
+      "mwlUps": "UPS-RS alt kümesi (DICOMweb iş listesi)",
+      "mwlStats": "İstatistik ve raporlama",
+      "interop": "DCMTK, dcm4che ve DVTk ile doğrulandı"
     },
     "brokerFeatures": "MWL broker",
     "brokerHint": "Önbellek, görüntü yönlendirme ve izleme içeren DICOM iş listesi proxy'si — kendi sayfalarından yapılandırılır."

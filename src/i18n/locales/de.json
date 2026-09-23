@@ -1903,7 +1903,7 @@
     "dialogHint": "{key} überall drücken um diesen Dialog zu öffnen"
   },
   "about": {
-    "description": "Modernes React/TypeScript-Frontend für den Orthanc DICOM-Server. Standalone SPA, die sich mit der REST-API von Orthanc verbindet — als Docker-Sidecar, Orthanc-Plugin oder hinter einem JWT-authentifizierten Backend-Proxy einsetzbar. Studienverwaltung, Merge/Migrate, intelligente Suche, Upload, Modalitäts- und DICOMweb-Konfiguration, Viewer-Integration und audit-gesicherte Aktionen. Zusätzlich enthält es den MWL-Broker: einen DICOM-Modality-Worklist-Proxy, der mehrere RIS/KIS-Systeme abfragt, deren Arbeitslisten zusammenführt und zwischenspeichert und die Bilder an das passende PACS weiterleitet — konfiguriert und überwacht in derselben Oberfläche.",
+    "description": "Modernes React/TypeScript-Frontend für den Orthanc DICOM-Server — Standalone-SPA (Docker-Sidecar, Orthanc-Plugin oder hinter einem JWT-authentifizierten Backend-Proxy) mit auditierten Schreibaktionen und einer Konfiguration, die eine Installation vorbelegen und sperren kann. Studienverwaltung, Merge/Migrate, intelligente Suche, Upload, Modalitäts- und DICOMweb-Konfiguration, Viewer-Integration inkl. des IHE-Bildaufrufs (RAD-106). Zusätzlich enthält es den MWL-Broker: einen DICOM-Modality-Worklist-Proxy, der mehrere RIS/KIS-Systeme abfragt, deren Arbeitslisten zusammenführt und zwischenspeichert, sie den Modalitäten liefert, MPPS an das RIS zurückmeldet, HL7-Aufträge (ORM/OMG/OMI) und ADT-Patientenänderungen (inkl. PIR) annimmt und die Bilder an das passende PACS weiterleitet — mit C-STORE-Spool, Cache je Quelle, Store-Log, TLS/mTLS, ATNA und Aufbewahrung. Geprüft gegen DCMTK, dcm4che und DVTk.",
     "systemInfo": "Systeminformationen",
     "appVersion": "App-Version",
     "orthancVersion": "Orthanc-Version",
@@ -1947,7 +1947,13 @@
       "mwlAtna": "ATNA-Audit-Export",
       "mwlTls": "DICOM TLS/mTLS",
       "mwlOps": "Health, Alerting, Aufbewahrung",
-      "mwlRbac": "RBAC (Lesen/Schreiben) & Änderungsprotokoll"
+      "mwlRbac": "RBAC (Lesen/Schreiben) & Änderungsprotokoll",
+      "mwlMpps": "MPPS-SCP + Statusmeldung an das RIS",
+      "mwlPir": "HL7 ADT (A08/A24/A40/A47/A31) + PIR",
+      "mwlIid": "IHE-Bildaufruf (RAD-106)",
+      "mwlUps": "UPS-RS-Subset (DICOMweb-Worklist)",
+      "mwlStats": "Statistik und Reporting",
+      "interop": "Geprüft gegen DCMTK, dcm4che und DVTk"
     },
     "brokerFeatures": "MWL-Broker",
     "brokerHint": "DICOM-Modality-Worklist-Proxy mit Worklist-Cache, Store-Routing und Monitoring — konfiguriert auf eigenen Seiten unter „MWL Broker“."

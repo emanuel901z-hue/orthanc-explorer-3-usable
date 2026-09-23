@@ -321,14 +321,24 @@ async function domReport(page) {
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
   const cachePanel = page.getByTestId('broker-cache');
   await cachePanel.scrollIntoViewIfNeeded().catch(() => {});
-  // The button only appears once the RBAC status resolved (canWrite) and the
-  // source actually holds entries — so poll instead of looking once.
+  // The button appears only when the RBAC status resolved (canWrite) **and** a
+  // source holds entries — the cache can legitimately be empty in a fresh stack,
+  // so refresh it first (that runs live queries and fills the snapshots).
+  const perSourceClearButton = () => cachePanel
+    .getByRole('button', { name: /cache von .* leeren|clear .* cache/i })
+    .first().isVisible().catch(() => false);
   let perSourceClear = false;
-  for (let attempt = 0; attempt < 20 && !perSourceClear; attempt += 1) {
-    perSourceClear = await cachePanel
-      .getByRole('button', { name: /cache von .* leeren|clear .* cache/i })
-      .first().isVisible().catch(() => false);
+  for (let attempt = 0; attempt < 12 && !perSourceClear; attempt += 1) {
+    perSourceClear = await perSourceClearButton();
     if (!perSourceClear) await page.waitForTimeout(250);
+  }
+  if (!perSourceClear) {
+    await cachePanel.getByRole('button', { name: /jetzt aktualisieren|refresh/i })
+      .first().click().catch(() => {});
+    for (let attempt = 0; attempt < 20 && !perSourceClear; attempt += 1) {
+      perSourceClear = await perSourceClearButton();
+      if (!perSourceClear) await page.waitForTimeout(250);
+    }
   }
   const cacheRows = await cachePanel.locator('li').count().catch(() => 0);
   record('monitoring: Cache je Quelle lässt sich einzeln verwerfen',

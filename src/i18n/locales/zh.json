@@ -868,7 +868,7 @@
     "dialogHint": "在任何地方按 {key} 打开此对话框"
   },
   "about": {
-    "description": "用于 Orthanc DICOM 服务器的现代 React/TypeScript 前端。连接到 Orthanc REST API 的独立 SPA — 可部署为 Docker 边车、Orthanc 插件，或在 JWT 认证的后端代理之后。研究管理、合并/迁移、智能搜索、上传、模态和 DICOMweb 配置、查看器集成以及审计支持的操作。 同时内置 MWL 代理服务:一个 DICOM 工作列表代理,可查询多个 RIS/KIS 系统、合并并缓存其工作列表,并将影像转发到正确的 PACS —— 在同一界面中配置与监控。",
+    "description": "面向 Orthanc DICOM 服务器的现代 React/TypeScript 前端 — 独立 SPA(Docker sidecar、Orthanc 插件或位于 JWT 认证的后端代理之后),写入操作均被审计,配置可由部署方预置并锁定。检查管理、合并/迁移、智能搜索、上传、设备与 DICOMweb 配置、查看器集成(含 IHE 图像显示入口 RAD-106)。此外还包含 MWL 代理:查询多个 RIS/KIS 系统、合并并缓存其工作列表、提供给设备、将 MPPS 回报给 RIS、接收 HL7 医嘱(ORM/OMG/OMI)与 ADT 患者更新(含 PIR),并把图像转发到合适的 PACS — 具备 C-STORE 队列、按来源缓存、发送日志、TLS/mTLS、ATNA 与保留策略。已通过 DCMTK、dcm4che 和 DVTk 验证。",
     "systemInfo": "系统信息",
     "appVersion": "应用版本",
     "orthancVersion": "Orthanc 版本",
@@ -912,7 +912,13 @@
       "mwlAtna": "ATNA 审计导出",
       "mwlTls": "DICOM TLS/mTLS",
       "mwlOps": "健康、告警、保留",
-      "mwlRbac": "RBAC (读写) 与变更日志"
+      "mwlRbac": "RBAC (读写) 与变更日志",
+      "mwlMpps": "MPPS SCP + 状态回报 RIS",
+      "mwlPir": "HL7 ADT (A08/A24/A40/A47/A31) + PIR",
+      "mwlIid": "IHE 图像显示入口 (RAD-106)",
+      "mwlUps": "UPS-RS 子集 (DICOMweb 工作列表)",
+      "mwlStats": "统计与报表",
+      "interop": "已通过 DCMTK、dcm4che 和 DVTk 验证"
     },
     "brokerFeatures": "MWL 代理服务",
     "brokerHint": "具备缓存、影像转发与监控的 DICOM 工作列表代理 — 在专属页面中配置。"

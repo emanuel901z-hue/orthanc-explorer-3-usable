@@ -868,7 +868,7 @@
     "dialogHint": "どこでも{key}を押してこのダイアログを開く"
   },
   "about": {
-    "description": "Orthanc DICOMサーバー用のモダンなReact/TypeScriptフロントエンド。OrthancのREST APIに接続するスタンドアロンSPA — Dockerサイドカー、Orthancプラグイン、またはJWT認証バックエンドプロキシの背後としてデプロイ。研究管理、マージ/移行、スマート検索、アップロード、モダリティおよびDICOMweb設定、ビューア統合、監査付きアクション。 MWL ブローカーも同梱しています。複数の RIS/KIS に問い合わせてワークリストを統合・キャッシュし、画像を適切な PACS へ転送する DICOM ワークリスト代理で、同じ画面から設定・監視できます。",
+    "description": "Orthanc DICOM サーバー向けのモダンな React/TypeScript フロントエンド — スタンドアロン SPA(Docker サイドカー、Orthanc プラグイン、JWT 認証バックエンドプロキシの背後)で、書き込みは監査され、配備側で設定を事前定義して固定できます。検査管理、マージ/移行、スマート検索、アップロード、モダリティおよび DICOMweb 設定、ビューア統合(IHE 画像表示エントリ RAD-106 を含む)。さらに MWL ブローカーを同梱: 複数の RIS/KIS に問い合わせ、ワークリストを統合・キャッシュしてモダリティに提供し、MPPS を RIS に返送し、HL7 オーダー(ORM/OMG/OMI)と ADT 患者更新(PIR 含む)を受け付け、画像を適切な PACS へ転送する DICOM モダリティワークリストプロキシ — C-STORE スプール、ソース別キャッシュ、ストアログ、TLS/mTLS、ATNA、保持を備えます。DCMTK、dcm4che、DVTk で検証済み。",
     "systemInfo": "システム情報",
     "appVersion": "アプリバージョン",
     "orthancVersion": "Orthancバージョン",
@@ -912,7 +912,13 @@
       "mwlAtna": "ATNA 監査のエクスポート",
       "mwlTls": "DICOM TLS/mTLS",
       "mwlOps": "状態監視、アラート、保存期間",
-      "mwlRbac": "RBAC (読み書き) と変更履歴"
+      "mwlRbac": "RBAC (読み書き) と変更履歴",
+      "mwlMpps": "MPPS SCP + RIS への状態返送",
+      "mwlPir": "HL7 ADT (A08/A24/A40/A47/A31) + PIR",
+      "mwlIid": "IHE 画像表示エントリ (RAD-106)",
+      "mwlUps": "UPS-RS サブセット (DICOMweb ワークリスト)",
+      "mwlStats": "統計とレポート",
+      "interop": "DCMTK・dcm4che・DVTk で検証済み"
     },
     "brokerFeatures": "MWL ブローカー",
     "brokerHint": "キャッシュ、転送ルーティング、監視を備えた DICOM ワークリスト代理 — 専用ページで設定します。"
