@@ -50,6 +50,7 @@ const DEFAULTS: NodeFormValues = {
   cache_refresh_s: 0,
   tls: false,
   tls_verify: true,
+  strip_query_retrieve_level: false,
   is_default: false,
 };
 
@@ -68,6 +69,8 @@ function fromRow(kind: NodeKind, row: BrokerSource | BrokerTarget): NodeFormValu
     cache_refresh_s: 'cache_refresh_s' in row ? row.cache_refresh_s : 0,
     tls: 'tls' in row ? row.tls : false,
     tls_verify: 'tls_verify' in row ? row.tls_verify : true,
+    strip_query_retrieve_level:
+      'strip_query_retrieve_level' in row ? row.strip_query_retrieve_level : false,
     is_default: kind === 'target' && 'is_default' in row ? row.is_default : false,
   };
   return base as NodeFormValues;
@@ -316,6 +319,24 @@ export function NodeFormDialog({
                       onChange={(e) => set('cache_refresh_s', Number(e.target.value))}
                     />
                     <p className="text-xs text-muted-foreground">{t('broker.cacheRefreshHint')}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* MWL interoperability: a per-source decision, never a silent rewrite */}
+              {kind === 'source' && (
+                <div className="space-y-3 rounded-md border p-3">
+                  <p className="text-sm font-medium">{t('broker.mwlInteropGroup')}</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <Label htmlFor="node-strip-qrl">{t('broker.stripQrl')}</Label>
+                      <p className="text-xs text-muted-foreground">{t('broker.stripQrlHint')}</p>
+                    </div>
+                    <Switch
+                      id="node-strip-qrl"
+                      checked={values.strip_query_retrieve_level ?? false}
+                      onCheckedChange={(checked) => set('strip_query_retrieve_level', checked)}
+                    />
                   </div>
                 </div>
               )}

@@ -161,7 +161,8 @@ describe('RulesPage — row click (API completeness follow-up)', () => {
       { id: 1, name: 'ris-a', aet: 'RIS_A', host: '10.0.1.20', port: 104,
         calling_aet: 'MWLBROKER', charset: 'ISO_IR 100', enabled: true, timeout_s: 10,
         priority: 10, cache_stale_on_error: true, cache_refresh_s: 0, tls: false,
-        tls_verify: true, created_at: '2026-09-21T00:00:00Z' },
+        tls_verify: true, strip_query_retrieve_level: false,
+        created_at: '2026-09-21T00:00:00Z' },
     ]);
     mockTargets.mockResolvedValue([
       { id: 1, name: 'pacs', aet: 'PACS', host: '10.0.1.30', port: 104,

@@ -63,6 +63,12 @@ export type BrokerSource = {
   tls: boolean;
   /** Verify the server certificate (off only for a self-signed lab system). */
   tls_verify: boolean;
+  /**
+   * Leave QueryRetrieveLevel (0008,0052) out of the identifier forwarded to
+   * this source — some foreign MWL SCPs match on that attribute and then answer
+   * nothing. Off = the modality's query is forwarded unchanged.
+   */
+  strip_query_retrieve_level: boolean;
   created_at: string;
 };
 
@@ -73,12 +79,13 @@ export type BrokerSource = {
  */
 export type BrokerSourceIn = Omit<
   BrokerSource, 'id' | 'created_at' | 'cache_stale_on_error' | 'cache_refresh_s'
-  | 'tls' | 'tls_verify'
+  | 'tls' | 'tls_verify' | 'strip_query_retrieve_level'
 > & {
   cache_stale_on_error?: boolean;
   cache_refresh_s?: number;
   tls?: boolean;
   tls_verify?: boolean;
+  strip_query_retrieve_level?: boolean;
 };
 
 export type BrokerTarget = {

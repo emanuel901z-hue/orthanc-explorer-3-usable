@@ -95,6 +95,30 @@ describe('SourcesPage', () => {
     });
   });
 
+  it('offers the MWL interoperability switch together with its explanation', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: /add source/i }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'dvtk-ris' } });
+    fireEvent.change(screen.getByLabelText('AE title'), { target: { value: 'DVTK_MWL_SCP' } });
+    fireEvent.change(screen.getByLabelText('Host'), { target: { value: '10.0.1.47' } });
+
+    // a novice has to see *why* the switch exists before touching it
+    expect(
+      screen.getByText(/some systems match on QueryRetrieveLevel/i),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole('switch', { name: /leave out QueryRetrieveLevel/i }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }));
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1));
+    expect(mockCreate.mock.calls[0][0]).toMatchObject({
+      strip_query_retrieve_level: true,
+    });
+  });
+
   it('does not submit an invalid form (missing host)', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('ris-a')).toBeInTheDocument());
