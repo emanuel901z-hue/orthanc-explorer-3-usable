@@ -481,7 +481,8 @@
     "ohifDescription": "Open-Source webbasierter medizinischer Bild-Viewer mit MPR, 3D und Segmentierung.",
     "stoneDescription": "Leichtgewichtiger DICOM-Viewer auf Basis des Stone of Orthanc Frameworks.",
     "volviewDescription": "Kitwares VolView für 3D-Volumen-Rendering und Visualisierung.",
-    "weasisDescription": "Desktop-DICOM-Viewer mit erweiterten Werkzeugen. Erfordert lokale Installation."
+    "weasisDescription": "Desktop-DICOM-Viewer mit erweiterten Werkzeugen. Erfordert lokale Installation.",
+    "lockedHint": "Diese Liste ist von der Installation vorgegeben und schreibgeschützt."
   },
   "theming": {
     "title": "Thematisierung",
@@ -1867,7 +1868,9 @@
     "mergeTitle": "Feldweiser Merge",
     "mergeAdd": "Regel anlegen",
     "pirEffectMerge": "Eine Zusammenführung entzieht die alte ID: Arbeitslisten-Antwort und Routing folgen der aktuellen.",
-    "pirEffectLink": "Eine Verknüpfung lässt beide IDs gültig: es wird nichts umgezogen und keine Antwort umgeschrieben."
+    "pirEffectLink": "Eine Verknüpfung lässt beide IDs gültig: es wird nichts umgezogen und keine Antwort umgeschrieben.",
+    "gateTitle": "MWL-Broker gehört nicht zu dieser Installation",
+    "gateHint": "Die Broker-Konsole ist hier abgeschaltet. brokerUrl (und enableMwlBroker: true) in config.js setzen, wenn diese Installation die Arbeitslisten der Modalitäten bedienen soll."
   },
   "shortcuts": {
     "nav": {

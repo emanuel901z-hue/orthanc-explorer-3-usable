@@ -426,7 +426,8 @@
     "volviewDescription": "VolView от Kitware для 3D-объёмного рендеринга и визуализации.",
     "weasisDescription": "Десктоп DICOM-просмотрщик с расширенными инструментами. Требует локальной установки.",
     "disabled": "Disabled",
-    "toggleEnabled": "Toggle {{name}}"
+    "toggleEnabled": "Toggle {{name}}",
+    "lockedHint": "Этот список задан установкой и доступен только для чтения."
   },
   "theming": {
     "title": "Тематизация",
@@ -1192,6 +1193,8 @@
     "pirProbeRun": "Разрешить",
     "mergeTitle": "Слияние по полям",
     "mergeAdd": "Добавить правило",
-    "mergeEmpty": "Нет правил по полям."
+    "mergeEmpty": "Нет правил по полям.",
+    "gateTitle": "Брокер MWL не входит в эту установку",
+    "gateHint": "Консоль брокера здесь отключена. Укажите brokerUrl (и enableMwlBroker: true) в config.js, если эта установка должна обслуживать рабочие списки."
   }
 }

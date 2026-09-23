@@ -16,6 +16,7 @@ import ActivityPage from "@/features/activity/pages/ActivityPage";
 import AuditLogsPage from "@/features/audit/pages/AuditLogsPage";
 import WorklistsPage from "@/features/worklists/pages/WorklistsPage";
 import BrokerPage from "@/features/broker/pages/BrokerPage";
+import { BrokerGate } from "@/features/broker/components/BrokerGate";
 import SourcesPage from "@/features/broker/pages/SourcesPage";
 import TargetsPage from "@/features/broker/pages/TargetsPage";
 import RulesPage from "@/features/broker/pages/RulesPage";
@@ -45,16 +46,16 @@ const App = () => (
               <Route path="activity" element={<ActivityPage />} />
               <Route path="audit-logs" element={<AuditLogsPage />} />
               <Route path="worklists" element={<WorklistsPage />} />
-              <Route path="broker" element={<BrokerPage />} />
-              <Route path="broker/sources" element={<SourcesPage />} />
-              <Route path="broker/targets" element={<TargetsPage />} />
-              <Route path="broker/rules" element={<RulesPage />} />
-              <Route path="broker/transforms" element={<TransformsPage />} />
-              <Route path="broker/settings" element={<BrokerSettingsPage />} />
-              <Route path="broker/audit" element={<AuditPage />} />
-              <Route path="broker/spool" element={<SpoolPage />} />
-              <Route path="broker/worklist" element={<LocalWorklistPage />} />
-              <Route path="broker/stations" element={<StationsPage />} />
+              <Route path="broker" element={<BrokerGate><BrokerPage /></BrokerGate>} />
+              <Route path="broker/sources" element={<BrokerGate><SourcesPage /></BrokerGate>} />
+              <Route path="broker/targets" element={<BrokerGate><TargetsPage /></BrokerGate>} />
+              <Route path="broker/rules" element={<BrokerGate><RulesPage /></BrokerGate>} />
+              <Route path="broker/transforms" element={<BrokerGate><TransformsPage /></BrokerGate>} />
+              <Route path="broker/settings" element={<BrokerGate><BrokerSettingsPage /></BrokerGate>} />
+              <Route path="broker/audit" element={<BrokerGate><AuditPage /></BrokerGate>} />
+              <Route path="broker/spool" element={<BrokerGate><SpoolPage /></BrokerGate>} />
+              <Route path="broker/worklist" element={<BrokerGate><LocalWorklistPage /></BrokerGate>} />
+              <Route path="broker/stations" element={<BrokerGate><StationsPage /></BrokerGate>} />
               <Route path="remote-sources" element={<RemoteSourcesPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>

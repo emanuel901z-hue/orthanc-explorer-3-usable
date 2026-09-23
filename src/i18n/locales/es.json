@@ -373,7 +373,8 @@
     "volviewDescription": "VolView de Kitware para renderizado de volumen 3D y visualización.",
     "weasisDescription": "Visor DICOM de escritorio con herramientas avanzadas. Requiere instalación local.",
     "disabled": "Disabled",
-    "toggleEnabled": "Toggle {{name}}"
+    "toggleEnabled": "Toggle {{name}}",
+    "lockedHint": "Esta lista está predefinida por la instalación y es de solo lectura."
   },
   "theming": {
     "title": "Tematización",
@@ -1192,6 +1193,8 @@
     "pirProbeRun": "Resolver",
     "mergeTitle": "Fusión por campo",
     "mergeAdd": "Añadir regla",
-    "mergeEmpty": "Sin reglas de campo."
+    "mergeEmpty": "Sin reglas de campo.",
+    "gateTitle": "El broker MWL no forma parte de esta instalación",
+    "gateHint": "La consola del broker está desactivada aquí. Defina brokerUrl (y enableMwlBroker: true) en config.js si esta instalación debe gestionar las listas de trabajo."
   }
 }

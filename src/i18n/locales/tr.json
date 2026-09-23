@@ -426,7 +426,8 @@
     "volviewDescription": "Kitware'in VolView - 3D hacim işleme ve görselleştirme.",
     "weasisDescription": "Gelişmiş araçlara sahip masaüstü DICOM görüntüleyici. Yerel kurulum gerektirir.",
     "disabled": "Disabled",
-    "toggleEnabled": "Toggle {{name}}"
+    "toggleEnabled": "Toggle {{name}}",
+    "lockedHint": "Bu liste kurulum tarafından tanımlıdır ve salt okunurdur."
   },
   "theming": {
     "title": "Temalandırma",
@@ -1192,6 +1193,8 @@
     "pirProbeRun": "Çöz",
     "mergeTitle": "Alan bazlı birleştirme",
     "mergeAdd": "Kural ekle",
-    "mergeEmpty": "Alan kuralı yok."
+    "mergeEmpty": "Alan kuralı yok.",
+    "gateTitle": "MWL broker bu kurulumun parçası değil",
+    "gateHint": "Broker konsolu burada kapalı. Bu kurulum iş listelerini yönetecekse config.js içinde brokerUrl (ve enableMwlBroker: true) tanımlayın."
   }
 }

@@ -426,7 +426,8 @@
     "volviewDescription": "VolView من Kitware لعرض الأحجام ثلاثية الأبعاد والتصور.",
     "weasisDescription": "عارض DICOM لسطح المكتب بأدوات متقدمة. يتطلب تثبيتًا محليًا.",
     "disabled": "Disabled",
-    "toggleEnabled": "Toggle {{name}}"
+    "toggleEnabled": "Toggle {{name}}",
+    "lockedHint": "هذه القائمة مُعدَّة مسبقًا من التنصيب وهي للقراءة فقط."
   },
   "theming": {
     "title": "التخصيص",
@@ -1192,6 +1193,8 @@
     "pirProbeRun": "تحليل",
     "mergeTitle": "الدمج حسب الحقل",
     "mergeAdd": "إضافة قاعدة",
-    "mergeEmpty": "لا توجد قواعد حقول."
+    "mergeEmpty": "لا توجد قواعد حقول.",
+    "gateTitle": "وسيط MWL ليس جزءًا من هذا التنصيب",
+    "gateHint": "تم إيقاف وحدة تحكم الوسيط هنا. حدّد brokerUrl (و enableMwlBroker: true) في config.js إذا كان هذا التنصيب سيدير قوائم العمل."
   }
 }

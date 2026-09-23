@@ -481,7 +481,8 @@
     "ohifDescription": "Open-source web-based medical imaging viewer with MPR, 3D, and segmentation support.",
     "stoneDescription": "Lightweight DICOM viewer built on the Stone of Orthanc framework.",
     "volviewDescription": "Kitware's VolView for 3D volume rendering and visualization.",
-    "weasisDescription": "Desktop DICOM viewer with advanced tools. Requires local installation."
+    "weasisDescription": "Desktop DICOM viewer with advanced tools. Requires local installation.",
+    "lockedHint": "This list is preset by the deployment and read-only."
   },
   "theming": {
     "title": "Theming",
@@ -1867,7 +1868,9 @@
     "mergeTitle": "Field-level merge",
     "mergeAdd": "Add rule",
     "pirEffectMerge": "A merge retires the old ID: the worklist answer and the routing follow the current one.",
-    "pirEffectLink": "A link keeps both IDs valid: nothing is moved and no answer is rewritten."
+    "pirEffectLink": "A link keeps both IDs valid: nothing is moved and no answer is rewritten.",
+    "gateTitle": "MWL broker is not part of this deployment",
+    "gateHint": "The broker console is switched off here. Set brokerUrl (and enableMwlBroker: true) in config.js if this installation should manage the modalities' worklists."
   },
   "shortcuts": {
     "nav": {

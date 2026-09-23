@@ -373,7 +373,8 @@
     "volviewDescription": "KitwareのVolView - 3Dボリュームレンダリングと可視化。",
     "weasisDescription": "高度なツールを備えたデスクトップDICOMビューア。ローカルインストールが必要。",
     "disabled": "Disabled",
-    "toggleEnabled": "Toggle {{name}}"
+    "toggleEnabled": "Toggle {{name}}",
+    "lockedHint": "この一覧は配備側で設定されており、読み取り専用です。"
   },
   "theming": {
     "title": "テーマ設定",
@@ -1192,6 +1193,8 @@
     "pirProbeRun": "解決",
     "mergeTitle": "フィールド単位のマージ",
     "mergeAdd": "ルールを追加",
-    "mergeEmpty": "フィールド規則はありません。"
+    "mergeEmpty": "フィールド規則はありません。",
+    "gateTitle": "この配備に MWL ブローカーは含まれません",
+    "gateHint": "ここではブローカーコンソールは無効です。この配備でワークリストを扱う場合は config.js に brokerUrl(および enableMwlBroker: true)を設定してください。"
   }
 }

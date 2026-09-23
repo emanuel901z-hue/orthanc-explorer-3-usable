@@ -321,9 +321,15 @@ async function domReport(page) {
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
   const cachePanel = page.getByTestId('broker-cache');
   await cachePanel.scrollIntoViewIfNeeded().catch(() => {});
-  const perSourceClear = await cachePanel
-    .getByRole('button', { name: /cache von .* leeren|clear .* cache/i })
-    .first().isVisible().catch(() => false);
+  // The button only appears once the RBAC status resolved (canWrite) and the
+  // source actually holds entries — so poll instead of looking once.
+  let perSourceClear = false;
+  for (let attempt = 0; attempt < 20 && !perSourceClear; attempt += 1) {
+    perSourceClear = await cachePanel
+      .getByRole('button', { name: /cache von .* leeren|clear .* cache/i })
+      .first().isVisible().catch(() => false);
+    if (!perSourceClear) await page.waitForTimeout(250);
+  }
   const cacheRows = await cachePanel.locator('li').count().catch(() => 0);
   record('monitoring: Cache je Quelle lässt sich einzeln verwerfen',
     perSourceClear, `Zeilen=${cacheRows} Knopf=${perSourceClear}`);

@@ -21,6 +21,18 @@ export const OE3ConfigSchema = z.object({
     scope: z.string(),
   }).optional(),
   features: z.record(z.string(), z.boolean()).default({}),
+  /** Viewer entries the deployment presets (Settings → Viewers). When present
+   * they are the base list — for a hospital that wants the same viewers
+   * everywhere instead of every user configuring their own browser. */
+  viewers: z.array(z.object({
+    id: z.string(),
+    url: z.string(),
+    enabled: z.boolean().default(true),
+    type: z.string().default('web'),
+  })).optional(),
+  /** Read-only viewer list: it comes from `viewers` and cannot be changed in
+   * the UI (the operator sees why instead of a disabled button without reason). */
+  viewersLocked: z.boolean().default(false),
   branding: z.object({
     title: z.string(),
     logoUrl: z.string().optional(),

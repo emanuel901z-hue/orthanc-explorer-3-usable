@@ -278,3 +278,11 @@ The broker service itself (DICOM SCP, C-FIND fan-out/merge, C-STORE routing,
 Postgres config/log DB) lives outside this repository — the UI slice here is
 deliberately limited to the REST client, the pages above, runtime config, and
 tests. This keeps the fork merge-friendly with upstream OE3.
+
+## Ohne den Broker betreiben (nur OE3)
+
+Der Broker ist optional: `brokerUrl` weglassen **und** `enableMwlBroker: false`
+setzen — dann verschwindet der Abschnitt aus der Navigation, die Routen zeigen
+eine Erklärung statt einer kaputten Konsole. Wie man außerdem alle Einstellungen
+vorbelegt und schreibgeschützt macht (Feature-Flags, Viewer-Liste, Branding):
+siehe [`docs/oe3-standalone.md`](oe3-standalone.md).

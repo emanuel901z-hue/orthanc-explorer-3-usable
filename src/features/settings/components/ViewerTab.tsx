@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, RefreshCw, Pencil, Globe, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { loadViewers, saveViewers, viewersLocked } from '@/features/viewer/lib/viewer-config';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -53,16 +54,14 @@ const statusConfig = {
 export default function ViewerTab() {
   const { t } = useTranslation();
 
-  // Load viewers from localStorage (persisted) or use defaults
+  // Read-only when the deployment preset the list (config.js: viewersLocked)
+  const locked = viewersLocked();
+
+  // Load viewers: deployment preset (config.js) > localStorage > defaults.
+  // A preset only needs `{id, url}` — name, description and status stay from the
+  // defaults, so a hospital does not have to repeat the whole entry.
   const [viewers, setViewers] = useState<ViewerConfig[]>(() => {
-    const saved = localStorage.getItem('oe3-viewers');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch { /* use defaults */ }
-    }
-    return [
+    const defaults: ViewerConfig[] = [
     {
       id: 'ohif',
       name: 'OHIF Viewer',
@@ -113,12 +112,24 @@ export default function ViewerTab() {
       enabled: false,
       defaultViewer: false,
     },
-  ];
+    ];
+    const stored = loadViewers();
+    if (stored.length === 0) return defaults;
+    const byId = new Map(defaults.map((viewer) => [viewer.id, viewer]));
+    return stored.map((entry) => {
+      const base = byId.get(entry.id);
+      const kind: ViewerConfig['type'] = entry.type === 'desktop' ? 'desktop' : 'web';
+      if (!base) {
+        return { id: entry.id, name: entry.id, url: entry.url, status: 'configured',
+                 type: kind, description: '', enabled: entry.enabled, defaultViewer: false };
+      }
+      return { ...base, url: entry.url, enabled: entry.enabled, type: kind };
+    });
   });
 
-  // Persist viewers to localStorage whenever they change
+  // Persist only when the deployment allows changes
   useEffect(() => {
-    localStorage.setItem('oe3-viewers', JSON.stringify(viewers));
+    saveViewers(viewers);
   }, [viewers]);
 
   const [editViewer, setEditViewer] = useState<ViewerConfig | null>(null);
@@ -185,6 +196,11 @@ export default function ViewerTab() {
             <p className="text-sm text-muted-foreground">
               {t('viewer.description')}
             </p>
+            {locked && (
+              <p className="text-xs text-muted-foreground" data-testid="viewer-locked-hint">
+                {t('viewer.lockedHint')}
+              </p>
+            )}
             <div className="flex items-center gap-3 text-xs">
               {connectedCount > 0 && (
                 <span className="flex items-center gap-1.5">
@@ -309,21 +325,23 @@ export default function ViewerTab() {
                         </TooltipTrigger>
                         <TooltipContent>{t('viewer.testTooltip')}</TooltipContent>
                       </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 gap-1 text-xs"
-                            onClick={() => openEdit(v)}
-                          >
-                            <Pencil className="h-3 w-3" />
-                            <span className="hidden sm:inline">{t('viewer.edit')}</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{t('viewer.editTooltip')}</TooltipContent>
-                      </Tooltip>
-                      {!v.defaultViewer && v.enabled && (
+                      {!locked && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 gap-1 text-xs"
+                              onClick={() => openEdit(v)}
+                            >
+                              <Pencil className="h-3 w-3" />
+                              <span className="hidden sm:inline">{t('viewer.edit')}</span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{t('viewer.editTooltip')}</TooltipContent>
+                        </Tooltip>
+                      )}
+                      {!locked && !v.defaultViewer && v.enabled && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button

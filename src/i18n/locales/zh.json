@@ -373,7 +373,8 @@
     "volviewDescription": "Kitware的VolView，用于3D体积渲染和可视化。",
     "weasisDescription": "具有高级工具的桌面DICOM查看器。需要本地安装。",
     "disabled": "Disabled",
-    "toggleEnabled": "Toggle {{name}}"
+    "toggleEnabled": "Toggle {{name}}",
+    "lockedHint": "此列表由部署预置,为只读。"
   },
   "theming": {
     "title": "主题设置",
@@ -1192,6 +1193,8 @@
     "pirProbeRun": "解析",
     "mergeTitle": "按字段合并",
     "mergeAdd": "添加规则",
-    "mergeEmpty": "没有字段规则。"
+    "mergeEmpty": "没有字段规则。",
+    "gateTitle": "此部署不包含 MWL 代理",
+    "gateHint": "此处已关闭代理控制台。若该部署需要管理工作列表,请在 config.js 中设置 brokerUrl(以及 enableMwlBroker: true)。"
   }
 }
