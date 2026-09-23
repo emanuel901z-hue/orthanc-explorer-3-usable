@@ -10,15 +10,17 @@ import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import { MppsCard } from './MppsCard';
 import '@/i18n';
 
-const { mockStats, mockList, mockForwardPending } = vi.hoisted(() => ({
+const { mockStats, mockList, mockForwardPending, mockForwardOne } = vi.hoisted(() => ({
   mockStats: vi.fn(),
   mockList: vi.fn(),
   mockForwardPending: vi.fn(),
+  mockForwardOne: vi.fn(),
 }));
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
-    mpps: { stats: mockStats, list: mockList, forwardPending: mockForwardPending },
+    mpps: { stats: mockStats, list: mockList, forwardPending: mockForwardPending,
+            forward: mockForwardOne },
     rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true,
                                                   write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) },
   },
@@ -55,6 +57,7 @@ describe('MppsCard', () => {
         forward_error: 'connection refused', forward_attempts: 2, forwarded_at: null },
     ]);
     mockForwardPending.mockResolvedValue({ attempted: 1, sent: 1, failed: 0 });
+    mockForwardOne.mockResolvedValue({ ok: true, error: '' });
   });
   afterEach(() => { __resetConfigForTests(); vi.clearAllMocks(); });
 
@@ -93,5 +96,20 @@ describe('MppsCard', () => {
     await screen.findByTestId('broker-mpps');
     await waitFor(() => expect(
       screen.queryByRole('button', { name: /erneut melden|again/i })).toBeNull());
+  });
+
+  it('meldet genau den nicht zugestellten Schritt erneut', async () => {
+    renderCard();
+    fireEvent.click(await screen.findByRole('button', { name: /steps anzeigen|show steps/i }));
+    const table = await screen.findByRole('table');
+    await waitFor(() => expect(within(table).getByText('ACC-1')).toBeInTheDocument());
+
+    // zugestellter Schritt: kein Knopf · nicht zugestellter Schritt: Knopf
+    const delivered = within(table).getByText('ACC-1').closest('tr') as HTMLElement;
+    const pending = within(table).getByText('ACC-2').closest('tr') as HTMLElement;
+    expect(within(delivered).queryByRole('button', { name: /send again|erneut senden/i })).toBeNull();
+
+    fireEvent.click(within(pending).getByRole('button', { name: /send again|erneut senden/i }));
+    await waitFor(() => expect(mockForwardOne).toHaveBeenCalledWith(2));
   });
 });

@@ -6,14 +6,15 @@ import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import { auditClient } from '@/lib/audit';
 import '@/i18n';
 
-const { mockStats, mockClear } = vi.hoisted(() => ({
+const { mockStats, mockClear, mockClearSource } = vi.hoisted(() => ({
   mockStats: vi.fn(),
   mockClear: vi.fn(),
+  mockClearSource: vi.fn(),
 }));
 
 vi.mock('@/api/broker', () => ({
   brokerApi: {
-    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) }, cache: { stats: mockStats, clear: mockClear, clearSource: vi.fn() } },
+    rbac: { status: vi.fn(() => Promise.resolve({ mode: 'off', enforced: false, can_write: true, write_role: 'brokerWrite', roles_header: 'X-OE3-Roles', roles: [] })) }, cache: { stats: mockStats, clear: mockClear, clearSource: mockClearSource } },
 }));
 
 const emit = vi.spyOn(auditClient, 'emit');
@@ -29,6 +30,7 @@ describe('CacheCard', () => {
     (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
     loadConfig();
     mockClear.mockResolvedValue(undefined);
+    mockClearSource.mockResolvedValue(undefined);
     emit.mockClear();
   });
   afterEach(() => { __resetConfigForTests(); vi.clearAllMocks(); });
@@ -105,5 +107,21 @@ describe('CacheCard', () => {
       resourceType: 'brokerConfig',
       outcome: 'started',
     });
+  });
+  it('verwirft nur die Momentaufnahme dieser einen Quelle', async () => {
+    mockStats.mockResolvedValue([
+      { source_id: 1, source_name: 'ris-a', entries: 3, age_s: 10, state: 'available',
+        stale_on_error: true, refresh_s: 0, newest_fetched_at: null },
+      { source_id: 2, source_name: 'ris-b', entries: 0, age_s: null, state: 'empty',
+        stale_on_error: true, refresh_s: 0, newest_fetched_at: null },
+    ]);
+    renderCard();
+
+    // nur die Quelle mit Inhalt hat den Knopf — und er nennt sie beim Namen
+    const button = await screen.findByRole('button', { name: /cache von ris-a leeren|clear ris-a/i });
+    expect(screen.queryByRole('button', { name: /ris-b/i })).toBeNull();
+
+    fireEvent.click(button);
+    await waitFor(() => expect(mockClearSource).toHaveBeenCalledWith(1));
   });
 });

@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { brokerApi } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
 import { CONFIG_KEYS, useAuditedMutation } from '../hooks/use-broker-writes';
+import { useCanWrite } from '../hooks/use-can-write';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 
 function formatAge(seconds: number | null): string {
@@ -28,6 +29,7 @@ function formatAge(seconds: number | null): string {
 export function CacheCard() {
   const { t } = useTranslation();
   const configured = Boolean(getConfig().brokerUrl);
+  const { canWrite } = useCanWrite();
   const [confirmClear, setConfirmClear] = useState(false);
 
   const statsQuery = useQuery({
@@ -52,6 +54,15 @@ export function CacheCard() {
     run: () => brokerApi.cache.clear(),
     resourceId: () => 'all',
     invalidate: [['broker', 'cache'], ...CONFIG_KEYS],
+  });
+
+  const clearSource = useAuditedMutation<{ id: number; name: string }, unknown>({
+    action: 'broker.cache.clear_source',
+    resourceType: 'brokerConfig',
+    resourceId: ({ name }) => name,
+    run: ({ id }) => brokerApi.cache.clearSource(id),
+    invalidate: [['broker', 'cache'], ...CONFIG_KEYS],
+    successMessage: t('broker.cacheCleared'),
   });
 
   const sources = statsQuery.data ?? [];
@@ -103,6 +114,21 @@ export function CacheCard() {
                   {source.stale_on_error ? t('broker.cacheStaleOn') : t('broker.cacheStaleOff')}
                   {source.refresh_s > 0 && ` · ${t('broker.cacheRefreshEvery', { seconds: source.refresh_s })}`}
                 </span>
+                {/* Nur diese eine Quelle verwerfen — der Zustand steht daneben, also
+                    gehört die Aktion auch dorthin (nicht nur "alles löschen"). */}
+                {canWrite && source.entries > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2"
+                    title={t('broker.cacheClearSourceHint')}
+                    aria-label={t('broker.cacheClearSource', { name: source.source_name })}
+                    disabled={clearSource.isPending}
+                    onClick={() => clearSource.mutate({ id: source.source_id, name: source.source_name })}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                )}
               </li>
             ))}
           </ul>

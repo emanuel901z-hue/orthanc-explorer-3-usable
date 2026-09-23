@@ -48,6 +48,15 @@ export function MppsCard() {
     successMessage: t('broker.mppsForwarded'),
   });
 
+  const retryOne = useAuditedMutation<number, { ok: boolean; error: string }>({
+    action: 'broker.mpps.forward_one',
+    resourceType: 'brokerConfig',
+    resourceId: (id) => String(id),
+    run: (id) => brokerApi.mpps.forward(id),
+    invalidate: [['broker', 'mpps']],
+    successMessage: t('broker.mppsForwarded'),
+  });
+
   const stats = statsQuery.data;
   const steps = stepsQuery.data ?? [];
 
@@ -120,6 +129,7 @@ export function MppsCard() {
                     <TableHead>{t('broker.station')}</TableHead>
                     <TableHead>{t('broker.mppsStatus')}</TableHead>
                     <TableHead>{t('broker.mppsDelivery')}</TableHead>
+                    <TableHead className="w-[120px] text-right">{t('broker.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -143,6 +153,23 @@ export function MppsCard() {
                           : step.forward_error
                             ? <span className="text-destructive">{step.forward_error}</span>
                             : t('broker.mppsPendingShort')}
+                      </TableCell>
+                      {/* Ein einzelner hängender Schritt braucht eine eigene Aktion:
+                          "alle nachmelden" hilft nicht, wenn genau einer abgelehnt wird. */}
+                      <TableCell className="text-right">
+                        {canWrite && !step.forwarded && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            title={t('broker.mppsRetryOneHint')}
+                            aria-label={t('broker.mppsRetryOne')}
+                            disabled={retryOne.isPending}
+                            onClick={() => retryOne.mutate(step.id)}
+                          >
+                            <Send className="h-3 w-3 mr-1" />
+                            {t('broker.mppsRetryOne')}
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

@@ -77,6 +77,14 @@ export default function BrokerPage() {
     enabled: brokerConfigured,
     refetchInterval: 5000,
   });
+  // Die andere Hälfte der Nachvollziehbarkeit: was der Broker **ausgeliefert**
+  // hat. Das Abfrageprotokoll allein beantwortet "kam das Bild an?" nicht.
+  const storesQuery = useQuery({
+    queryKey: ['broker', 'stores', logSince],
+    queryFn: () => brokerApi.logs.stores({ limit: 50, ...(logSince ? { since: logSince } : {}) }),
+    enabled: brokerConfigured,
+    refetchInterval: 5000,
+  });
 
   const sourcesQuery = useQuery({
     queryKey: ['broker', 'sources'],
@@ -123,6 +131,7 @@ export default function BrokerPage() {
 
   const status = statusQuery.data;
   const queryLogs = queriesQuery.data ?? [];
+  const storeLogs = storesQuery.data ?? [];
   const sourceById = new Map((sourcesQuery.data ?? []).map((s) => [s.id, s]));
   const targetById = new Map((targetsQuery.data ?? []).map((t2) => [t2.id, t2]));
 
@@ -423,6 +432,56 @@ export default function BrokerPage() {
                         {t(`broker.queryStatus_${row.status}`, { defaultValue: row.status })}
                       </Badge>
                     </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card data-testid="broker-store-log">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium">{t('broker.storeLogTitle')}</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">{t('broker.storeLogHint')}</p>
+        </CardHeader>
+        <CardContent className="p-0">
+          {storesQuery.isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : storeLogs.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground text-sm">
+              {t('broker.storeLogEmpty')}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('broker.time')}</TableHead>
+                  <TableHead>{t('broker.callingAet')}</TableHead>
+                  <TableHead>{t('broker.accession')}</TableHead>
+                  <TableHead>{t('broker.status')}</TableHead>
+                  <TableHead>{t('broker.storeLogError')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {storeLogs.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="text-xs whitespace-nowrap">
+                      {format(new Date(row.ts), 'dd.MM. HH:mm:ss')}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">{row.calling_aet}</TableCell>
+                    <TableCell className="font-mono text-xs">{row.accession || '—'}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={row.status === 'success' ? 'secondary' : 'outline'}
+                        className="text-[10px]"
+                      >
+                        {t(`broker.storeStatus_${row.status}`, { defaultValue: row.status })}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-destructive">{row.error || ''}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

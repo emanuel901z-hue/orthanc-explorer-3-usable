@@ -43,6 +43,8 @@ const CHROME = [
   'name', 'aet', 'host', 'port', 'priority', 'enabled', 'actions', 'status',
   'charset', 'timeout', 'echo', 'mwlInteropGroup', 'stripQrl', 'stripQrlHint',
   'entity_patient_merge', 'entity_merge_rule', 'entity_mpps_step', 'entity_hl7_field_map',
+  'mppsRetryOne', 'mppsRetryOneHint',
+  'cacheCleared', 'cacheClearSource', 'cacheClearSourceHint', 'storeLogTitle', 'storeLogHint', 'storeLogEmpty', 'storeLogError',
   'addSource', 'editSource', 'deleteSource', 'addTarget', 'editTarget',
   'deleteTarget', 'addRule', 'editRule', 'deleteRule', 'addTransform',
   'editTransform', 'deleteTransform', 'addOperation', 'save', 'edit', 'delete',

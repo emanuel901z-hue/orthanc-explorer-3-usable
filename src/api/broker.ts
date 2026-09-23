@@ -991,6 +991,9 @@ export const brokerApi = {
     /** Report finished steps to the RIS again (they failed while it was down). */
     forwardPending: () => brokerFetch<{ attempted: number; sent: number; failed: number }>(
       '/api/v1/mpps/forward-pending', post({})),
+    /** Report one step again — for the single message the RIS did not accept. */
+    forward: (id: number) => brokerFetch<{ ok: boolean; error: string }>(
+      `/api/v1/mpps/${id}/forward`, post({})),
   },
 
   /** Run the real C-FIND aggregation and show what a modality would receive. */

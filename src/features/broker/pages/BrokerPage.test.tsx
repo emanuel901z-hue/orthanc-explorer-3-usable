@@ -1,15 +1,16 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import BrokerPage from './BrokerPage';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import '@/i18n';
 
-const { mockStatus, mockQueries, mockSources, mockTargets, mockHealth, mockResetBreaker } = vi.hoisted(() => ({
+const { mockStatus, mockQueries, mockStores, mockSources, mockTargets, mockHealth, mockResetBreaker } = vi.hoisted(() => ({
   mockStatus: vi.fn(),
   mockQueries: vi.fn(),
+  mockStores: vi.fn(),
   mockSources: vi.fn(),
   mockTargets: vi.fn(),
   mockHealth: vi.fn(),
@@ -19,7 +20,7 @@ const { mockStatus, mockQueries, mockSources, mockTargets, mockHealth, mockReset
 vi.mock('@/api/broker', () => ({
   brokerApi: {
     status: mockStatus,
-    logs: { queries: mockQueries, stores: vi.fn(() => Promise.resolve([])) },
+    logs: { queries: mockQueries, stores: mockStores },
     sources: { list: mockSources, echo: vi.fn(), resetBreaker: mockResetBreaker },
     targets: { list: mockTargets, echo: vi.fn() },
     rules: { list: vi.fn(() => Promise.resolve([])) },
@@ -56,6 +57,7 @@ describe('BrokerPage', () => {
       counts: { queries: 42, stores: 7, seen_items: 9 },
     });
     mockQueries.mockResolvedValue([]);
+    mockStores.mockResolvedValue([]);
     mockHealth.mockResolvedValue({ findings: [], summary: { error: 0, warning: 0, info: 0 } });
     mockResetBreaker.mockResolvedValue({ source_id: 1, name: 'ris-a', state: 'closed' });
     mockSources.mockResolvedValue([
@@ -203,5 +205,20 @@ describe('BrokerPage', () => {
     await waitFor(() =>
       expect(vi.mocked(brokerApi.sources.echo)).toHaveBeenCalledWith(1),
     );
+  });
+  it('zeigt, was der Broker ausgeliefert hat', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '/broker-api', authMode: 'none', features: {} };
+    loadConfig();
+    mockStores.mockResolvedValue([
+      { id: 1, ts: '2026-09-23T10:15:30Z', calling_aet: 'DVTK_MOD', sop_instance_uid: '1.2.3',
+        study_uid: '1.2.3.4', accession: 'ACC-A-001', source_id: 1, target_id: 2,
+        status: 'success', error: '' },
+    ]);
+    renderPage();
+
+    const card = await screen.findByTestId('broker-store-log');
+    await waitFor(() => expect(within(card).getByText('ACC-A-001')).toBeInTheDocument());
+    expect(within(card).getByText('DVTK_MOD')).toBeInTheDocument();
   });
 });

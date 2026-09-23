@@ -307,6 +307,27 @@ async function domReport(page) {
   await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 1400, height: 900 });
 
+  // Store log + per-source cache clear: two elements the API offered but the UI
+  // did not — the audit's forward check found them (see tests/test_api_ui_contract.py).
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  const storeLog = page.getByTestId('broker-store-log');
+  await storeLog.scrollIntoViewIfNeeded().catch(() => {});
+  const storeLogRows = await storeLog.locator('tbody tr').count().catch(() => 0);
+  const storeLogTitle = await storeLog.getByText(/store log|Store-Log/i).first().isVisible().catch(() => false);
+  record('monitoring: Store-Log zeigt, was ausgeliefert wurde',
+    storeLogTitle && storeLogRows > 0, `Titel=${storeLogTitle} Zeilen=${storeLogRows}`);
+
+  await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  const cachePanel = page.getByTestId('broker-cache');
+  await cachePanel.scrollIntoViewIfNeeded().catch(() => {});
+  const perSourceClear = await cachePanel
+    .getByRole('button', { name: /cache von .* leeren|clear .* cache/i })
+    .first().isVisible().catch(() => false);
+  const cacheRows = await cachePanel.locator('li').count().catch(() => 0);
+  record('monitoring: Cache je Quelle lässt sich einzeln verwerfen',
+    perSourceClear, `Zeilen=${cacheRows} Knopf=${perSourceClear}`);
+
   // The MWL interoperability switch (found with the DVTk RIS emulator): an
   // operator has to see *why* it exists before touching it — and on a small
   // screen the (now taller) source dialog must still fit and scroll.
