@@ -106,6 +106,21 @@ describe('BrokerSettingsPage', () => {
     expect(overrideRow.getByText('—')).toBeInTheDocument();   // ENV default is empty
   });
 
+  it('labels a setting in words, never with its raw key', async () => {
+    // without a translation the page would show "spool_lease_s" — a novice-safe
+    // interface must not do that (a backend test keeps the locales complete)
+    mockList.mockResolvedValue([{
+      key: 'spool_lease_s', value: '300', default: '300', source: 'db' as const,
+      kind: 'int' as const,
+      description: 'How long one instance may hold a claimed spool entry.',
+      min: 30, max: 86400,
+    }]);
+    renderPage();
+
+    await waitFor(() => expect(screen.getByText(/spool claim: lease/i)).toBeInTheDocument());
+    expect(screen.queryByText('spool_lease_s')).not.toBeInTheDocument();
+  });
+
   it('toggles a boolean setting through the switch', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('Strict store status')).toBeInTheDocument());

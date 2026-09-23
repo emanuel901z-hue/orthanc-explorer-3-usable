@@ -49,6 +49,39 @@ async function api(pathname, init) {
   return res.status === 204 ? null : res.json();
 }
 
+/**
+ * Poll until the API shows the effect. A fixed `waitForTimeout` is flaky: under
+ * load the browser needs longer than the number someone guessed, and the check
+ * then reports a failure that is really a slow render. (Measured on a host with
+ * load 16: the same checks failed intermittently with 1200 ms.)
+ */
+async function waitForRow(pathname, predicate, timeoutMs = 10000) {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const hit = (await api(pathname)).find(predicate);
+    if (hit || Date.now() > deadline) return hit || null;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+}
+
+/**
+ * Poll until the API no longer shows the row (delete checks).
+ *
+ * Not `!waitForRow(...)`: the row is still there for a moment after the click,
+ * so a single check returns false immediately and reports a failure although the
+ * delete arrives a heartbeat later (it did — all deletes were 204 in the proxy
+ * log while the checks said "failed").
+ */
+async function waitForGone(pathname, predicate, timeoutMs = 10000) {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const hit = (await api(pathname)).find(predicate);
+    if (!hit) return true;
+    if (Date.now() > deadline) return false;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+}
+
 async function newPage(browser, viewport, isMobile = false) {
   const ctx = await browser.newContext({
     viewport, isMobile, hasTouch: isMobile,
@@ -144,9 +177,8 @@ async function domReport(page) {
   await page.getByLabel('Host', { exact: true }).fill('127.0.0.1');
   await page.getByLabel('Port', { exact: true }).fill('11199');
   await page.getByRole('button', { name: /^save$|^speichern$/i }).click();
-  await page.waitForTimeout(1200);
   let sources = await api('/sources');
-  const created = sources.find((s) => s.name === 'verify-ris');
+  const created = await waitForRow('/sources', (s) => s.name === 'verify-ris');
   record('sources: Anlegen via UI landet in der API', Boolean(created),
     JSON.stringify(created && { id: created.id, aet: created.aet, port: created.port }));
 
@@ -154,17 +186,13 @@ async function domReport(page) {
     await page.getByRole('button', { name: /edit source|quelle bearbeiten/i }).last().click();
     await page.getByLabel('Port', { exact: true }).fill('11200');
     await page.getByRole('button', { name: /^save$|^speichern$/i }).click();
-    await page.waitForTimeout(1200);
-    sources = await api('/sources');
-    record('sources: Bearbeiten via UI wirkt in der API',
-      sources.find((s) => s.id === created.id)?.port === 11200);
+    const edited = await waitForRow('/sources', (s) => s.id === created.id && s.port === 11200);
+    record('sources: Bearbeiten via UI wirkt in der API', Boolean(edited));
 
     await page.getByRole('button', { name: /delete source|quelle löschen/i }).last().click();
     await page.getByRole('button', { name: /^delete$|^löschen$/i }).click();
-    await page.waitForTimeout(1200);
-    sources = await api('/sources');
     record('sources: Löschen via UI entfernt den Datensatz',
-      !sources.some((s) => s.id === created.id));
+      await waitForGone('/sources', (s) => s.id === created.id));
   }
 
   // targets: create with default flag
@@ -175,16 +203,13 @@ async function domReport(page) {
   await page.getByLabel('Host', { exact: true }).fill('127.0.0.1');
   await page.getByLabel('Port', { exact: true }).fill('104');
   await page.getByRole('button', { name: /^save$|^speichern$/i }).click();
-  await page.waitForTimeout(1200);
-  const targets = await api('/targets');
-  const tgt = targets.find((t) => t.name === 'verify-pacs');
+  const tgt = await waitForRow('/targets', (t) => t.name === 'verify-pacs');
   record('targets: Anlegen via UI landet in der API', Boolean(tgt));
   if (tgt) {
     await page.getByRole('button', { name: /delete target|ziel löschen/i }).last().click();
     await page.getByRole('button', { name: /^delete$|^löschen$/i }).click();
-    await page.waitForTimeout(1200);
     record('targets: Löschen via UI entfernt den Datensatz',
-      !(await api('/targets')).some((t) => t.id === tgt.id));
+      await waitForGone('/targets', (t) => t.id === tgt.id));
   }
 
   // rules: create via the (real) Radix selects
@@ -198,16 +223,13 @@ async function domReport(page) {
   await page.getByRole('option', { name: /pacs-peer/ }).first().click();
   await page.getByLabel('Priority', { exact: true }).fill('77');
   await page.getByRole('button', { name: /^save$|^speichern$/i }).click();
-  await page.waitForTimeout(1200);
-  const rules = await api('/rules');
-  const rule = rules.find((r) => r.priority === 77);
+  const rule = await waitForRow('/rules', (r) => r.priority === 77);
   record('rules: Anlegen via UI (Selects) landet in der API', Boolean(rule));
   if (rule) {
     await page.getByRole('button', { name: /delete rule|regel löschen/i }).last().click();
     await page.getByRole('button', { name: /^delete$|^löschen$/i }).click();
-    await page.waitForTimeout(1200);
     record('rules: Löschen via UI entfernt die Regel',
-      !(await api('/rules')).some((r) => r.id === rule.id));
+      await waitForGone('/rules', (r) => r.id === rule.id));
   }
 
   // transforms: create with an operation, then delete
@@ -217,18 +239,14 @@ async function domReport(page) {
   await page.getByLabel('DICOM tag', { exact: true }).fill('InstitutionName');
   await page.getByLabel('Value', { exact: true }).fill('Verify Klinikum');
   await page.getByRole('button', { name: /^save$|^speichern$/i }).click();
-  await page.waitForTimeout(1200);
-  let transforms = await api('/transforms');
-  const tr = transforms.find((t) => t.name === 'verify-modify');
+  const tr = await waitForRow('/transforms', (t) => t.name === 'verify-modify');
   record('transforms: Anlegen via UI landet in der API',
     Boolean(tr), JSON.stringify(tr && tr.operations));
   if (tr) {
     await page.getByRole('button', { name: /delete modify rule|modify-regel löschen/i }).last().click();
     await page.getByRole('button', { name: /^delete$|^löschen$/i }).click();
-    await page.waitForTimeout(1200);
-    transforms = await api('/transforms');
     record('transforms: Löschen via UI entfernt die Regel',
-      !transforms.some((t) => t.id === tr.id));
+      await waitForGone('/transforms', (t) => t.id === tr.id));
   }
 
   // transforms: invalid tag surfaces the backend validation message
@@ -250,20 +268,19 @@ async function domReport(page) {
   if (await resetBtn.count()) { await resetBtn.click(); await page.waitForTimeout(800); }
   await row.getByLabel(/C-ECHO interval/i).fill('42');
   await row.getByRole('button', { name: /^save$|^speichern$/i }).click();
-  await page.waitForTimeout(1200);
-  let settings = await api('/settings');
-  const s1 = settings.find((s) => s.key === 'echo_interval_s');
-  record('settings: Override via UI wirkt in der API', s1.value === '42' && s1.source === 'db',
-    `${s1.value}/${s1.source}`);
-  record('settings: Badge zeigt "override"',
-    await row.getByText(/^override$/i).isVisible());
+  const s1 = await waitForRow('/settings',
+    (s) => s.key === 'echo_interval_s' && s.value === '42' && s.source === 'db');
+  record('settings: Override via UI wirkt in der API', Boolean(s1),
+    s1 ? `${s1.value}/${s1.source}` : 'kein Override angekommen');
+  const badgeOk = await row.getByText(/^override$/i).waitFor({ timeout: 8000 })
+    .then(() => true).catch(() => false);
+  record('settings: Badge zeigt "override"', badgeOk);
 
   await resetBtn.click();
-  await page.waitForTimeout(1200);
-  settings = await api('/settings');
-  const s2 = settings.find((s) => s.key === 'echo_interval_s');
+  const s2 = await waitForRow('/settings',
+    (s) => s.key === 'echo_interval_s' && s.source === 'env');
   record('settings: Reset via UI stellt den ENV-Default wieder her',
-    s2.source === 'env' && s2.value === s2.default, `${s2.value}/${s2.source}`);
+    Boolean(s2) && s2.value === s2.default, s2 ? `${s2.value}/${s2.source}` : 'kein Reset');
 
   // echo button
   await page.goto(`${OE3}/oe3/broker/sources`, { waitUntil: 'domcontentloaded' });
@@ -384,7 +401,13 @@ async function domReport(page) {
   record('HA: Instanzen-Karte wird gerendert', haVisible);
   if (haVisible) {
     const statusBody = await api('/status');
-    const haText = await ha.first().innerText().catch(() => '');
+    // wait for the *content*: the card renders before its query resolves
+    let haText = '';
+    for (let i = 0; i < 20; i++) {
+      haText = await ha.first().innerText().catch(() => '');
+      if (statusBody.instance_id && haText.includes(statusBody.instance_id)) break;
+      await page.waitForTimeout(300);
+    }
     record('HA: die Karte nennt die antwortende Instanz',
       haText.includes(statusBody.instance_id) && statusBody.instance_id.length > 0,
       statusBody.instance_id);
@@ -396,6 +419,23 @@ async function domReport(page) {
       listText.includes(statusBody.instance_id) && /running|läuft/i.test(listText),
       listText.split('\n')[0]?.slice(0, 60) || '');
   }
+
+  // Settings page: every row must be labelled in words. A setting without a
+  // translation shows its raw key ("spool_lease_s") — 15 of 72 did, until a
+  // backend test and this check were added.
+  await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });
+  await page.getByTestId('setting-spool_lease_s').waitFor({ timeout: 15000 }).catch(() => {});
+  const settingRows = await page.locator('[data-testid^="setting-"]').all();
+  const rawKeys = [];
+  for (const row of settingRows) {
+    const testId = (await row.getAttribute('data-testid')) || '';
+    const key = testId.replace('setting-', '');
+    const firstLine = ((await row.innerText()) || '').split('\n')[0].trim();
+    if (firstLine === key) rawKeys.push(key);
+  }
+  record('Einstellungen: jede Zeile ist beschriftet (kein roher Schlüssel)',
+    settingRows.length > 50 && rawKeys.length === 0,
+    rawKeys.length ? rawKeys.slice(0, 4).join(', ') : `${settingRows.length} Zeilen geprüft`);
 
   // About dialog: it must describe the MWL broker, not only the base fork
   await page.goto(`${OE3}/oe3/`, { waitUntil: 'domcontentloaded' });
@@ -489,9 +529,15 @@ async function domReport(page) {
   record('dialog: ungespeicherte Eingaben werden nicht stillschweigend verworfen', discardAsked);
   if (discardAsked) {
     await page.getByRole('button', { name: /discard|verwerfen/i }).last().click();
-    await page.waitForTimeout(400);
   }
-  const dialogClosed = await page.locator('[role="dialog"]').count() === 0;
+  // wait for the dialog to go away — 400 ms was enough on an idle machine, not
+  // on a loaded one (the check then reported a failure the UI did not have)
+  let dialogClosed = false;
+  for (let i = 0; i < 20; i++) {
+    dialogClosed = await page.locator('[role="dialog"]').count() === 0;
+    if (dialogClosed) break;
+    await page.waitForTimeout(300);
+  }
   record('dialog: nach dem Verwerfen ist der Dialog geschlossen', dialogClosed);
 
   // P2 fix: a duplicate AE title is pointed out while typing
@@ -759,15 +805,6 @@ async function domReport(page) {
 
   // IHE PIR: a merge retires the old identifier, a link does not — both kinds
   // must reach the API, and the card has to say which one it recorded
-  const waitForRow = async (path, predicate, timeoutMs = 8000) => {
-    const deadline = Date.now() + timeoutMs;
-    for (;;) {
-      const hit = (await api(path)).find(predicate);
-      if (hit || Date.now() > deadline) return hit || null;
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
-  };
-
   await page.goto(`${OE3}/oe3/broker/worklist`, { waitUntil: 'domcontentloaded' });
   const pir = page.getByTestId('patient-merge-card');
   await pir.first().waitFor({ timeout: 10000 }).catch(() => {});
