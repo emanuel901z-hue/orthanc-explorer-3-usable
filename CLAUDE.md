@@ -71,7 +71,7 @@ GitHub Actions CI (`.github/workflows/ci.yml`) laeuft bei Pull Requests und Push
 |-----|--------|-------|
 | `typecheck` | `tsc --noEmit -p tsconfig.app.json` | ~15s |
 | `lint` | `npm run lint` (ESLint) | ~10s |
-| `test` | `npm run test` (Vitest, 606 Tests) | ~15s |
+| `test` | `npm run test` (Vitest, 673 Tests) | ~15s |
 | `i18n:check` | `npm run i18n:check` (translation coverage) | ~1s |
 | `audit` | `npm run audit` (audit-ci, high+critical blocking) | ~10s |
 
@@ -102,7 +102,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (606 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (673 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -195,9 +195,18 @@ features: {
 | `src/features/settings/components/EmbeddedThemingCard.tsx` | White-labeling: app name, colors, fonts, border radius, compact mode, sidebar/header visibility |
 | `src/lib/smart-search.ts` | Multi-token search with umlaut tolerance and date pattern matching |
 | `src/actions/mergeStudy.ts` | Audit-seam wrapper for study merge — emits `study.merge` audit event |
+| `src/actions/migrateSeries.ts` | Audit-seam wrapper for migrating a series into a study — emits `series.migrate` |
+| `src/actions/migrateInstance.ts` | Audit-seam wrapper for migrating an instance into a study — emits `instance.migrate` |
+| `src/actions/queryModality.ts` | Audit-seam wrapper for DICOM C-FIND against a remote modality — emits `modality.query` |
+| `src/actions/retrieveModality.ts` | Audit-seam wrapper for DICOM C-MOVE retrieve into Orthanc — emits `modality.retrieve` |
+| `src/actions/sendToPeer.ts` | Audit-seam wrapper for sending resources to an Orthanc peer — emits `peer.send` |
+| `src/api/queries.ts` | Typed Orthanc REST wrappers for `/queries` (C-FIND, query answers, content, C-MOVE retrieve) |
 | `src/api/pulmopath-pacs.ts` | Typed client for PP backend PACS endpoints (`/api/v1/pacs/*`, same-origin JWT cookie, `credentials: 'include'`) — **not** Orthanc REST. Currently: `quarantineStudy()` |
 | `src/actions/quarantineStudy.ts` | Audit-seam wrapper for study quarantine — calls the PP backend, emits `study.quarantine` |
 | `src/actions/exportStudies.ts` | Audit-seam wrapper for the multi-study ZIP export (`/tools/create-archive`), emits `study.export` |
+| `src/features/instances/components/InstanceDocumentViewer.tsx` | Inline in-browser viewer for Encapsulated PDF (`/instances/:id/pdf` in iframe) and DICOM Structured Reports |
+| `src/features/tools/components/UidLookupDialog.tsx` | Global DICOM UID lookup dialog (`toolsApi.lookup`) resolving any UID/UUID to its OE3 route |
+| `src/features/studies/components/SendToPeerDialog.tsx` | Direct HTTP transfer dialog to remote Orthanc peers |
 | `src/features/studies/lib/column-layout.ts` | Automatic studies-list column layout: `distributeColumnWidths()` shares the container width over the visible columns (proportional to `size`, never below `minSize`), `totalTableWidth()` grows the table when the columns need more room. Manual widths are merged on top |
 | `src/store/ui-state.ts` | Navigation-proof page UI state: `usePersistedState` (localStorage — **non-PHI only**) and `useRememberedState` (memory only — for anything that may contain PHI). Use these instead of plain `useState` for filters, columns, widths, sort order and view modes |
 | `src/lib/use-remembered-search-params.ts` | `useSearchParams()` + remembers the filter query across tab/view switches (deep link wins; clearing the filters clears the memory) |
