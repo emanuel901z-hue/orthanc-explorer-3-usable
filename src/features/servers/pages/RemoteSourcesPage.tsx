@@ -24,13 +24,15 @@ import {
 import { useModalities } from '@/features/settings/hooks/use-modalities';
 import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
 import { modalitiesApi } from '@/api/modalities';
+import { queryModalityAction } from '@/actions/queryModality';
+import { retrieveModalityAction } from '@/actions/retrieveModality';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { usePersistedState, useRememberedState } from '@/store/ui-state';
 
 interface RemoteStudy {
   queryId: string;
-  answerId: string;
+  answerIndex: number;
   patientName: string;
   patientId: string;
   studyDate: string;
@@ -84,39 +86,34 @@ export default function RemoteSourcesPage() {
       if (queryPatientName) query['PatientName'] = `*${queryPatientName}*`;
       if (queryPatientId) query['PatientID'] = `*${queryPatientId}*`;
       if (queryAccession) query['AccessionNumber'] = `*${queryAccession}*`;
-      // Always request StudyInstanceUID
       query['StudyInstanceUID'] = '';
 
-      const results = await modalitiesApi.query(selectedModality, {
+      const result = await queryModalityAction(selectedModality, {
         Level: 'Study',
         Query: query,
       });
 
-      // Parse query answers — Orthanc returns array of answer objects
-      const studies: RemoteStudy[] = [];
-      if (Array.isArray(results)) {
-        for (const answer of results) {
-          const a = answer as Record<string, Record<string, string>>;
-          const tags = a['0010,0010'] ? a : (a as any);
-          studies.push({
-            queryId: (answer as any).ID || '',
-            answerId: (answer as any).ID || '',
-            patientName: tags['0010,0010']?.Value || tags['PatientName'] || '—',
-            patientId: tags['0010,0020']?.Value || tags['PatientID'] || '—',
-            studyDate: tags['0008,0020']?.Value || tags['StudyDate'] || '—',
-            studyDescription: tags['0008,1030']?.Value || tags['StudyDescription'] || '—',
-            accessionNumber: tags['0008,0050']?.Value || tags['AccessionNumber'] || '—',
-            modalities: tags['0008,0061']?.Value || tags['ModalitiesInStudy'] || '—',
-            studyInstanceUid: tags['0020,000d']?.Value || tags['StudyInstanceUID'] || '',
-            retrieving: false,
-            retrieved: false,
-            error: false,
-          });
-        }
-      }
+      const studies: RemoteStudy[] = result.answers.map((ans) => {
+        const tags = ans.tags;
+        return {
+          queryId: result.queryId,
+          answerIndex: ans.index,
+          patientName: tags['0010,0010'] || tags['PatientName'] || '—',
+          patientId: tags['0010,0020'] || tags['PatientID'] || '—',
+          studyDate: tags['0008,0020'] || tags['StudyDate'] || '—',
+          studyDescription: tags['0008,1030'] || tags['StudyDescription'] || '—',
+          accessionNumber: tags['0008,0050'] || tags['AccessionNumber'] || '—',
+          modalities: tags['0008,0061'] || tags['ModalitiesInStudy'] || '—',
+          studyInstanceUid: tags['0020,000d'] || tags['StudyInstanceUID'] || '',
+          retrieving: false,
+          retrieved: false,
+          error: false,
+        };
+      });
+
       setRemoteStudies(studies);
       toast.success(t('remote.querySuccess', { count: studies.length, defaultValue: `${studies.length} studies found` }));
-    } catch (e) {
+    } catch {
       toast.error(t('remote.queryFailed', { defaultValue: 'C-FIND query failed' }));
     } finally {
       setQuerying(false);
@@ -125,14 +122,23 @@ export default function RemoteSourcesPage() {
 
   // C-MOVE retrieve for a specific query answer
   const handleRetrieve = async (study: RemoteStudy, index: number) => {
-    setRemoteStudies((prev) => prev.map((s, i) => i === index ? { ...s, retrieving: true } : s));
+    setRemoteStudies((prev) => prev.map((s, i) => i === index ? { ...s, retrieving: true, error: false } : s));
     try {
-      await modalitiesApi.retrieve(selectedModality, study.queryId);
+      await retrieveModalityAction(selectedModality, study.queryId, study.answerIndex);
       setRemoteStudies((prev) => prev.map((s, i) => i === index ? { ...s, retrieving: false, retrieved: true } : s));
       toast.success(t('remote.retrieveStarted', { defaultValue: 'Retrieve started (C-MOVE)' }));
-    } catch (e) {
+    } catch {
       setRemoteStudies((prev) => prev.map((s, i) => i === index ? { ...s, retrieving: false, error: true } : s));
       toast.error(t('remote.retrieveFailed', { defaultValue: 'Retrieve failed' }));
+    }
+  };
+
+  const handleRetrieveAll = async () => {
+    for (let i = 0; i < remoteStudies.length; i++) {
+      const s = remoteStudies[i];
+      if (!s.retrieved && !s.retrieving) {
+        await handleRetrieve(s, i);
+      }
     }
   };
 
@@ -245,6 +251,20 @@ export default function RemoteSourcesPage() {
           {/* Query results */}
           {remoteStudies.length > 0 ? (
             <Card>
+              <div className="flex items-center justify-between p-3 border-b">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  {t('remote.resultsCount', { count: remoteStudies.length, defaultValue: `${remoteStudies.length} studies found` })}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5 text-xs"
+                  onClick={handleRetrieveAll}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  {t('remote.retrieveAll', { defaultValue: 'Retrieve all' })}
+                </Button>
+              </div>
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
