@@ -32,6 +32,26 @@ export function AnonymizeDialog({ open, onOpenChange, level, resourceId, resourc
   const [keepStudyDesc, setKeepStudyDesc] = useState(false);
   const [keepSeriesDesc, setKeepSeriesDesc] = useState(false);
 
+  const applyPreset = (preset: 'full' | 'clinical' | 'clear') => {
+    const suffix = resourceId.slice(0, 8);
+    if (preset === 'full') {
+      setNewPatientName('ANONYMOUS');
+      setNewPatientId(`ANON-${suffix}`);
+      setKeepStudyDesc(false);
+      setKeepSeriesDesc(false);
+    } else if (preset === 'clinical') {
+      setNewPatientName(`SUBJECT-${suffix}`);
+      setNewPatientId(`SUBJ-${suffix}`);
+      setKeepStudyDesc(true);
+      setKeepSeriesDesc(true);
+    } else {
+      setNewPatientName('');
+      setNewPatientId('');
+      setKeepStudyDesc(false);
+      setKeepSeriesDesc(false);
+    }
+  };
+
   const handleClose = () => {
     onOpenChange(false);
     setTimeout(() => {
@@ -80,6 +100,40 @@ export function AnonymizeDialog({ open, onOpenChange, level, resourceId, resourc
 
         {/* Settings */}
         <div className="space-y-4">
+          {/* Preset Buttons */}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">{t('anonymize.presets', { defaultValue: 'Presets' })}</Label>
+            <div className="flex gap-1.5 flex-wrap">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => applyPreset('full')}
+              >
+                {t('anonymize.presetFull', { defaultValue: 'Full De-ID' })}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => applyPreset('clinical')}
+              >
+                {t('anonymize.presetClinical', { defaultValue: 'Clinical Research' })}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => applyPreset('clear')}
+              >
+                {t('anonymize.presetClear', { defaultValue: 'Reset' })}
+              </Button>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="anon-patient-name">{t('anonymize.newPatientName')}</Label>
             <Input

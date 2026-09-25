@@ -12,14 +12,16 @@ import { useUiStore } from '@/store/ui-store';
 import { useKeyboardShortcuts } from '@/shared/hooks/use-keyboard-shortcuts';
 import { KeyboardShortcutsDialog } from '@/shared/components/KeyboardShortcutsDialog';
 import { Button } from '@/components/ui/button';
-import { Keyboard, Menu } from 'lucide-react';
+import { Keyboard, Menu, Search } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { UidLookupDialog } from '@/features/tools/components/UidLookupDialog';
 
 export function AppLayout() {
   const location = useLocation();
   const { t } = useTranslation();
   const { tabs, openTab } = useTabStore();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [lookupOpen, setLookupOpen] = useState(false);
   const { appName, logoUrl, hideSidebar, hideHeader, applyTheming } = useUiStore();
 
   useEffect(() => {
@@ -71,6 +73,19 @@ export function AppLayout() {
                     variant="ghost"
                     size="sm"
                     className="h-9 w-9 p-0 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                    onClick={() => setLookupOpen(true)}
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('lookup.title', { defaultValue: 'DICOM UID Lookup' })}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 w-9 p-0 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                     onClick={toggleShortcuts}
                   >
                     <Keyboard className="h-4 w-4" />
@@ -90,6 +105,7 @@ export function AppLayout() {
         </div>
       </div>
       <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+      <UidLookupDialog open={lookupOpen} onOpenChange={setLookupOpen} />
     </SidebarProvider>
   );
 }

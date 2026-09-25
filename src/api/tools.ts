@@ -16,12 +16,12 @@ export type LookupResult = {
 };
 
 export const toolsApi = {
-  /** POST /tools/lookup — Looks up a DICOM UID (e.g. StudyInstanceUID) and returns the Orthanc resource path. */
-  lookup: (body: string | Record<string, unknown>) =>
-    orthancFetch<LookupResult>('/tools/lookup', {
+  /** POST /tools/lookup — Looks up a DICOM UID (e.g. StudyInstanceUID, SOPInstanceUID) and returns matching Orthanc resources. */
+  lookup: (uid: string) =>
+    orthancFetch<LookupResult[]>('/tools/lookup', {
       method: 'POST',
-      headers: JSON_CONTENT_HEADERS,
-      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'text/plain' },
+      body: uid.trim(),
     }),
 
   /**
