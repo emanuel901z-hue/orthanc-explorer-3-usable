@@ -53,7 +53,9 @@ import { useJobStore } from '@/store/job-store';
 import { useAuditStore } from '@/store/audit-store';
 import { ActivityEvent, ActivityCategory, ActivitySeverity } from '@/shared/types/activity';
 import { ActivityDetailPanel } from '@/features/activity/components/ActivityDetailPanel';
+import { normalizeResourceRefs } from '@/features/activity/lib/orthanc-resources';
 import { useActivityUIStore } from '@/store/activity-ui-store';
+import { usePersistedState, useRememberedState } from '@/store/ui-state';
 import { cn } from '@/lib/utils';
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
@@ -279,12 +281,10 @@ function orthancJobToActivity(
   const failedInstancesCount = typeof content['FailedInstancesCount'] === 'number'
     ? content['FailedInstancesCount'] as number
     : undefined;
-  const parentResources = Array.isArray(content['ParentResources'])
-    ? content['ParentResources'] as string[]
-    : [];
-  const resources = Array.isArray(content['Resources'])
-    ? content['Resources'] as Record<string, unknown>[]
-    : [];
+  // Orthanc liefert Ressourcenreferenzen je Version als String oder als
+  // Objekt { ID, Type } — beide Formen auf IDs normalisieren.
+  const parentResources = normalizeResourceRefs(content['ParentResources']);
+  const resources = normalizeResourceRefs(content['Resources']);
   const archiveSizeMB = typeof content['ArchiveSizeMB'] === 'number'
     ? content['ArchiveSizeMB'] as number
     : undefined;
@@ -457,12 +457,19 @@ export default function ActivityPage() {
   const { pendingSelectId, setPendingSelectId } = useActivityUIStore();
   const { data: changesData } = useChanges();
   const { data: orthancJobs = [] } = useOrthancJobs();
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('job');
-  const [myJobsOnly, setMyJobsOnly] = useState(false);
-  const [severityFilter, setSeverityFilter] = useState<string>('all');
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
-  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  // Filters survive navigation (tab/view switch). The free-text search may
+  // contain PHI, so it is only kept in memory; the rest is persisted.
+  const [search, setSearch] = useRememberedState('activity.search', '');
+  const [categoryFilter, setCategoryFilter] = usePersistedState('activity.categoryFilter', 'job');
+  const [myJobsOnly, setMyJobsOnly] = usePersistedState('activity.myJobsOnly', false);
+  const [severityFilter, setSeverityFilter] = usePersistedState('activity.severityFilter', 'all');
+  // Dates must be JSON-serializable — store them as ISO strings.
+  const [dateFromIso, setDateFromIso] = usePersistedState<string>('activity.dateFrom', '');
+  const [dateToIso, setDateToIso] = usePersistedState<string>('activity.dateTo', '');
+  const dateFrom = useMemo(() => (dateFromIso ? new Date(dateFromIso) : undefined), [dateFromIso]);
+  const dateTo = useMemo(() => (dateToIso ? new Date(dateToIso) : undefined), [dateToIso]);
+  const setDateFrom = (date?: Date) => setDateFromIso(date ? date.toISOString() : '');
+  const setDateTo = (date?: Date) => setDateToIso(date ? date.toISOString() : '');
   const [selectedEvent, setSelectedEvent] = useState<ActivityEvent | null>(null);
 
   // Merge: Orthanc jobs + client-side jobs + live audit events + changes feed

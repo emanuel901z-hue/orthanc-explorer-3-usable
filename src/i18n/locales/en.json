@@ -107,7 +107,8 @@
       "seriesCount": "{{count}} series",
       "config": "Columns",
       "toggle": "Toggle columns",
-      "view": "View"
+      "view": "View",
+      "autoWidth": "Auto widths"
     },
     "filters": {
       "patientId": "Patient ID",
@@ -133,7 +134,9 @@
       "export": "Export",
       "label": "Label",
       "send": "Send",
-      "delete": "Delete"
+      "delete": "Delete",
+      "anonymize": "Anonymize",
+      "quarantine": "Quarantine"
     },
     "labels": "Labels",
     "labelModeAny": "OR",
@@ -144,7 +147,39 @@
     "print": "Print / Save PDF",
     "sortBy": "Sort by",
     "sortAsc": "Ascending",
-    "sortDesc": "Descending"
+    "sortDesc": "Descending",
+    "bulkExportSuccess": "{{count}} study/studies exported.",
+    "bulkExportError": "Export failed.",
+    "bulkAnonymizeTitle": "Anonymize selected studies?",
+    "bulkAnonymizeConfirm": "{{count}} study/studies will be anonymized (one copy each).",
+    "bulkAnonymizeRunning": "Anonymizing…",
+    "bulkAnonymizeSuccess": "{{count}} study/studies anonymized.",
+    "bulkAnonymizePartial": "{{ok}} of {{total}} anonymized — {{failed}} failed.",
+    "bulkAnonymizeError": "Anonymization failed.",
+    "labelDialog": {
+      "title": "Set label",
+      "description": "Sets a label on {{count}} study/studies.",
+      "placeholder": "Label name",
+      "apply": "Set label",
+      "applying": "Setting label…",
+      "missing": "Please enter a label.",
+      "success": "Label “{{label}}” set on {{count}} study/studies.",
+      "partial": "{{ok}} of {{total}} study/studies labelled — {{failed}} failed.",
+      "error": "Could not set the label."
+    },
+    "quarantineDialog": {
+      "title": "Send to quarantine?",
+      "description": "The PatientID is renamed to QRN-ADOPT-… in place. The study is kept and can be restored in PP under “Orphaned studies”.",
+      "bulkDescription": "{{count}} study/studies will be renamed to QRN-ADOPT-… in place. They are kept and can be restored in PP.",
+      "reason": "Reason (optional)",
+      "reasonPlaceholder": "e.g. duplicate, wrong assignment",
+      "confirm": "Quarantine",
+      "running": "Quarantining…",
+      "success": "Study moved to quarantine ({{patientId}}).",
+      "bulkSuccess": "{{count}} study/studies moved to quarantine.",
+      "partial": "{{ok}} of {{total}} moved — {{failed}} failed.",
+      "error": "Quarantine failed."
+    }
   },
   "studyDetail": {
     "patientId": "Patient ID",
@@ -408,7 +443,9 @@
     "send": "Send",
     "modify": "Modify",
     "anonymize": "Anonymize",
-    "delete": "Delete"
+    "delete": "Delete",
+    "label": "Label",
+    "quarantine": "Quarantine"
   },
   "common": {
     "save": "Save",

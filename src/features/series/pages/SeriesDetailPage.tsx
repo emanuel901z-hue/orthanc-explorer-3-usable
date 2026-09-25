@@ -17,6 +17,7 @@ import {
   GitMerge,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { usePersistedState } from '@/store/ui-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -173,7 +174,7 @@ export default function SeriesDetailPage() {
   const [anonOpen, setAnonOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
-  const [instanceView, setInstanceView] = useState<'grid' | 'table'>('grid');
+  const [instanceView, setInstanceView] = usePersistedState<'grid' | 'table'>('seriesDetail.instanceView', 'grid');
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { audit } = useAuditLog();

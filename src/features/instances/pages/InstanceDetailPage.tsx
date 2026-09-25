@@ -24,6 +24,7 @@ import { downloadInstanceAction } from '@/actions/downloadInstance';
 import { deleteInstanceAction } from '@/actions/deleteInstance';
 import { toast } from 'sonner';
 import type { DicomTag } from '@/shared/types';
+import { useRememberedState } from '@/store/ui-state';
 
 const SOP_CLASS_NAMES: Record<string, string> = {
   '1.2.840.10008.5.1.4.1.1.2':     'CT Image Storage',
@@ -81,7 +82,8 @@ export default function InstanceDetailPage() {
   const { data: study } = useStudy(studyId!);
   const { data: seriesData } = useSeries(seriesId!);
   const { data: transferSyntax } = useInstanceTransferSyntax(instanceId!);
-  const [tagSearch, setTagSearch] = useState('');
+  // Tag search may match patient data — memory only, never persisted.
+  const [tagSearch, setTagSearch] = useRememberedState('instanceDetail.tagSearch', '');
   const [sendOpen, setSendOpen] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);

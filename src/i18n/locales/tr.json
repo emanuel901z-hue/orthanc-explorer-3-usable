@@ -106,7 +106,8 @@
       "seriesCount": "{{count}} seri",
       "config": "Sütunlar",
       "toggle": "Sütunları değiştir",
-      "view": "Görüntüle"
+      "view": "Görüntüle",
+      "autoWidth": "Otomatik genişlik"
     },
     "filters": {
       "patientId": "Hasta ID",
@@ -132,7 +133,9 @@
       "export": "Dışa Aktar",
       "label": "Etiketle",
       "send": "Gönder",
-      "delete": "Sil"
+      "delete": "Sil",
+      "anonymize": "Anonimleştir",
+      "quarantine": "Karantina"
     },
     "labels": "Etiketler",
     "labelModeAny": "VEYA",
@@ -143,7 +146,39 @@
     "quickReport": "Quick report",
     "sortBy": "Sırala",
     "sortAsc": "Artan",
-    "sortDesc": "Azalan"
+    "sortDesc": "Azalan",
+    "bulkExportSuccess": "{{count}} tetkik dışa aktarıldı.",
+    "bulkExportError": "Dışa aktarma başarısız.",
+    "bulkAnonymizeTitle": "Seçili tetkikler anonimleştirilsin mi?",
+    "bulkAnonymizeConfirm": "{{count}} tetkik anonimleştirilecek (her biri için bir kopya).",
+    "bulkAnonymizeRunning": "Anonimleştiriliyor…",
+    "bulkAnonymizeSuccess": "{{count}} tetkik anonimleştirildi.",
+    "bulkAnonymizePartial": "{{total}} tetkikin {{ok}} tanesi anonimleştirildi — {{failed}} başarısız.",
+    "bulkAnonymizeError": "Anonimleştirme başarısız.",
+    "labelDialog": {
+      "title": "Etiket ata",
+      "description": "{{count}} tetkike etiket atar.",
+      "placeholder": "Etiket adı",
+      "apply": "Etiketi ata",
+      "applying": "Etiket atanıyor…",
+      "missing": "Lütfen bir etiket girin.",
+      "success": "{{count}} tetkike \"{{label}}\" etiketi atandı.",
+      "partial": "{{total}} tetkikin {{ok}} tanesine atandı — {{failed}} başarısız.",
+      "error": "Etiket atanamadı."
+    },
+    "quarantineDialog": {
+      "title": "Karantinaya gönderilsin mi?",
+      "description": "PatientID yerinde QRN-ADOPT-… olarak yeniden adlandırılır. Tetkik korunur ve PP’de \"Sahipsiz tetkikler\" altında geri alınabilir.",
+      "bulkDescription": "{{count}} tetkik yerinde QRN-ADOPT-… olarak yeniden adlandırılacak. Korunurlar ve PP’de geri alınabilirler.",
+      "reason": "Gerekçe (isteğe bağlı)",
+      "reasonPlaceholder": "örn. kopya, hatalı atama",
+      "confirm": "Karantina",
+      "running": "Karantinaya alınıyor…",
+      "success": "Tetkik karantinaya alındı ({{patientId}}).",
+      "bulkSuccess": "{{count}} tetkik karantinaya alındı.",
+      "partial": "{{total}} tetkikin {{ok}} tanesi alındı — {{failed}} başarısız.",
+      "error": "Karantina başarısız."
+    }
   },
   "upload": {
     "subtitle": "Yüklemek için DICOM dosyalarını veya klasörlerini sürükleyip bırakın",
@@ -353,7 +388,9 @@
     "send": "Gönder",
     "modify": "Düzenle",
     "anonymize": "Anonimleştir",
-    "delete": "Sil"
+    "delete": "Sil",
+    "label": "Etiket",
+    "quarantine": "Karantina"
   },
   "common": {
     "save": "Kaydet",

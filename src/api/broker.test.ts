@@ -384,10 +384,16 @@ describe("brokerApi — sprints 3+4 (the newer calls)", () => {
   });
   afterEach(() => { __resetConfigForTests(); vi.restoreAllMocks(); });
 
-  const ok = (body: unknown) =>
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+  const ok = (body: unknown) => {
+    // vi.spyOn returns the *existing* mock when fetch is already spied, so the
+    // call history would accumulate across the assertions of one test. Clear it
+    // so `calls[0]` always belongs to the call the assertion just made.
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockClear();
+    return spy.mockResolvedValue(
       new Response(JSON.stringify(body), { status: 200 }),
     );
+  };
 
   it("sources.query() posts to the per-source C-FIND test", async () => {
     const fetchMock = ok({ source_id: 1, name: "ris-a", ok: true, answers: 2 });

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
+import { usePersistedState, useRememberedState } from '@/store/ui-state';
 import { cn } from '@/lib/utils';
 
 export interface DicomTagEntry {
@@ -387,9 +388,10 @@ interface DicomTagBrowserProps {
 export default function DicomTagBrowser({ study, tags, editable, onModificationsChange }: DicomTagBrowserProps) {
   const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width: 767px)');
-  const [search, setSearch] = useState('');
-  const [sortKey, setSortKey] = useState<'tag' | 'name' | 'vr' | 'value'>('tag');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  // The search can match tag values (PHI) — memory only; the sort order persists.
+  const [search, setSearch] = useRememberedState('tagBrowser.search', '');
+  const [sortKey, setSortKey] = usePersistedState<'tag' | 'name' | 'vr' | 'value'>('tagBrowser.sortKey', 'tag');
+  const [sortDir, setSortDir] = usePersistedState<'asc' | 'desc'>('tagBrowser.sortDir', 'asc');
   const allTags = useMemo(
     () => tags,
     [tags],

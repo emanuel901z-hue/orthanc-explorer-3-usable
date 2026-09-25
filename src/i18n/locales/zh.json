@@ -300,7 +300,9 @@
     "modify": "修改",
     "anonymize": "匿名化",
     "delete": "删除",
-    "openInOhif": "在OHIF中打开"
+    "openInOhif": "在OHIF中打开",
+    "label": "标签",
+    "quarantine": "隔离"
   },
   "common": {
     "save": "保存",
@@ -583,7 +585,9 @@
       "delete": "删除",
       "export": "导出",
       "label": "标签",
-      "send": "发送"
+      "send": "发送",
+      "anonymize": "匿名化",
+      "quarantine": "隔离"
     },
     "columns": {
       "accession": "检查号",
@@ -598,7 +602,8 @@
       "studyInstanceUID": "研究UID",
       "config": "列",
       "toggle": "切换列",
-      "view": "查看"
+      "view": "查看",
+      "autoWidth": "自动列宽"
     },
     "empty": "未找到研究",
     "filters": {
@@ -629,7 +634,39 @@
     "quickReport": "Quick report",
     "sortBy": "排序方式",
     "sortAsc": "升序",
-    "sortDesc": "降序"
+    "sortDesc": "降序",
+    "bulkExportSuccess": "已导出 {{count}} 项检查。",
+    "bulkExportError": "导出失败。",
+    "bulkAnonymizeTitle": "匿名化所选检查？",
+    "bulkAnonymizeConfirm": "将匿名化 {{count}} 项检查（各生成一份副本）。",
+    "bulkAnonymizeRunning": "正在匿名化…",
+    "bulkAnonymizeSuccess": "已匿名化 {{count}} 项检查。",
+    "bulkAnonymizePartial": "{{total}} 项中已匿名化 {{ok}} 项 — {{failed}} 项失败。",
+    "bulkAnonymizeError": "匿名化失败。",
+    "labelDialog": {
+      "title": "设置标签",
+      "description": "为 {{count}} 项检查设置标签。",
+      "placeholder": "标签名称",
+      "apply": "设置标签",
+      "applying": "正在设置标签…",
+      "missing": "请输入标签。",
+      "success": "已为 {{count}} 项检查设置标签“{{label}}”。",
+      "partial": "{{total}} 项中已设置 {{ok}} 项 — {{failed}} 项失败。",
+      "error": "无法设置标签。"
+    },
+    "quarantineDialog": {
+      "title": "移入隔离？",
+      "description": "PatientID 将就地重命名为 QRN-ADOPT-…。检查会被保留，可在 PP 的“孤立检查”中恢复。",
+      "bulkDescription": "{{count}} 项检查的 PatientID 将就地重命名为 QRN-ADOPT-…。检查会被保留，可在 PP 中恢复。",
+      "reason": "原因（可选）",
+      "reasonPlaceholder": "例如：重复、错误分配",
+      "confirm": "隔离",
+      "running": "正在隔离…",
+      "success": "检查已移入隔离（{{patientId}}）。",
+      "bulkSuccess": "已将 {{count}} 项检查移入隔离。",
+      "partial": "{{total}} 项中已移入 {{ok}} 项 — {{failed}} 项失败。",
+      "error": "隔离失败。"
+    }
   },
   "study": {
     "modifyTitle": "修改研究标签",

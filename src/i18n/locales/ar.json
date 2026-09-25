@@ -106,7 +106,8 @@
       "seriesCount": "{{count}} سلسلة",
       "config": "الأعمدة",
       "toggle": "تبديل الأعمدة",
-      "view": "عرض"
+      "view": "عرض",
+      "autoWidth": "عرض تلقائي"
     },
     "filters": {
       "patientId": "معرف المريض",
@@ -132,7 +133,9 @@
       "export": "تصدير",
       "label": "تصنيف",
       "send": "إرسال",
-      "delete": "حذف"
+      "delete": "حذف",
+      "anonymize": "إخفاء الهوية",
+      "quarantine": "الحجر"
     },
     "labels": "العلامات",
     "labelModeAny": "أو",
@@ -143,7 +146,39 @@
     "quickReport": "Quick report",
     "sortBy": "ترتيب حسب",
     "sortAsc": "تصاعدي",
-    "sortDesc": "تنازلي"
+    "sortDesc": "تنازلي",
+    "bulkExportSuccess": "تم تصدير {{count}} فحص.",
+    "bulkExportError": "فشل التصدير.",
+    "bulkAnonymizeTitle": "إخفاء هوية الفحوص المحددة؟",
+    "bulkAnonymizeConfirm": "سيتم إخفاء هوية {{count}} فحص (نسخة لكل منها).",
+    "bulkAnonymizeRunning": "جارٍ إخفاء الهوية…",
+    "bulkAnonymizeSuccess": "تم إخفاء هوية {{count}} فحص.",
+    "bulkAnonymizePartial": "تم إخفاء هوية {{ok}} من {{total}} — فشل {{failed}}.",
+    "bulkAnonymizeError": "فشل إخفاء الهوية.",
+    "labelDialog": {
+      "title": "تعيين تسمية",
+      "description": "يعيّن تسمية على {{count}} فحص.",
+      "placeholder": "اسم التسمية",
+      "apply": "تعيين التسمية",
+      "applying": "جارٍ تعيين التسمية…",
+      "missing": "يرجى إدخال تسمية.",
+      "success": "تم تعيين التسمية «{{label}}» على {{count}} فحص.",
+      "partial": "تم تعيين {{ok}} من {{total}} — فشل {{failed}}.",
+      "error": "تعذّر تعيين التسمية."
+    },
+    "quarantineDialog": {
+      "title": "إرسال إلى الحجر؟",
+      "description": "ستُعاد تسمية PatientID إلى QRN-ADOPT-… في مكانه. يبقى الفحص محفوظًا ويمكن استعادته في PP ضمن «الفحوص اليتيمة».",
+      "bulkDescription": "ستُعاد تسمية {{count}} فحص إلى QRN-ADOPT-… في مكانه. تبقى محفوظة ويمكن استعادتها في PP.",
+      "reason": "السبب (اختياري)",
+      "reasonPlaceholder": "مثل: تكرار، إسناد خاطئ",
+      "confirm": "إلى الحجر",
+      "running": "جارٍ الإرسال إلى الحجر…",
+      "success": "تم إرسال الفحص إلى الحجر ({{patientId}}).",
+      "bulkSuccess": "تم إرسال {{count}} فحص إلى الحجر.",
+      "partial": "تم إرسال {{ok}} من {{total}} — فشل {{failed}}.",
+      "error": "فشل الإرسال إلى الحجر."
+    }
   },
   "upload": {
     "subtitle": "اسحب وأفلت ملفات أو مجلدات DICOM لرفعها",
@@ -353,7 +388,9 @@
     "send": "إرسال",
     "modify": "تعديل",
     "anonymize": "إخفاء الهوية",
-    "delete": "حذف"
+    "delete": "حذف",
+    "label": "تسمية",
+    "quarantine": "الحجر"
   },
   "common": {
     "save": "حفظ",

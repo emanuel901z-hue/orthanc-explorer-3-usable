@@ -300,7 +300,9 @@
     "modify": "Modifier",
     "anonymize": "Anonymiser",
     "delete": "Supprimer",
-    "openInOhif": "Ouvrir dans OHIF"
+    "openInOhif": "Ouvrir dans OHIF",
+    "label": "Étiquette",
+    "quarantine": "Quarantaine"
   },
   "common": {
     "save": "Enregistrer",
@@ -583,7 +585,9 @@
       "delete": "Supprimer",
       "export": "Exporter",
       "label": "Étiquette",
-      "send": "Envoyer"
+      "send": "Envoyer",
+      "anonymize": "Anonymiser",
+      "quarantine": "Quarantaine"
     },
     "columns": {
       "accession": "N° d'accès",
@@ -598,7 +602,8 @@
       "studyInstanceUID": "UID d'étude",
       "config": "Colonnes",
       "toggle": "Basculer les colonnes",
-      "view": "Voir"
+      "view": "Voir",
+      "autoWidth": "Largeurs automatiques"
     },
     "empty": "Aucune étude trouvée",
     "filters": {
@@ -629,7 +634,39 @@
     "quickReport": "Quick report",
     "sortBy": "Trier par",
     "sortAsc": "Croissant",
-    "sortDesc": "Décroissant"
+    "sortDesc": "Décroissant",
+    "bulkExportSuccess": "{{count}} étude(s) exportée(s).",
+    "bulkExportError": "L'export a échoué.",
+    "bulkAnonymizeTitle": "Anonymiser les études sélectionnées ?",
+    "bulkAnonymizeConfirm": "{{count}} étude(s) seront anonymisées (une copie chacune).",
+    "bulkAnonymizeRunning": "Anonymisation…",
+    "bulkAnonymizeSuccess": "{{count}} étude(s) anonymisée(s).",
+    "bulkAnonymizePartial": "{{ok}} sur {{total}} anonymisées — {{failed}} en échec.",
+    "bulkAnonymizeError": "L'anonymisation a échoué.",
+    "labelDialog": {
+      "title": "Définir une étiquette",
+      "description": "Définit une étiquette sur {{count}} étude(s).",
+      "placeholder": "Nom de l'étiquette",
+      "apply": "Définir l'étiquette",
+      "applying": "Définition de l'étiquette…",
+      "missing": "Veuillez saisir une étiquette.",
+      "success": "Étiquette « {{label}} » définie sur {{count}} étude(s).",
+      "partial": "{{ok}} sur {{total}} étude(s) étiquetées — {{failed}} en échec.",
+      "error": "Impossible de définir l'étiquette."
+    },
+    "quarantineDialog": {
+      "title": "Mettre en quarantaine ?",
+      "description": "Le PatientID est renommé en QRN-ADOPT-… sur place. L’étude est conservée et peut être restaurée dans PP sous « Études orphelines ».",
+      "bulkDescription": "{{count}} étude(s) seront renommées en QRN-ADOPT-… sur place. Elles sont conservées et peuvent être restaurées dans PP.",
+      "reason": "Motif (facultatif)",
+      "reasonPlaceholder": "p. ex. doublon, affectation erronée",
+      "confirm": "Quarantaine",
+      "running": "Mise en quarantaine…",
+      "success": "Étude mise en quarantaine ({{patientId}}).",
+      "bulkSuccess": "{{count}} étude(s) mises en quarantaine.",
+      "partial": "{{ok}} sur {{total}} mises — {{failed}} en échec.",
+      "error": "La mise en quarantaine a échoué."
+    }
   },
   "study": {
     "modifyTitle": "Modifier les étiquettes de l'étude",

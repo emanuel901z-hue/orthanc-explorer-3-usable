@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import {
@@ -9,9 +9,7 @@ import {
   getPaginationRowModel,
   flexRender,
   type ColumnDef,
-  type SortingState,
   type ColumnSizingState,
-  type VisibilityState,
 } from '@tanstack/react-table';
 import {
   Search,
@@ -24,10 +22,13 @@ import {
   Download,
   Tag,
   Send,
+  Shield,
+  ShieldAlert,
   HelpCircle,
   Eye,
   Loader2,
   Settings2,
+  RotateCcw,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -57,15 +58,23 @@ import {
   TooltipProvider,
 } from '@/components/ui/tooltip';
 import { useStudies } from '@/features/studies/hooks/use-studies';
+import { distributeColumnWidths, totalTableWidth } from '@/features/studies/lib/column-layout';
+import { useRememberedSearchParams } from '@/lib/use-remembered-search-params';
+import { usePersistedState } from '@/store/ui-state';
+import { DEFAULT_COLUMN_VISIBILITY, DEFAULT_SORTING } from '@/features/studies/pages/study-list-defaults';
 import { Study, StudyFilters } from '@/shared/types';
 import { ModalityBadge, formatPatientName } from '@/shared/components/ModalityBadge';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
+import QuarantineDialog from '@/features/studies/components/QuarantineDialog';
+import StudyLabelDialog from '@/features/studies/components/StudyLabelDialog';
 import QuickReportDialog from '@/features/studies/components/QuickReportDialog';
 import { FileText } from 'lucide-react';
 import { useFeature } from '@/config/features';
 import { smartSearch } from '@/lib/smart-search';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { deleteStudyAction } from '@/actions/deleteStudy';
+import { exportStudiesAction } from '@/actions/exportStudies';
+import { anonymizeStudyAction } from '@/actions/anonymizeStudy';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,6 +99,14 @@ const MODALITY_OPTIONS = [
 ];
 const DEFAULT_PAGE_SIZE = 25;
 
+/**
+ * tanstack-table hands `on*Change` either the new value or an updater function.
+ * Zustand setters only take a value, so resolve it first.
+ */
+function resolveUpdater<T>(updater: T | ((old: T) => T), old: T): T {
+  return typeof updater === 'function' ? (updater as (o: T) => T)(old) : updater;
+}
+
 type TFn = ReturnType<typeof useTranslation>['t'];
 
 function getColumnLabel(colId: string, t: TFn): string {
@@ -106,6 +123,13 @@ function getColumnLabel(colId: string, t: TFn): string {
     status: 'studyList.columns.status',
   };
   return t(keys[colId] ?? colId, { defaultValue: colId });
+}
+
+/** Column id of a column definition: the explicit `id`, else the accessor key. */
+function columnDefId(column: ColumnDef<Study>): string {
+  if (column.id) return column.id;
+  const accessor = (column as { accessorKey?: string | number }).accessorKey;
+  return accessor === undefined ? '' : String(accessor);
 }
 
 /** Sortable header button — renders sort direction indicator. */
@@ -139,29 +163,46 @@ function SortableHeader({
 export default function StudyListPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  // Filters live in the URL, but the query string is remembered across
+  // navigation (tab/view switch) — see the hook.
+  const [searchParams, setSearchParams] = useRememberedSearchParams('studies');
 
-  // Default ordering from URL param `order-by` (e.g. "studyDate:desc" or "patientName:asc")
-  const orderParam = searchParams.get('order-by') || '';
-  const initialSorting: SortingState = orderParam
-    ? [{ id: orderParam.split(':')[0], desc: orderParam.split(':')[1] === 'desc' }]
-    : [{ id: 'studyDate', desc: true }];
+  // Columns, their widths and the sort order survive navigation (persisted);
+  // the selection is per-visit on purpose.
+  const [columnVisibility, setColumnVisibility] = usePersistedState('studies.columnVisibility', DEFAULT_COLUMN_VISIBILITY);
+  // Only the widths the user actually dragged are stored — every other column
+  // stays on the automatic layout (see `autoSizing`).
+  const [columnWidths, setColumnWidths] = usePersistedState<ColumnSizingState>('studies.columnWidths', {});
+  const [sorting, setSorting] = usePersistedState('studies.sorting', DEFAULT_SORTING);
 
-  const [sorting, setSorting] = useState<SortingState>(initialSorting);
+  // Deep link ordering: `?order-by=studyDate:desc` seeds the sort on mount.
+  // Afterwards the persisted sort order is authoritative (changes are not
+  // written back to the URL).
+  useEffect(() => {
+    const orderParam = searchParams.get('order-by') || '';
+    if (orderParam) {
+      setSorting([{ id: orderParam.split(':')[0], desc: orderParam.split(':')[1] === 'desc' }]);
+    }
+    // mount only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [rowSelection, setRowSelection] = useState({});
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = usePersistedState('studies.showFilters', false);
   const [sendOpen, setSendOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [labelOpen, setLabelOpen] = useState(false);
+  const [anonymizeOpen, setAnonymizeOpen] = useState(false);
+  const [quarantineOpen, setQuarantineOpen] = useState(false);
   const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
+  const [bulkExportLoading, setBulkExportLoading] = useState(false);
+  const [bulkAnonymizeLoading, setBulkAnonymizeLoading] = useState(false);
   const [reportStudy, setReportStudy] = useState<Study | null>(null);
-  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    studyInstanceUID: false, // hidden by default (long UID)
-    lastUpdate: false,       // hidden by default
-    referringPhysician: false, // hidden by default
-  });
   const [showColumnConfig, setShowColumnConfig] = useState(false);
   const colConfigRef = useRef<HTMLDivElement>(null);
+  // Width of the table's scroll container — the automatic layout distributes it.
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   // Close the column-config dropdown on outside click — previously it only
   // toggled via its own button, so it stayed open when tapping elsewhere.
@@ -185,6 +226,8 @@ export default function StudyListPage() {
   const canEditLabels = useFeature('editLabels');
   const canSend = useFeature('send');
   const canDelete = useFeature('delete');
+  const canAnonymize = useFeature('anonymize');
+  const canQuarantine = useFeature('quarantine');
 
   const filters: StudyFilters = useMemo(
     () => ({
@@ -202,6 +245,22 @@ export default function StudyListPage() {
 
   const { data: studies = [], isLoading, isFetching } = useStudies(filters);
   const isMobile = useMediaQuery('(max-width: 767px)');
+
+  // Track the table's available width so the automatic layout can fill it.
+  // Re-runs when the desktop table mounts (breakpoint change).
+  useEffect(() => {
+    const el = tableContainerRef.current;
+    if (!el) return;
+    setContainerWidth(el.clientWidth);
+    // jsdom (unit tests) has no ResizeObserver — the fallback above is enough.
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width ?? 0;
+      if (width > 0) setContainerWidth(width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isMobile]);
 
   // Check if Orthanc supports labels (1.13.0+ with has-labels capability)
   const { data: systemInfo } = useQuery({
@@ -519,14 +578,43 @@ export default function StudyListPage() {
     [t],
   );
 
+  // Automatic layout basis: the visible columns share the container width,
+  // weighted by their size hints. Widths the user dragged are merged on top, so
+  // adjusting one column leaves the others automatic (and a window resize keeps
+  // re-fitting them).
+  const layoutColumns = useMemo(
+    () =>
+      columns
+        .map((c) => ({ id: columnDefId(c), size: c.size, minSize: c.minSize }))
+        .filter((c) => c.id !== '' && columnVisibility[c.id] !== false),
+    [columns, columnVisibility],
+  );
+  const autoSizing = useMemo(
+    () => distributeColumnWidths(layoutColumns, containerWidth),
+    [layoutColumns, containerWidth],
+  );
+  const columnSizing = useMemo<ColumnSizingState>(
+    () => ({ ...autoSizing, ...columnWidths }),
+    [autoSizing, columnWidths],
+  );
+
   const table = useReactTable({
     data: filteredStudies,
     columns,
     state: { sorting, rowSelection, columnSizing, columnVisibility },
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => setSorting(resolveUpdater(updater, sorting)),
     onRowSelectionChange: setRowSelection,
-    onColumnSizingChange: setColumnSizing,
-    onColumnVisibilityChange: setColumnVisibility,
+    // A drag emits the full sizing map — store only the columns that actually
+    // changed, so the rest keeps following the automatic layout.
+    onColumnSizingChange: (updater) => {
+      const next = resolveUpdater(updater, columnSizing);
+      const changed: ColumnSizingState = {};
+      for (const [id, width] of Object.entries(next)) {
+        if (columnSizing[id] !== width) changed[id] = width;
+      }
+      if (Object.keys(changed).length > 0) setColumnWidths({ ...columnWidths, ...changed });
+    },
+    onColumnVisibilityChange: (updater) => setColumnVisibility(resolveUpdater(updater, columnVisibility)),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -560,6 +648,54 @@ export default function StudyListPage() {
     }
     if (failCount > 0) {
       toast.error(t('studyList.bulkDeleteError', { count: failCount, defaultValue: `${failCount} study/studies could not be deleted` }));
+    }
+    queryClient.invalidateQueries({ queryKey: ['studies'] });
+  };
+
+  const selectedStudies = table.getSelectedRowModel().rows.map((r) => ({
+    id: r.original.id,
+    patientName: formatPatientName(r.original.patientName),
+    studyDescription: r.original.studyDescription,
+  }));
+
+  // Bulk export — one ZIP archive for the whole selection
+  const handleBulkExport = async () => {
+    const ids = selectedStudies.map((s) => s.id);
+    if (ids.length === 0) return;
+    setBulkExportLoading(true);
+    try {
+      await exportStudiesAction(ids);
+      toast.success(t('studyList.bulkExportSuccess', { count: ids.length }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t('studyList.bulkExportError'));
+    } finally {
+      setBulkExportLoading(false);
+    }
+  };
+
+  // Bulk anonymize — one anonymized copy per selected study
+  const handleBulkAnonymize = async () => {
+    const ids = selectedStudies.map((s) => s.id);
+    setBulkAnonymizeLoading(true);
+    let ok = 0;
+    let failed = 0;
+    for (const id of ids) {
+      try {
+        await anonymizeStudyAction(id, {});
+        ok += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+    setBulkAnonymizeLoading(false);
+    setAnonymizeOpen(false);
+    setRowSelection({});
+    if (ok > 0 && failed === 0) {
+      toast.success(t('studyList.bulkAnonymizeSuccess', { count: ok }));
+    } else if (ok > 0) {
+      toast.warning(t('studyList.bulkAnonymizePartial', { ok, total: ids.length, failed }));
+    } else {
+      toast.error(t('studyList.bulkAnonymizeError'));
     }
     queryClient.invalidateQueries({ queryKey: ['studies'] });
   };
@@ -653,6 +789,20 @@ export default function StudyListPage() {
                         </label>
                       ))}
                   </div>
+                  {/* Only shown once the user dragged a column edge — clears the
+                      manual widths so the automatic layout takes over again. */}
+                  {Object.keys(columnWidths).length > 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start gap-2 h-7 text-xs mt-1"
+                      onClick={() => setColumnWidths({})}
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                      {t('studyList.columns.autoWidth')}
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -788,12 +938,25 @@ export default function StudyListPage() {
           </span>
           <div className="flex gap-1 flex-wrap justify-center sm:ml-auto">
             {canDownload && (
-              <Button size="sm" variant="outline" className="gap-1.5 h-8">
-                <Download className="h-3.5 w-3.5" /> {t('studyList.actions.export')}
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 h-8"
+                onClick={handleBulkExport}
+                disabled={bulkExportLoading}
+              >
+                {bulkExportLoading
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <Download className="h-3.5 w-3.5" />} {t('studyList.actions.export')}
               </Button>
             )}
-            {canEditLabels && (
-              <Button size="sm" variant="outline" className="gap-1.5 h-8">
+            {canEditLabels && labelsSupported && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 h-8"
+                onClick={() => setLabelOpen(true)}
+              >
                 <Tag className="h-3.5 w-3.5" /> {t('studyList.actions.label')}
               </Button>
             )}
@@ -805,6 +968,26 @@ export default function StudyListPage() {
                 onClick={() => setSendOpen(true)}
               >
                 <Send className="h-3.5 w-3.5" /> {t('studyList.actions.send')}
+              </Button>
+            )}
+            {canAnonymize && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 h-8"
+                onClick={() => setAnonymizeOpen(true)}
+              >
+                <Shield className="h-3.5 w-3.5" /> {t('studyList.actions.anonymize')}
+              </Button>
+            )}
+            {canQuarantine && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 h-8"
+                onClick={() => setQuarantineOpen(true)}
+              >
+                <ShieldAlert className="h-3.5 w-3.5" /> {t('studyList.actions.quarantine')}
               </Button>
             )}
             {canDelete && (
@@ -995,8 +1178,20 @@ export default function StudyListPage() {
           </div>
         ) : (
         /* ── Desktop Table View ── */
-        <div className="overflow-auto">
-          <Table style={{ tableLayout: 'auto', minWidth: '1200px' }}>
+        <div className="overflow-auto" ref={tableContainerRef}>
+          {/* tableLayout must be 'fixed' — with 'auto' the browser derives the
+              widths from the content and ignores the per-column width, so the
+              resize handles moved but nothing changed. */}
+          <Table
+            style={{
+              tableLayout: 'fixed',
+              // The automatic layout fills the container; dragged widths can make
+              // the table wider than it (then the wrapper scrolls).
+              width: totalTableWidth(columnSizing, containerWidth),
+              // No text selection while dragging a column edge.
+              userSelect: table.getState().columnSizingInfo.isResizingColumn ? 'none' : undefined,
+            }}
+          >
             <TableHeader>
               {table.getHeaderGroups().map((hg) => (
                 <TableRow key={hg.id}>
@@ -1021,6 +1216,9 @@ export default function StudyListPage() {
                             // @tanstack/react-table v7 API that no longer exists
                             // in v8.21+ and produced a type error.
                             transform: '',
+                            // Required for touch drags (tablets) — without it the
+                            // browser scrolls instead of resizing.
+                            touchAction: 'none',
                           }}
                         />
                       )}
@@ -1140,6 +1338,58 @@ export default function StudyListPage() {
                 <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t('common.deleting', { defaultValue: 'Deleting...' })}</>
               ) : (
                 <><Trash2 className="h-4 w-4 mr-2" /> {t('studyList.actions.delete', { defaultValue: 'Delete' })}</>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk label + quarantine (shared dialogs with the study detail page) */}
+      <StudyLabelDialog
+        open={labelOpen}
+        onOpenChange={setLabelOpen}
+        studyIds={selectedStudies.map((s) => s.id)}
+        existingLabels={allLabels}
+        onDone={() => {
+          setRowSelection({});
+          queryClient.invalidateQueries({ queryKey: ['studies'] });
+        }}
+      />
+
+      <QuarantineDialog
+        open={quarantineOpen}
+        onOpenChange={setQuarantineOpen}
+        studies={selectedStudies}
+        onDone={() => {
+          setRowSelection({});
+          queryClient.invalidateQueries({ queryKey: ['studies'] });
+        }}
+      />
+
+      {/* Bulk anonymize confirmation */}
+      <AlertDialog open={anonymizeOpen} onOpenChange={setAnonymizeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('studyList.bulkAnonymizeTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('studyList.bulkAnonymizeConfirm', { count: selectedCount })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkAnonymizeLoading}>
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleBulkAnonymize();
+              }}
+              disabled={bulkAnonymizeLoading}
+            >
+              {bulkAnonymizeLoading ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t('studyList.bulkAnonymizeRunning')}</>
+              ) : (
+                <><Shield className="h-4 w-4 mr-2" /> {t('studyList.actions.anonymize')}</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

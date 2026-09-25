@@ -5,7 +5,6 @@
  * counters, and the live C-FIND query log. Source/target/rule editors are
  * a later phase — the API client (src/api/broker.ts) already covers CRUD.
  */
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -42,6 +41,7 @@ import { SpoolCard } from '../components/SpoolCard';
 import { RbacBanner } from '../components/RbacBanner';
 import { PageHelp } from '../components/PageHelp';
 import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
+import { usePersistedState } from '@/store/ui-state';
 
 /** Seconds → "3 d 4 h", "12 min" — what an operator reads at a glance. */
 function formatUptime(seconds?: number): string {
@@ -70,7 +70,7 @@ export default function BrokerPage() {
 
   // "show me yesterday's failures": the API filters by date, so the operator
   // does not have to page through weeks of log lines
-  const [logSince, setLogSince] = useState('');
+  const [logSince, setLogSince] = usePersistedState('broker.logSince', '');
   const queriesQuery = useQuery({
     queryKey: ['broker', 'queries', logSince],
     queryFn: () => brokerApi.logs.queries({ limit: 50, ...(logSince ? { since: logSince } : {}) }),

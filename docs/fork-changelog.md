@@ -104,7 +104,7 @@ Health-Panel, „Was ist das?"-Hilfe je Seite, Formular-Entwürfen und
 - 441 Unit-Tests (Vitest), Playwright-Suite mit 48 Tests, `verify-ui.cjs` mit
   109 Checks.
 
-### Neu: lokale Worklist, Stationsregeln, ATNA
+### Neu: DICOM-TLS/mTLS und Zertifikatsverwaltung
 
 - **TLS-Karte** auf der Broker-Settings-Seite: Listener mit Port und Zustand,
   mTLS-Auswahl, Zertifikatsfelder mit **Ablauf-Badges**, Erzeugung

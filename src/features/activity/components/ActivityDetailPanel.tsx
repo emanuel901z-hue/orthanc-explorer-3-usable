@@ -38,6 +38,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ActivityEvent, ActivityCategory, ActivitySeverity } from '@/shared/types/activity';
 import { jobsApi } from '@/api/jobs';
+import { resourceRefId, resourceRefType } from '@/features/activity/lib/orthanc-resources';
 import { cn } from '@/lib/utils';
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
@@ -304,17 +305,22 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
         {event.category === 'job' && event.metadata?.['__rawContent'] && (() => {
           try {
             const content = JSON.parse(event.metadata['__rawContent'] as string);
-            const resources = content?.Resources;
-            if (!Array.isArray(resources) || resources.length === 0) return null;
+            // Orthanc liefert die Eintraege je Version als String oder als
+            // Objekt { ID, Type } — nur die ID ist darstellbar (React #31).
+            const resources: unknown[] = Array.isArray(content?.Resources) ? content.Resources : [];
+            const refs = resources
+              .map((r) => ({ id: resourceRefId(r), type: resourceRefType(r) }))
+              .filter((r): r is { id: string; type: string | undefined } => r.id !== undefined);
+            if (refs.length === 0) return null;
             return (
               <>
                 <Separator className="my-4" />
                 <p className="text-xs font-medium text-muted-foreground mb-2">{t('activity.detail.jobResources', { defaultValue: 'Resources' })}</p>
                 <div className="flex flex-wrap gap-1">
-                  {resources.slice(0, 20).map((r: string, i: number) => (
-                    <code key={i} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{r}</code>
+                  {refs.slice(0, 20).map((r, i) => (
+                    <code key={i} title={r.type} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{r.id}</code>
                   ))}
-                  {resources.length > 20 && <span className="text-[10px] text-muted-foreground">+{resources.length - 20} more</span>}
+                  {refs.length > 20 && <span className="text-[10px] text-muted-foreground">+{refs.length - 20} more</span>}
                 </div>
               </>
             );

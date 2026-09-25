@@ -7,7 +7,6 @@
  * patient name/ID appear only when the operator switched `simulate_show_phi` on
  * (the health panel reports that).
  */
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { Loader2, PlayCircle, TriangleAlert } from 'lucide-react';
@@ -20,11 +19,13 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { brokerApi } from '@/api/broker';
+import { usePersistedState, useRememberedState } from '@/store/ui-state';
 
 export function WorklistPreviewPanel() {
   const { t } = useTranslation();
-  const [station, setStation] = useState('');
-  const [accession, setAccession] = useState('');
+  // The station persists; the accession number is PHI-adjacent — memory only.
+  const [station, setStation] = usePersistedState('worklistPreview.station', '');
+  const [accession, setAccession] = useRememberedState('worklistPreview.accession', '');
 
   const preview = useMutation({
     mutationFn: () => brokerApi.worklistPreview({

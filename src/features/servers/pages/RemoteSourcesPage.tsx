@@ -26,6 +26,7 @@ import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-serv
 import { modalitiesApi } from '@/api/modalities';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { usePersistedState, useRememberedState } from '@/store/ui-state';
 
 interface RemoteStudy {
   queryId: string;
@@ -59,11 +60,13 @@ export default function RemoteSourcesPage() {
     lastEchoStatus: undefined as 'success' | 'failure' | undefined,
     lastEcho: undefined as Date | undefined,
   }));
-  const [selectedModality, setSelectedModality] = useState('');
-  const [selectedServer, setSelectedServer] = useState('');
-  const [queryPatientName, setQueryPatientName] = useState('');
-  const [queryPatientId, setQueryPatientId] = useState('');
-  const [queryAccession, setQueryAccession] = useState('');
+  // Target selection survives navigation; the query fields can contain PHI and
+  // are therefore only kept in memory.
+  const [selectedModality, setSelectedModality] = usePersistedState('remoteSources.modality', '');
+  const [selectedServer, setSelectedServer] = usePersistedState('remoteSources.server', '');
+  const [queryPatientName, setQueryPatientName] = useRememberedState('remoteSources.queryPatientName', '');
+  const [queryPatientId, setQueryPatientId] = useRememberedState('remoteSources.queryPatientId', '');
+  const [queryAccession, setQueryAccession] = useRememberedState('remoteSources.queryAccession', '');
   const [querying, setQuerying] = useState(false);
   const [remoteStudies, setRemoteStudies] = useState<RemoteStudy[]>([]);
   const [echoLoading, setEchoLoading] = useState(false);

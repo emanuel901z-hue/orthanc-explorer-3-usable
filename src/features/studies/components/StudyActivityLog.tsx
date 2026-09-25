@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useAuditStore } from '@/store/audit-store';
 import { useChanges } from '@/features/activity/hooks/useChanges';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
+import { normalizeResourceRefs } from '@/features/activity/lib/orthanc-resources';
 import type { ActivityEvent } from '@/shared/types/activity';
 import type { Change } from '@/api/changes';
 import type { OrthancJob } from '@/api/jobs';
@@ -196,11 +197,11 @@ function isRelatedChange(change: Change, studyId: string, studyInstanceUid?: str
 
 function isRelatedJob(job: OrthancJob, studyId: string, studyInstanceUid?: string): boolean {
   const content = job.Content ?? {};
-  const parentResources = Array.isArray(content['ParentResources']) ? (content['ParentResources'] as string[]) : [];
+  const parentResources = normalizeResourceRefs(content['ParentResources']);
   if (parentResources.some((r) => r.includes(studyId))) return true;
 
-  const resources = Array.isArray(content['Resources']) ? (content['Resources'] as Record<string, unknown>[]) : [];
-  if (resources.some((r) => r?.['ID'] === studyId)) return true;
+  const resources = normalizeResourceRefs(content['Resources']);
+  if (resources.includes(studyId)) return true;
 
   const queries = Array.isArray(content['Query']) ? (content['Query'] as Record<string, string>[]) : [];
   if (queries.some((q) => q?.['0020,000d'] === studyInstanceUid)) return true;

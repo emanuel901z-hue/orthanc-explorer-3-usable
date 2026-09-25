@@ -300,7 +300,9 @@
     "modify": "修正",
     "anonymize": "匿名化",
     "delete": "削除",
-    "openInOhif": "OHIFで開く"
+    "openInOhif": "OHIFで開く",
+    "label": "ラベル",
+    "quarantine": "隔離"
   },
   "common": {
     "save": "保存",
@@ -583,7 +585,9 @@
       "delete": "削除",
       "export": "エクスポート",
       "label": "ラベル",
-      "send": "送信"
+      "send": "送信",
+      "anonymize": "匿名化",
+      "quarantine": "隔離"
     },
     "columns": {
       "accession": "アクセッション番号",
@@ -598,7 +602,8 @@
       "studyInstanceUID": "スタディUID",
       "config": "列",
       "toggle": "列の切り替え",
-      "view": "表示"
+      "view": "表示",
+      "autoWidth": "幅を自動調整"
     },
     "empty": "スタディが見つかりません",
     "filters": {
@@ -629,7 +634,39 @@
     "quickReport": "Quick report",
     "sortBy": "並び替え",
     "sortAsc": "昇順",
-    "sortDesc": "降順"
+    "sortDesc": "降順",
+    "bulkExportSuccess": "{{count}} 件の検査をエクスポートしました。",
+    "bulkExportError": "エクスポートに失敗しました。",
+    "bulkAnonymizeTitle": "選択した検査を匿名化しますか？",
+    "bulkAnonymizeConfirm": "{{count}} 件の検査を匿名化します（それぞれコピーが作成されます）。",
+    "bulkAnonymizeRunning": "匿名化中…",
+    "bulkAnonymizeSuccess": "{{count}} 件の検査を匿名化しました。",
+    "bulkAnonymizePartial": "{{total}} 件中 {{ok}} 件を匿名化 — {{failed}} 件失敗。",
+    "bulkAnonymizeError": "匿名化に失敗しました。",
+    "labelDialog": {
+      "title": "ラベルを設定",
+      "description": "{{count}} 件の検査にラベルを設定します。",
+      "placeholder": "ラベル名",
+      "apply": "ラベルを設定",
+      "applying": "ラベルを設定中…",
+      "missing": "ラベルを入力してください。",
+      "success": "{{count}} 件の検査にラベル「{{label}}」を設定しました。",
+      "partial": "{{total}} 件中 {{ok}} 件に設定 — {{failed}} 件失敗。",
+      "error": "ラベルを設定できませんでした。"
+    },
+    "quarantineDialog": {
+      "title": "隔離しますか？",
+      "description": "PatientID をその場で QRN-ADOPT-… に変更します。検査は保持され、PP の「孤立した検査」から復元できます。",
+      "bulkDescription": "{{count}} 件の検査の PatientID をその場で QRN-ADOPT-… に変更します。検査は保持され、PP から復元できます。",
+      "reason": "理由（任意）",
+      "reasonPlaceholder": "例：重複、誤った割り当て",
+      "confirm": "隔離",
+      "running": "隔離中…",
+      "success": "検査を隔離しました（{{patientId}}）。",
+      "bulkSuccess": "{{count}} 件の検査を隔離しました。",
+      "partial": "{{total}} 件中 {{ok}} 件を隔離 — {{failed}} 件失敗。",
+      "error": "隔離に失敗しました。"
+    }
   },
   "study": {
     "modifyTitle": "スタディタグを変更",

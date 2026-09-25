@@ -107,7 +107,8 @@
       "seriesCount": "{{count}} Serien",
       "config": "Spalten",
       "toggle": "Spalten umschalten",
-      "view": "Ansicht"
+      "view": "Ansicht",
+      "autoWidth": "Breiten automatisch"
     },
     "filters": {
       "patientId": "Patienten-ID",
@@ -133,7 +134,9 @@
       "export": "Export",
       "label": "Label",
       "send": "Senden",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "anonymize": "Anonymisieren",
+      "quarantine": "In Quarantäne"
     },
     "labels": "Labels",
     "labelModeAny": "ODER",
@@ -144,7 +147,39 @@
     "print": "Drucken / PDF speichern",
     "sortBy": "Sortieren nach",
     "sortAsc": "Aufsteigend",
-    "sortDesc": "Absteigend"
+    "sortDesc": "Absteigend",
+    "bulkExportSuccess": "{{count}} Studie(n) exportiert.",
+    "bulkExportError": "Export fehlgeschlagen.",
+    "bulkAnonymizeTitle": "Ausgewählte Studien anonymisieren?",
+    "bulkAnonymizeConfirm": "{{count}} Studie(n) werden anonymisiert (es entsteht je eine Kopie).",
+    "bulkAnonymizeRunning": "Anonymisiere…",
+    "bulkAnonymizeSuccess": "{{count}} Studie(n) anonymisiert.",
+    "bulkAnonymizePartial": "{{ok}} von {{total}} anonymisiert — {{failed}} fehlgeschlagen.",
+    "bulkAnonymizeError": "Anonymisierung fehlgeschlagen.",
+    "labelDialog": {
+      "title": "Label setzen",
+      "description": "Setzt ein Label auf {{count}} Studie(n).",
+      "placeholder": "Label-Name",
+      "apply": "Label setzen",
+      "applying": "Setze Label…",
+      "missing": "Bitte ein Label eingeben.",
+      "success": "{{count}} Studie(n) mit „{{label}}“ versehen.",
+      "partial": "{{ok}} von {{total}} Studie(n) versehen — {{failed}} fehlgeschlagen.",
+      "error": "Label konnte nicht gesetzt werden."
+    },
+    "quarantineDialog": {
+      "title": "In Quarantäne schicken?",
+      "description": "Die PatientID wird auf QRN-ADOPT-… umbenannt (in-place). Die Studie bleibt erhalten und ist in PP unter „Verwaiste Studien“ rückholbar.",
+      "bulkDescription": "{{count}} Studie(n) werden auf QRN-ADOPT-… umbenannt (in-place). Sie bleiben erhalten und sind in PP rückholbar.",
+      "reason": "Grund (optional)",
+      "reasonPlaceholder": "z. B. Dublette, fehlerhafte Zuordnung",
+      "confirm": "In Quarantäne",
+      "running": "Quarantäne läuft…",
+      "success": "Studie in Quarantäne verschoben ({{patientId}}).",
+      "bulkSuccess": "{{count}} Studie(n) in Quarantäne verschoben.",
+      "partial": "{{ok}} von {{total}} verschoben — {{failed}} fehlgeschlagen.",
+      "error": "Quarantäne fehlgeschlagen."
+    }
   },
   "studyDetail": {
     "patientId": "Patienten-ID",
@@ -408,7 +443,9 @@
     "send": "Senden",
     "modify": "Bearbeiten",
     "anonymize": "Anonymisieren",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "label": "Label",
+    "quarantine": "In Quarantäne"
   },
   "common": {
     "save": "Speichern",

@@ -13,6 +13,7 @@ import {
 } from '@/features/viewer/components/CornerstoneMultiViewport';
 import type { SeriesInfo } from '@/features/viewer/components/CornerstoneViewport';
 import { useViewerTools, type ViewerTool } from '@/features/viewer/hooks/useViewerTools';
+import { usePersistedState } from '@/store/ui-state';
 
 export default function ViewerPage() {
   const { studyId } = useParams<{ studyId: string }>();
@@ -21,10 +22,11 @@ export default function ViewerPage() {
   const { data: study } = useStudy(studyId!);
   const { data: seriesList } = useStudySeries(studyId!);
 
-  const [layout, setLayout] = useState<Layout>('1x1');
+  // Layout/tool/panel choice survives navigation; the loaded series do not.
+  const [layout, setLayout] = usePersistedState<Layout>('viewer.layout', '1x1');
   const [activeSlot, setActiveSlot] = useState(0);
-  const [panelCollapsed, setPanelCollapsed] = useState(false);
-  const [activeTool, setActiveToolState] = useState<ViewerTool>('windowing');
+  const [panelCollapsed, setPanelCollapsed] = usePersistedState('viewer.panelCollapsed', false);
+  const [activeTool, setActiveToolState] = usePersistedState<ViewerTool>('viewer.activeTool', 'windowing');
 
   // 4 slots max; null = empty
   const [slotSeries, setSlotSeries] = useState<Array<SeriesInfo | null>>([

@@ -4,7 +4,7 @@
  * Shows all client-side audit events from the in-memory audit store.
  * In Phase 5+, this will be backed by the backend ATNA audit trail.
  */
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Shield, Search, Trash2, Download } from 'lucide-react';
@@ -28,12 +28,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useAuditStore } from '@/store/audit-store';
+import { usePersistedState, useRememberedState } from '@/store/ui-state';
 
 export default function AuditLogsPage() {
   const { t } = useTranslation();
   const { events, clear } = useAuditStore();
-  const [search, setSearch] = useState('');
-  const [actionFilter, setActionFilter] = useState('all');
+  // The search is free text (may contain PHI) — memory only; the action filter persists.
+  const [search, setSearch] = useRememberedState('auditLogs.search', '');
+  const [actionFilter, setActionFilter] = usePersistedState('auditLogs.actionFilter', 'all');
 
   const actions = useMemo(
     () => [...new Set(events.map((e) => e.action))].sort(),

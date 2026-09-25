@@ -163,6 +163,7 @@ features: {
 - Each Orthanc resource type has a dedicated file in `src/api/` — follow the existing pattern for new endpoints
 - Write operations in `src/actions/` must emit `AuditEvent` before and after; never write directly from feature components
 - Tests live alongside source files: `foo.ts` → `foo.test.ts`
+- Page UI state that must survive a tab/view switch (filters, columns, widths, sort order, view mode) goes through `usePersistedState` / `useRememberedState` (`src/store/ui-state.ts`) — never plain `useState`. Rule: **PHI (free-text search, patient/accession filters) only into `useRememberedState`** (memory), everything else into `usePersistedState`. Persisted values must be JSON-serializable (store `Date` as an ISO string).
 - No `console.log` in source — use `src/lib/logger.ts` (PHI-safe)
 
 ## Key Files
@@ -194,6 +195,14 @@ features: {
 | `src/features/settings/components/EmbeddedThemingCard.tsx` | White-labeling: app name, colors, fonts, border radius, compact mode, sidebar/header visibility |
 | `src/lib/smart-search.ts` | Multi-token search with umlaut tolerance and date pattern matching |
 | `src/actions/mergeStudy.ts` | Audit-seam wrapper for study merge — emits `study.merge` audit event |
+| `src/api/pulmopath-pacs.ts` | Typed client for PP backend PACS endpoints (`/api/v1/pacs/*`, same-origin JWT cookie, `credentials: 'include'`) — **not** Orthanc REST. Currently: `quarantineStudy()` |
+| `src/actions/quarantineStudy.ts` | Audit-seam wrapper for study quarantine — calls the PP backend, emits `study.quarantine` |
+| `src/actions/exportStudies.ts` | Audit-seam wrapper for the multi-study ZIP export (`/tools/create-archive`), emits `study.export` |
+| `src/features/studies/lib/column-layout.ts` | Automatic studies-list column layout: `distributeColumnWidths()` shares the container width over the visible columns (proportional to `size`, never below `minSize`), `totalTableWidth()` grows the table when the columns need more room. Manual widths are merged on top |
+| `src/store/ui-state.ts` | Navigation-proof page UI state: `usePersistedState` (localStorage — **non-PHI only**) and `useRememberedState` (memory only — for anything that may contain PHI). Use these instead of plain `useState` for filters, columns, widths, sort order and view modes |
+| `src/lib/use-remembered-search-params.ts` | `useSearchParams()` + remembers the filter query across tab/view switches (deep link wins; clearing the filters clears the memory) |
+| `src/features/studies/components/QuarantineDialog.tsx` | Quarantine confirm dialog (single study + bulk selection), optional reason, per-study loop |
+| `src/features/studies/components/StudyLabelDialog.tsx` | Sets one label on one or many studies (shared by list + detail) |
 | `src/shared/api/orthanc-study-repository.ts` | Repository with label-based `/tools/find` filtering, RequestedTags for computed tags |
 | `src/api/series.ts` | Series API: get, getInstances, getSharedTags, delete, archive, modify, anonymize, sendToModality |
 | `src/api/tools.ts` | Tools API: lookup, createArchive (multi-resource ZIP), create-dicom (encapsulated series) |

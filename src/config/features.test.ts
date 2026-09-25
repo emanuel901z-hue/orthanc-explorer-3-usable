@@ -94,4 +94,26 @@ describe("resolveFeature", () => {
       }),
     ).toBe(true);
   });
+
+  describe("opt-in features (quarantine)", () => {
+    it("quarantine is disabled by default (opt-in)", () => {
+      setCfg();
+      expect(resolveFeature("quarantine", { profile: null, scopes: null })).toBe(false);
+    });
+
+    it("quarantine is enabled when canonical flag is explicitly true", () => {
+      setCfg({ quarantine: true });
+      expect(resolveFeature("quarantine", { profile: null, scopes: null })).toBe(true);
+    });
+
+    it("quarantine is enabled when legacy alias enableQuarantine is true", () => {
+      setCfg({ enableQuarantine: true });
+      expect(resolveFeature("quarantine", { profile: null, scopes: null })).toBe(true);
+    });
+
+    it("quarantine is disabled when explicitly false", () => {
+      setCfg({ enableQuarantine: false });
+      expect(resolveFeature("quarantine", { profile: null, scopes: null })).toBe(false);
+    });
+  });
 });

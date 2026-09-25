@@ -15,7 +15,7 @@ const mockXhrInstance = {
   removeEventListener: vi.fn(),
 };
 
-vi.stubGlobal('XMLHttpRequest', vi.fn(() => mockXhrInstance));
+vi.stubGlobal('XMLHttpRequest', vi.fn(function () { return mockXhrInstance; }));
 
 import { uploadDicomWithProgress } from './upload-xhr';
 

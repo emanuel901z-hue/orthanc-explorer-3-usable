@@ -47,6 +47,7 @@ import { ConfigDiffTable } from '../components/ConfigDiffTable';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useBrokerAuditWrites } from '../hooks/use-broker-audit';
 import { describeEntry, diffFields } from '../lib/config-diff';
+import { usePersistedState } from '@/store/ui-state';
 
 const ENTITIES = ['all', 'source', 'target', 'rule', 'transform', 'setting',
                   'cache', 'spool', 'tls', 'local_item', 'hl7_message'] as const;
@@ -69,7 +70,7 @@ export default function AuditPage() {
   const isMobile = useMediaQuery('(max-width: 767px)');
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const [entity, setEntity] = useState<string>('all');
+  const [entity, setEntity] = usePersistedState<string>('brokerAudit.entity', 'all');
   const [detail, setDetail] = useState<ConfigAuditEntry | null>(null);
   const [rollbackTarget, setRollbackTarget] = useState<ConfigAuditEntry | null>(null);
   const [pendingImport, setPendingImport] = useState<{ doc: ConfigDocument; plan: ImportPlan } | null>(null);
@@ -77,7 +78,7 @@ export default function AuditPage() {
   const [exporting, setExporting] = useState(false);
 
   // "show me yesterday's changes" instead of paging through weeks
-  const [since, setSince] = useState('');
+  const [since, setSince] = usePersistedState('brokerAudit.since', '');
   const auditQuery = useQuery({
     queryKey: ['broker', 'audit', entity, since],
     queryFn: () => brokerApi.audit.config({

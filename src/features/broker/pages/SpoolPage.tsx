@@ -45,6 +45,7 @@ import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { ConfigRowCard } from '../components/ConfigRowCard';
 import { useBrokerSpoolWrites } from '../hooks/use-broker-spool';
+import { usePersistedState } from '@/store/ui-state';
 
 const STATUSES = ['all', 'queued', 'failed', 'dead', 'sent'] as const;
 
@@ -62,13 +63,14 @@ export default function SpoolPage() {
   const configured = Boolean(getConfig().brokerUrl);
   const isMobile = useMediaQuery('(max-width: 767px)');
 
-  const [status, setStatus] = useState<string>('all');
+  // filter + page size survive navigation
+  const [status, setStatus] = usePersistedState<string>('brokerSpool.status', 'all');
   const [discarding, setDiscarding] = useState<SpoolItem | null>(null);
   const [reason, setReason] = useState('');
 
   // one page at a time: the spool budget allows 20 000 entries, so a fixed
   // first page would hide everything older (offset is the API's answer)
-  const [limit, setLimit] = useState(PAGE_SIZE);
+  const [limit, setLimit] = usePersistedState<number>('brokerSpool.limit', PAGE_SIZE);
   const spoolQuery = useQuery({
     queryKey: ['broker', 'spool', 'items', status, limit],
     queryFn: () => brokerApi.spool.items(

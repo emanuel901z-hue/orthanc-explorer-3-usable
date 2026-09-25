@@ -8,6 +8,7 @@ export type FeatureKey =
   | "send"
   | "download"
   | "editLabels"
+  | "quarantine"
   | "modalityManagement"
   | "dicomWebManagement"
   | "worklists"
@@ -25,6 +26,7 @@ const SCOPE_WRITE_FEATURES = new Set<FeatureKey>([
   "modify",
   "send",
   "editLabels",
+  "quarantine",
 ]);
 
 function scopeAllows(scopes: string[], key: FeatureKey): boolean {
@@ -52,6 +54,10 @@ const FEATURE_ALIASES: Record<FeatureKey, string[]> = {
   send: ['enableSendTo'],
   download: ['enableDownload'],
   editLabels: ['enableEditLabels'],
+  // Pulmopath backend endpoint POST /api/v1/pacs/quarantine/adopt (QRN-ADOPT-*).
+  // Not an Orthanc feature — it needs the PP backend proxy, so standalone
+  // deployments should switch it off.
+  quarantine: ['enableQuarantine'],
   modalityManagement: ['enableModalityConfig', 'enableModalityManagement'],
   dicomWebManagement: ['enableDicomWebConfig', 'enableDicomWebManagement'],
   // Orthanc's worklists plugin REST API — off in this deployment, the MWL
@@ -61,7 +67,23 @@ const FEATURE_ALIASES: Record<FeatureKey, string[]> = {
   mwlBroker: ['enableMwlBroker'],
 };
 
+/** Features that require explicit opt-in (disabled unless explicitly set to true). */
+const OPT_IN_FEATURES = new Set<FeatureKey>(['quarantine']);
+
 function isFeatureDisabled(cfg: ReturnType<typeof getConfig>, key: FeatureKey): boolean {
+  if (OPT_IN_FEATURES.has(key)) {
+    // Opt-in: disabled UNLESS explicitly enabled via canonical key or legacy alias
+    if (cfg.features?.[key] === true) return false;
+    const aliases = FEATURE_ALIASES[key];
+    if (aliases) {
+      for (const alias of aliases) {
+        if (cfg.features?.[alias] === true) return false;
+      }
+    }
+    return true;
+  }
+
+  // Standard Opt-out: enabled unless explicitly disabled
   if (cfg.features?.[key] === false) return true;
   const aliases = FEATURE_ALIASES[key];
   if (aliases) {

@@ -300,7 +300,9 @@
     "modify": "Modificar",
     "anonymize": "Anonimizar",
     "delete": "Eliminar",
-    "openInOhif": "Abrir en OHIF"
+    "openInOhif": "Abrir en OHIF",
+    "label": "Etiqueta",
+    "quarantine": "Cuarentena"
   },
   "common": {
     "save": "Guardar",
@@ -583,7 +585,9 @@
       "delete": "Eliminar",
       "export": "Exportar",
       "label": "Etiqueta",
-      "send": "Enviar"
+      "send": "Enviar",
+      "anonymize": "Anonimizar",
+      "quarantine": "Cuarentena"
     },
     "columns": {
       "accession": "Acceso",
@@ -598,7 +602,8 @@
       "studyInstanceUID": "UID de estudio",
       "config": "Columnas",
       "toggle": "Alternar columnas",
-      "view": "Ver"
+      "view": "Ver",
+      "autoWidth": "Anchos automáticos"
     },
     "empty": "No se encontraron estudios",
     "filters": {
@@ -629,7 +634,39 @@
     "quickReport": "Quick report",
     "sortBy": "Ordenar por",
     "sortAsc": "Ascendente",
-    "sortDesc": "Descendente"
+    "sortDesc": "Descendente",
+    "bulkExportSuccess": "{{count}} estudio(s) exportado(s).",
+    "bulkExportError": "La exportación ha fallado.",
+    "bulkAnonymizeTitle": "¿Anonimizar los estudios seleccionados?",
+    "bulkAnonymizeConfirm": "Se anonimizarán {{count}} estudio(s) (una copia cada uno).",
+    "bulkAnonymizeRunning": "Anonimizando…",
+    "bulkAnonymizeSuccess": "{{count}} estudio(s) anonimizado(s).",
+    "bulkAnonymizePartial": "{{ok}} de {{total}} anonimizados — {{failed}} con error.",
+    "bulkAnonymizeError": "La anonimización ha fallado.",
+    "labelDialog": {
+      "title": "Asignar etiqueta",
+      "description": "Asigna una etiqueta a {{count}} estudio(s).",
+      "placeholder": "Nombre de la etiqueta",
+      "apply": "Asignar etiqueta",
+      "applying": "Asignando etiqueta…",
+      "missing": "Introduce una etiqueta.",
+      "success": "Etiqueta «{{label}}» asignada a {{count}} estudio(s).",
+      "partial": "{{ok}} de {{total}} estudio(s) etiquetados — {{failed}} con error.",
+      "error": "No se ha podido asignar la etiqueta."
+    },
+    "quarantineDialog": {
+      "title": "¿Enviar a cuarentena?",
+      "description": "El PatientID se renombra a QRN-ADOPT-… in situ. El estudio se conserva y puede restaurarse en PP en «Estudios huérfanos».",
+      "bulkDescription": "Se renombrarán {{count}} estudio(s) a QRN-ADOPT-… in situ. Se conservan y pueden restaurarse en PP.",
+      "reason": "Motivo (opcional)",
+      "reasonPlaceholder": "p. ej. duplicado, asignación incorrecta",
+      "confirm": "Cuarentena",
+      "running": "Enviando a cuarentena…",
+      "success": "Estudio enviado a cuarentena ({{patientId}}).",
+      "bulkSuccess": "{{count}} estudio(s) enviados a cuarentena.",
+      "partial": "{{ok}} de {{total}} enviados — {{failed}} con error.",
+      "error": "La cuarentena ha fallado."
+    }
   },
   "study": {
     "modifyTitle": "Modificar etiquetas del estudio",

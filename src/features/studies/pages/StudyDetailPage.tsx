@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Download, Trash2, Send, Eye, Shield, ShieldAlert, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -26,6 +26,8 @@ import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import MigrateStudyDialog from '@/features/studies/components/MigrateStudyDialog';
 import ShareStudyDialog from '@/features/studies/components/ShareStudyDialog';
 import AddSeriesDialog from '@/features/studies/components/AddSeriesDialog';
+import QuarantineDialog from '@/features/studies/components/QuarantineDialog';
+import StudyLabelDialog from '@/features/studies/components/StudyLabelDialog';
 import { loadCustomButtons, executeButton } from '@/lib/custom-buttons';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
@@ -41,6 +43,18 @@ import { useFeature } from '@/config/features';
 import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { toolsApi } from '@/api/tools';
+import { systemApi } from '@/api/system';
+import { usePersistedState, useRememberedState } from '@/store/ui-state';
+
+/** Columns of the series table shown by default. */
+const DEFAULT_SERIES_COLUMN_VISIBILITY: Record<string, boolean> = {
+  select: true,
+  seriesNumber: true,
+  modality: true,
+  seriesDescription: true,
+  numberOfInstances: true,
+  seriesInstanceUID: true,
+};
 
 function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
   const { data: previewBlob, isLoading } = useInstancePreview(instanceId ?? '');
@@ -79,6 +93,23 @@ export default function StudyDetailPage() {
   const canModify = useFeature('modify');
   const canAnonymize = useFeature('anonymize');
   const canDelete = useFeature('delete');
+  const canEditLabels = useFeature('editLabels');
+  const canQuarantine = useFeature('quarantine');
+  // Labels need Orthanc 1.13.0+ with the has-labels capability (same check as the study list)
+  const { data: systemInfo } = useQuery({
+    queryKey: ['orthanc-system'],
+    queryFn: () => systemApi.get(),
+    staleTime: 300_000,
+    retry: false,
+  });
+  const labelsSupported = systemInfo?.Capabilities?.['has-labels'] === true || systemInfo?.HasLabels === true;
+  const { data: allLabels = [] } = useQuery({
+    queryKey: ['orthanc-labels'],
+    queryFn: () => toolsApi.getLabels(),
+    enabled: canEditLabels && labelsSupported,
+    staleTime: 60_000,
+    retry: false,
+  });
   const { data: series = [] } = useStudySeries(studyId!);
   const { data: sharedTags } = useStudySharedTags(studyId!);
   const { audit } = useAuditLog();
@@ -90,18 +121,20 @@ export default function StudyDetailPage() {
   const [modifyOpen, setModifyOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [labelOpen, setLabelOpen] = useState(false);
+  const [quarantineOpen, setQuarantineOpen] = useState(false);
   const [addSeriesOpen, setAddSeriesOpen] = useState(false);
-  const [seriesView, setSeriesView] = useState<'grid' | 'table'>('table');
-  const [seriesSearch, setSeriesSearch] = useState('');
-  const [seriesSort, setSeriesSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'seriesNumber', dir: 'asc' });
-  const [seriesColumnVisibility, setSeriesColumnVisibility] = useState<Record<string, boolean>>({
-    select: true,
-    seriesNumber: true,
-    modality: true,
-    seriesDescription: true,
-    numberOfInstances: true,
-    seriesInstanceUID: true,
-  });
+  const [seriesView, setSeriesView] = usePersistedState<'grid' | 'table'>('studyDetail.seriesView', 'table');
+  // The series search is free text and can contain patient data — memory only.
+  const [seriesSearch, setSeriesSearch] = useRememberedState('studyDetail.seriesSearch', '');
+  const [seriesSort, setSeriesSort] = usePersistedState<{ key: SortKey; dir: 'asc' | 'desc' }>(
+    'studyDetail.seriesSort',
+    { key: 'seriesNumber', dir: 'asc' },
+  );
+  const [seriesColumnVisibility, setSeriesColumnVisibility] = usePersistedState<Record<string, boolean>>(
+    'studyDetail.seriesColumnVisibility',
+    DEFAULT_SERIES_COLUMN_VISIBILITY,
+  );
   const [showSeriesColumnConfig, setShowSeriesColumnConfig] = useState(false);
   const seriesColConfigRef = useRef<HTMLDivElement>(null);
 
@@ -426,6 +459,9 @@ export default function StudyDetailPage() {
               <TooltipContent>{t('studyDetail.dicomDirTooltip', { defaultValue: 'Download as ZIP with DICOMDIR index' })}</TooltipContent>
             </Tooltip>
           )}
+          {canEditLabels && labelsSupported && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setLabelOpen(true)}><Tag className="h-3.5 w-3.5" /> {t('actions.label')}</Button>
+          )}
           {canSend && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('actions.send')}</Button>
           )}
@@ -482,6 +518,9 @@ export default function StudyDetailPage() {
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAddSeriesOpen(true)}>
               <Plus className="h-3.5 w-3.5" /> {t('study.addSeries', { defaultValue: 'Add Series' })}
             </Button>
+          )}
+          {canQuarantine && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setQuarantineOpen(true)}><ShieldAlert className="h-3.5 w-3.5" /> {t('actions.quarantine')}</Button>
           )}
           {canDelete && (
             <AlertDialog>
@@ -1012,6 +1051,29 @@ export default function StudyDetailPage() {
           level="study"
           resourceId={study.id}
           resourceLabel={formatPatientName(study.patientName)}
+        />
+      )}
+      {study && (
+        <StudyLabelDialog
+          open={labelOpen}
+          onOpenChange={setLabelOpen}
+          studyIds={[study.id]}
+          existingLabels={allLabels}
+          onDone={() => queryClient.invalidateQueries({ queryKey: ['study', studyId] })}
+        />
+      )}
+      {study && (
+        <QuarantineDialog
+          open={quarantineOpen}
+          onOpenChange={setQuarantineOpen}
+          studies={[{ id: study.id, patientName: formatPatientName(study.patientName), studyDescription: study.studyDescription }]}
+          onDone={(result) => {
+            if (result.ok > 0) {
+              // The rename replaced the study in place — the old URL is gone.
+              queryClient.invalidateQueries({ queryKey: ['studies'] });
+              navigate('/studies');
+            }
+          }}
         />
       )}
       {study && sharedTags && (
