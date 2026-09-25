@@ -53,6 +53,14 @@ export type OrthancSeries = {
 /** @deprecated Use OrthancSeries instead. */
 export type Series = OrthancSeries;
 
+export type OrthancMergeResult = {
+  TargetStudy: string;
+  InstancesCount?: number;
+  FailedInstancesCount?: number;
+  Description?: string;
+  MergedStudies?: string[];
+};
+
 export const studiesApi = {
   /** POST /tools/find — Search resources. Body: OrthancFindQuery (Level, Query, Expand, RequestedTags). Returns OrthancStudy[] (when Level='Study'). PHI must stay in POST body. */
   find: (query: OrthancFindQuery) =>
@@ -138,7 +146,7 @@ export const studiesApi = {
    *  Returns { TargetStudy, MergedStudies } on success.
    */
   merge: (targetStudyId: string, sourceIds: string[], keepSource = false) =>
-    orthancFetch<{ TargetStudy: string; MergedStudies: string[] }>(`/studies/${targetStudyId}/merge`, {
+    orthancFetch<OrthancMergeResult>(`/studies/${targetStudyId}/merge`, {
       method: 'POST',
       headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify({ Resources: sourceIds, KeepSource: keepSource }),

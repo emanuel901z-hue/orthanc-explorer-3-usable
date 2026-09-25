@@ -344,7 +344,11 @@
     "warningDelete": "{{count}}件のソース研究が統合後に削除されます。この操作は取り消せません。",
     "mergeButton": "{{count}}件の研究を統合",
     "success": "{{count}}件の研究がターゲット研究に正常に移行されました",
-    "error": "統合に失敗しました"
+    "error": "統合に失敗しました",
+    "samePatient": "同一患者",
+    "differentPatient": "異なる患者",
+    "differentPatientWarning": "警告: 選択した検査の少なくとも1つが別の患者のものです。マージするとそのシリーズはこの対象患者に割り当てられます。",
+    "partialSuccess": "{{count}} 件の検査をマージしましたが、{{failed}} 件のインスタンスが失敗しました。"
   },
   "viewer": {
     "description": "エクスプローラーから直接スタディを開くための外部DICOMビューア。",
@@ -568,7 +572,9 @@
     "warningDelete": "マージ後にソースシリーズは削除されます。この操作は取り消せません。",
     "migrateButton": "シリーズ移行",
     "success": "シリーズをターゲットスタディに正常に移行しました",
-    "error": "移行に失敗しました"
+    "error": "移行に失敗しました",
+    "differentPatientWarning": "警告: 選択した移行先検査は別の患者のものです。移行するとこのシリーズはその患者に割り当てられます。",
+    "partialSuccess": "シリーズを移行しましたが、{{failed}} 件のインスタンスが失敗しました。"
   },
   "instanceMigrate": {
     "title": "インスタンスを移行",
@@ -581,7 +587,9 @@
     "warningDelete": "ソースインスタンスはマージ後に完全に削除されます。",
     "migrateButton": "インスタンスを移行",
     "success": "インスタンスが正常に移行されました",
-    "error": "移行に失敗しました"
+    "error": "移行に失敗しました",
+    "differentPatientWarning": "警告: 選択した移行先検査は別の患者のものです。移行するとこのインスタンスはその患者に割り当てられます。",
+    "partialSuccess": "インスタンスを移行しましたが、{{failed}} 件のインスタンスが失敗しました。"
   },
   "studyList": {
     "actions": {

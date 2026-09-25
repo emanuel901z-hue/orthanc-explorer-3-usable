@@ -20,14 +20,15 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AlertTriangle, GitMerge, Loader2, Search } from 'lucide-react';
+import { AlertTriangle, GitMerge, Loader2, Search, CheckCircle2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { studiesApi } from '@/api/studies';
+import { migrateSeriesAction } from '@/actions/migrateSeries';
 import { useStudies } from '@/features/studies/hooks/use-studies';
 import { formatPatientName, ModalityBadge } from '@/shared/components/ModalityBadge';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import type { Series } from '@/shared/types';
+import type { Series, Study } from '@/shared/types';
+import { patientSignaturesMatch, type PatientSignature } from '@/lib/dicom-patient-matching';
 
 interface MigrateSeriesDialogProps {
   open: boolean;
@@ -52,6 +53,25 @@ export default function MigrateSeriesDialog({
 
   const { data: allStudies = [], isLoading } = useStudies({});
 
+  const currentStudy = useMemo(() => allStudies.find((s) => s.id === currentStudyId), [allStudies, currentStudyId]);
+  const currentSig: PatientSignature = useMemo(() => ({
+    patientId: currentStudy?.patientId ?? '',
+    patientName: currentStudy?.patientName ?? '',
+    patientBirthDate: currentStudy?.patientBirthDate ? format(currentStudy.patientBirthDate, 'yyyyMMdd') : '',
+  }), [currentStudy]);
+
+  const studyMatchesCurrentPatient = (s: Study): boolean => {
+    const targetSig: PatientSignature = {
+      patientId: s.patientId ?? '',
+      patientName: s.patientName ?? '',
+      patientBirthDate: s.patientBirthDate ? format(s.patientBirthDate, 'yyyyMMdd') : '',
+    };
+    return patientSignaturesMatch(currentSig, targetSig);
+  };
+
+  const selectedTargetStudy = useMemo(() => allStudies.find((s) => s.id === selectedTargetId), [allStudies, selectedTargetId]);
+  const isSelectedDifferentPatient = selectedTargetStudy ? !studyMatchesCurrentPatient(selectedTargetStudy) : false;
+
   // Filter out the current study and apply search
   const candidateStudies = useMemo(() => {
     return allStudies.filter((s) => {
@@ -72,11 +92,20 @@ export default function MigrateSeriesDialog({
   const migrateMutation = useMutation({
     mutationFn: async () => {
       if (!series || !selectedTargetId) throw new Error('No series or target selected');
-      // Orthanc /studies/:id/merge accepts series IDs in the Resources array
-      await studiesApi.merge(selectedTargetId, [series.id], keepSource);
+      return await migrateSeriesAction(selectedTargetId, series.id, keepSource);
     },
-    onSuccess: () => {
-      toast.success(t('seriesMigrate.success'));
+    onSuccess: (result) => {
+      const failedCount = result.FailedInstancesCount ?? 0;
+      if (failedCount > 0) {
+        toast.warning(
+          t('seriesMigrate.partialSuccess', {
+            failed: failedCount,
+            defaultValue: `Series migrated, but ${failedCount} instances failed.`,
+          }),
+        );
+      } else {
+        toast.success(t('seriesMigrate.success'));
+      }
       queryClient.invalidateQueries({ queryKey: ['studies'] });
       queryClient.invalidateQueries({ queryKey: ['study'] });
       queryClient.invalidateQueries({ queryKey: ['series'] });
@@ -190,6 +219,19 @@ export default function MigrateSeriesDialog({
                         {s.studyDescription || '—'} · {format(s.studyDate, 'dd.MM.yyyy')}
                         {s.accessionNumber && ` · ACC: ${s.accessionNumber}`}
                       </div>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {studyMatchesCurrentPatient(s) ? (
+                          <Badge variant="outline" className="text-success border-success/30 text-[10px] h-5 gap-1">
+                            <CheckCircle2 className="h-2.5 w-2.5" />
+                            {t('migrate.samePatient', { defaultValue: 'Same patient' })}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-destructive border-destructive/30 text-[10px] h-5 gap-1">
+                            <AlertTriangle className="h-2.5 w-2.5" />
+                            {t('migrate.differentPatient', { defaultValue: 'Different patient' })}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </label>
                 );
@@ -204,6 +246,17 @@ export default function MigrateSeriesDialog({
             <Checkbox checked={keepSource} onCheckedChange={(v) => setKeepSource(!!v)} />
             <span>{t('seriesMigrate.keepSource')}</span>
           </label>
+
+          {isSelectedDifferentPatient && (
+            <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                {t('seriesMigrate.differentPatientWarning', {
+                  defaultValue: 'Warning: The selected target study belongs to a different patient. Migrating will assign this series to that patient.',
+                })}
+              </p>
+            </div>
+          )}
 
           {selectedTargetId && !keepSource && (
             <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 p-2.5">

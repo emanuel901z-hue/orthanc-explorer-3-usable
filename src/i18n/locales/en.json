@@ -486,7 +486,11 @@
     "warningDelete": "{{count}} source study(ies) will be DELETED after merge. This action is irreversible.",
     "mergeButton": "Merge {{count}} stud(y/ies)",
     "success": "{{count}} stud(y/ies) successfully migrated into target study",
-    "error": "Merge failed"
+    "error": "Merge failed",
+    "samePatient": "Same patient",
+    "differentPatient": "Different patient",
+    "differentPatientWarning": "Warning: At least one selected study belongs to a different patient. Merging will assign its series to this target patient.",
+    "partialSuccess": "{{count}} studies merged, but {{failed}} instances failed."
   },
   "viewer": {
     "description": "External DICOM viewers for opening studies directly from the explorer.",
@@ -710,7 +714,9 @@
     "warningDelete": "The source series will be DELETED after merge. This action is irreversible.",
     "migrateButton": "Migrate Series",
     "success": "Series successfully migrated into target study",
-    "error": "Migration failed"
+    "error": "Migration failed",
+    "differentPatientWarning": "Warning: The selected target study belongs to a different patient. Migrating will assign this series to that patient.",
+    "partialSuccess": "Series migrated, but {{failed}} instances failed."
   },
   "instanceMigrate": {
     "title": "Migrate Instance",
@@ -723,7 +729,9 @@
     "warningDelete": "The source instance will be permanently deleted after merge.",
     "migrateButton": "Migrate Instance",
     "success": "Instance migrated successfully",
-    "error": "Migration failed"
+    "error": "Migration failed",
+    "differentPatientWarning": "Warning: The selected target study belongs to a different patient. Migrating will assign this instance to that patient.",
+    "partialSuccess": "Instance migrated, but {{failed}} instances failed."
   },
   "study": {
     "modifyTitle": "Modify Study Tags",

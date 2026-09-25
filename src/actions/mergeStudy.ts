@@ -10,7 +10,7 @@
  * @param sourceIds  Array of Orthanc UUIDs of source studies to merge into target.
  * @param keepSource If false, source studies are deleted after merge.
  */
-import { studiesApi } from "@/api/studies";
+import { studiesApi, type OrthancMergeResult } from "@/api/studies";
 import { auditClient } from "@/lib/audit";
 import { OrthancError } from "@/lib/errors";
 import { makeAuditBase } from "@/actions/audit-base";
@@ -19,7 +19,7 @@ export async function mergeStudyAction(
   targetId: string,
   sourceIds: string[],
   keepSource = false,
-): Promise<{ TargetStudy: string; MergedStudies: string[] }> {
+): Promise<OrthancMergeResult> {
   const base = makeAuditBase("study.merge", "study", targetId);
   auditClient.emit({ ...base, outcome: "started", detail: { sourceIds, keepSource } });
   try {
@@ -31,6 +31,8 @@ export async function mergeStudyAction(
         sourceIds,
         keepSource,
         mergedCount: sourceIds.length,
+        instancesCount: result.InstancesCount,
+        failedInstancesCount: result.FailedInstancesCount,
       },
     });
     return result;

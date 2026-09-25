@@ -344,7 +344,11 @@
     "warningDelete": "{{count}} étude(s) source seront SUPPRIMÉES après fusion. Action irréversible.",
     "mergeButton": "Fusionner {{count}} étude(s)",
     "success": "{{count}} étude(s) migrée(s) avec succès vers l'étude cible",
-    "error": "Échec de la fusion"
+    "error": "Échec de la fusion",
+    "samePatient": "Même patient",
+    "differentPatient": "Patient différent",
+    "differentPatientWarning": "Avertissement : Au moins une étude sélectionnée appartient à un autre patient. La fusion attribuera ses séries au patient cible.",
+    "partialSuccess": "{{count}} étude(s) fusionnée(s), mais {{failed}} instance(s) ont échoué."
   },
   "viewer": {
     "description": "Visionneuses DICOM externes pour ouvrir des études directement depuis l'explorateur.",
@@ -568,7 +572,9 @@
     "warningDelete": "La série source sera SUPPRIMÉE après le merge. Cette action est irréversible.",
     "migrateButton": "Migrer Série",
     "success": "Série migrée avec succès vers l'étude cible",
-    "error": "Échec de la migration"
+    "error": "Échec de la migration",
+    "differentPatientWarning": "Avertissement : L'étude cible sélectionnée appartient à un autre patient. La migration attribuera la série à ce patient.",
+    "partialSuccess": "Série migrée, mais {{failed}} instance(s) ont échoué."
   },
   "instanceMigrate": {
     "title": "Migrer l'instance",
@@ -581,7 +587,9 @@
     "warningDelete": "L'instance source sera définitivement supprimée après la fusion.",
     "migrateButton": "Migrer l'instance",
     "success": "Instance migrée avec succès",
-    "error": "Migration échouée"
+    "error": "Migration échouée",
+    "differentPatientWarning": "Avertissement : L'étude cible sélectionnée appartient à un autre patient. La migration attribuera l'instance à ce patient.",
+    "partialSuccess": "Instance migrée, mais {{failed}} instance(s) ont échoué."
   },
   "studyList": {
     "actions": {

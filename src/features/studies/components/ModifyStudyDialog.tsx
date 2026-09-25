@@ -10,6 +10,7 @@
  * the modify as an internal job either way; the REST call returns when queued.
  */
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -56,6 +57,7 @@ const JOB_THRESHOLD = 50;
 
 export function ModifyStudyDialog({ open, onOpenChange, study, instanceCount, tags }: ModifyStudyDialogProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>('edit');
   const [modifications, setModifications] = useState<TagModification[]>([]);
@@ -91,17 +93,22 @@ export function ModifyStudyDialog({ open, onOpenChange, study, instanceCount, ta
 
     setApplying(true);
     try {
-      await modifyStudyAction(study.id, {
+      const result = await modifyStudyAction(study.id, {
         Replace: replace,
         // 'duplicate' mode = KeepSource: true (creates a copy with new UIDs)
         // 'modify' mode = KeepSource: false (in-place modification, preserves UIDs)
         KeepSource: modifyMode === 'duplicate',
       });
       toast.success(t('study.modifySuccess', { count: modifications.length }));
-      queryClient.invalidateQueries({ queryKey: ['study', study.id] });
-      queryClient.invalidateQueries({ queryKey: ['study-shared-tags', study.id] });
       queryClient.invalidateQueries({ queryKey: ['studies'] });
       handleOpenChange(false);
+      if (modifyMode === 'modify' && result?.ID && result.ID !== study.id) {
+        // Orthanc replaced the study in place with a new UUID — navigate to it
+        navigate(`/studies/${result.ID}`);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['study', study.id] });
+        queryClient.invalidateQueries({ queryKey: ['study-shared-tags', study.id] });
+      }
     } catch (e) {
       const msg = e instanceof OrthancError
         ? e.message

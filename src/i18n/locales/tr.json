@@ -432,7 +432,11 @@
     "warningDelete": "{{count}} kaynak çalışma birleştirmeden sonra SİLİNECEK. Bu işlem geri alınamaz.",
     "mergeButton": "{{count}} çalışmayı birleştir",
     "success": "{{count}} çalışma hedef çalışmaya başarıyla taşındı",
-    "error": "Birleştirme başarısız"
+    "error": "Birleştirme başarısız",
+    "samePatient": "Aynı hasta",
+    "differentPatient": "Farklı hasta",
+    "differentPatientWarning": "Uyarı: Seçilen tetkiklerden en az biri farklı bir hastaya ait. Birleştirme işlemi serilerini bu hedef hastaya atayacaktır.",
+    "partialSuccess": "{{count}} tetkik birleştirildi, ancak {{failed}} örnek başarısız oldu."
   },
   "viewer": {
     "description": "Çalışma alanından çalışmaları doğrudan açmak için harici DICOM görüntüleyiciler.",
@@ -656,7 +660,9 @@
     "warningDelete": "Merge sonrası kaynak seri SİLİNECEK. Bu işlem geri alınamaz.",
     "migrateButton": "Seri Taşı",
     "success": "Seri hedef çalışmaya başarıyla taşındı",
-    "error": "Taşıma başarısız"
+    "error": "Taşıma başarısız",
+    "differentPatientWarning": "Uyarı: Seçilen hedef tetkik farklı bir hastaya ait. Taşıma işlemi seriyi o hastaya atayacaktır.",
+    "partialSuccess": "Seri taşındı, ancak {{failed}} örnek başarısız oldu."
   },
   "instanceMigrate": {
     "title": "Örneği taşı",
@@ -669,7 +675,9 @@
     "warningDelete": "Kaynak örnek birleştirmeden sonra kalıcı olarak silinecek.",
     "migrateButton": "Örneği taşı",
     "success": "Örnek başarıyla taşındı",
-    "error": "Taşıma başarısız"
+    "error": "Taşıma başarısız",
+    "differentPatientWarning": "Uyarı: Seçilen hedef tetkik farklı bir hastaya ait. Taşıma işlemi örneği o hastaya atayacaktır.",
+    "partialSuccess": "Örnek taşındı, ancak {{failed}} örnek başarısız oldu."
   },
   "study": {
     "modifyTitle": "Çalışma etiketlerini değiştir",

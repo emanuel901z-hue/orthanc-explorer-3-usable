@@ -344,7 +344,11 @@
     "warningDelete": "{{count}}个源研究将在合并后被删除。此操作不可逆。",
     "mergeButton": "合并{{count}}个研究",
     "success": "{{count}}个研究成功迁移到目标研究",
-    "error": "合并失败"
+    "error": "合并失败",
+    "samePatient": "同一患者",
+    "differentPatient": "不同患者",
+    "differentPatientWarning": "警告：所选检查中至少有一项属于其他患者。合并后其序列将归属于该目标患者。",
+    "partialSuccess": "已合并 {{count}} 项检查，但有 {{failed}} 个实例失败。"
   },
   "viewer": {
     "description": "从浏览器直接打开研究的外部DICOM查看器。",
@@ -568,7 +572,9 @@
     "warningDelete": "合并后源系列将被删除。此操作不可逆。",
     "migrateButton": "迁移系列",
     "success": "系列已成功迁移到目标研究",
-    "error": "迁移失败"
+    "error": "迁移失败",
+    "differentPatientWarning": "警告：所选目标检查属于其他患者。迁移后该序列将归属于该患者。",
+    "partialSuccess": "已迁移序列，但有 {{failed}} 个实例失败。"
   },
   "instanceMigrate": {
     "title": "迁移实例",
@@ -581,7 +587,9 @@
     "warningDelete": "源实例将在合并后永久删除。",
     "migrateButton": "迁移实例",
     "success": "实例迁移成功",
-    "error": "迁移失败"
+    "error": "迁移失败",
+    "differentPatientWarning": "警告：所选目标检查属于其他患者。迁移后该实例将归属于该患者。",
+    "partialSuccess": "已迁移实例，但有 {{failed}} 个实例失败。"
   },
   "studyList": {
     "actions": {

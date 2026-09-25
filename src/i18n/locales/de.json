@@ -486,7 +486,11 @@
     "warningDelete": "{{count}} Quell-Studie(n) werden nach dem Merge GELÖSCHT. Diese Aktion ist unwiderruflich.",
     "mergeButton": "{{count}} Studie(n) zusammenführen",
     "success": "{{count}} Studie(n) erfolgreich in Ziel-Studie migriert",
-    "error": "Merge fehlgeschlagen"
+    "error": "Merge fehlgeschlagen",
+    "samePatient": "Gleicher Patient",
+    "differentPatient": "Anderer Patient",
+    "differentPatientWarning": "Warnung: Mindestens eine ausgewählte Studie gehört einem anderen Patienten. Beim Zusammenführen werden alle Serien diesem Zielpatienten zugeordnet.",
+    "partialSuccess": "{{count}} Studie(n) zusammengeführt, aber {{failed}} Instanz(en) fehlgeschlagen."
   },
   "viewer": {
     "description": "Externe DICOM-Viewer zum direkten Öffnen von Studien aus dem Explorer.",
@@ -710,7 +714,9 @@
     "warningDelete": "Die Quell-Serie wird nach dem Merge GELÖSCHT. Diese Aktion ist unwiderruflich.",
     "migrateButton": "Serie migrieren",
     "success": "Serie erfolgreich in Zielstudie migriert",
-    "error": "Migration fehlgeschlagen"
+    "error": "Migration fehlgeschlagen",
+    "differentPatientWarning": "Warnung: Die ausgewählte Zielstudie gehört einem anderen Patienten. Beim Migrieren wird die Serie diesem Patienten zugeordnet.",
+    "partialSuccess": "Serie migriert, aber {{failed}} Instanz(en) fehlgeschlagen."
   },
   "instanceMigrate": {
     "title": "Instanz migrieren",
@@ -723,7 +729,9 @@
     "warningDelete": "Die Quell-Instanz wird nach dem Merge dauerhaft gelöscht.",
     "migrateButton": "Instanz migrieren",
     "success": "Instanz erfolgreich migriert",
-    "error": "Migration fehlgeschlagen"
+    "error": "Migration fehlgeschlagen",
+    "differentPatientWarning": "Warnung: Die ausgewählte Zielstudie gehört einem anderen Patienten. Beim Migrieren wird die Instanz diesem Patienten zugeordnet.",
+    "partialSuccess": "Instanz migriert, aber {{failed}} Instanz(en) fehlgeschlagen."
   },
   "study": {
     "modifyTitle": "Studien-Tags ändern",

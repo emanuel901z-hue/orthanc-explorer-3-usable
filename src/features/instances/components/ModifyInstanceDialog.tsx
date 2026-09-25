@@ -6,6 +6,7 @@
  *   2. Review: Shows pending changes before applying
  */
 import { useState, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -44,6 +45,8 @@ export default function ModifyInstanceDialog({
   tags,
 }: ModifyInstanceDialogProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { studyId, seriesId } = useParams<{ studyId: string; seriesId: string }>();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>('edit');
   const [modifications, setModifications] = useState<TagModification[]>([]);
@@ -74,11 +77,14 @@ export default function ModifyInstanceDialog({
 
     setApplying(true);
     try {
-      await modifyInstanceAction(instanceId, replace);
+      const result = await modifyInstanceAction(instanceId, replace);
       toast.success(t('instance.modifySuccess', { count: modifications.length }));
-      queryClient.invalidateQueries({ queryKey: ['instance', instanceId] });
-      queryClient.invalidateQueries({ queryKey: ['instance-tags', instanceId] });
+      queryClient.invalidateQueries({ queryKey: ['instances'] });
+      queryClient.invalidateQueries({ queryKey: ['series'] });
       handleOpenChange(false);
+      if (result?.ID && result.ID !== instanceId && studyId && seriesId) {
+        navigate(`/studies/${studyId}/series/${seriesId}/instances/${result.ID}`);
+      }
     } catch (e) {
       const msg = e instanceof OrthancError
         ? e.message

@@ -344,7 +344,11 @@
     "warningDelete": "{{count}} estudio(s) fuente serán ELIMINADOS después de fusionar. Esta acción es irreversible.",
     "mergeButton": "Fusionar {{count}} estudio(s)",
     "success": "{{count}} estudio(s) migrados exitosamente al estudio destino",
-    "error": "Fusión fallida"
+    "error": "Fusión fallida",
+    "samePatient": "Mismo paciente",
+    "differentPatient": "Paciente diferente",
+    "differentPatientWarning": "Advertencia: Al menos un estudio seleccionado pertenece a otro paciente. Al fusionar, sus series se asignarán a este paciente de destino.",
+    "partialSuccess": "{{count}} estudio(s) fusionado(s), pero fallaron {{failed}} instancia(s)."
   },
   "viewer": {
     "description": "Visores DICOM externos para abrir estudios directamente desde el explorador.",
@@ -568,7 +572,9 @@
     "warningDelete": "La serie origen será ELIMINADA después del merge. Esta acción es irreversible.",
     "migrateButton": "Migrar Serie",
     "success": "Serie migrada exitosamente al estudio destino",
-    "error": "Migración fallida"
+    "error": "Migración fallida",
+    "differentPatientWarning": "Advertencia: El estudio de destino seleccionado pertenece a otro paciente. Al migrar, la serie se asignará a ese paciente.",
+    "partialSuccess": "Serie migrada, pero fallaron {{failed}} instancia(s)."
   },
   "instanceMigrate": {
     "title": "Migrar instancia",
@@ -581,7 +587,9 @@
     "warningDelete": "La instancia origen se eliminará permanentemente después de la fusión.",
     "migrateButton": "Migrar instancia",
     "success": "Instancia migrada correctamente",
-    "error": "Migración fallida"
+    "error": "Migración fallida",
+    "differentPatientWarning": "Advertencia: El estudio de destino seleccionado pertenece a otro paciente. Al migrar, la instancia se asignará a ese paciente.",
+    "partialSuccess": "Instancia migrada, pero fallaron {{failed}} instancia(s)."
   },
   "studyList": {
     "actions": {

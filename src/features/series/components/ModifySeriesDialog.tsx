@@ -8,6 +8,7 @@
  * Uses modifySeriesAction (audit-seam) to call seriesApi.modify with { Replace: { ...tags } }.
  */
 import { useState, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -21,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Pencil, ArrowRight, AlertTriangle, Loader2, CheckCircle2 } from 'lucide-react';
+import { Pencil, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import DicomTagBrowser, { type TagModification, type DicomTagEntry } from '@/features/studies/components/DicomTagBrowser';
 import { modifySeriesAction } from '@/actions/modifySeries';
 import { useQueryClient } from '@tanstack/react-query';
@@ -46,6 +47,8 @@ export default function ModifySeriesDialog({
   tags,
 }: ModifySeriesDialogProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { studyId } = useParams<{ studyId: string }>();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>('edit');
   const [modifications, setModifications] = useState<TagModification[]>([]);
@@ -78,11 +81,14 @@ export default function ModifySeriesDialog({
 
     setApplying(true);
     try {
-      await modifySeriesAction(series.id, replace);
+      const result = await modifySeriesAction(series.id, replace);
       toast.success(t('series.modifySuccess', { count: modifications.length }));
-      queryClient.invalidateQueries({ queryKey: ['series', series.id] });
-      queryClient.invalidateQueries({ queryKey: ['series-shared-tags', series.id] });
+      queryClient.invalidateQueries({ queryKey: ['series'] });
+      queryClient.invalidateQueries({ queryKey: ['study'] });
       handleOpenChange(false);
+      if (result?.ID && result.ID !== series.id && studyId) {
+        navigate(`/studies/${studyId}/series/${result.ID}`);
+      }
     } catch (e) {
       const msg = e instanceof OrthancError
         ? e.message

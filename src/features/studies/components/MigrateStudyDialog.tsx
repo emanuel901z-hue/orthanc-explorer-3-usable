@@ -8,7 +8,7 @@
  * Common use case: AVIEW report studies that share the same StudyInstanceUID
  * but exist as separate Orthanc resources need to be merged into the main study.
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -23,15 +23,15 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AlertTriangle, GitMerge, Loader2, Search } from 'lucide-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { studiesApi } from '@/api/studies';
+import { AlertTriangle, GitMerge, Loader2, Search, CheckCircle2 } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { mergeStudyAction } from '@/actions/mergeStudy';
 import { useStudies } from '@/features/studies/hooks/use-studies';
 import { formatPatientName } from '@/shared/components/ModalityBadge';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import type { Study } from '@/shared/types';
+import { patientSignaturesMatch, type PatientSignature } from '@/lib/dicom-patient-matching';
 
 interface MigrateStudyDialogProps {
   open: boolean;
@@ -78,6 +78,29 @@ export default function MigrateStudyDialog({ open, onOpenChange, targetStudy }: 
     );
   }, [allStudies, targetStudy]);
 
+  const targetSig: PatientSignature = useMemo(() => ({
+    patientId: targetStudy?.patientId ?? '',
+    patientName: targetStudy?.patientName ?? '',
+    patientBirthDate: targetStudy?.patientBirthDate ? format(targetStudy.patientBirthDate, 'yyyyMMdd') : '',
+  }), [targetStudy]);
+
+  const studyMatchesTargetPatient = useCallback((s: Study): boolean => {
+    const candSig: PatientSignature = {
+      patientId: s.patientId ?? '',
+      patientName: s.patientName ?? '',
+      patientBirthDate: s.patientBirthDate ? format(s.patientBirthDate, 'yyyyMMdd') : '',
+    };
+    return patientSignaturesMatch(targetSig, candSig);
+  }, [targetSig]);
+
+  // Check if any selected source belongs to a different patient
+  const hasSelectedDifferentPatient = useMemo(() => {
+    return Array.from(selectedSourceIds).some((id) => {
+      const match = allStudies.find((s) => s.id === id);
+      return match ? !studyMatchesTargetPatient(match) : false;
+    });
+  }, [selectedSourceIds, allStudies, studyMatchesTargetPatient]);
+
   const toggleSource = (id: string) => {
     setSelectedSourceIds((prev) => {
       const next = new Set(prev);
@@ -91,14 +114,24 @@ export default function MigrateStudyDialog({ open, onOpenChange, targetStudy }: 
     mutationFn: async () => {
       if (!targetStudy) throw new Error('No target study');
       const sourceIds = Array.from(selectedSourceIds);
-      for (const sourceId of sourceIds) {
-        await mergeStudyAction(targetStudy.id, [sourceId], keepSource);
-      }
+      // Atomic batch merge: Orthanc accepts all source IDs in a single call
+      return await mergeStudyAction(targetStudy.id, sourceIds, keepSource);
     },
-    onSuccess: () => {
-      toast.success(
-        t('migrate.success', { count: selectedSourceIds.size }),
-      );
+    onSuccess: (result) => {
+      const failedCount = result.FailedInstancesCount ?? 0;
+      if (failedCount > 0) {
+        toast.warning(
+          t('migrate.partialSuccess', {
+            failed: failedCount,
+            count: selectedSourceIds.size,
+            defaultValue: `${selectedSourceIds.size} studies merged, but ${failedCount} instances failed.`,
+          }),
+        );
+      } else {
+        toast.success(
+          t('migrate.success', { count: selectedSourceIds.size }),
+        );
+      }
       queryClient.invalidateQueries({ queryKey: ['studies'] });
       queryClient.invalidateQueries({ queryKey: ['study'] });
       setSelectedSourceIds(new Set());
@@ -220,12 +253,25 @@ export default function MigrateStudyDialog({ open, onOpenChange, targetStudy }: 
                       <div className="text-xs text-muted-foreground font-mono truncate mt-0.5">
                         SIUID: {s.studyInstanceUID}
                       </div>
-                      {isSameSiuid && (
-                        <Badge variant="destructive" className="text-xs h-5 mt-1 gap-1">
-                          <AlertTriangle className="h-3 w-3" />
-                          {t('migrate.sameSiuid')}
-                        </Badge>
-                      )}
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {studyMatchesTargetPatient(s) ? (
+                          <Badge variant="outline" className="text-success border-success/30 text-[10px] h-5 gap-1">
+                            <CheckCircle2 className="h-2.5 w-2.5" />
+                            {t('migrate.samePatient', { defaultValue: 'Same patient' })}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-destructive border-destructive/30 text-[10px] h-5 gap-1">
+                            <AlertTriangle className="h-2.5 w-2.5" />
+                            {t('migrate.differentPatient', { defaultValue: 'Different patient' })}
+                          </Badge>
+                        )}
+                        {isSameSiuid && (
+                          <Badge variant="secondary" className="text-xs h-5 gap-1">
+                            <AlertTriangle className="h-3 w-3" />
+                            {t('migrate.sameSiuid')}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </label>
                 );
@@ -243,6 +289,17 @@ export default function MigrateStudyDialog({ open, onOpenChange, targetStudy }: 
             />
             <span>{t('migrate.keepSource')}</span>
           </label>
+
+          {hasSelectedDifferentPatient && (
+            <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                {t('migrate.differentPatientWarning', {
+                  defaultValue: 'Warning: At least one selected study belongs to a different patient. Merging will assign its series to this target patient.',
+                })}
+              </p>
+            </div>
+          )}
 
           {selectedSourceIds.size > 0 && !keepSource && (
             <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 p-2.5">
