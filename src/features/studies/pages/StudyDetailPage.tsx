@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, ShieldAlert, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown } from 'lucide-react';
+import { Download, Trash2, Send, Eye, Shield, ShieldAlert, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown, Server } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -26,6 +26,7 @@ import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import MigrateStudyDialog from '@/features/studies/components/MigrateStudyDialog';
 import ShareStudyDialog from '@/features/studies/components/ShareStudyDialog';
 import AddSeriesDialog from '@/features/studies/components/AddSeriesDialog';
+import { SendToPeerDialog } from '@/features/studies/components/SendToPeerDialog';
 import QuarantineDialog from '@/features/studies/components/QuarantineDialog';
 import StudyLabelDialog from '@/features/studies/components/StudyLabelDialog';
 import { loadCustomButtons, executeButton } from '@/lib/custom-buttons';
@@ -114,6 +115,7 @@ export default function StudyDetailPage() {
   const { data: sharedTags } = useStudySharedTags(studyId!);
   const { audit } = useAuditLog();
   const [sendOpen, setSendOpen] = useState(false);
+  const [peerOpen, setPeerOpen] = useState(false);
   const [bulkSendOpen, setBulkSendOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -464,6 +466,9 @@ export default function StudyDetailPage() {
           )}
           {canSend && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('actions.send')}</Button>
+          )}
+          {canSend && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPeerOpen(true)}><Server className="h-3.5 w-3.5" /> {t('actions.sendToPeer', { defaultValue: 'Peer' })}</Button>
           )}
           {canModify && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setModifyOpen(true)}><Pencil className="h-3.5 w-3.5" /> {t('actions.modify')}</Button>
@@ -1042,6 +1047,15 @@ export default function StudyDetailPage() {
           open={sendOpen}
           onOpenChange={setSendOpen}
           studies={[{ id: study.id, patientName: formatPatientName(study.patientName), studyDescription: study.studyDescription }]}
+        />
+      )}
+      {study && (
+        <SendToPeerDialog
+          open={peerOpen}
+          onOpenChange={setPeerOpen}
+          resourceId={study.id}
+          resourceLabel={formatPatientName(study.patientName)}
+          resourceType="study"
         />
       )}
       {study && (

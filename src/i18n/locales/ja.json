@@ -304,7 +304,8 @@
     "delete": "削除",
     "openInOhif": "OHIFで開く",
     "label": "ラベル",
-    "quarantine": "隔離"
+    "quarantine": "隔離",
+    "sendToPeer": "ピア"
   },
   "common": {
     "save": "保存",
@@ -745,7 +746,11 @@
     "preserveFields": "Preserve Fields",
     "keepStudyDescription": "Keep Study Description",
     "keepSeriesDescription": "Keep Series Description",
-    "button": "Anonymize"
+    "button": "Anonymize",
+    "presets": "プリセット",
+    "presetFull": "完全匿名化",
+    "presetClinical": "臨床研究向け",
+    "presetClear": "リセット"
   },
   "send": {
     "title": "Send {{pluralLabel}}",
@@ -2018,5 +2023,23 @@
     "err_bothStudyKeys": "\"studyUID\" か \"accessionNumber\" のどちらかを指定してください — 両方は不可。",
     "err_missingPatientID": "PATIENT 要求には \"patientID\" が必要です。",
     "err_badMostRecentResults": "\"mostRecentResults\" は整数である必要があります。"
+  },
+  "lookup": {
+    "title": "DICOM UID 検索",
+    "description": "StudyInstanceUID、SeriesInstanceUID、SOPInstanceUID または Orthanc UUID を入力してください。",
+    "placeholder": "1.2.840.10008... または Orthanc UUID",
+    "search": "検索",
+    "noResults": "一致する DICOM リソースが見つかりません。",
+    "open": "開く"
+  },
+  "peer": {
+    "sendTitle": "Orthanc ピアに送信",
+    "sendDescription": "このリソースを HTTP 経由で別の Orthanc ピアに直接転送します。",
+    "selectPeer": "宛先ピアを選択",
+    "noPeers": "Orthanc ピアが設定されていません。",
+    "configureInOrthancJson": "ピアは Orthanc 設定ファイルで設定できます。",
+    "send": "送信",
+    "sendSuccess": "ピア {{peer}} に正常に送信されました。",
+    "sendError": "ピアへの送信に失敗しました。"
   }
 }

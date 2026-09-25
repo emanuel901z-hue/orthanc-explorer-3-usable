@@ -392,7 +392,8 @@
     "anonymize": "Anonimleştir",
     "delete": "Sil",
     "label": "Etiket",
-    "quarantine": "Karantina"
+    "quarantine": "Karantina",
+    "sendToPeer": "Eş (Peer)"
   },
   "common": {
     "save": "Kaydet",
@@ -745,7 +746,11 @@
     "preserveFields": "Preserve Fields",
     "keepStudyDescription": "Keep Study Description",
     "keepSeriesDescription": "Keep Series Description",
-    "button": "Anonymize"
+    "button": "Anonymize",
+    "presets": "Şablonlar",
+    "presetFull": "Tam Anonimleştirme",
+    "presetClinical": "Klinik Araştırma",
+    "presetClear": "Sıfırla"
   },
   "send": {
     "title": "Send {{pluralLabel}}",
@@ -2018,5 +2023,23 @@
     "err_bothStudyKeys": "\"studyUID\" veya \"accessionNumber\" verin — ikisini birlikte değil.",
     "err_missingPatientID": "Bir PATIENT isteği \"patientID\" gerektirir.",
     "err_badMostRecentResults": "\"mostRecentResults\" bir tam sayı olmalıdır."
+  },
+  "lookup": {
+    "title": "DICOM UID Sorgulama",
+    "description": "StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID veya Orthanc UUID girin.",
+    "placeholder": "1.2.840.10008... veya Orthanc UUID",
+    "search": "Sorgula",
+    "noResults": "Bu tanımlayıcıyla eşleşen DICOM kaynağı bulunamadı.",
+    "open": "Aç"
+  },
+  "peer": {
+    "sendTitle": "Orthanc Eşine Gönder",
+    "sendDescription": "Bu kaynağı HTTP üzerinden doğrudan başka bir Orthanc eşine aktarın.",
+    "selectPeer": "Hedef eşi seçin",
+    "noPeers": "Yapılandırılmış Orthanc eşi yok.",
+    "configureInOrthancJson": "Eşler Orthanc yapılandırma dosyasında ayarlanabilir.",
+    "send": "Gönder",
+    "sendSuccess": "{{peer}} eşine başarıyla gönderildi.",
+    "sendError": "Eşe gönderme başarısız oldu."
   }
 }

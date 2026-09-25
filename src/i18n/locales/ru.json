@@ -392,7 +392,8 @@
     "anonymize": "Анонимизировать",
     "delete": "Удалить",
     "label": "Метка",
-    "quarantine": "Карантин"
+    "quarantine": "Карантин",
+    "sendToPeer": "Узел (Peer)"
   },
   "common": {
     "save": "Сохранить",
@@ -745,7 +746,11 @@
     "preserveFields": "Preserve Fields",
     "keepStudyDescription": "Keep Study Description",
     "keepSeriesDescription": "Keep Series Description",
-    "button": "Anonymize"
+    "button": "Anonymize",
+    "presets": "Шаблоны",
+    "presetFull": "Полное обезличивание",
+    "presetClinical": "Клиническое исследование",
+    "presetClear": "Сбросить"
   },
   "send": {
     "title": "Send {{pluralLabel}}",
@@ -2018,5 +2023,23 @@
     "err_bothStudyKeys": "Укажите либо «studyUID», либо «accessionNumber» — не оба.",
     "err_missingPatientID": "Запросу PATIENT нужен «patientID».",
     "err_badMostRecentResults": "«mostRecentResults» должен быть целым числом."
+  },
+  "lookup": {
+    "title": "Поиск по UID DICOM",
+    "description": "Введите StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID или Orthanc UUID.",
+    "placeholder": "1.2.840.10008... или Orthanc UUID",
+    "search": "Искать",
+    "noResults": "Ресурсов DICOM с таким идентификатором не найдено.",
+    "open": "Открыть"
+  },
+  "peer": {
+    "sendTitle": "Отправить на узел Orthanc",
+    "sendDescription": "Передать этот ресурс напрямую на другой узел Orthanc по HTTP.",
+    "selectPeer": "Выберите целевой узел",
+    "noPeers": "Узлы Orthanc не настроены.",
+    "configureInOrthancJson": "Узлы можно настроить в конфигурационном файле Orthanc.",
+    "send": "Отправить",
+    "sendSuccess": "Успешно отправлено на узел {{peer}}.",
+    "sendError": "Не удалось отправить на узел."
   }
 }

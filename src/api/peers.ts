@@ -29,4 +29,12 @@ export const peersApi = {
 
   /** DELETE /peers/:name — Removes a peer. Returns 200 (void). */
   delete: (name: string) => orthancFetch<void>(`/peers/${name}`, { method: 'DELETE' }),
+
+  /** POST /peers/:name/store — Sends a resource (study/series/instance) to an Orthanc peer. */
+  send: (name: string, resourceId: string) =>
+    orthancFetch<Record<string, unknown>>(`/peers/${encodeURIComponent(name)}/store`, {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify(resourceId),
+    }),
 };

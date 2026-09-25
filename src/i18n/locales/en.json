@@ -446,7 +446,8 @@
     "anonymize": "Anonymize",
     "delete": "Delete",
     "label": "Label",
-    "quarantine": "Quarantine"
+    "quarantine": "Quarantine",
+    "sendToPeer": "Peer"
   },
   "common": {
     "save": "Save",
@@ -799,7 +800,11 @@
     "preserveFields": "Preserve Fields",
     "keepStudyDescription": "Keep Study Description",
     "keepSeriesDescription": "Keep Series Description",
-    "button": "Anonymize"
+    "button": "Anonymize",
+    "presets": "Presets",
+    "presetFull": "Full De-ID",
+    "presetClinical": "Clinical Research",
+    "presetClear": "Reset"
   },
   "send": {
     "title": "Send {{pluralLabel}}",
@@ -2018,5 +2023,23 @@
     "err_bothStudyKeys": "Give either “studyUID” or “accessionNumber” — not both.",
     "err_missingPatientID": "A PATIENT request needs “patientID”.",
     "err_badMostRecentResults": "“mostRecentResults” must be a whole number."
+  },
+  "lookup": {
+    "title": "DICOM UID Lookup",
+    "description": "Enter any DICOM StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID or Orthanc UUID.",
+    "placeholder": "1.2.840.10008... or Orthanc UUID",
+    "search": "Lookup",
+    "noResults": "No DICOM resource matches this identifier.",
+    "open": "Open"
+  },
+  "peer": {
+    "sendTitle": "Send to Orthanc Peer",
+    "sendDescription": "Transfer this resource directly to another Orthanc peer via HTTP.",
+    "selectPeer": "Select Destination Peer",
+    "noPeers": "No Orthanc peers configured.",
+    "configureInOrthancJson": "Peers can be configured in Orthanc configuration file.",
+    "send": "Send",
+    "sendSuccess": "Successfully sent to peer {{peer}}.",
+    "sendError": "Failed to send to peer."
   }
 }

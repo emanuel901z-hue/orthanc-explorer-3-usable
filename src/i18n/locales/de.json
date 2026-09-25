@@ -446,7 +446,8 @@
     "anonymize": "Anonymisieren",
     "delete": "Löschen",
     "label": "Label",
-    "quarantine": "In Quarantäne"
+    "quarantine": "In Quarantäne",
+    "sendToPeer": "Peer"
   },
   "common": {
     "save": "Speichern",
@@ -799,7 +800,11 @@
     "preserveFields": "Felder beibehalten",
     "keepStudyDescription": "Studienbeschreibung beibehalten",
     "keepSeriesDescription": "Serienbeschreibung beibehalten",
-    "button": "Anonymisieren"
+    "button": "Anonymisieren",
+    "presets": "Vorlagen",
+    "presetFull": "Vollständig anonymisieren",
+    "presetClinical": "Klinische Forschung",
+    "presetClear": "Zurücksetzen"
   },
   "send": {
     "title": "{{pluralLabel}} senden",
@@ -2018,5 +2023,23 @@
     "err_bothStudyKeys": "Entweder „studyUID“ oder „accessionNumber“ angeben — nicht beides.",
     "err_missingPatientID": "Eine PATIENT-Anfrage braucht „patientID“.",
     "err_badMostRecentResults": "„mostRecentResults“ muss eine ganze Zahl sein."
+  },
+  "lookup": {
+    "title": "DICOM UID-Suche",
+    "description": "StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID oder Orthanc-UUID eingeben.",
+    "placeholder": "1.2.840.10008... oder Orthanc UUID",
+    "search": "Suchen",
+    "noResults": "Keine passende DICOM-Ressource gefunden.",
+    "open": "Öffnen"
+  },
+  "peer": {
+    "sendTitle": "An Orthanc-Peer senden",
+    "sendDescription": "Diese Ressource direkt per HTTP an eine andere Orthanc-Instanz übertragen.",
+    "selectPeer": "Ziel-Peer auswählen",
+    "noPeers": "Keine Orthanc-Peers konfiguriert.",
+    "configureInOrthancJson": "Peers können in der Orthanc-Konfigurationsdatei hinterlegt werden.",
+    "send": "Senden",
+    "sendSuccess": "Erfolgreich an Peer {{peer}} gesendet.",
+    "sendError": "Übertragung an Peer fehlgeschlagen."
   }
 }

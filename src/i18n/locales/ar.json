@@ -392,7 +392,8 @@
     "anonymize": "إخفاء الهوية",
     "delete": "حذف",
     "label": "تسمية",
-    "quarantine": "الحجر"
+    "quarantine": "الحجر",
+    "sendToPeer": "نظير"
   },
   "common": {
     "save": "حفظ",
@@ -745,7 +746,11 @@
     "preserveFields": "Preserve Fields",
     "keepStudyDescription": "Keep Study Description",
     "keepSeriesDescription": "Keep Series Description",
-    "button": "Anonymize"
+    "button": "Anonymize",
+    "presets": "قوالب جاهزة",
+    "presetFull": "إخفاء هوية كامل",
+    "presetClinical": "أبحاث سريرية",
+    "presetClear": "إعادة تعيين"
   },
   "send": {
     "title": "Send {{pluralLabel}}",
@@ -2018,5 +2023,23 @@
     "err_bothStudyKeys": "حدّد «studyUID» أو «accessionNumber» — وليس كليهما.",
     "err_missingPatientID": "طلب PATIENT يحتاج «patientID».",
     "err_badMostRecentResults": "يجب أن يكون «mostRecentResults» عددًا صحيحًا."
+  },
+  "lookup": {
+    "title": "البحث عن معرف DICOM UID",
+    "description": "أدخل StudyInstanceUID أو SeriesInstanceUID أو SOPInstanceUID أو Orthanc UUID.",
+    "placeholder": "1.2.840.10008... أو Orthanc UUID",
+    "search": "بحث",
+    "noResults": "لم يتم العثور على مورد DICOM مطابق.",
+    "open": "فتح"
+  },
+  "peer": {
+    "sendTitle": "إرسال إلى نظير Orthanc",
+    "sendDescription": "نقل هذا المورد مباشرة إلى نظير Orthanc آخر عبر HTTP.",
+    "selectPeer": "حدد النظير المستهدف",
+    "noPeers": "لم يتم تكوين نظراء Orthanc.",
+    "configureInOrthancJson": "يمكن تكوين النظراء في ملف تكوين Orthanc.",
+    "send": "إرسال",
+    "sendSuccess": "تم الإرسال بنجاح إلى النظير {{peer}}.",
+    "sendError": "فشل الإرسال إلى النظير."
   }
 }

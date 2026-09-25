@@ -304,7 +304,8 @@
     "delete": "Supprimer",
     "openInOhif": "Ouvrir dans OHIF",
     "label": "Étiquette",
-    "quarantine": "Quarantaine"
+    "quarantine": "Quarantaine",
+    "sendToPeer": "Pair (Peer)"
   },
   "common": {
     "save": "Enregistrer",
@@ -745,7 +746,11 @@
     "preserveFields": "Preserve Fields",
     "keepStudyDescription": "Keep Study Description",
     "keepSeriesDescription": "Keep Series Description",
-    "button": "Anonymize"
+    "button": "Anonymize",
+    "presets": "Modèles",
+    "presetFull": "Désidentification totale",
+    "presetClinical": "Recherche clinique",
+    "presetClear": "Réinitialiser"
   },
   "send": {
     "title": "Send {{pluralLabel}}",
@@ -2018,5 +2023,23 @@
     "err_bothStudyKeys": "Indiquez soit « studyUID », soit « accessionNumber » — pas les deux.",
     "err_missingPatientID": "Une demande PATIENT exige « patientID ».",
     "err_badMostRecentResults": "« mostRecentResults » doit être un nombre entier."
+  },
+  "lookup": {
+    "title": "Recherche UID DICOM",
+    "description": "Entrez StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID ou UUID Orthanc.",
+    "placeholder": "1.2.840.10008... ou UUID Orthanc",
+    "search": "Chercher",
+    "noResults": "Aucune ressource DICOM ne correspond à cet identifiant.",
+    "open": "Ouvrir"
+  },
+  "peer": {
+    "sendTitle": "Envoyer au pair Orthanc",
+    "sendDescription": "Transférer directement cette ressource à une autre instance Orthanc par HTTP.",
+    "selectPeer": "Sélectionner le pair de destination",
+    "noPeers": "Aucun pair Orthanc configuré.",
+    "configureInOrthancJson": "Les pairs peuvent être configurés dans le fichier de configuration Orthanc.",
+    "send": "Envoyer",
+    "sendSuccess": "Envoyé avec succès au pair {{peer}}.",
+    "sendError": "Échec de l'envoi au pair."
   }
 }

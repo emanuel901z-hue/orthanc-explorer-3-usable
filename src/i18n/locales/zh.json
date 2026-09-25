@@ -304,7 +304,8 @@
     "delete": "删除",
     "openInOhif": "在OHIF中打开",
     "label": "标签",
-    "quarantine": "隔离"
+    "quarantine": "隔离",
+    "sendToPeer": "节点"
   },
   "common": {
     "save": "保存",
@@ -745,7 +746,11 @@
     "preserveFields": "Preserve Fields",
     "keepStudyDescription": "Keep Study Description",
     "keepSeriesDescription": "Keep Series Description",
-    "button": "Anonymize"
+    "button": "Anonymize",
+    "presets": "预设",
+    "presetFull": "完全去标识化",
+    "presetClinical": "临床研究",
+    "presetClear": "重置"
   },
   "send": {
     "title": "Send {{pluralLabel}}",
@@ -2018,5 +2023,23 @@
     "err_bothStudyKeys": "请给出 “studyUID” 或 “accessionNumber” — 不要同时给出。",
     "err_missingPatientID": "PATIENT 请求需要 “patientID”。",
     "err_badMostRecentResults": "“mostRecentResults” 必须是整数。"
+  },
+  "lookup": {
+    "title": "DICOM UID 查询",
+    "description": "输入 StudyInstanceUID、SeriesInstanceUID、SOPInstanceUID 或 Orthanc UUID。",
+    "placeholder": "1.2.840.10008... 或 Orthanc UUID",
+    "search": "查询",
+    "noResults": "未找到匹配的 DICOM 资源。",
+    "open": "打开"
+  },
+  "peer": {
+    "sendTitle": "发送到 Orthanc 节点",
+    "sendDescription": "通过 HTTP 将此资源直接传输到另一个 Orthanc 节点。",
+    "selectPeer": "选择目标节点",
+    "noPeers": "未配置 Orthanc 节点。",
+    "configureInOrthancJson": "可在 Orthanc 配置文件中配置节点。",
+    "send": "发送",
+    "sendSuccess": "已成功发送到节点 {{peer}}。",
+    "sendError": "发送到节点失败。"
   }
 }
