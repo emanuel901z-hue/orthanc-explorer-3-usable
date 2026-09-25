@@ -47,6 +47,12 @@ export const instancesApi = {
       responseType: "blob",
     }),
 
+  /** GET /instances/:id/pdf — Returns extracted PDF as Blob for encapsulated PDF documents. */
+  getPdf: (id: string) =>
+    orthancFetch<Blob>(`/instances/${id}/pdf`, {
+      responseType: "blob",
+    }),
+
   /** DELETE /instances/:id — Deletes a single instance. Returns 200 (void). */
   delete: (id: string) =>
     orthancFetch<void>(`/instances/${id}`, { method: "DELETE" }),

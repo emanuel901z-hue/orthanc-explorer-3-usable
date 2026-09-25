@@ -25,6 +25,11 @@ import { deleteInstanceAction } from '@/actions/deleteInstance';
 import { toast } from 'sonner';
 import type { DicomTag } from '@/shared/types';
 import { useRememberedState } from '@/store/ui-state';
+import {
+  InstanceDocumentViewer,
+  isEncapsulatedPdf,
+  isStructuredReport,
+} from '@/features/instances/components/InstanceDocumentViewer';
 
 const SOP_CLASS_NAMES: Record<string, string> = {
   '1.2.840.10008.5.1.4.1.1.2':     'CT Image Storage',
@@ -436,18 +441,32 @@ export default function InstanceDetailPage() {
         <div className="lg:col-span-2 space-y-4">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{t('instance.preview')}</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {isEncapsulatedPdf(sopClassUID)
+                  ? t('instance.pdfDocument', { defaultValue: 'PDF Document' })
+                  : isStructuredReport(sopClassUID)
+                    ? t('instance.structuredReport', { defaultValue: 'Structured Report' })
+                    : t('instance.preview')}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="flex items-center justify-center bg-black rounded-b-lg min-h-[240px]">
-              {previewUrl ? (
-                <img src={previewUrl} alt={t('instance.instanceNumber', { number: instance.instanceNumber })} className="max-h-[360px] w-auto object-contain rounded" />
-              ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                  <Image className="h-12 w-12 mb-2 opacity-30" />
-                  <p className="text-xs">{t('instance.loadingPreview')}</p>
-                </div>
-              )}
-            </CardContent>
+            {isEncapsulatedPdf(sopClassUID) || isStructuredReport(sopClassUID) ? (
+              <InstanceDocumentViewer
+                instanceId={instance.id}
+                sopClassUID={sopClassUID}
+                tags={instance.tags}
+              />
+            ) : (
+              <CardContent className="flex items-center justify-center bg-black rounded-b-lg min-h-[240px]">
+                {previewUrl ? (
+                  <img src={previewUrl} alt={t('instance.instanceNumber', { number: instance.instanceNumber })} className="max-h-[360px] w-auto object-contain rounded" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                    <Image className="h-12 w-12 mb-2 opacity-30" />
+                    <p className="text-xs">{t('instance.loadingPreview')}</p>
+                  </div>
+                )}
+              </CardContent>
+            )}
           </Card>
 
           <Card>
