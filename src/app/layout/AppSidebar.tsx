@@ -198,7 +198,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border">
         <button
           onClick={() => setAboutOpen(true)}
-          className="flex items-center gap-2 px-2 py-1 text-sidebar-muted-foreground hover:text-sidebar-foreground transition-colors w-full text-left cursor-pointer"
+          className="flex items-center gap-2 px-2 py-1 text-sidebar-muted-foreground hover:text-sidebar-foreground transition-colors w-full text-start cursor-pointer"
         >
           <Info className="h-3 w-3 shrink-0" />
           {!isCollapsed && (

@@ -9,7 +9,8 @@
     "settings": "Settings",
     "demoMode": "Demo Mode",
     "collapse": "Collapse",
-    "expand": "Expand"
+    "expand": "Expand",
+    "auditLogs": "Audit Logs"
   },
   "settings": {
     "title": "Settings",
@@ -461,7 +462,8 @@
     "reset": "Reset",
     "export": "Export",
     "status": "Status",
-    "size": "Size"
+    "size": "Size",
+    "toggleSidebar": "Toggle sidebar"
   },
   "search": {
     "hintText": "Separate terms with comma or space. Date: 29.08, 2908, 290826. Umlauts: Müller=Mueller. Example: Müller, CT, 29.08",
@@ -1940,7 +1942,7 @@
     "dialogHint": "Press {key} anywhere to toggle this dialog"
   },
   "about": {
-    "description": "Modern React/TypeScript frontend for the Orthanc DICOM server. Standalone SPA that connects to Orthanc's REST API — deploy as a Docker sidecar, Orthanc plugin, or behind a JWT-authenticated backend proxy. Study management, merge/migrate, smart search, upload, modality and DICOMweb configuration, viewer integration, and audit-backed actions. It also ships the MWL broker: a DICOM Modality Worklist proxy that queries several RIS/KIS systems, merges and caches their worklists, and routes the stored images to the right PACS — configured and monitored in the same UI.",
+    "description": "Modern React/TypeScript frontend for the Orthanc DICOM server — standalone SPA (Docker sidecar, Orthanc plugin or behind a JWT-authenticated backend proxy) with audited writes and a configuration a deployment can preset and lock. Study management, merge/migrate, smart search, upload, modality and DICOMweb configuration, viewer integration incl. the IHE image display entry point (RAD-106). It also ships the MWL broker: a DICOM Modality Worklist proxy that fans out to several RIS/KIS systems, merges and caches their worklists, serves the modalities, reports MPPS back to the RIS, accepts HL7 orders (ORM/OMG/OMI) and ADT patient updates (incl. PIR), and routes the stored images to the right PACS — with store spool, per-source cache, store log, TLS/mTLS, ATNA and retention. Verified against DCMTK, dcm4che and DVTk.",
     "systemInfo": "System Information",
     "appVersion": "App Version",
     "orthancVersion": "Orthanc Version",
@@ -1984,7 +1986,13 @@
       "mwlAtna": "ATNA audit export",
       "mwlTls": "DICOM TLS/mTLS",
       "mwlOps": "Health, alerting, retention",
-      "mwlRbac": "RBAC (read/write) & audit log"
+      "mwlRbac": "RBAC (read/write) & audit log",
+      "mwlMpps": "MPPS SCP + status back to the RIS",
+      "mwlPir": "HL7 ADT (A08/A24/A40/A47/A31) + PIR",
+      "mwlIid": "IHE image display entry point (RAD-106)",
+      "mwlUps": "UPS-RS subset (DICOMweb worklist)",
+      "mwlStats": "Statistics and reporting",
+      "interop": "Verified against DCMTK, dcm4che and DVTk"
     },
     "brokerFeatures": "MWL broker",
     "brokerHint": "DICOM Modality Worklist proxy with worklist cache, store routing and monitoring — configured on its own pages under “MWL Broker”."

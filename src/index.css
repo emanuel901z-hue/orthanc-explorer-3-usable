@@ -175,3 +175,13 @@
     min-width: 24px;
   }
 }
+
+/*
+ * Numbers with Latin units ("25 ms", "1.2.840.…") inside an RTL layout: without
+ * an isolate the bidi algorithm puts the unit in front ("ms 25"). Any value of
+ * that shape gets this class instead of a second translation.
+ */
+.ltr-value {
+  direction: ltr;
+  unicode-bidi: isolate;
+}

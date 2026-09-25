@@ -30,6 +30,20 @@ Seit v2.4.0 ist der Broker-UI-Slice deutlich gewachsen. Die wichtigsten
   bis dahin ungenutzte Endpunkt antwortete **500** für Altzeilen
   (`applied_transforms = NULL`); der Backend-Fix steht im Broker-Repo.
 
+### Neu: alle neun Sprachen vollständig — und Arabisch rechtsläufig
+
+- **Der Broker-Slice ist in allen neun Sprachen übersetzt** (en, de, es, fr, ja,
+  ru, tr, zh, ar) — abschnittsweise, damit keine Seite gemischtsprachig wird.
+  Vorher trugen sieben Sprachen nur den Rahmen und fielen auf Englisch zurück.
+- **Arabisch ist rechtsläufig** ✗→✓: `<html dir>`/`lang` folgen der Sprache
+  (`src/i18n/direction.ts`), die Seitenleiste nutzt jetzt logische Insets
+  (`start`/`end`) und wandert nach rechts, und Zahlen mit lateinischen Einheiten
+  („25 ms") laufen über `.ltr-value` isoliert, damit die Bidi-Regeln sie nicht
+  umstellen. Geprüft per Screenshot (Desktop + Mobil) und im DOM-Audit
+  („Schreibrichtung folgt der Sprache").
+- Zwei Lücken außerhalb des Brokers mitgenommen: `nav.auditLogs` fehlte in allen
+  Locales und „Toggle Sidebar" war hartkodiert — beides jetzt übersetzt.
+
 ### Weitere Änderungen
 
 - **MWL-Interop-Schalter** je Quelle: `QueryRetrieveLevel (0008,0052)` weglassen —

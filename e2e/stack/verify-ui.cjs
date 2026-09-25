@@ -321,14 +321,24 @@ async function domReport(page) {
   await page.goto(`${OE3}/oe3/broker`, { waitUntil: 'domcontentloaded' });
   const cachePanel = page.getByTestId('broker-cache');
   await cachePanel.scrollIntoViewIfNeeded().catch(() => {});
-  // The button only appears once the RBAC status resolved (canWrite) and the
-  // source actually holds entries — so poll instead of looking once.
+  // The button appears only when the RBAC status resolved (canWrite) **and** a
+  // source holds entries — the cache can legitimately be empty in a fresh stack,
+  // so refresh it first (that runs live queries and fills the snapshots).
+  const perSourceClearButton = () => cachePanel
+    .getByRole('button', { name: /cache von .* leeren|clear .* cache/i })
+    .first().isVisible().catch(() => false);
   let perSourceClear = false;
-  for (let attempt = 0; attempt < 20 && !perSourceClear; attempt += 1) {
-    perSourceClear = await cachePanel
-      .getByRole('button', { name: /cache von .* leeren|clear .* cache/i })
-      .first().isVisible().catch(() => false);
+  for (let attempt = 0; attempt < 12 && !perSourceClear; attempt += 1) {
+    perSourceClear = await perSourceClearButton();
     if (!perSourceClear) await page.waitForTimeout(250);
+  }
+  if (!perSourceClear) {
+    await cachePanel.getByRole('button', { name: /jetzt aktualisieren|refresh/i })
+      .first().click().catch(() => {});
+    for (let attempt = 0; attempt < 20 && !perSourceClear; attempt += 1) {
+      perSourceClear = await perSourceClearButton();
+      if (!perSourceClear) await page.waitForTimeout(250);
+    }
   }
   const cacheRows = await cachePanel.locator('li').count().catch(() => 0);
   record('monitoring: Cache je Quelle lässt sich einzeln verwerfen',
@@ -531,6 +541,7 @@ async function domReport(page) {
   const languageBefore = await page.evaluate(() => localStorage.getItem('oe3-language'));
   const languages = ['en', 'de', 'es', 'fr', 'ja', 'zh', 'ru', 'tr', 'ar'];
   const rawKeyLanguages = [];
+  const wrongDirection = [];
   for (const lng of languages) {
     for (const path of ['/oe3/broker', '/oe3/broker/sources', '/oe3/broker/settings']) {
       await page.goto(`${OE3}${path}?lng=${lng}`, { waitUntil: 'domcontentloaded' });
@@ -540,8 +551,15 @@ async function domReport(page) {
       if (/\b(broker|common|nav|settings|shortcuts)\.[a-z][A-Za-z]+/.test(text)) {
         rawKeyLanguages.push(`${lng}${path}`);
       }
+      // Arabic is written right-to-left: without <html dir> the whole layout
+      // stays mirrored (sidebar on the left, units in front of their numbers)
+      const dir = await page.evaluate(() => document.documentElement.getAttribute('dir'));
+      const expected = lng === 'ar' ? 'rtl' : 'ltr';
+      if (dir !== expected) wrongDirection.push(`${lng}${path}=${dir}`);
     }
   }
+  record('i18n: Schreibrichtung folgt der Sprache (Arabisch = rtl)', wrongDirection.length === 0,
+    wrongDirection.slice(0, 3).join(', ') || '9 Sprachen geprüft');
   record('i18n: keine Rohschlüssel in allen 9 Sprachen', rawKeyLanguages.length === 0,
     rawKeyLanguages.length ? `betroffen: ${rawKeyLanguages.join(', ')}` : '9 Sprachen geprüft');
 
