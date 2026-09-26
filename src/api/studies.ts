@@ -61,6 +61,22 @@ export type OrthancMergeResult = {
   MergedStudies?: string[];
 };
 
+export type OrthancSplitParams = {
+  Series?: string[];
+  Instances?: string[];
+  KeepSource?: boolean;
+  Replace?: Record<string, string>;
+  Remove?: string[];
+};
+
+export type OrthancSplitResult = {
+  TargetStudy: string;
+  TargetStudyUID: string;
+  InstancesCount?: number;
+  FailedInstancesCount?: number;
+  Description?: string;
+};
+
 export const studiesApi = {
   /** POST /tools/find — Search resources. Body: OrthancFindQuery (Level, Query, Expand, RequestedTags). Returns OrthancStudy[] (when Level='Study'). PHI must stay in POST body. */
   find: (query: OrthancFindQuery) =>
@@ -150,5 +166,17 @@ export const studiesApi = {
       method: 'POST',
       headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify({ Resources: sourceIds, KeepSource: keepSource }),
+    }),
+
+  /** POST /studies/:id/split — Splits series or instances out of a study into a new study.
+   *  Body: OrthancSplitParams (Series, Instances, KeepSource, Replace, Remove).
+   *  When KeepSource=false (default in Orthanc), resources are moved (cut & paste) into the new study.
+   *  Returns { TargetStudy, TargetStudyUID, ... }.
+   */
+  split: (studyId: string, params: OrthancSplitParams) =>
+    orthancFetch<OrthancSplitResult>(`/studies/${studyId}/split`, {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify(params),
     }),
 };

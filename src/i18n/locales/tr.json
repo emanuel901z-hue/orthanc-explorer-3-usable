@@ -573,7 +573,17 @@
     "tagName": "Ad",
     "original": "Orijinal",
     "newValue": "Yeni değer",
-    "empty": "boş"
+    "empty": "boş",
+    "instancesSelected": "örnek seçildi",
+    "migrateInstances": "Tetkike Taşı",
+    "splitToStudy": "Yeni Tetkike Böl",
+    "bulkDownloadSuccess": "{{count}} örnek indirildi.",
+    "bulkDownloadFailed": "İndirme başarısız.",
+    "bulkDeleteTitle": "Seçili örnekleri sil?",
+    "bulkDeleteDescription": "{{count}} örneği kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "bulkDeleteSuccess": "{{count}} örnek silindi.",
+    "bulkDeleteFailed": "{{count}} örnek silinemedi.",
+    "splitSuccess": "{{count}} örnek yeni tetkike bölündü."
   },
   "instance": {
     "notFound": "Örnek bulunamadı",
@@ -678,7 +688,10 @@
     "success": "Örnek başarıyla taşındı",
     "error": "Taşıma başarısız",
     "differentPatientWarning": "Uyarı: Seçilen hedef tetkik farklı bir hastaya ait. Taşıma işlemi örneği o hastaya atayacaktır.",
-    "partialSuccess": "Örnek taşındı, ancak {{failed}} örnek başarısız oldu."
+    "partialSuccess": "Örnek taşındı, ancak {{failed}} örnek başarısız oldu.",
+    "instancesToMigrate": "Taşınacak örnekler",
+    "bulkSuccess": "{{count}} örnek başarıyla taşındı.",
+    "migrateButtonBulk": "Taşı ({{count}})"
   },
   "study": {
     "modifyTitle": "Çalışma etiketlerini değiştir",
@@ -2041,5 +2054,18 @@
     "send": "Gönder",
     "sendSuccess": "{{peer}} eşine başarıyla gönderildi.",
     "sendError": "Eşe gönderme başarısız oldu."
+  },
+  "split": {
+    "title": "Tetkiki Böl",
+    "description": "Seçilen serileri veya örnekleri yeni StudyInstanceUID ile yeni bir tetkike ayıklayın.",
+    "selectSeries": "Ayıklanacak serileri seçin",
+    "selectAll": "Tümünü seç",
+    "deselectAll": "Seçimi temizle",
+    "newStudyDescription": "Yeni Tetkik Açıklaması",
+    "keepSource": "Kaynak serileri koru (kesmek yerine kopyala)",
+    "warningCut": "Seçilen seriler bu tetkikten kaldırılacak ve yeni tetkike taşınacaktır.",
+    "confirm": "Böl ({{count}})",
+    "success": "{{count}} seri başarıyla yeni tetkike bölündü.",
+    "error": "Tetkik bölünemedi"
   }
 }

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, ShieldAlert, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown, Server } from 'lucide-react';
+import { Download, Trash2, Send, Eye, Shield, ShieldAlert, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown, Server, Scissors } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -24,6 +24,7 @@ import { requestViewerSession } from '@/lib/viewer-session';
 import { buildIidUrl } from '@/features/viewer/lib/iid';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import MigrateStudyDialog from '@/features/studies/components/MigrateStudyDialog';
+import { SplitStudyDialog } from '@/features/studies/components/SplitStudyDialog';
 import ShareStudyDialog from '@/features/studies/components/ShareStudyDialog';
 import AddSeriesDialog from '@/features/studies/components/AddSeriesDialog';
 import { SendToPeerDialog } from '@/features/studies/components/SendToPeerDialog';
@@ -122,6 +123,7 @@ export default function StudyDetailPage() {
   const [anonOpen, setAnonOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [labelOpen, setLabelOpen] = useState(false);
   const [quarantineOpen, setQuarantineOpen] = useState(false);
@@ -476,6 +478,9 @@ export default function StudyDetailPage() {
           {canModify && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setMigrateOpen(true)}><GitMerge className="h-3.5 w-3.5" /> {t('migrate.title')}</Button>
           )}
+          {canModify && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSplitOpen(true)}><Scissors className="h-3.5 w-3.5" /> {t('split.title', { defaultValue: 'Split' })}</Button>
+          )}
           {canAnonymize && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAnonOpen(true)}><Shield className="h-3.5 w-3.5" /> {t('actions.anonymize')}</Button>
           )}
@@ -828,6 +833,16 @@ export default function StudyDetailPage() {
                                 <Send className="h-3.5 w-3.5" /> {t('studyDetail.bulkSend', { defaultValue: 'Send' })}
                               </Button>
                             )}
+                            {canModify && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5"
+                                onClick={() => setSplitOpen(true)}
+                              >
+                                <Scissors className="h-3.5 w-3.5" /> {t('split.title', { defaultValue: 'Split' })} ({selectedSeriesIds.size})
+                              </Button>
+                            )}
                             {canDelete && (
                               <Button
                                 variant="outline"
@@ -1104,6 +1119,15 @@ export default function StudyDetailPage() {
           open={migrateOpen}
           onOpenChange={setMigrateOpen}
           targetStudy={study}
+        />
+      )}
+      {study && (
+        <SplitStudyDialog
+          open={splitOpen}
+          onOpenChange={setSplitOpen}
+          study={study}
+          seriesList={series}
+          preselectedSeriesIds={selectedSeriesIds.size > 0 ? Array.from(selectedSeriesIds) : undefined}
         />
       )}
 

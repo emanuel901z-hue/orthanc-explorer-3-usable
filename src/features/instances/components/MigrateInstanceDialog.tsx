@@ -22,7 +22,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertTriangle, GitMerge, Loader2, Search, CheckCircle2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { migrateInstanceAction } from '@/actions/migrateInstance';
+import { mergeStudyAction } from '@/actions/mergeStudy';
 import { useStudies } from '@/features/studies/hooks/use-studies';
 import { formatPatientName } from '@/shared/components/ModalityBadge';
 import { format } from 'date-fns';
@@ -33,10 +33,12 @@ import { patientSignaturesMatch, type PatientSignature } from '@/lib/dicom-patie
 interface MigrateInstanceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** The instance ID to migrate. */
-  instanceId: string;
+  /** The instance ID to migrate (single mode). */
+  instanceId?: string;
+  /** The instance IDs to migrate (bulk mode). */
+  instanceIds?: string[];
   /** Instance number for display. */
-  instanceNumber: number | string;
+  instanceNumber?: number | string;
   /** The current parent study ID (will be excluded from target list). */
   currentStudyId: string;
 }
@@ -45,6 +47,7 @@ export default function MigrateInstanceDialog({
   open,
   onOpenChange,
   instanceId,
+  instanceIds,
   instanceNumber,
   currentStudyId,
 }: MigrateInstanceDialogProps) {
@@ -91,10 +94,17 @@ export default function MigrateInstanceDialog({
     });
   }, [allStudies, currentStudyId, searchTerm]);
 
+  const targetIds = useMemo(() => {
+    if (instanceIds && instanceIds.length > 0) return instanceIds;
+    if (instanceId) return [instanceId];
+    return [];
+  }, [instanceIds, instanceId]);
+
   const migrateMutation = useMutation({
     mutationFn: async () => {
       if (!selectedTargetId) throw new Error('No target selected');
-      return await migrateInstanceAction(selectedTargetId, instanceId, keepSource);
+      if (targetIds.length === 0) throw new Error('No instances selected');
+      return await mergeStudyAction(selectedTargetId, targetIds, keepSource);
     },
     onSuccess: (result) => {
       const failedCount = result.FailedInstancesCount ?? 0;
@@ -106,7 +116,11 @@ export default function MigrateInstanceDialog({
           }),
         );
       } else {
-        toast.success(t('instanceMigrate.success'));
+        toast.success(
+          targetIds.length > 1
+            ? t('instanceMigrate.bulkSuccess', { count: targetIds.length, defaultValue: `${targetIds.length} instances migrated.` })
+            : t('instanceMigrate.success'),
+        );
       }
       queryClient.invalidateQueries({ queryKey: ['studies'] });
       queryClient.invalidateQueries({ queryKey: ['study'] });
@@ -148,14 +162,18 @@ export default function MigrateInstanceDialog({
         {/* Instance Info */}
         <div className="rounded-lg border bg-muted/30 p-3 space-y-1">
           <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            {t('instanceMigrate.instanceToMigrate')}
+            {targetIds.length > 1
+              ? t('instanceMigrate.instancesToMigrate', { count: targetIds.length, defaultValue: `${targetIds.length} instances to migrate` })
+              : t('instanceMigrate.instanceToMigrate')}
           </div>
           <div className="flex items-center justify-between">
             <span className="font-medium">
-              {t('instanceMigrate.instanceLabel', { number: instanceNumber })}
+              {targetIds.length > 1
+                ? `${targetIds.length} instances`
+                : t('instanceMigrate.instanceLabel', { number: instanceNumber })}
             </span>
             <span className="text-xs text-muted-foreground font-mono">
-              {instanceId.substring(0, 16)}…
+              {targetIds.length === 1 ? `${(instanceId ?? '').substring(0, 16)}…` : `${targetIds.length} IDs`}
             </span>
           </div>
         </div>
@@ -274,7 +292,9 @@ export default function MigrateInstanceDialog({
               ) : (
                 <GitMerge className="h-4 w-4" />
               )}
-              {t('instanceMigrate.migrateButton')}
+              {targetIds.length > 1
+                ? t('instanceMigrate.migrateButtonBulk', { count: targetIds.length, defaultValue: `Migrate (${targetIds.length})` })
+                : t('instanceMigrate.migrateButton')}
             </Button>
           </DialogFooter>
         </div>

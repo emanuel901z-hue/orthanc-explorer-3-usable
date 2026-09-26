@@ -15,8 +15,10 @@ import {
   List,
   Loader2,
   GitMerge,
+  Scissors,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { usePersistedState } from '@/store/ui-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,6 +40,7 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,6 +69,10 @@ import {
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import ModifySeriesDialog from '@/features/series/components/ModifySeriesDialog';
 import MigrateSeriesDialog from '@/features/series/components/MigrateSeriesDialog';
+import MigrateInstanceDialog from '@/features/instances/components/MigrateInstanceDialog';
+import { toolsApi } from '@/api/tools';
+import { splitStudyAction } from '@/actions/splitStudy';
+import { deleteInstanceAction } from '@/actions/deleteInstance';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
@@ -152,6 +159,7 @@ export default function SeriesDetailPage() {
   const { t } = useTranslation();
   const { studyId, seriesId } = useParams<{ studyId: string; seriesId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: series, isLoading } = useSeries(seriesId!);
   const { data: study } = useStudy(studyId!);
   const { data: rawInstances = [], isLoading: instancesLoading } = useSeriesInstances(seriesId!);
@@ -177,9 +185,102 @@ export default function SeriesDetailPage() {
   const [instanceView, setInstanceView] = usePersistedState<'grid' | 'table'>('seriesDetail.instanceView', 'grid');
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [selectedInstanceIds, setSelectedInstanceIds] = useState<Set<string>>(new Set());
+  const [migrateInstancesOpen, setMigrateInstancesOpen] = useState(false);
+  const [bulkDownloading, setBulkDownloading] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const { audit } = useAuditLog();
 
   useTabLabel(study ? formatPatientName(study.patientName) : undefined);
+
+  const toggleInstance = (id: string) => {
+    setSelectedInstanceIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllInstances = () => {
+    if (selectedInstanceIds.size === instances.length) {
+      setSelectedInstanceIds(new Set());
+    } else {
+      setSelectedInstanceIds(new Set(instances.map((i) => i.id)));
+    }
+  };
+
+  const handleBulkDownloadInstances = async () => {
+    const ids = Array.from(selectedInstanceIds);
+    if (ids.length === 0) return;
+    setBulkDownloading(true);
+    try {
+      const blob = await toolsApi.createArchive(ids);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${formatPatientName(study?.patientName ?? 'study')}_series${series?.seriesNumber}_${ids.length}instances.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(t('series.bulkDownloadSuccess', { count: ids.length, defaultValue: `${ids.length} instances downloaded` }));
+      setSelectedInstanceIds(new Set());
+    } catch {
+      toast.error(t('series.bulkDownloadFailed', { defaultValue: 'Download failed' }));
+    } finally {
+      setBulkDownloading(false);
+    }
+  };
+
+  const handleSplitInstancesToNewStudy = async () => {
+    const ids = Array.from(selectedInstanceIds);
+    if (ids.length === 0 || !studyId) return;
+    try {
+      const result = await splitStudyAction(studyId, {
+        Instances: ids,
+        KeepSource: false,
+        Replace: {
+          StudyDescription: `[Split] ${series?.seriesDescription || 'Instances'}`,
+        },
+      });
+      toast.success(t('series.splitSuccess', { count: ids.length, defaultValue: `${ids.length} instances split into new study.` }));
+      queryClient.invalidateQueries({ queryKey: ['series', seriesId] });
+      queryClient.invalidateQueries({ queryKey: ['study', studyId] });
+      setSelectedInstanceIds(new Set());
+      if (result.TargetStudy) {
+        navigate(`/studies/${result.TargetStudy}`);
+      }
+    } catch (e) {
+      toast.error(t('split.error', { defaultValue: 'Failed to split study' }), {
+        description: e instanceof Error ? e.message : 'Unknown error',
+      });
+    }
+  };
+
+  const handleBulkDeleteInstances = async () => {
+    const ids = Array.from(selectedInstanceIds);
+    if (ids.length === 0) return;
+    setBulkDeleting(true);
+    let ok = 0;
+    let fail = 0;
+    for (const id of ids) {
+      try {
+        await deleteInstanceAction(id);
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    setBulkDeleting(false);
+    setBulkDeleteOpen(false);
+    setSelectedInstanceIds(new Set());
+    if (ok > 0) toast.success(t('series.bulkDeleteSuccess', { count: ok, defaultValue: `${ok} instances deleted` }));
+    if (fail > 0) toast.error(t('series.bulkDeleteFailed', { count: fail, defaultValue: `${fail} instances could not be deleted` }));
+    queryClient.invalidateQueries({ queryKey: ['series', seriesId] });
+    queryClient.invalidateQueries({ queryKey: ['study', studyId] });
+  };
 
   if (isLoading) {
     return (
@@ -546,17 +647,90 @@ export default function SeriesDetailPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
+                  {/* Bulk action bar */}
+                  {selectedInstanceIds.size > 0 && (
+                    <div className="flex items-center justify-between gap-2 mb-3 p-2 rounded-md bg-primary/5 border border-primary/20 flex-col sm:flex-row">
+                      <span className="text-sm font-medium">
+                        {selectedInstanceIds.size} {t('series.instancesSelected', { defaultValue: 'instances selected' })}
+                      </span>
+                      <div className="flex gap-1.5 flex-wrap">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs gap-1"
+                          disabled={bulkDownloading}
+                          onClick={handleBulkDownloadInstances}
+                        >
+                          {bulkDownloading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                          ZIP ({selectedInstanceIds.size})
+                        </Button>
+                        {canModify && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1"
+                            onClick={() => setMigrateInstancesOpen(true)}
+                          >
+                            <GitMerge className="h-3 w-3" />
+                            {t('series.migrateInstances', { defaultValue: 'Move to Study' })}
+                          </Button>
+                        )}
+                        {canModify && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1"
+                            onClick={handleSplitInstancesToNewStudy}
+                          >
+                            <Scissors className="h-3 w-3" />
+                            {t('series.splitToStudy', { defaultValue: 'Split to Study' })}
+                          </Button>
+                        )}
+                        {canDelete && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1 text-destructive"
+                            onClick={() => setBulkDeleteOpen(true)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            {t('common.delete', { defaultValue: 'Delete' })}
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs px-2"
+                          onClick={() => setSelectedInstanceIds(new Set())}
+                        >
+                          {t('common.cancel', { defaultValue: 'Cancel' })}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   {instanceView === 'grid' ? (
                     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                       {instances.map((inst) => (
-                        <InstanceThumbnail
-                          key={inst.id}
-                          instanceId={inst.id}
-                          instanceNumber={inst.instanceNumber}
-                          onClick={() =>
-                            navigate(`/studies/${studyId}/series/${seriesId}/instances/${inst.id}`)
-                          }
-                        />
+                        <div key={inst.id} className="relative group">
+                          <div
+                            className="absolute top-1 left-1 z-10"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Checkbox
+                              checked={selectedInstanceIds.has(inst.id)}
+                              onCheckedChange={() => toggleInstance(inst.id)}
+                              className="bg-background/80"
+                            />
+                          </div>
+                          <InstanceThumbnail
+                            instanceId={inst.id}
+                            instanceNumber={inst.instanceNumber}
+                            onClick={() =>
+                              navigate(`/studies/${studyId}/series/${seriesId}/instances/${inst.id}`)
+                            }
+                          />
+                        </div>
                       ))}
                     </div>
                   ) : (
@@ -564,6 +738,12 @@ export default function SeriesDetailPage() {
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead className="w-10">
+                              <Checkbox
+                                checked={instances.length > 0 && selectedInstanceIds.size === instances.length}
+                                onCheckedChange={selectAllInstances}
+                              />
+                            </TableHead>
                             <TableHead className="w-12">#</TableHead>
                             <TableHead>{t('series.sopInstanceUid')}</TableHead>
                             <TableHead>{t('series.positionZ')}</TableHead>
@@ -575,6 +755,7 @@ export default function SeriesDetailPage() {
                           {instancesLoading
                             ? Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={i}>
+                                  <TableCell><Skeleton className="h-4 w-4" /></TableCell>
                                   <TableCell><Skeleton className="h-4 w-8" /></TableCell>
                                   <TableCell><Skeleton className="h-4 w-full" /></TableCell>
                                   <TableCell><Skeleton className="h-4 w-32" /></TableCell>
@@ -590,6 +771,12 @@ export default function SeriesDetailPage() {
                                     navigate(`/studies/${studyId}/series/${seriesId}/instances/${inst.id}`)
                                   }
                                 >
+                                  <TableCell className="w-10" onClick={(e) => e.stopPropagation()}>
+                                    <Checkbox
+                                      checked={selectedInstanceIds.has(inst.id)}
+                                      onCheckedChange={() => toggleInstance(inst.id)}
+                                    />
+                                  </TableCell>
                                   <TableCell className="font-medium">{inst.instanceNumber}</TableCell>
                                   <TableCell className="font-mono text-xs truncate max-w-[300px]">{inst.sopInstanceUID}</TableCell>
                                   <TableCell className="font-mono text-xs text-muted-foreground">{formatSlicePosition(inst.imagePositionPatient)}</TableCell>
@@ -672,6 +859,42 @@ export default function SeriesDetailPage() {
           tags={seriesTags ?? []}
         />
       )}
+      {studyId && migrateInstancesOpen && (
+        <MigrateInstanceDialog
+          open={migrateInstancesOpen}
+          onOpenChange={setMigrateInstancesOpen}
+          instanceIds={Array.from(selectedInstanceIds)}
+          currentStudyId={studyId}
+        />
+      )}
+
+      {/* Bulk Delete Instances Confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('series.bulkDeleteTitle', { defaultValue: 'Delete selected instances?' })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('series.bulkDeleteDescription', {
+                count: selectedInstanceIds.size,
+                defaultValue: `Are you sure you want to permanently delete ${selectedInstanceIds.size} instances? This cannot be undone.`,
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleting}>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={bulkDeleting}
+              onClick={handleBulkDeleteInstances}
+            >
+              {bulkDeleting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
+              {t('common.delete', { defaultValue: 'Delete' })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -573,7 +573,17 @@
     "tagName": "الاسم",
     "original": "الأصلي",
     "newValue": "القيمة الجديدة",
-    "empty": "فارغ"
+    "empty": "فارغ",
+    "instancesSelected": "عناصر محددة",
+    "migrateInstances": "نقل إلى فحص",
+    "splitToStudy": "تقسيم إلى فحص جديد",
+    "bulkDownloadSuccess": "تم تنزيل {{count}} عنصر.",
+    "bulkDownloadFailed": "فشل التنزيل.",
+    "bulkDeleteTitle": "حذف العناصر المحددة؟",
+    "bulkDeleteDescription": "هل أنت متأكد من رغبتك في حذف {{count}} عنصر نهائياً؟ لا يمكن التراجع عن هذا الإجراء.",
+    "bulkDeleteSuccess": "تم حذف {{count}} عنصر.",
+    "bulkDeleteFailed": "تعذر حذف {{count}} عنصر.",
+    "splitSuccess": "تم تقسيم {{count}} عنصر إلى فحص جديد."
   },
   "instance": {
     "notFound": "المثيل غير موجود",
@@ -678,7 +688,10 @@
     "success": "تم ترحيل المثيل بنجاح",
     "error": "فشل الترحيل",
     "differentPatientWarning": "تحذير: الفحص المستهدف المحدد ينتمي لمريض آخر. سيؤدي النقل إلى تعيين هذا العنصر لذلك المريض.",
-    "partialSuccess": "تم نقل العنصر، ولكن فشل {{failed}} عنصر."
+    "partialSuccess": "تم نقل العنصر، ولكن فشل {{failed}} عنصر.",
+    "instancesToMigrate": "العناصر المراد نقلها",
+    "bulkSuccess": "تم نقل {{count}} عنصر بنجاح.",
+    "migrateButtonBulk": "نقل ({{count}})"
   },
   "study": {
     "modifyTitle": "تعديل علامات الدراسة",
@@ -2041,5 +2054,18 @@
     "send": "إرسال",
     "sendSuccess": "تم الإرسال بنجاح إلى النظير {{peer}}.",
     "sendError": "فشل الإرسال إلى النظير."
+  },
+  "split": {
+    "title": "تقسيم الفحص",
+    "description": "استخراج السلاسل أو العناصر المحددة إلى فحص جديد بمعرف StudyInstanceUID جديد.",
+    "selectSeries": "حدد السلاسل المراد استخراجها",
+    "selectAll": "تحديد الكل",
+    "deselectAll": "إلغاء تحديد الكل",
+    "newStudyDescription": "وصف الفحص الجديد",
+    "keepSource": "الاحتفاظ بالسلاسل المصدر (نسخ بدلاً من قص ونقل)",
+    "warningCut": "ستتم إزالة السلاسل المحددة من هذا الفحص ونقلها إلى الفحص الجديد.",
+    "confirm": "تقسيم ({{count}})",
+    "success": "تم تقسيم {{count}} سلسلة بنجاح إلى فحص جديد.",
+    "error": "فشل تقسيم الفحص"
   }
 }

@@ -485,7 +485,17 @@
     "tagName": "名前",
     "original": "元の値",
     "newValue": "新しい値",
-    "empty": "空"
+    "empty": "空",
+    "instancesSelected": "件のインスタンスが選択されました",
+    "migrateInstances": "検査へ移動",
+    "splitToStudy": "新しい検査へ分割",
+    "bulkDownloadSuccess": "{{count}} 件のインスタンスをダウンロードしました。",
+    "bulkDownloadFailed": "ダウンロードに失敗しました。",
+    "bulkDeleteTitle": "選択したインスタンスを削除しますか？",
+    "bulkDeleteDescription": "選択した {{count}} 件のインスタンスを完全に削除してもよろしいですか？この操作は取り消せません。",
+    "bulkDeleteSuccess": "{{count}} 件のインスタンスを削除しました。",
+    "bulkDeleteFailed": "{{count}} 件のインスタンスを削除できませんでした。",
+    "splitSuccess": "{{count}} 件のインスタンスを新しい検査に分割しました。"
   },
   "instance": {
     "notFound": "インスタンスが見つかりません",
@@ -590,7 +600,10 @@
     "success": "インスタンスが正常に移行されました",
     "error": "移行に失敗しました",
     "differentPatientWarning": "警告: 選択した移行先検査は別の患者のものです。移行するとこのインスタンスはその患者に割り当てられます。",
-    "partialSuccess": "インスタンスを移行しましたが、{{failed}} 件のインスタンスが失敗しました。"
+    "partialSuccess": "インスタンスを移行しましたが、{{failed}} 件のインスタンスが失敗しました。",
+    "instancesToMigrate": "移行するインスタンス",
+    "bulkSuccess": "{{count}} 件のインスタンスが正常に移行されました。",
+    "migrateButtonBulk": "移行 ({{count}})"
   },
   "studyList": {
     "actions": {
@@ -2041,5 +2054,18 @@
     "send": "送信",
     "sendSuccess": "ピア {{peer}} に正常に送信されました。",
     "sendError": "ピアへの送信に失敗しました。"
+  },
+  "split": {
+    "title": "検査の分割",
+    "description": "選択したシリーズまたはインスタンスを新しいStudyInstanceUIDを持つ新しい検査に抽出します。",
+    "selectSeries": "抽出するシリーズを選択",
+    "selectAll": "すべて選択",
+    "deselectAll": "すべて解除",
+    "newStudyDescription": "新しい検査の説明",
+    "keepSource": "元のシリーズを保持（切り取りではなくコピー）",
+    "warningCut": "選択したシリーズはこの検査から削除され、新しい検査に移動します。",
+    "confirm": "分割 ({{count}})",
+    "success": "{{count}} 件のシリーズを新しい検査に正常に分割しました。",
+    "error": "検査の分割に失敗しました"
   }
 }

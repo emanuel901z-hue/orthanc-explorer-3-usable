@@ -485,7 +485,17 @@
     "tagName": "Nom",
     "original": "Original",
     "newValue": "Nouvelle valeur",
-    "empty": "vide"
+    "empty": "vide",
+    "instancesSelected": "instances sélectionnées",
+    "migrateInstances": "Déplacer vers l'étude",
+    "splitToStudy": "Diviser dans une nouvelle étude",
+    "bulkDownloadSuccess": "{{count}} instance(s) téléchargée(s).",
+    "bulkDownloadFailed": "Le téléchargement a échoué.",
+    "bulkDeleteTitle": "Supprimer les instances sélectionnées ?",
+    "bulkDeleteDescription": "Voulez-vous vraiment supprimer définitivement {{count}} instance(s) ? Cette action est irréversible.",
+    "bulkDeleteSuccess": "{{count}} instance(s) supprimée(s).",
+    "bulkDeleteFailed": "{{count}} instance(s) n'ont pas pu être supprimées.",
+    "splitSuccess": "{{count}} instance(s) divisée(s) dans une nouvelle étude."
   },
   "instance": {
     "notFound": "Instance introuvable",
@@ -590,7 +600,10 @@
     "success": "Instance migrée avec succès",
     "error": "Migration échouée",
     "differentPatientWarning": "Avertissement : L'étude cible sélectionnée appartient à un autre patient. La migration attribuera l'instance à ce patient.",
-    "partialSuccess": "Instance migrée, mais {{failed}} instance(s) ont échoué."
+    "partialSuccess": "Instance migrée, mais {{failed}} instance(s) ont échoué.",
+    "instancesToMigrate": "Instances à migrer",
+    "bulkSuccess": "{{count}} instance(s) migrées avec succès.",
+    "migrateButtonBulk": "Migrer ({{count}})"
   },
   "studyList": {
     "actions": {
@@ -2041,5 +2054,18 @@
     "send": "Envoyer",
     "sendSuccess": "Envoyé avec succès au pair {{peer}}.",
     "sendError": "Échec de l'envoi au pair."
+  },
+  "split": {
+    "title": "Diviser l'étude",
+    "description": "Extraire les séries ou instances sélectionnées dans une nouvelle étude avec un nouveau StudyInstanceUID.",
+    "selectSeries": "Sélectionner les séries à extraire",
+    "selectAll": "Tout sélectionner",
+    "deselectAll": "Tout désélectionner",
+    "newStudyDescription": "Description de la nouvelle étude",
+    "keepSource": "Conserver les séries sources (copier au lieu de déplacer)",
+    "warningCut": "Les séries sélectionnées seront retirées de cette étude et déplacées dans la nouvelle étude.",
+    "confirm": "Diviser ({{count}})",
+    "success": "{{count}} série(s) divisée(s) avec succès dans une nouvelle étude.",
+    "error": "Échec de la division de l'étude"
   }
 }

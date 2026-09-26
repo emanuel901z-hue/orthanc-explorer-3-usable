@@ -485,7 +485,17 @@
     "tagName": "Nombre",
     "original": "Original",
     "newValue": "Nuevo valor",
-    "empty": "vacío"
+    "empty": "vacío",
+    "instancesSelected": "instancias seleccionadas",
+    "migrateInstances": "Mover a estudio",
+    "splitToStudy": "Dividir en nuevo estudio",
+    "bulkDownloadSuccess": "{{count}} instancia(s) descargada(s).",
+    "bulkDownloadFailed": "La descarga falló.",
+    "bulkDeleteTitle": "¿Eliminar las instancias seleccionadas?",
+    "bulkDeleteDescription": "¿Está seguro de que desea eliminar permanentemente {{count}} instancia(s)? Esta acción no se puede deshacer.",
+    "bulkDeleteSuccess": "{{count}} instancia(s) eliminada(s).",
+    "bulkDeleteFailed": "{{count}} instancia(s) no se pudieron eliminar.",
+    "splitSuccess": "{{count}} instancia(s) dividida(s) en un nuevo estudio."
   },
   "instance": {
     "notFound": "Instancia no encontrada",
@@ -590,7 +600,10 @@
     "success": "Instancia migrada correctamente",
     "error": "Migración fallida",
     "differentPatientWarning": "Advertencia: El estudio de destino seleccionado pertenece a otro paciente. Al migrar, la instancia se asignará a ese paciente.",
-    "partialSuccess": "Instancia migrada, pero fallaron {{failed}} instancia(s)."
+    "partialSuccess": "Instancia migrada, pero fallaron {{failed}} instancia(s).",
+    "instancesToMigrate": "Instancias a migrar",
+    "bulkSuccess": "{{count}} instancia(s) migrada(s) con éxito.",
+    "migrateButtonBulk": "Migrar ({{count}})"
   },
   "studyList": {
     "actions": {
@@ -2041,5 +2054,18 @@
     "send": "Enviar",
     "sendSuccess": "Enviado con éxito al par {{peer}}.",
     "sendError": "Error al enviar al par."
+  },
+  "split": {
+    "title": "Dividir estudio",
+    "description": "Extraer series o instancias seleccionadas en un nuevo estudio con nuevo StudyInstanceUID.",
+    "selectSeries": "Seleccionar series para extraer",
+    "selectAll": "Seleccionar todo",
+    "deselectAll": "Deseleccionar todo",
+    "newStudyDescription": "Descripción del nuevo estudio",
+    "keepSource": "Mantener series de origen (copiar en lugar de mover)",
+    "warningCut": "Las series seleccionadas se eliminarán de este estudio y se moverán al nuevo estudio.",
+    "confirm": "Dividir ({{count}})",
+    "success": "Se dividieron {{count}} serie(s) con éxito en un nuevo estudio.",
+    "error": "Error al dividir el estudio"
   }
 }

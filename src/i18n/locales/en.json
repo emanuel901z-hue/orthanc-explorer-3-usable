@@ -627,7 +627,17 @@
     "metadata": {
       "seriesId": "Series ID",
       "instances": "Instances"
-    }
+    },
+    "instancesSelected": "instances selected",
+    "migrateInstances": "Move to Study",
+    "splitToStudy": "Split to Study",
+    "bulkDownloadSuccess": "{{count}} instance(s) downloaded.",
+    "bulkDownloadFailed": "Download failed.",
+    "bulkDeleteTitle": "Delete selected instances?",
+    "bulkDeleteDescription": "Are you sure you want to permanently delete {{count}} instance(s)? This cannot be undone.",
+    "bulkDeleteSuccess": "{{count}} instance(s) deleted.",
+    "bulkDeleteFailed": "{{count}} instance(s) could not be deleted.",
+    "splitSuccess": "{{count}} instance(s) split into new study."
   },
   "instance": {
     "notFound": "Instance not found",
@@ -732,7 +742,10 @@
     "success": "Instance migrated successfully",
     "error": "Migration failed",
     "differentPatientWarning": "Warning: The selected target study belongs to a different patient. Migrating will assign this instance to that patient.",
-    "partialSuccess": "Instance migrated, but {{failed}} instances failed."
+    "partialSuccess": "Instance migrated, but {{failed}} instances failed.",
+    "instancesToMigrate": "Instances to migrate",
+    "bulkSuccess": "{{count}} instance(s) successfully migrated.",
+    "migrateButtonBulk": "Migrate ({{count}})"
   },
   "study": {
     "modifyTitle": "Modify Study Tags",
@@ -2041,5 +2054,18 @@
     "send": "Send",
     "sendSuccess": "Successfully sent to peer {{peer}}.",
     "sendError": "Failed to send to peer."
+  },
+  "split": {
+    "title": "Split Study",
+    "description": "Extract selected series or instances into a new study with a new StudyInstanceUID.",
+    "selectSeries": "Select Series to Extract",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "newStudyDescription": "New Study Description",
+    "keepSource": "Keep source series (Copy instead of Cut & Move)",
+    "warningCut": "The selected series will be removed from this study and moved into the new study.",
+    "confirm": "Split ({{count}})",
+    "success": "Successfully split {{count}} series into a new study.",
+    "error": "Failed to split study"
   }
 }

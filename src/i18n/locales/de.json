@@ -627,7 +627,17 @@
     "metadata": {
       "seriesId": "Serien-ID",
       "instances": "Instanzen"
-    }
+    },
+    "instancesSelected": "Instanzen ausgewählt",
+    "migrateInstances": "In Studie verschieben",
+    "splitToStudy": "In neue Studie abspalten",
+    "bulkDownloadSuccess": "{{count}} Instanz(en) heruntergeladen.",
+    "bulkDownloadFailed": "Download fehlgeschlagen.",
+    "bulkDeleteTitle": "Ausgewählte Instanzen löschen?",
+    "bulkDeleteDescription": "Möchten Sie {{count}} Instanz(en) wirklich dauerhaft löschen? Dies kann nicht rückgängig gemacht werden.",
+    "bulkDeleteSuccess": "{{count}} Instanz(en) gelöscht.",
+    "bulkDeleteFailed": "{{count}} Instanz(en) konnten nicht gelöscht werden.",
+    "splitSuccess": "{{count}} Instanz(en) in neue Studie aufgeteilt."
   },
   "instance": {
     "notFound": "Instanz nicht gefunden",
@@ -732,7 +742,10 @@
     "success": "Instanz erfolgreich migriert",
     "error": "Migration fehlgeschlagen",
     "differentPatientWarning": "Warnung: Die ausgewählte Zielstudie gehört einem anderen Patienten. Beim Migrieren wird die Instanz diesem Patienten zugeordnet.",
-    "partialSuccess": "Instanz migriert, aber {{failed}} Instanz(en) fehlgeschlagen."
+    "partialSuccess": "Instanz migriert, aber {{failed}} Instanz(en) fehlgeschlagen.",
+    "instancesToMigrate": "Zu migrierende Instanzen",
+    "bulkSuccess": "{{count}} Instanz(en) erfolgreich migriert.",
+    "migrateButtonBulk": "Migrieren ({{count}})"
   },
   "study": {
     "modifyTitle": "Studien-Tags ändern",
@@ -2041,5 +2054,18 @@
     "send": "Senden",
     "sendSuccess": "Erfolgreich an Peer {{peer}} gesendet.",
     "sendError": "Übertragung an Peer fehlgeschlagen."
+  },
+  "split": {
+    "title": "Studie aufteilen",
+    "description": "Ausgewählte Serien oder Instanzen in eine neue Studie mit neuer StudyInstanceUID ausgliedern.",
+    "selectSeries": "Serien zum Ausgliedern auswählen",
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Alle abwählen",
+    "newStudyDescription": "Beschreibung der neuen Studie",
+    "keepSource": "Quellserien behalten (Kopieren statt Ausschneiden)",
+    "warningCut": "Die ausgewählten Serien werden aus dieser Studie entfernt und in die neue Studie verschoben.",
+    "confirm": "Aufteilen ({{count}})",
+    "success": "{{count}} Serie(n) erfolgreich in neue Studie aufgeteilt.",
+    "error": "Aufteilen der Studie fehlgeschlagen"
   }
 }

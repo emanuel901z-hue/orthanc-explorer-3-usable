@@ -485,7 +485,17 @@
     "tagName": "名称",
     "original": "原始值",
     "newValue": "新值",
-    "empty": "空"
+    "empty": "空",
+    "instancesSelected": "个实例已选择",
+    "migrateInstances": "移动到检查",
+    "splitToStudy": "拆分到新检查",
+    "bulkDownloadSuccess": "已下载 {{count}} 个实例。",
+    "bulkDownloadFailed": "下载失败。",
+    "bulkDeleteTitle": "删除选定的实例？",
+    "bulkDeleteDescription": "您确定要永久删除 {{count}} 个实例吗？此操作无法撤消。",
+    "bulkDeleteSuccess": "已删除 {{count}} 个实例。",
+    "bulkDeleteFailed": "{{count}} 个实例无法删除。",
+    "splitSuccess": "已将 {{count}} 个实例拆分到新检查。"
   },
   "instance": {
     "notFound": "未找到实例",
@@ -590,7 +600,10 @@
     "success": "实例迁移成功",
     "error": "迁移失败",
     "differentPatientWarning": "警告：所选目标检查属于其他患者。迁移后该实例将归属于该患者。",
-    "partialSuccess": "已迁移实例，但有 {{failed}} 个实例失败。"
+    "partialSuccess": "已迁移实例，但有 {{failed}} 个实例失败。",
+    "instancesToMigrate": "要迁移的实例",
+    "bulkSuccess": "已成功迁移 {{count}} 个实例。",
+    "migrateButtonBulk": "迁移 ({{count}})"
   },
   "studyList": {
     "actions": {
@@ -2041,5 +2054,18 @@
     "send": "发送",
     "sendSuccess": "已成功发送到节点 {{peer}}。",
     "sendError": "发送到节点失败。"
+  },
+  "split": {
+    "title": "拆分检查",
+    "description": "将选定的序列或实例提取到具有新 StudyInstanceUID 的新检查中。",
+    "selectSeries": "选择要提取的序列",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "newStudyDescription": "新检查描述",
+    "keepSource": "保留源序列（复制而非移动）",
+    "warningCut": "所选序列将从当前检查中移除并移动到新检查中。",
+    "confirm": "拆分 ({{count}})",
+    "success": "已成功将 {{count}} 个序列拆分到新检查中。",
+    "error": "拆分检查失败"
   }
 }
