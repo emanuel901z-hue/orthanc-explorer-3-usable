@@ -16,6 +16,7 @@ import {
   Loader2,
   GitMerge,
   Scissors,
+  Layers,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -70,8 +71,9 @@ import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import ModifySeriesDialog from '@/features/series/components/ModifySeriesDialog';
 import MigrateSeriesDialog from '@/features/series/components/MigrateSeriesDialog';
 import MigrateInstanceDialog from '@/features/instances/components/MigrateInstanceDialog';
+import { SplitInstancesDialog } from '@/features/instances/components/SplitInstancesDialog';
+import { MoveInstancesToSeriesDialog } from '@/features/instances/components/MoveInstancesToSeriesDialog';
 import { toolsApi } from '@/api/tools';
-import { splitStudyAction } from '@/actions/splitStudy';
 import { deleteInstanceAction } from '@/actions/deleteInstance';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
@@ -187,6 +189,8 @@ export default function SeriesDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<Set<string>>(new Set());
   const [migrateInstancesOpen, setMigrateInstancesOpen] = useState(false);
+  const [splitInstancesOpen, setSplitInstancesOpen] = useState(false);
+  const [moveToSeriesOpen, setMoveToSeriesOpen] = useState(false);
   const [bulkDownloading, setBulkDownloading] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -231,31 +235,6 @@ export default function SeriesDetailPage() {
       toast.error(t('series.bulkDownloadFailed', { defaultValue: 'Download failed' }));
     } finally {
       setBulkDownloading(false);
-    }
-  };
-
-  const handleSplitInstancesToNewStudy = async () => {
-    const ids = Array.from(selectedInstanceIds);
-    if (ids.length === 0 || !studyId) return;
-    try {
-      const result = await splitStudyAction(studyId, {
-        Instances: ids,
-        KeepSource: false,
-        Replace: {
-          StudyDescription: `[Split] ${series?.seriesDescription || 'Instances'}`,
-        },
-      });
-      toast.success(t('series.splitSuccess', { count: ids.length, defaultValue: `${ids.length} instances split into new study.` }));
-      queryClient.invalidateQueries({ queryKey: ['series', seriesId] });
-      queryClient.invalidateQueries({ queryKey: ['study', studyId] });
-      setSelectedInstanceIds(new Set());
-      if (result.TargetStudy) {
-        navigate(`/studies/${result.TargetStudy}`);
-      }
-    } catch (e) {
-      toast.error(t('split.error', { defaultValue: 'Failed to split study' }), {
-        description: e instanceof Error ? e.message : 'Unknown error',
-      });
     }
   };
 
@@ -680,10 +659,21 @@ export default function SeriesDetailPage() {
                             variant="outline"
                             size="sm"
                             className="h-7 text-xs gap-1"
-                            onClick={handleSplitInstancesToNewStudy}
+                            onClick={() => setSplitInstancesOpen(true)}
                           >
                             <Scissors className="h-3 w-3" />
                             {t('series.splitToStudy', { defaultValue: 'Split to Study' })}
+                          </Button>
+                        )}
+                        {canModify && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1"
+                            onClick={() => setMoveToSeriesOpen(true)}
+                          >
+                            <Layers className="h-3 w-3" />
+                            {t('series.moveToSeries', { defaultValue: 'Move to Series' })}
                           </Button>
                         )}
                         {canDelete && (
@@ -865,6 +855,30 @@ export default function SeriesDetailPage() {
           onOpenChange={setMigrateInstancesOpen}
           instanceIds={Array.from(selectedInstanceIds)}
           currentStudyId={studyId}
+        />
+      )}
+      {studyId && splitInstancesOpen && (
+        <SplitInstancesDialog
+          open={splitInstancesOpen}
+          onOpenChange={setSplitInstancesOpen}
+          studyId={studyId}
+          seriesDescription={series?.seriesDescription}
+          seriesNumber={series?.seriesNumber}
+          instanceIds={Array.from(selectedInstanceIds)}
+          onSuccess={() => setSelectedInstanceIds(new Set())}
+        />
+      )}
+      {studyId && seriesId && moveToSeriesOpen && (
+        <MoveInstancesToSeriesDialog
+          open={moveToSeriesOpen}
+          onOpenChange={setMoveToSeriesOpen}
+          studyId={studyId}
+          currentSeriesId={seriesId}
+          currentSeriesInstanceCount={instances.length}
+          currentSeriesNumber={series?.seriesNumber}
+          currentSeriesDescription={series?.seriesDescription}
+          instanceIds={Array.from(selectedInstanceIds)}
+          onSuccess={() => setSelectedInstanceIds(new Set())}
         />
       )}
 

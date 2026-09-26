@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Download, Image, Send, Eye, Trash2, Pencil, Shield, Search, GitMerge, FileText } from 'lucide-react';
+import { Download, Image, Send, Eye, Trash2, Pencil, Shield, Search, GitMerge, FileText, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import { formatDiskSize, formatPatientName } from '@/shared/components/ModalityB
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import MigrateInstanceDialog from '@/features/instances/components/MigrateInstanceDialog';
 import ModifyInstanceDialog from '@/features/instances/components/ModifyInstanceDialog';
+import { MoveInstancesToSeriesDialog } from '@/features/instances/components/MoveInstancesToSeriesDialog';
 import { useTabLabel } from '@/shared/hooks/use-tab-label';
 import { AnonymizeDialog } from '@/features/studies/components/AnonymizeDialog';
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
@@ -93,6 +94,7 @@ export default function InstanceDetailPage() {
   const [anonOpen, setAnonOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
+  const [moveToSeriesOpen, setMoveToSeriesOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { audit } = useAuditLog();
@@ -261,6 +263,9 @@ export default function InstanceDetailPage() {
           )}
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setMigrateOpen(true); audit({ action: 'modify', title: t('instance.auditMigrateInitiated'), resource: t('instance.instanceNumber', { number: instance.instanceNumber }) }); }}>
             <GitMerge className="h-3.5 w-3.5" /> {t('instance.migrate')}
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setMoveToSeriesOpen(true); audit({ action: 'modify', title: t('instance.auditMoveToSeriesInitiated', { defaultValue: 'Instance move to series initiated' }), resource: t('instance.instanceNumber', { number: instance.instanceNumber }) }); }}>
+            <Layers className="h-3.5 w-3.5" /> {t('instance.moveToSeries', { defaultValue: 'Move to Series' })}
           </Button>
           {canModify && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setModifyOpen(true); audit({ action: 'modify', title: t('instance.auditModifyInitiated'), resource: t('instance.instanceNumber', { number: instance.instanceNumber }) }); }}>
@@ -546,6 +551,18 @@ export default function InstanceDetailPage() {
           instanceId={instance.id}
           instanceNumber={instance.instanceNumber}
           currentStudyId={studyId}
+        />
+      )}
+      {studyId && seriesId && moveToSeriesOpen && (
+        <MoveInstancesToSeriesDialog
+          open={moveToSeriesOpen}
+          onOpenChange={setMoveToSeriesOpen}
+          studyId={studyId}
+          currentSeriesId={seriesId}
+          currentSeriesInstanceCount={seriesData?.numberOfInstances ?? 1}
+          currentSeriesNumber={seriesData?.seriesNumber}
+          currentSeriesDescription={seriesData?.seriesDescription}
+          instanceIds={[instance.id]}
         />
       )}
       <ModifyInstanceDialog

@@ -209,10 +209,16 @@ export default function MigrateInstanceDialog({
                     className={`flex items-start gap-3 p-3 cursor-pointer hover:bg-muted/50 transition-colors ${
                       isSelected ? 'bg-primary/5' : ''
                     }`}
-                    onClick={() => setSelectedTargetId(isSelected ? null : s.id)}
+                    onClick={(e) => {
+                      // A label click is forwarded to the nested checkbox, which
+                      // would toggle a second time and undo the selection.
+                      e.preventDefault();
+                      setSelectedTargetId(isSelected ? null : s.id);
+                    }}
                   >
                     <Checkbox
                       checked={isSelected}
+                      onClick={(e) => e.stopPropagation()}
                       onCheckedChange={() => setSelectedTargetId(isSelected ? null : s.id)}
                       className="mt-1"
                     />

@@ -65,7 +65,11 @@ export const instancesApi = {
   nifti: (id: string) =>
     orthancFetch<Blob>(`/instances/${id}/nifti`, { responseType: "blob" }),
 
-  /** POST /instances/:id/modify — Creates a modified copy. Body: { Replace, Remove }. Returns { ID, Path }. */
+  /**
+   * POST /instances/:id/modify — Modifies tags and returns the modified DICOM file as a
+   * BINARY download (application/dicom); nothing is stored in Orthanc.
+   * For a stored modification use toolsApi.bulkModify — see modifyInstanceAction.
+   */
   modify: (id: string, body: Record<string, unknown>) =>
     orthancFetch<{ ID: string; Path: string }>(`/instances/${id}/modify`, {
       method: "POST",

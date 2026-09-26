@@ -13,18 +13,26 @@ import { makeAuditBase } from '@/actions/audit-base';
 
 export async function migrateSeriesAction(
   targetStudyId: string,
-  seriesId: string,
+  seriesIds: string | string[],
   keepSource = false,
 ): Promise<OrthancMergeResult> {
-  const base = makeAuditBase('series.migrate', 'series', seriesId);
-  auditClient.emit({ ...base, outcome: 'started', detail: { targetStudyId, keepSource } });
+  const ids = Array.isArray(seriesIds) ? seriesIds : [seriesIds];
+  const primaryId = ids[0] ?? targetStudyId;
+  const base = makeAuditBase('series.migrate', 'series', primaryId);
+  auditClient.emit({
+    ...base,
+    outcome: 'started',
+    detail: { targetStudyId, seriesIds: ids, count: ids.length, keepSource },
+  });
   try {
-    const result = await studiesApi.merge(targetStudyId, [seriesId], keepSource);
+    const result = await studiesApi.merge(targetStudyId, ids, keepSource);
     auditClient.emit({
       ...base,
       outcome: 'success',
       detail: {
         targetStudyId,
+        seriesIds: ids,
+        count: ids.length,
         keepSource,
         instancesCount: result.InstancesCount,
         failedInstancesCount: result.FailedInstancesCount,
@@ -36,7 +44,7 @@ export async function migrateSeriesAction(
       ...base,
       outcome: 'failure',
       errorCode: e instanceof OrthancError ? e.status : undefined,
-      detail: { targetStudyId, keepSource },
+      detail: { targetStudyId, seriesIds: ids, count: ids.length, keepSource },
     });
     throw e;
   }

@@ -33,23 +33,37 @@ import { patientSignaturesMatch, type PatientSignature } from '@/lib/dicom-patie
 interface MigrateSeriesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** The series to migrate. */
-  series: Series | null;
+  /** The series to migrate (single mode). */
+  series?: Series | null;
+  /** Multiple series to migrate (bulk mode). */
+  seriesList?: Series[];
   /** The current parent study ID (will be excluded from target list). */
   currentStudyId: string;
+  /** Optional callback on successful migration. */
+  onSuccess?: () => void;
 }
 
 export default function MigrateSeriesDialog({
   open,
   onOpenChange,
   series,
+  seriesList,
   currentStudyId,
+  onSuccess,
 }: MigrateSeriesDialogProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [keepSource, setKeepSource] = useState(false);
+
+  const targetSeriesList = useMemo(() => {
+    if (seriesList && seriesList.length > 0) return seriesList;
+    if (series) return [series];
+    return [];
+  }, [seriesList, series]);
+
+  const singleSeries = targetSeriesList.length === 1 ? targetSeriesList[0] : null;
 
   const { data: allStudies = [], isLoading } = useStudies({});
 
@@ -91,8 +105,9 @@ export default function MigrateSeriesDialog({
 
   const migrateMutation = useMutation({
     mutationFn: async () => {
-      if (!series || !selectedTargetId) throw new Error('No series or target selected');
-      return await migrateSeriesAction(selectedTargetId, series.id, keepSource);
+      if (targetSeriesList.length === 0 || !selectedTargetId) throw new Error('No series or target selected');
+      const seriesIds = targetSeriesList.map((s) => s.id);
+      return await migrateSeriesAction(selectedTargetId, seriesIds, keepSource);
     },
     onSuccess: (result) => {
       const failedCount = result.FailedInstancesCount ?? 0;
@@ -104,11 +119,19 @@ export default function MigrateSeriesDialog({
           }),
         );
       } else {
-        toast.success(t('seriesMigrate.success'));
+        toast.success(
+          targetSeriesList.length > 1
+            ? t('seriesMigrate.bulkSuccess', {
+                count: targetSeriesList.length,
+                defaultValue: `${targetSeriesList.length} series migrated.`,
+              })
+            : t('seriesMigrate.success'),
+        );
       }
       queryClient.invalidateQueries({ queryKey: ['studies'] });
       queryClient.invalidateQueries({ queryKey: ['study'] });
       queryClient.invalidateQueries({ queryKey: ['series'] });
+      onSuccess?.();
       setSelectedTargetId(null);
       setSearchTerm('');
       onOpenChange(false);
@@ -119,7 +142,7 @@ export default function MigrateSeriesDialog({
   });
 
   const handleMigrate = () => {
-    if (!selectedTargetId || !series) return;
+    if (!selectedTargetId || targetSeriesList.length === 0) return;
     migrateMutation.mutate();
   };
 
@@ -131,7 +154,7 @@ export default function MigrateSeriesDialog({
     onOpenChange(open);
   };
 
-  if (!series) return null;
+  if (targetSeriesList.length === 0) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -139,28 +162,62 @@ export default function MigrateSeriesDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <GitMerge className="h-5 w-5" />
-            {t('seriesMigrate.title')}
+            {targetSeriesList.length > 1
+              ? t('seriesMigrate.titleBulk', {
+                  count: targetSeriesList.length,
+                  defaultValue: `Migrate ${targetSeriesList.length} Series`,
+                })
+              : t('seriesMigrate.title')}
           </DialogTitle>
-          <DialogDescription>{t('seriesMigrate.description')}</DialogDescription>
+          <DialogDescription>
+            {targetSeriesList.length > 1
+              ? t('seriesMigrate.descriptionBulk', {
+                  count: targetSeriesList.length,
+                  defaultValue: `Move ${targetSeriesList.length} series to a target study.`,
+                })
+              : t('seriesMigrate.description')}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Series Info */}
         <div className="rounded-lg border bg-muted/30 p-3 space-y-1">
           <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            {t('seriesMigrate.seriesToMigrate')}
+            {targetSeriesList.length > 1
+              ? t('seriesMigrate.seriesToMigrateBulk', {
+                  count: targetSeriesList.length,
+                  defaultValue: `${targetSeriesList.length} series to migrate`,
+                })
+              : t('seriesMigrate.seriesToMigrate')}
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ModalityBadge modality={series.modality} />
-              <span className="font-medium">
-                {t('seriesMigrate.seriesLabel', { number: series.seriesNumber })}
+          {singleSeries ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ModalityBadge modality={singleSeries.modality} />
+                <span className="font-medium">
+                  {t('seriesMigrate.seriesLabel', { number: singleSeries.seriesNumber })}
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground truncate">
+                {singleSeries.seriesDescription || '—'}
               </span>
             </div>
-            <span className="text-xs text-muted-foreground">
-              {series.seriesDescription || '—'}
-            </span>
-          </div>
-          <div className="text-xs text-muted-foreground font-mono truncate">
+          ) : (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {targetSeriesList.map((s) => (
+                <span
+                  key={s.id}
+                  className="inline-flex items-center gap-1 bg-muted px-2 py-0.5 rounded text-xs border"
+                >
+                  <ModalityBadge modality={s.modality} />
+                  <span className="font-medium">#{s.seriesNumber}</span>
+                  <span className="text-muted-foreground text-[10px] truncate max-w-[120px]">
+                    {s.seriesDescription || '—'}
+                  </span>
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="text-xs text-muted-foreground font-mono truncate pt-0.5">
             {t('seriesMigrate.currentStudy')}: {currentStudyId.substring(0, 12)}…
           </div>
         </div>
@@ -196,10 +253,16 @@ export default function MigrateSeriesDialog({
                     className={`flex items-start gap-3 p-3 cursor-pointer hover:bg-muted/50 transition-colors ${
                       isSelected ? 'bg-primary/5' : ''
                     }`}
-                    onClick={() => setSelectedTargetId(isSelected ? null : s.id)}
+                    onClick={(e) => {
+                      // A label click is forwarded to the nested checkbox, which
+                      // would toggle a second time and undo the selection.
+                      e.preventDefault();
+                      setSelectedTargetId(isSelected ? null : s.id);
+                    }}
                   >
                     <Checkbox
                       checked={isSelected}
+                      onClick={(e) => e.stopPropagation()}
                       onCheckedChange={() => setSelectedTargetId(isSelected ? null : s.id)}
                       className="mt-1"
                     />
@@ -279,7 +342,12 @@ export default function MigrateSeriesDialog({
               ) : (
                 <GitMerge className="h-4 w-4" />
               )}
-              {t('seriesMigrate.migrateButton')}
+              {targetSeriesList.length > 1
+                ? t('seriesMigrate.migrateButtonBulk', {
+                    count: targetSeriesList.length,
+                    defaultValue: `Migrate (${targetSeriesList.length})`,
+                  })
+                : t('seriesMigrate.migrateButton')}
             </Button>
           </DialogFooter>
         </div>

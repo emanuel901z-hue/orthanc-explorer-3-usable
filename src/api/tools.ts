@@ -15,6 +15,29 @@ export type LookupResult = {
   Type: 'Patient' | 'Study' | 'Series' | 'Instance';
 };
 
+export type OrthancBulkModifyParams = {
+  /** Orthanc IDs of the resources to modify (patients, studies, series or instances). */
+  Resources: string[];
+  /** Tag substitutions applied to every instance, e.g. { SeriesInstanceUID: '2.25.…' }. */
+  Replace?: Record<string, string>;
+  Remove?: string[];
+  /** Required by Orthanc for identifier tags (PatientID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID). */
+  Force?: boolean;
+  Transcode?: string;
+  RemovePrivateTags?: boolean;
+};
+
+export type OrthancBulkModifyResult = {
+  Description?: string;
+  InstancesCount: number;
+  FailedInstancesCount: number;
+  IsAnonymization?: boolean;
+  /** Source resources whose modified copy was created. */
+  ParentResources?: string[];
+  /** Stored resources created by the call (Resources[].ID = new instance IDs). */
+  Resources: Array<{ ID: string; Path: string; Type: string }>;
+};
+
 export const toolsApi = {
   /** POST /tools/lookup — Looks up a DICOM UID (e.g. StudyInstanceUID, SOPInstanceUID) and returns matching Orthanc resources. */
   lookup: (uid: string) =>
@@ -82,4 +105,20 @@ export const toolsApi = {
     });
     return Array.isArray(results) ? results.length : 0;
   },
+
+  /**
+   * POST /tools/bulk-modify — Modifies a set of DICOM resources in one call and
+   * STORES the modified copies (unlike /instances/:id/modify, which returns the
+   * modified file as a binary download and stores nothing).
+   *
+   * Requires Force for identifier tags (SeriesInstanceUID, …). Orthanc assigns a
+   * fresh SOPInstanceUID to every stored copy; the source resources are kept.
+   * The response lists the newly stored resources (Resources[].ID).
+   */
+  bulkModify: (params: OrthancBulkModifyParams) =>
+    orthancFetch<OrthancBulkModifyResult>('/tools/bulk-modify', {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify(params),
+    }),
 };

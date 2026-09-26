@@ -53,4 +53,31 @@ describe('migrateSeriesAction', () => {
       expect.objectContaining({ outcome: 'success', action: 'series.migrate', detail: expect.objectContaining({ failedInstancesCount: 1 }) }),
     );
   });
+
+  it('supports migrating multiple series IDs at once', async () => {
+    vi.mocked(studiesApi.merge).mockResolvedValue({
+      TargetStudy: 'target-study',
+      InstancesCount: 10,
+      FailedInstancesCount: 0,
+    });
+
+    const result = await migrateSeriesAction('target-study', ['series-1', 'series-2'], true);
+
+    expect(studiesApi.merge).toHaveBeenCalledWith('target-study', ['series-1', 'series-2'], true);
+    expect(result.TargetStudy).toBe('target-study');
+    expect(auditClient.emit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcome: 'started',
+        action: 'series.migrate',
+        detail: expect.objectContaining({ seriesIds: ['series-1', 'series-2'], count: 2, keepSource: true }),
+      }),
+    );
+    expect(auditClient.emit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcome: 'success',
+        action: 'series.migrate',
+        detail: expect.objectContaining({ count: 2, instancesCount: 10 }),
+      }),
+    );
+  });
 });

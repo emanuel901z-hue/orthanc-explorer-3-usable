@@ -24,6 +24,7 @@ import { requestViewerSession } from '@/lib/viewer-session';
 import { buildIidUrl } from '@/features/viewer/lib/iid';
 import SendStudyDialog from '@/features/studies/components/SendStudyDialog';
 import MigrateStudyDialog from '@/features/studies/components/MigrateStudyDialog';
+import MigrateSeriesDialog from '@/features/series/components/MigrateSeriesDialog';
 import { SplitStudyDialog } from '@/features/studies/components/SplitStudyDialog';
 import ShareStudyDialog from '@/features/studies/components/ShareStudyDialog';
 import AddSeriesDialog from '@/features/studies/components/AddSeriesDialog';
@@ -118,6 +119,7 @@ export default function StudyDetailPage() {
   const [sendOpen, setSendOpen] = useState(false);
   const [peerOpen, setPeerOpen] = useState(false);
   const [bulkSendOpen, setBulkSendOpen] = useState(false);
+  const [bulkMigrateOpen, setBulkMigrateOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [anonOpen, setAnonOpen] = useState(false);
@@ -838,6 +840,16 @@ export default function StudyDetailPage() {
                                 variant="outline"
                                 size="sm"
                                 className="gap-1.5"
+                                onClick={() => setBulkMigrateOpen(true)}
+                              >
+                                <GitMerge className="h-3.5 w-3.5" /> {t('seriesMigrate.title', { defaultValue: 'Move to Study' })} ({selectedSeriesIds.size})
+                              </Button>
+                            )}
+                            {canModify && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5"
                                 onClick={() => setSplitOpen(true)}
                               >
                                 <Scissors className="h-3.5 w-3.5" /> {t('split.title', { defaultValue: 'Split' })} ({selectedSeriesIds.size})
@@ -1128,6 +1140,15 @@ export default function StudyDetailPage() {
           study={study}
           seriesList={series}
           preselectedSeriesIds={selectedSeriesIds.size > 0 ? Array.from(selectedSeriesIds) : undefined}
+        />
+      )}
+      {study && bulkMigrateOpen && (
+        <MigrateSeriesDialog
+          open={bulkMigrateOpen}
+          onOpenChange={setBulkMigrateOpen}
+          seriesList={series.filter((s) => selectedSeriesIds.has(s.id))}
+          currentStudyId={study.id}
+          onSuccess={() => setSelectedSeriesIds(new Set())}
         />
       )}
 
