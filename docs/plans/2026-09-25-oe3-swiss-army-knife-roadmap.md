@@ -36,6 +36,7 @@ OE3 bietet eine moderne, responsive Oberfläche mit Zustandsspeicherung, Mehrspr
 | **Sprint 3** | **In-Browser PDF & Structured Report (SR) Viewer** | SOPClass-Erkennung, native Inline-PDF-Vorschau (`/instances/:id/pdf` bzw. Blob), strukturierte SR-Textdarstellung | Renderer-Tests |
 | **Sprint 4** | **Anonymisierungs-Profile & UID Lookup Tool** | DICOM PS 3.15 Presets in `AnonymizeDialog`, globales UID-Lookup-Modal via `/tools/lookup` | Preset- & Lookup-Tests |
 | **Sprint 5** | **Peer-to-Peer Transfer (Orthanc Peers)** | `SendToPeerDialog` auf Studien- und Serienebene, `sendToPeerAction` mit Audit | Peer-Send-Tests |
+| **Sprint 6** | **Serien- & Instanz-basiertes Split & Merge (Cut & Paste Suite)** | `POST /studies/:id/split` angebunden, `SplitStudyDialog`, Serien-Bulk-Split in `StudyDetailPage`, Instanz-Multiselect & Merge/Split in `SeriesDetailPage`, `MigrateInstanceDialog` fuer Bulk erweitert | Unit-Tests + Multimodale DOM- & Screenshot-Analyse |
 
 ---
 
@@ -95,6 +96,28 @@ OE3 bietet eine moderne, responsive Oberfläche mit Zustandsspeicherung, Mehrspr
   - `SendToPeerDialog` auf Studien- und Serienebene.
 - **5.2 Integration:**
   - Menüpunkt in Aktionsleisten (Einzel- und Mehrfachauswahl).
+
+### Sprint 6: Serien- & Instanz-basiertes Split & Merge (Cut & Paste Suite)
+- **6.1 API & Actions:**
+  - `studiesApi.split`: `POST /studies/:id/split` angebunden mit `OrthancSplitParams` und `OrthancSplitResult`.
+  - `splitStudyAction`: Audit-Seam `study.split` mit Detail (neue Study-ID, SIUID, Instanzen-Zähler).
+- **6.2 SplitStudyDialog:**
+  - Dialog zum Ausgliedern ausgewählter Serien/Instanzen in eine neue Studie mit neuer StudyInstanceUID.
+  - Serien-Checkboxen, Eingabe neuer Studienbeschreibung, Toggle `KeepSource` (Kopieren vs. Ausschneiden).
+  - Sofortige Navigation zur neu erstellten Studie nach erfolgreichem Split.
+- **6.3 StudyDetailPage (Serien-Ebene):**
+  - Neuer Button „Aufteilen“ (`Scissors`) in der Haupt-Aktionsleiste.
+  - Neuer Bulk-Aktionsbutton „Studie aufteilen (N)“ in der Serien-Tabelle.
+- **6.4 SeriesDetailPage (Instanzen-Ebene):**
+  - Checkboxen und Multiselect für Instanzen in der Tabelle und im Raster.
+  - Bulk-Aktionsleiste:
+    - „In Studie verschieben“ (Merge via erweitertem `MigrateInstanceDialog`).
+    - „In neue Studie abspalten“ (Split via `splitStudyAction`).
+    - „Download ZIP“ und „Löschen“.
+- **6.5 Verifikation:**
+  - Unit-Tests für `splitStudyAction` und `SplitStudyDialog`.
+  - 100% Übersetzungsabdeckung in allen 9 Sprachen.
+  - Multimodale DOM- & Screenshot-Analyse im realen Browser (Chrome).
 
 ---
 
