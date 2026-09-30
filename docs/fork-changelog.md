@@ -4,6 +4,99 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.0 — OE3 als Werkzeug: Split & Merge, echtes Query/Retrieve, Dokumente (2026-09-30)
+
+Sechs Sprints („Schweizer Taschenmesser", Roadmap:
+[`docs/plans/2026-09-25-oe3-swiss-army-knife-roadmap.md`](plans/2026-09-25-oe3-swiss-army-knife-roadmap.md)),
+die OE3 von der Anzeige- zur Arbeitsfläche machen — plus ein Aufräum-Commit
+davor. Alle Änderungen an der OE3-Oberfläche selbst, **nicht** am Broker-Slice.
+
+### Aufräumen (vor den Sprints)
+
+- **Activity-Timeline**: Job-Fehler wurden nicht angezeigt.
+- **UI-Zustand überlebt den Tab-Wechsel**: `src/store/ui-state.ts` mit
+  `usePersistedState` (localStorage, **nur PHI-freie Werte**) und
+  `useRememberedState` (nur im Speicher, für alles, was PHI tragen kann).
+  Filter, Spalten, Breiten, Sortierung und Ansichtsmodus gehen jetzt darüber.
+- **Automatisches Spalten-Layout** (`src/features/studies/lib/column-layout.ts`):
+  `distributeColumnWidths()` verteilt die Container-Breite proportional über die
+  sichtbaren Spalten (nie unter `minSize`), manuell gesetzte Breiten werden
+  darübergelegt.
+- **Quarantäne** (Backend-Endpunkt) als **Opt-in**-Feature.
+- Multiselect-Parität zwischen Liste und Detail.
+
+### Sprint 1 — Merge- & Modify-Integrität
+
+- **`FailedInstancesCount` wird ausgewertet**: Orthanc antwortet bei
+  Merge-Teilausfällen mit HTTP 200 — die UI meldete das bisher als vollen Erfolg.
+- **Cross-Patient-Mismatch-Schutz** vor jedem Merge (gleicher Patient grün,
+  abweichend gelb/rot, Sicherheitsabfrage).
+- **Audit-Seam geschlossen**: `migrateSeriesAction` / `migrateInstanceAction`
+  emittieren `series.migrate` / `instance.migrate` — die Dialoge riefen vorher
+  direkt die API auf, ohne AuditEvent.
+- **Atomarer Batch-Merge** statt seriellem Loop in `MigrateStudyDialog`.
+- **404-Falle nach Modify behoben**: bei `KeepSource: false` löscht Orthanc die
+  alte ID; die UI navigiert jetzt auf die neue ID.
+
+### Sprint 2 — Echtes DICOM Query & Retrieve (C-FIND / C-MOVE)
+
+- **`src/api/queries.ts`** bindet die realen Orthanc-Routen an
+  (`POST /modalities/:name/query`, `GET /queries/:id/answers`,
+  `.../answers/:index/content`, `.../answers/:index/retrieve`,
+  `DELETE /queries/:id`).
+- Die frühere `RemoteSourcesPage` benutzte **nicht existierende Endpunkte**
+  (`/modalities/:name/query/:id/retrieve`) — jetzt echte Abfrage-Pipeline mit
+  Fortschritt, Ergebnistabelle und Import-Status.
+- Auditierte Actions `queryModalityAction` (`modality.query`) und
+  `retrieveModalityAction` (`modality.retrieve`).
+
+### Sprint 3 — Dokumente im Browser
+
+- **`InstanceDocumentViewer`**: Encapsulated PDF (`/instances/:id/pdf` im
+  iframe) und **DICOM Structured Reports** (strukturierte Baum-/Textansicht)
+  statt Binär-Download.
+
+### Sprint 4 — Anonymisierungs-Profile & UID-Lookup
+
+- **PS-3.15-Presets** im `AnonymizeDialog` (`Full`, `Clinical`, `De-Identify`).
+- **Globales UID-Lookup** (`UidLookupDialog`, `/tools/lookup`): löst jede
+  UID/UUID auf und navigiert zur passenden Route.
+
+### Sprint 5 — Peer-to-Peer-Transfer
+
+- **`SendToPeerDialog`** auf Studien- und Serienebene, `sendToPeerAction`
+  (Audit `peer.send`) — direktes HTTP-Senden an einen Orthanc-Peer.
+
+### Sprint 6 — Split & Merge (Cut & Paste)
+
+- **`POST /studies/:id/split`** angebunden (`splitStudyAction`, Audit
+  `study.split`) mit `SplitStudyDialog`: ausgewählte Serien/Instanzen in eine
+  neue Studie ausgliedern (neue StudyInstanceUID, `KeepSource`-Toggle).
+- **`StudyDetailPage`**: „Aufteilen" in der Aktionsleiste + Bulk-Aktion in der
+  Serientabelle.
+- **`SeriesDetailPage`**: Instanz-Multiselect (Tabelle und Raster) mit
+  „In Studie verschieben" (`moveInstancesToSeriesAction`), „In neue Studie
+  abspalten", „Download ZIP" und „Löschen".
+
+### Weitere Änderungen
+
+- **Mehrstudien-Export** als ZIP (`exportStudiesAction`, Audit `study.export`).
+- **`StudyLabelDialog`**: ein Label auf eine oder viele Studien (Liste + Detail
+  teilen sich den Dialog).
+- **`use-remembered-search-params.ts`**: Filterabfrage überlebt den Tab-Wechsel,
+  Deep-Link gewinnt, Leeren der Filter löscht die Erinnerung.
+
+### Tests & Tooling
+
+- **696 Unit-Tests** (Vitest, 133 Dateien), `tsc --noEmit` 0 Fehler,
+  `npm run lint` 0 Fehler, `npm run i18n:check` 100 % (9 Sprachen).
+- Neue Suiten u. a.: `splitStudy`, `sendToPeer`, `quarantineStudy`,
+  `queryModality`/`retrieveModality`, `moveInstancesToSeries`,
+  `migrateInstance`/`migrateSeries`, `column-layout`, `ui-state`,
+  `use-remembered-search-params`, `dicom-uid`, `pulmopath-pacs`.
+
+---
+
 ## v2.5.0 — Broker-Betrieb, PIR, Barrierefreiheit und Standalone (2026-09-23)
 
 Seit v2.4.0 ist der Broker-UI-Slice deutlich gewachsen. Die wichtigsten
