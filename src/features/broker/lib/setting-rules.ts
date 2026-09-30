@@ -54,6 +54,22 @@ export function validateSetting(setting: BrokerSetting, raw: string): string | n
     if (value.split('/').includes('..')) return "must not contain '..'";
     return null;
   }
+  if (kind === 'json') {
+    if (!value.trim()) return null;                 // empty = the defaults apply
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return 'not valid JSON';
+    }
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return 'must be a JSON object, e.g. {"accession": "6200"}';
+    }
+    const bad = Object.entries(parsed)
+      .filter(([, item]) => typeof item !== 'string')
+      .map(([key]) => key);
+    return bad.length ? `values must be strings: ${bad.join(', ')}` : null;
+  }
   if (kind === 'aets') {
     const bad = value.split(',').map((part) => part.trim())
       .filter((part) => part && !AET_RE.test(part));
