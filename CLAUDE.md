@@ -321,6 +321,52 @@ fallback (`t(key, { defaultValue: apiText })`):
 Short labels exist in all nine languages; the longer texts in German and English
 (the fallback fills the rest). Add a translation key, never a hardcoded string.
 
+## Releases & Governance
+
+This fork is the **shared OE3 base of two independent products**: the public
+MWL-broker workspace (`orthanc-dicommwl-broker`) and an internal PACS project
+that runs its own private stack. Both push to `main` and both consume the same
+components. Three rules keep that from becoming drift.
+
+### 1. Layering — what may land on `main`
+
+| Layer | Examples | Rule |
+|---|---|---|
+| Generic OE3 | column layout, search, a11y, mobile cards, query/retrieve, split & merge | Upstream-compatible, belongs here |
+| Broker slice | `src/features/broker/**`, `src/api/broker.ts` | Gated by `brokerUrl` **and** `enableMwlBroker` |
+| Project-specific | quarantine (a backend endpoint), product-named APIs | **Opt-in flag, default off, graceful 404 in a foreign stack** |
+
+- **Nothing project-specific may be mandatory.** A deployment without the owning
+  backend must still start and must not fire a failing request. The pattern is
+  `OPT_IN_FEATURES` in `src/config/features.ts` plus a base URL that degrades to
+  a same-origin 404 (`src/api/backend-pacs.ts`).
+- **Project-specific code lives in its own files** (`src/features/<domain>/`,
+  `src/api/<domain>-*.ts`) — never edited into a shared component. Shared
+  components are where the two products would otherwise collide.
+- **No customer's product name in this repository.** Use neutral names
+  (`backend-pacs`, not `pulmopath-pacs`); the deployment carries its own label.
+  This repo is public and generic.
+
+### 2. Releases — how the two adoption cycles are decoupled
+
+`main` is tagged (`vX.Y.Z`) and consumers pin the **tag**, never a branch head.
+A branch head moves under you — that is exactly how the broker workspace ended
+up eleven commits behind without anyone noticing.
+
+- Annotated tags, `vMAJOR.MINOR.PATCH`, message = what changed.
+- Every release updates `docs/fork-changelog.md` **and** the test counts in
+  `README.md` / `CLAUDE.md` (they drift otherwise).
+- The broker workspace pins the submodule to the tag (see its `agents.md`).
+
+Step-by-step: [`docs/release-process.md`](docs/release-process.md).
+
+### 3. Gate — how `main` is protected
+
+- **No direct pushes to `main`.** Changes go through a PR; CI (`typecheck`,
+  `lint`, `test`, `i18n:check`, `audit`) is the gate.
+- Pushing to the public remote happens from the broker workspace via
+  `./pre-push-fork.sh` (blacklist + secret scan, refuses upstream remotes).
+
 ## Important Constraints
 
 - Never edit `public/config.js` for production values — it is a dev placeholder; production config is injected by the deployment target
