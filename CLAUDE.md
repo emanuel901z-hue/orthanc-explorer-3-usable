@@ -367,6 +367,10 @@ Step-by-step: [`docs/release-process.md`](docs/release-process.md).
 - Pushing to the public remote happens from the broker workspace via
   `./pre-push-fork.sh` (blacklist + secret scan, refuses upstream remotes).
 
+**New here, or bringing your own product integration?** Start with
+[`docs/contributing-shared-fork.md`](docs/contributing-shared-fork.md) — current
+state, the five rules, what to migrate, and how a merge reaches `main`.
+
 ## Important Constraints
 
 - Never edit `public/config.js` for production values — it is a dev placeholder; production config is injected by the deployment target

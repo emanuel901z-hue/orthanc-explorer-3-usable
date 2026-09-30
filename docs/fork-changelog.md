@@ -4,6 +4,25 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.3 — Einstiegs-Anleitung für das geteilte Repo (2026-09-30)
+
+**Doku, keine Code-Änderung.** Die Regeln standen verstreut (`CLAUDE.md`,
+`release-process.md`, `backend-integration.md`); wer neu dazukommt — oder ein
+zweites Produkt anbindet — konnte nirgends an einer Stelle lesen, was der
+aktuelle Stand ist und wie er sich zu verhalten hat.
+
+- Neu: [`docs/contributing-shared-fork.md`](contributing-shared-fork.md) —
+  Startprozedur, aktueller Stand (Tags, kein `feat/mwl-broker`, kein
+  Upstream-Tracking), die **fünf Regeln**, was eine eigene Integration nachziehen
+  muss, Arbeitsweise (PR, Gates, Guard) und Verbote.
+- **Neutral formuliert**: kein Produktname, keine interne Topologie — die Datei
+  würde sonst Regel 1 und 2 selbst verletzen.
+- `CLAUDE.md` → „Releases & Governance" verweist darauf.
+
+Keine Code-Änderung: 696 Tests, `tsc`/`lint`/`i18n` unverändert grün.
+
+---
+
 ## v2.6.2 — Upstream wird nicht mehr verfolgt (2026-09-30)
 
 **Entscheidung, keine Code-Änderung.** Dieser Fork ist 105 Commits vor dem
