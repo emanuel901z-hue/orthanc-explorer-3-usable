@@ -46,6 +46,10 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
   // the same rules the server applies — the operator sees it before sending
   const draftError = validateSetting(setting, draft);
   const label = t(`broker.setting_${setting.key}`, { defaultValue: setting.key });
+  // Deployment-owned (spool volume, container port, instance name): the value
+  // has to match the compose mapping, so the broker refuses a write (409) —
+  // offering the input would only produce a confusing error.
+  const editable = setting.editable !== false;
 
   return (
     <Card data-testid={`setting-${setting.key}`}>
@@ -66,7 +70,7 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
             </p>
           </div>
 
-          {setting.source === 'db' && (
+          {setting.source === 'db' && editable && (
             <Button
               variant="outline"
               size="sm"
@@ -80,7 +84,14 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {setting.kind === 'bool' ? (
+          {!editable ? (
+            <div className="space-y-1">
+              <span className="font-mono text-sm">{setting.value || '—'}</span>
+              <p className="text-xs text-muted-foreground" data-testid="setting-deployment-only">
+                {t('broker.settingDeploymentOnly')}
+              </p>
+            </div>
+          ) : setting.kind === 'bool' ? (
             <div className="flex items-center gap-3">
               <Switch
                 id={`setting-${setting.key}`}

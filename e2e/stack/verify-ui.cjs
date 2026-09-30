@@ -33,6 +33,7 @@ const PAGES = [
   ['spool', '/oe3/broker/spool', /store queue|store-warteschlange/i],
   ['worklist', '/oe3/broker/worklist', /local worklist|lokale worklist/i],
   ['stations', '/oe3/broker/stations', /station rules|stationsregeln/i],
+  ['prefetch', '/oe3/broker/prefetch', /prior studies|voraufnahmen/i],
 ];
 
 const results = [];

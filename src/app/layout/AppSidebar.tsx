@@ -93,6 +93,7 @@ export function AppSidebar() {
             { title: t('broker.spoolPageTitle'), url: '/broker/spool' },
             { title: t('broker.localTitle'), url: '/broker/worklist' },
             { title: t('broker.stationTitle'), url: '/broker/stations' },
+            { title: t('broker.prefetchTitle'), url: '/broker/prefetch' },
             { title: t('broker.auditTitle'), url: '/broker/audit' },
           ],
         }]

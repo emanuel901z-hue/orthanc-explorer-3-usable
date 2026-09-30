@@ -241,4 +241,37 @@ describe('BrokerSettingsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /reset to default/i }));
     await waitFor(() => expect(mockReset).toHaveBeenCalledWith('allowed_calling_aets'));
   });
+
+  it('shows a deployment-owned setting read-only instead of offering a doomed input', async () => {
+    // `spool_dir` has to match the mounted volume — the broker refuses a write
+    // (409). Offering the field anyway would only produce a confusing error,
+    // and the operator could believe the spool moved.
+    mockList.mockResolvedValue([
+      {
+        key: 'spool_dir', value: '/var/lib/mwl-broker/spool', default: '/var/lib/mwl-broker/spool',
+        source: 'env' as const, kind: 'path' as const,
+        description: 'Directory the spooled DICOM files are written to.',
+        editable: false,
+      },
+      {
+        key: 'echo_interval_s', value: '30', default: '30', source: 'env' as const,
+        kind: 'int' as const, description: 'Interval of the C-ECHO loop.',
+        min: 5, max: 3600, choices: [], editable: true,
+      },
+    ]);
+    renderPage();
+
+    const row = await screen.findByTestId('setting-spool_dir');
+    expect(within(row).getByTestId('setting-deployment-only')).toBeInTheDocument();
+    expect(within(row).queryByRole('textbox')).not.toBeInTheDocument();
+    expect(within(row).queryByRole('button', { name: /^save$/i })).not.toBeInTheDocument();
+    // the value itself stays visible — the operator must see what is configured
+    // (it appears twice: as the value and as the ENV default line)
+    expect(within(row).getAllByText('/var/lib/mwl-broker/spool').length).toBeGreaterThan(0);
+
+    // an editable setting is unaffected
+    const editable = within(screen.getByTestId('setting-echo_interval_s'));
+    expect(editable.queryByTestId('setting-deployment-only')).not.toBeInTheDocument();
+    expect(editable.getByLabelText(/echo interval/i)).toBeInTheDocument();
+  });
 });

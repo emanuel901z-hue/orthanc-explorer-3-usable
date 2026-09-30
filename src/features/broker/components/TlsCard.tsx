@@ -77,6 +77,8 @@ export function TlsCard({ settings }: { settings: BrokerSetting[] }) {
   const draft = useSettingDraft(byKey, (key, next) => setValue.mutate({ key, value: next }));
   const value = draft.value;
   const source = (key: string) => byKey.get(key)?.source ?? 'env';
+  // deployment-owned (the container port has to match the published port)
+  const isEditable = (key: string) => byKey.get(key)?.editable !== false;
   const isOn = (key: string) => ['true', '1', 'yes', 'on'].includes(value(key).toLowerCase());
 
   const [showGenerate, setShowGenerate] = useState(false);
@@ -112,8 +114,15 @@ export function TlsCard({ settings }: { settings: BrokerSetting[] }) {
         type={type}
         className="font-mono text-xs"
         value={value(key)}
+        readOnly={!isEditable(key)}
+        disabled={!isEditable(key)}
         onChange={(event) => setValue.mutate({ key, value: event.target.value })}
       />
+      {!isEditable(key) && (
+        <p className="text-xs text-muted-foreground" data-testid={`setting-deployment-only-${key}`}>
+          {t('broker.settingDeploymentOnly')}
+        </p>
+      )}
     </div>
   );
 

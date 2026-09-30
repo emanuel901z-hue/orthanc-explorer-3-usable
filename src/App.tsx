@@ -26,6 +26,7 @@ import AuditPage from "@/features/broker/pages/AuditPage";
 import SpoolPage from "@/features/broker/pages/SpoolPage";
 import LocalWorklistPage from "@/features/broker/pages/LocalWorklistPage";
 import StationsPage from "@/features/broker/pages/StationsPage";
+import PrefetchPage from "@/features/broker/pages/PrefetchPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="broker/spool" element={<BrokerGate><SpoolPage /></BrokerGate>} />
               <Route path="broker/worklist" element={<BrokerGate><LocalWorklistPage /></BrokerGate>} />
               <Route path="broker/stations" element={<BrokerGate><StationsPage /></BrokerGate>} />
+              <Route path="broker/prefetch" element={<BrokerGate><PrefetchPage /></BrokerGate>} />
               <Route path="remote-sources" element={<RemoteSourcesPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>

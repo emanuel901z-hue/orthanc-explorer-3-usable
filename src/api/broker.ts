@@ -37,6 +37,10 @@
  *   POST   /api/v1/spool/:id/retry    POST /api/v1/spool/retry-all
  *   DELETE /api/v1/spool/:id?reason=
  *   GET    /api/v1/logs/queries       GET /api/v1/logs/stores
+ *   POST   /api/v1/prefetch?dry_run=
+ *   GET    /api/v1/dicom-web/workitems/subscriptions
+ *   POST   /api/v1/dicom-web/workitems/subscriptions
+ *   DELETE /api/v1/dicom-web/workitems/subscriptions/:aet
  */
 import { getConfig } from '@/config/runtime';
 import { newCorrelationId } from '@/lib/correlation';
@@ -153,8 +157,14 @@ export type BrokerSetting = {
   /** 'db' = UI override active, 'env' = deployment default */
   source: 'db' | 'env';
   /** Value type — `enum:<a,b>` carries its choices in the same string. */
-  kind: 'bool' | 'int' | 'aets' | 'str' | 'url' | 'path' | 'events' | string;
+  kind: 'bool' | 'int' | 'aets' | 'str' | 'url' | 'path' | 'events' | 'json' | string;
   description: string;
+  /**
+   * False for deployment-owned settings (spool volume, container port, instance
+   * name): their value has to match the compose mapping, so they are shown
+   * read-only — the broker answers 409 on a write.
+   */
+  editable?: boolean;
   /** Lower bound for integer settings (null for other kinds). */
   min?: number | null;
   /** Upper bound for integer settings (null for other kinds). */
@@ -459,6 +469,60 @@ export type BrokerFinding = {
 export type BrokerHealth = {
   findings: BrokerFinding[];
   summary: Record<FindingSeverity, number>;
+};
+
+/** Prior-study prefetch request (`POST /prefetch`). */
+export type PrefetchRequest = {
+  patient_id: string;
+  /** Name of the PACS target that holds the priors and runs the move. */
+  query_node: string;
+  /** Name of the PACS target the images should land on. */
+  destination: string;
+  modality?: string;
+  /** Study to leave out — usually the one being read right now. */
+  exclude_study_uid?: string;
+  max_studies?: number;
+};
+
+/** One prior study the query node reported. */
+export type PrefetchStudy = {
+  study_uid: string;
+  study_date: string;
+  description: string;
+  modalities: string;
+  instances: string;
+};
+
+/** The outcome of one C-MOVE. */
+export type PrefetchMove = {
+  study_uid: string;
+  status: number | null;
+  completed: number;
+  failed: number;
+  warning: number;
+  ok: boolean;
+  error: string;
+};
+
+export type PrefetchResult = {
+  dry_run: boolean;
+  query_node: string;
+  destination: string;
+  destination_aet: string;
+  studies: PrefetchStudy[];
+  moved: PrefetchMove[];
+  /** Not moved because the time budget ran out — not started, not cut off. */
+  skipped: string[];
+};
+
+/** A UPS-RS subscription: who wants work item events. */
+export type UpsSubscription = {
+  id: number;
+  subscriber_aet: string;
+  /** Empty = every work item. */
+  workitem_uid: string;
+  deletion_lock: boolean;
+  created_at: string;
 };
 
 /** One configuration change-log entry (before/after snapshots). */
@@ -914,6 +978,27 @@ export const brokerApi = {
 
   health: {
     config: () => brokerFetch<BrokerHealth>('/api/v1/health/config'),
+  },
+
+  /** Prior-study prefetch: find a patient's earlier studies and pull them in. */
+  prefetch: {
+    run: (body: PrefetchRequest, dryRun = true) =>
+      brokerFetch<PrefetchResult>(
+        `/api/v1/prefetch?dry_run=${dryRun ? 'true' : 'false'}`,
+        post(body),
+      ),
+  },
+
+  /** UPS-RS subscriptions — who receives work item events. */
+  upsSubscriptions: {
+    list: () => brokerFetch<UpsSubscription[]>('/api/v1/dicom-web/workitems/subscriptions'),
+    create: (body: { subscriber_aet: string; workitem_uid?: string; deletion_lock?: boolean }) =>
+      brokerFetch<UpsSubscription>('/api/v1/dicom-web/workitems/subscriptions', post(body)),
+    remove: (subscriberAet: string) =>
+      brokerFetch<void>(
+        `/api/v1/dicom-web/workitems/subscriptions/${encodeURIComponent(subscriberAet)}`,
+        { method: 'DELETE' },
+      ),
   },
 
   localItems: {
