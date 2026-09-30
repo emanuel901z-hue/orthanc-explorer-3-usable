@@ -9,8 +9,15 @@
 import { test, expect, type Page, type ConsoleMessage } from '@playwright/test';
 import { execSync } from 'child_process';
 
-const OE3_BASE = 'http://10.0.1.46:3080';
+// Deployment values are environment-driven so this repository stays generic —
+// see docs/backend-integration.md. A deployment sets OE3_PROD_BASE,
+// OE3_PROD_BACKEND_CONTAINER, OE3_PROD_JWT_ISS and OE3_PROD_JWT_AUD; the JWT
+// signing key is read from /run/secrets/jwt_secret inside that container.
+const OE3_BASE = process.env.OE3_PROD_BASE ?? 'http://127.0.0.1:3080';
 const OE3_URL = `${OE3_BASE}/oe3/`;
+const BACKEND_CONTAINER = process.env.OE3_PROD_BACKEND_CONTAINER ?? 'oe3-prod-backend-1';
+const JWT_ISS = process.env.OE3_PROD_JWT_ISS ?? 'oe3-auth';
+const JWT_AUD = process.env.OE3_PROD_JWT_AUD ?? 'oe3-api';
 
 // ── Generate a valid JWT token for the superadmin user ──
 function getSuperadminToken(): string {
@@ -23,15 +30,15 @@ function getSuperadminToken(): string {
       userType: 'STAFF',
       domain_uuid: 'system',
       mfaVerified: true,
-      iss: 'pulmopath-auth',
-      aud: 'pulmopath-api',
+      iss: '${JWT_ISS}',
+      aud: '${JWT_AUD}',
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 3600
     };
     process.stdout.write(jwt.sign(payload, secret));
   `;
   return execSync(
-    `docker exec pulmopath-prod-backend-1 node -e "${script.replace(/"/g, '\\"').replace(/\n/g, ' ')}"`,
+    `docker exec ${BACKEND_CONTAINER} node -e "${script.replace(/"/g, '\\"').replace(/\n/g, ' ')}"`,
     { encoding: 'utf-8' },
   ).trim();
 }
@@ -57,7 +64,7 @@ async function login(page: Page) {
   await page.context().addCookies([{
     name: 'token',
     value: token,
-    domain: '10.0.1.46',
+    domain: new URL(OE3_BASE).hostname,
     path: '/',
     httpOnly: false,
     sameSite: 'Lax',

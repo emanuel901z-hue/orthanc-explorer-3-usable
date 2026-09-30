@@ -201,8 +201,8 @@ features: {
 | `src/actions/retrieveModality.ts` | Audit-seam wrapper for DICOM C-MOVE retrieve into Orthanc — emits `modality.retrieve` |
 | `src/actions/sendToPeer.ts` | Audit-seam wrapper for sending resources to an Orthanc peer — emits `peer.send` |
 | `src/api/queries.ts` | Typed Orthanc REST wrappers for `/queries` (C-FIND, query answers, content, C-MOVE retrieve) |
-| `src/api/pulmopath-pacs.ts` | Typed client for PP backend PACS endpoints (`/api/v1/pacs/*`, same-origin JWT cookie, `credentials: 'include'`) — **not** Orthanc REST. Currently: `quarantineStudy()` |
-| `src/actions/quarantineStudy.ts` | Audit-seam wrapper for study quarantine — calls the PP backend, emits `study.quarantine` |
+| `src/api/backend-pacs.ts` | Typed client for a backend's PACS endpoints (`/api/v1/pacs/*`, same-origin JWT cookie, `credentials: 'include'`) — **not** Orthanc REST, and project-specific: off unless the deployment has that backend. Currently: `quarantineStudy()`. See [docs/backend-integration.md](docs/backend-integration.md) |
+| `src/actions/quarantineStudy.ts` | Audit-seam wrapper for study quarantine — calls the backend, emits `study.quarantine` |
 | `src/actions/exportStudies.ts` | Audit-seam wrapper for the multi-study ZIP export (`/tools/create-archive`), emits `study.export` |
 | `src/features/instances/components/InstanceDocumentViewer.tsx` | Inline in-browser viewer for Encapsulated PDF (`/instances/:id/pdf` in iframe) and DICOM Structured Reports |
 | `src/features/tools/components/UidLookupDialog.tsx` | Global DICOM UID lookup dialog (`toolsApi.lookup`) resolving any UID/UUID to its OE3 route |

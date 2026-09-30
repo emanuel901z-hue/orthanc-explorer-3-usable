@@ -20,7 +20,7 @@ export default defineConfig({
     ['html', { outputFolder: 'e2e/prod/report', open: 'never' }],
   ],
   use: {
-    baseURL: 'http://10.0.1.46:3080',
+    baseURL: process.env.OE3_PROD_BASE ?? 'http://127.0.0.1:3080',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

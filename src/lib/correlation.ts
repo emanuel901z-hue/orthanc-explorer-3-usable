@@ -12,7 +12,7 @@
  */
 export function newCorrelationId(): string {
   // crypto.randomUUID is only defined in secure contexts (HTTPS or localhost).
-  // In non-secure HTTP contexts (e.g. http://10.0.1.46:3080), it is undefined.
+  // In non-secure HTTP contexts (e.g. http://host:8080), it is undefined.
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }

@@ -33,7 +33,7 @@ interface QuarantineDialogProps {
 }
 
 /**
- * Moves studies into quarantine via the PP backend (PatientID → QRN-ADOPT-*).
+ * Moves studies into quarantine via the backend PACS API (PatientID → QRN-ADOPT-*).
  * The rename happens in place, so the Orthanc study id changes — callers must
  * refresh their list afterwards.
  */

@@ -40,7 +40,7 @@ function scopeAllows(scopes: string[], key: FeatureKey): boolean {
 
 /**
  * Aliases for the legacy `enableX` config.js key form (documented in CLAUDE.md /
- * AGENTS.md and used by `public/config.prod.js` and the PP backend deployment).
+ * AGENTS.md and used by `public/config.prod.js` and backend-proxy deployments).
  * Without this mapping, `cfg.features?.[key] === false` would never match the
  * `enableDelete` / `enableSendTo` / `enableModalityConfig` keys actually shipped
  * in production, leaving all dangerous write actions (delete/modify/anonymize/send)
@@ -54,9 +54,9 @@ const FEATURE_ALIASES: Record<FeatureKey, string[]> = {
   send: ['enableSendTo'],
   download: ['enableDownload'],
   editLabels: ['enableEditLabels'],
-  // Pulmopath backend endpoint POST /api/v1/pacs/quarantine/adopt (QRN-ADOPT-*).
-  // Not an Orthanc feature — it needs the PP backend proxy, so standalone
-  // deployments should switch it off.
+  // Backend PACS endpoint POST /api/v1/pacs/quarantine/adopt (QRN-ADOPT-*).
+  // Not an Orthanc feature — it needs a backend proxy, so standalone
+  // deployments (and any deployment without that backend) leave it off.
   quarantine: ['enableQuarantine'],
   modalityManagement: ['enableModalityConfig', 'enableModalityManagement'],
   dicomWebManagement: ['enableDicomWebConfig', 'enableDicomWebManagement'],

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { pulmopathPacsApi } from './pulmopath-pacs';
+import { backendPacsApi } from './backend-pacs';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import { OrthancError } from '@/lib/errors';
 
@@ -9,19 +9,19 @@ function setConfig(orthancUrl: string) {
   loadConfig();
 }
 
-describe('pulmopathPacsApi', () => {
+describe('backendPacsApi', () => {
   beforeEach(() => setConfig('/api/v1/pacs/orthanc'));
   afterEach(() => {
     __resetConfigForTests();
     vi.restoreAllMocks();
   });
 
-  it('quarantineStudy() posts to the PP backend derived from orthancUrl', async () => {
+  it('quarantineStudy() posts to the backend derived from orthancUrl', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ success: true, orthancStudyId: 'new-id', previousOrthancStudyId: 'old-id', quarantinePatientId: 'QRN-ADOPT-1' }), { status: 200 }),
     );
 
-    const result = await pulmopathPacsApi.quarantineStudy({ orthancStudyId: 'old-id', reason: 'duplicate' });
+    const result = await backendPacsApi.quarantineStudy({ orthancStudyId: 'old-id', reason: 'duplicate' });
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe('/api/v1/pacs/quarantine/adopt');
@@ -37,7 +37,7 @@ describe('pulmopathPacsApi', () => {
       new Response('{}', { status: 200 }),
     );
 
-    await pulmopathPacsApi.quarantineStudy({ orthancStudyId: 'old-id' });
+    await backendPacsApi.quarantineStudy({ orthancStudyId: 'old-id' });
 
     expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/pacs/quarantine/adopt');
   });
@@ -47,7 +47,7 @@ describe('pulmopathPacsApi', () => {
       new Response(JSON.stringify({ error: 'Studie ist einer Untersuchung zugeordnet und wird gebraucht.' }), { status: 409 }),
     );
 
-    await expect(pulmopathPacsApi.quarantineStudy({ orthancStudyId: 'x' })).rejects.toMatchObject({
+    await expect(backendPacsApi.quarantineStudy({ orthancStudyId: 'x' })).rejects.toMatchObject({
       status: 409,
       message: 'Studie ist einer Untersuchung zugeordnet und wird gebraucht.',
     });
@@ -56,7 +56,7 @@ describe('pulmopathPacsApi', () => {
   it('keeps the scrubbed message for unexpected statuses', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('boom', { status: 500 }));
 
-    const err = await pulmopathPacsApi.quarantineStudy({ orthancStudyId: 'x' }).catch((e) => e);
+    const err = await backendPacsApi.quarantineStudy({ orthancStudyId: 'x' }).catch((e) => e);
     expect(err).toBeInstanceOf(OrthancError);
     expect((err as OrthancError).status).toBe(500);
     expect((err as OrthancError).message).toBe('The server encountered an error.');

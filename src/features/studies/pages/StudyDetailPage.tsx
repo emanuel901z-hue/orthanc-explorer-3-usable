@@ -405,7 +405,10 @@ export default function StudyDetailPage() {
                     await requestViewerSession();
                     if (v.type === 'desktop') {
                       // Weasis uses custom protocol: weasis://$dicom:get -w "rsid:..." ...
-                      window.location.href = `${v.url}$dicom:get -r "http://10.0.1.46:3080/api/v1/pacs/orthanc/wado-rs/studies/${study.studyInstanceUID}"`;
+                      // Same origin as the SPA — never a hardcoded host (the
+                      // deployment decides its own address; see
+                      // docs/backend-integration.md for the WADO-RS base).
+                      window.location.href = `${v.url}$dicom:get -r "${window.location.origin}/api/v1/pacs/orthanc/wado-rs/studies/${study.studyInstanceUID}"`;
                     } else {
                       // Web viewers (VolView, MedDream) — pass study UID
                       const sep = v.url.includes('?') ? '&' : '?';

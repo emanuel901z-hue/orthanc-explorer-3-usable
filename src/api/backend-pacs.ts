@@ -1,14 +1,18 @@
 /**
- * Typed client for the Pulmopath backend PACS endpoints — these are NOT Orthanc
- * REST routes but PP-specific operations that need the backend (DB checks,
- * audit log, WORM-safe modify).
+ * Typed client for a backend's PACS endpoints — these are NOT Orthanc REST
+ * routes but operations that need the backend (DB checks, audit log,
+ * WORM-safe modify).
  *
  * They live under /api/v1/pacs/* on the same origin as the SPA and are
  * authenticated by the same JWT cookie as the Orthanc proxy, so every request
  * uses credentials: 'include' and no auth headers.
  *
+ * The endpoint is **project-specific**: a deployment without such a backend
+ * leaves the feature off (`enableQuarantine`, see `OPT_IN_FEATURES`) and the
+ * requests below simply answer 404. See `docs/backend-integration.md`.
+ *
  * Covered:
- *   POST /api/v1/pacs/quarantine/adopt — pulmopathPacsApi.quarantineStudy()
+ *   POST /api/v1/pacs/quarantine/adopt — backendPacsApi.quarantineStudy()
  */
 import { getConfig } from '@/config/runtime';
 import { JSON_CONTENT_HEADERS } from '@/lib/client';
@@ -17,7 +21,7 @@ import { OrthancError } from '@/lib/errors';
 import { logger } from '@/lib/logger';
 
 /**
- * Base path of the PP PACS API. In production orthancUrl is
+ * Base path of the backend PACS API. In production orthancUrl is
  * "/api/v1/pacs/orthanc" — strip the trailing /orthanc. In dev (or a
  * standalone deployment without the backend) the fallback points at the same
  * origin; the endpoint then simply answers 404.
@@ -73,7 +77,7 @@ async function pacsFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
       const err = detail
         ? new OrthancError(res.status, correlationId, detail)
         : await OrthancError.from(res, correlationId);
-      logger.error('pulmopath.pacs.failed', { path, status: err.status, correlationId });
+      logger.error('backend.pacs.failed', { path, status: err.status, correlationId });
       throw err;
     }
     if (res.status === 204) return undefined as T;
@@ -81,18 +85,18 @@ async function pacsFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
     return (text ? JSON.parse(text) : undefined) as T;
   } catch (e) {
     if (e instanceof OrthancError) throw e;
-    logger.error('pulmopath.pacs.failed', { path, correlationId });
+    logger.error('backend.pacs.failed', { path, correlationId });
     throw new OrthancError(0, correlationId, 'Network error. Please try again.');
   }
 }
 
-export const pulmopathPacsApi = {
+export const backendPacsApi = {
   /**
    * POST /quarantine/adopt — puts a study into quarantine: the backend renames
    * its PatientID to QRN-ADOPT-<timestamp> in place (KeepSource:false), so the
-   * Orthanc study id changes. Reversible in PP ("Verwaiste Studien" →
-   * Normalisieren). Answers 409 when the study belongs to an investigation or
-   * is already quarantined.
+   * Orthanc study id changes. The backend's own UI reverses it ("orphaned
+   * studies" → normalise). Answers 409 when the study belongs to an
+   * investigation or is already quarantined.
    */
   quarantineStudy: (params: { orthancStudyId: string; reason?: string }) =>
     pacsFetch<QuarantineResult>('/quarantine/adopt', {

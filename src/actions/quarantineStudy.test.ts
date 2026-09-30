@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const { mockQuarantine } = vi.hoisted(() => ({ mockQuarantine: vi.fn() }));
 
-vi.mock('@/api/pulmopath-pacs', () => ({
-  pulmopathPacsApi: { quarantineStudy: mockQuarantine },
+vi.mock('@/api/backend-pacs', () => ({
+  backendPacsApi: { quarantineStudy: mockQuarantine },
 }));
 vi.mock('@/lib/audit', () => ({
   auditClient: { emit: vi.fn() },
