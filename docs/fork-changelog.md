@@ -4,6 +4,39 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.1 — Governance und Entkopplung (2026-09-30)
+
+Patch-Release **ohne funktionale Änderung**. Dieser Fork ist die gemeinsame
+OE3-Basis zweier Produkte; die Regeln dafür standen nirgends, und der Code trug
+Name und Adresse eines davon.
+
+### Regeln
+
+- `CLAUDE.md` → „Releases & Governance": **Schichtung** (nichts
+  Projektspezifisches ist Pflicht, kein Produktname im Repo), **Releases**
+  (Konsumenten pinnen Tags, keine Branch-Heads), **Gate** (`main` nur über PR).
+- Neu: [`docs/release-process.md`](release-process.md) — Checkliste zum Schneiden
+  einer Release, inklusive Verhalten bei einer kaputten Release (Tag **nicht**
+  verschieben).
+- Neu: [`docs/backend-integration.md`](backend-integration.md) — wie ein zweites
+  Produkt sein Backend anbindet (Opt-in-Flag, abgeleitete Basis-URL, 404 im
+  Fremdstack).
+
+### Entkopplung
+
+- `src/api/pulmopath-pacs.ts` → `src/api/backend-pacs.ts` (neutral:
+  `backendPacsApi`, `backend.pacs.failed`). Die Quarantäne bleibt **Opt-in**
+  (`OPT_IN_FEATURES`) — das war bereits richtig.
+- **Interne IP aus dem Code entfernt**: die Weasis-WADO-RS-URL in
+  `StudyDetailPage` baute auf einer hartkodierten Adresse (für jedes andere
+  Deployment kaputt) — jetzt `window.location.origin`.
+- Die Produktions-E2E (`e2e/prod`) holt Instanz-URL, Backend-Container und
+  JWT-`iss`/`aud` aus der Umgebung statt aus dem Code.
+
+696 Tests, `tsc`/`lint`/`i18n` unverändert grün.
+
+---
+
 ## v2.6.0 — OE3 als Werkzeug: Split & Merge, echtes Query/Retrieve, Dokumente (2026-09-30)
 
 Sechs Sprints („Schweizer Taschenmesser", Roadmap:
@@ -93,7 +126,7 @@ davor. Alle Änderungen an der OE3-Oberfläche selbst, **nicht** am Broker-Slice
 - Neue Suiten u. a.: `splitStudy`, `sendToPeer`, `quarantineStudy`,
   `queryModality`/`retrieveModality`, `moveInstancesToSeries`,
   `migrateInstance`/`migrateSeries`, `column-layout`, `ui-state`,
-  `use-remembered-search-params`, `dicom-uid`, `pulmopath-pacs`.
+  `use-remembered-search-params`, `dicom-uid`, `backend-pacs`.
 
 ---
 
