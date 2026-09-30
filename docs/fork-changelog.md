@@ -4,6 +4,25 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.2 — Upstream wird nicht mehr verfolgt (2026-09-30)
+
+**Entscheidung, keine Code-Änderung.** Dieser Fork ist 105 Commits vor dem
+Upstream-`main` (2026-04-12), hat die Studien-/Serien-Ebene umgebaut und den
+MWL-Broker-Slice ergänzt — ein Merge der Upstream-Linie wäre ein Umbau, kein
+Update. Upstreams Entwicklung lief ohnehin auf dessen `dev` weiter (2026-07-24,
+80 Commits); die holen wir **bewusst nicht**.
+
+- **README**: der Abschnitt „Upstream" sagt jetzt, dass nicht mehr getrackt wird
+  — mit Begründung und Verweis auf `docs/next-steps.md` (B7) im Broker-Workspace.
+- **MIT-Attribution bleibt**: Copyright-Notiz und Herkunftshinweis sind erhalten,
+  auch ohne Tracking.
+- Der `upstream`-Remote wurde entfernt. Der Push-Guard verweigert weiterhin
+  Pushes, deren `origin` auf den Upstream zeigt — die Sicherung bleibt.
+
+Keine Code-Änderung: 696 Tests, `tsc`/`lint`/`i18n` unverändert grün.
+
+---
+
 ## v2.6.1 — Governance und Entkopplung (2026-09-30)
 
 Patch-Release **ohne funktionale Änderung**. Dieser Fork ist die gemeinsame

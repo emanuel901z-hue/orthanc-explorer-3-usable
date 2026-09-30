@@ -477,7 +477,18 @@ Architectural context lives in [`docs/plans/`](docs/plans/). Fork-specific chang
 
 ### Upstream
 
-This fork tracks the upstream at [rhavekost/orthanc-explorer-3](https://github.com/rhavekost/orthanc-explorer-3). Fork-specific changes are documented in [`docs/fork-changelog.md`](docs/fork-changelog.md).
+This project started as a fork of [rhavekost/orthanc-explorer-3](https://github.com/rhavekost/orthanc-explorer-3)
+(MIT) and **no longer tracks it**. The divergence is deliberate and large: by
+2026-09-30 this repository is 105 commits ahead of the upstream `main`
+(2026-04-12), the study/series layer has been rebuilt, and the MWL-broker slice
+was added — merging upstream's later line would be a rewrite, not an update.
+
+Upstream's development continued on its `dev` branch (2026-07-24, 80 commits we
+do not have). That is a known, accepted gap; the reasoning and the options are
+recorded in the broker workspace's `docs/next-steps.md` (B7). The MIT copyright
+notice and attribution stay — see [LICENSE](LICENSE).
+
+Fork-specific changes are documented in [`docs/fork-changelog.md`](docs/fork-changelog.md).
 
 ## License
 
