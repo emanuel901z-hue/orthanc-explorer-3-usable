@@ -464,6 +464,7 @@ export default function BrokerPage() {
                   <TableHead>{t('broker.callingAet')}</TableHead>
                   <TableHead>{t('broker.accession')}</TableHead>
                   <TableHead>{t('broker.status')}</TableHead>
+                  <TableHead>{t('broker.storeLogTransforms')}</TableHead>
                   <TableHead>{t('broker.storeLogError')}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -482,6 +483,17 @@ export default function BrokerPage() {
                       >
                         {t(`broker.storeStatus_${row.status}`, { defaultValue: row.status })}
                       </Badge>
+                    </TableCell>
+                    {/* which modify rules touched this image — the answer to
+                        "why does the accession look different in the PACS?" */}
+                    <TableCell className="text-xs">
+                      {(row.applied_transforms ?? []).length === 0 ? '—' : (
+                        <span className="flex flex-wrap gap-1">
+                          {row.applied_transforms.map((name) => (
+                            <Badge key={name} variant="outline" className="text-[10px]">{name}</Badge>
+                          ))}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-xs text-destructive">{row.error || ''}</TableCell>
                   </TableRow>

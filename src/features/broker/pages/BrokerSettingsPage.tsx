@@ -63,6 +63,15 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
               <Badge variant={setting.source === 'db' ? 'secondary' : 'outline'} className="text-xs">
                 {setting.source === 'db' ? t('broker.settingOverridden') : t('broker.settingFromEnv')}
               </Badge>
+              {/* Read once while the process starts (TLS listener, MLLP thread,
+                  MPPS presentation context) — without this the operator toggles
+                  it and nothing happens. Only worth showing when it was changed. */}
+              {setting.restart_required && setting.source === 'db' && (
+                <Badge variant="outline" className="text-xs border-warning/40 text-warning"
+                       data-testid={`setting-restart-${setting.key}`}>
+                  {t('broker.settingRestartRequired')}
+                </Badge>
+              )}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {/* the API delivers the description in English; a translation wins */}

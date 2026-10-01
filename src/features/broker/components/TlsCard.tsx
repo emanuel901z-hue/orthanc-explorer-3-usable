@@ -181,7 +181,15 @@ export function TlsCard({ settings }: { settings: BrokerSetting[] }) {
         <div className="space-y-3 rounded-md border p-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <Label htmlFor="tls-inbound">{t('broker.tlsInbound')}</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                <Label htmlFor="tls-inbound">{t('broker.tlsInbound')}</Label>
+                {/* The listener is started once, while the process boots — a
+                    toggle without this hint looks immediate and does nothing. */}
+                <Badge variant="outline" className="text-xs border-warning/40 text-warning"
+                       data-testid="tls-inbound-restart-required">
+                  {t('broker.settingRestartRequired')}
+                </Badge>
+              </div>
               <p className="text-xs text-muted-foreground">{t('broker.tlsInboundHint')}</p>
             </div>
             <Switch

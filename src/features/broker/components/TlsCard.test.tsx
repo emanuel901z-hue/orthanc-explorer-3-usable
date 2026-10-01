@@ -231,4 +231,10 @@ describe('TlsCard — PKI upload (A10)', () => {
     await waitFor(() => expect(
       within(upload).getByRole('button', { name: /install|einspielen/i })).toBeDisabled());
   });
+
+  it('says that the listener only starts with the next restart', async () => {
+    renderCard();
+    // the TLS server is opened once while the process boots
+    expect(await screen.findByTestId('tls-inbound-restart-required')).toBeInTheDocument();
+  });
 });

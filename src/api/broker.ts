@@ -165,6 +165,8 @@ export type BrokerSetting = {
    * read-only — the broker answers 409 on a write.
    */
   editable?: boolean;
+  /** Only read while the process starts — the change needs a restart. */
+  restart_required?: boolean;
   /** Lower bound for integer settings (null for other kinds). */
   min?: number | null;
   /** Upper bound for integer settings (null for other kinds). */
@@ -855,6 +857,8 @@ export type StoreLogRow = {
   target_id: number | null;
   status: string;
   error: string;
+  /** Names of the modify rules that changed this instance before forwarding. */
+  applied_transforms: string[];
 };
 
 /**

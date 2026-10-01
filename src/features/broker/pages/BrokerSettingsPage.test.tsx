@@ -274,4 +274,20 @@ describe('BrokerSettingsPage', () => {
     expect(editable.queryByTestId('setting-deployment-only')).not.toBeInTheDocument();
     expect(editable.getByLabelText(/echo interval/i)).toBeInTheDocument();
   });
+
+  it('marks a setting that only takes effect after a restart', async () => {
+    // The TLS listener and the MLLP thread are read once while the process
+    // starts — without the hint the operator toggles it and nothing happens.
+    mockList.mockResolvedValue([
+      { key: 'mpps_enabled', value: 'true', default: 'false', source: 'db',
+        kind: 'bool', description: 'Report the performed procedure step back.',
+        restart_required: true },
+      { key: 'spool_enabled', value: 'true', default: 'true', source: 'db',
+        kind: 'bool', description: 'Queue instead of failing.', restart_required: false },
+    ]);
+    renderPage();
+
+    expect(await screen.findByTestId('setting-restart-mpps_enabled')).toBeInTheDocument();
+    expect(screen.queryByTestId('setting-restart-spool_enabled')).not.toBeInTheDocument();
+  });
 });
