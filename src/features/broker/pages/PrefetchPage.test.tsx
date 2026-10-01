@@ -163,4 +163,46 @@ describe('PrefetchPage', () => {
 
     await waitFor(() => expect(mockRemove).toHaveBeenCalledWith('CT_01'));
   });
+
+  it('says that the broker is not configured instead of failing on every request', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', brokerUrl: '', authMode: 'none', features: {} };
+    loadConfig();
+    renderPage();
+
+    expect(await screen.findByText(/not configured/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /preview/i })).not.toBeInTheDocument();
+  });
+
+  it('reports a partly delivered prefetch instead of claiming success', async () => {
+    renderPage();
+    await fillForm();
+    fireEvent.click(screen.getByRole('button', { name: /preview/i }));
+    await screen.findByText('CT Thorax');
+
+    mockRun.mockResolvedValueOnce({
+      ...PLAN, dry_run: false,
+      moved: [
+        { study_uid: '1.2.3', status: 0, completed: 120, failed: 0, warning: 0, ok: true, error: '' },
+        { study_uid: '1.2.4', status: 0xA801, completed: 0, failed: 0, warning: 0, ok: false,
+          error: 'move destination unknown to the query node' },
+      ],
+      skipped: ['1.2.5'],
+    });
+    fireEvent.click(screen.getByRole('button', { name: /fetch 1/i }));
+
+    await waitFor(() => expect(mockToast.error).toHaveBeenCalled());
+    const result = await screen.findByTestId('prefetch-result');
+    expect(within(result).getByText(/move destination unknown/i)).toBeInTheDocument();
+    expect(within(result).getByText(/1 study\/studies were not fetched/i)).toBeInTheDocument();
+  });
+
+  it('shows what the broker refused in plain words', async () => {
+    renderPage();
+    await fillForm();
+    mockRun.mockRejectedValueOnce(new Error("unknown query node 'nope' (a PACS target name)"));
+    fireEvent.click(screen.getByRole('button', { name: /preview/i }));
+
+    expect(await screen.findByText(/unknown query node/i)).toBeInTheDocument();
+  });
 });

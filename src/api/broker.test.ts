@@ -494,3 +494,136 @@ describe("brokerApi without brokerUrl", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * The page tests mock this module, so a wrong path or a method nobody wired up
+ * would only show up in production. One case per method pins the client ↔ API
+ * contract at the URL level — the backend side of the contract lives in
+ * `tests/test_api_ui_contract.py`.
+ */
+describe("brokerApi — jeder Aufruf trifft den richtigen Pfad", () => {
+  const B = "/broker-api/api/v1";
+  const CASES: Array<[string, () => Promise<unknown>, string, string]> = [
+    // sources
+    ["sources.get", () => brokerApi.sources.get(7), `${B}/sources/7`, "GET"],
+    ["sources.update", () => brokerApi.sources.update(7, {} as never), `${B}/sources/7`, "PUT"],
+    ["sources.delete", () => brokerApi.sources.delete(7), `${B}/sources/7`, "DELETE"],
+    ["sources.query", () => brokerApi.sources.query(7, { accession: "A" }), `${B}/sources/7/query`, "POST"],
+    ["sources.resetBreaker", () => brokerApi.sources.resetBreaker(7), `${B}/sources/7/reset-breaker`, "POST"],
+    // targets
+    ["targets.get", () => brokerApi.targets.get(7), `${B}/targets/7`, "GET"],
+    ["targets.update", () => brokerApi.targets.update(7, {} as never), `${B}/targets/7`, "PUT"],
+    ["targets.delete", () => brokerApi.targets.delete(7), `${B}/targets/7`, "DELETE"],
+    // rules + transforms
+    ["rules.create", () => brokerApi.rules.create({} as never), `${B}/rules`, "POST"],
+    ["rules.update", () => brokerApi.rules.update(7, {} as never), `${B}/rules/7`, "PUT"],
+    ["rules.delete", () => brokerApi.rules.delete(7), `${B}/rules/7`, "DELETE"],
+    ["transforms.create", () => brokerApi.transforms.create({} as never), `${B}/transforms`, "POST"],
+    ["transforms.update", () => brokerApi.transforms.update(7, {} as never), `${B}/transforms/7`, "PUT"],
+    ["transforms.delete", () => brokerApi.transforms.delete(7), `${B}/transforms/7`, "DELETE"],
+    // settings
+    ["settings.get", () => brokerApi.settings.get("echo_interval_s"), `${B}/settings/echo_interval_s`, "GET"],
+    ["settings.set", () => brokerApi.settings.set("echo_interval_s", "45"), `${B}/settings/echo_interval_s`, "PUT"],
+    ["settings.reset", () => brokerApi.settings.reset("echo_interval_s"), `${B}/settings/echo_interval_s`, "DELETE"],
+    // the interfaces added in v2.6.x
+    ["prefetch.run (dry run)",
+      () => brokerApi.prefetch.run({ patient_id: "P-1", query_node: "a", destination: "b" }),
+      `${B}/prefetch?dry_run=true`, "POST"],
+    ["prefetch.run (apply)",
+      () => brokerApi.prefetch.run({ patient_id: "P-1", query_node: "a", destination: "b" }, false),
+      `${B}/prefetch?dry_run=false`, "POST"],
+    ["upsSubscriptions.list", () => brokerApi.upsSubscriptions.list(),
+      `${B}/dicom-web/workitems/subscriptions`, "GET"],
+    ["upsSubscriptions.create", () => brokerApi.upsSubscriptions.create({ subscriber_aet: "CT_01" }),
+      `${B}/dicom-web/workitems/subscriptions`, "POST"],
+    ["upsSubscriptions.remove", () => brokerApi.upsSubscriptions.remove("CT 01"),
+      `${B}/dicom-web/workitems/subscriptions/CT%2001`, "DELETE"],
+    // local worklist + HL7
+    ["localItems.create", () => brokerApi.localItems.create({} as never), `${B}/local-items`, "POST"],
+    ["localItems.update", () => brokerApi.localItems.update(7, {} as never), `${B}/local-items/7`, "PUT"],
+    ["localItems.remove", () => brokerApi.localItems.remove(7), `${B}/local-items/7`, "DELETE"],
+    ["hl7.orm", () => brokerApi.hl7.orm("MSH|^~\\&|", false), `${B}/hl7/orm?dry_run=false`, "POST"],
+    ["hl7.message", () => brokerApi.hl7.message(7), `${B}/hl7/messages/7`, "GET"],
+    ["hl7.reprocess", () => brokerApi.hl7.reprocess(7, true), `${B}/hl7/messages/7/reprocess?dry_run=true`, "POST"],
+    ["hl7FieldMaps.create", () => brokerApi.hl7FieldMaps.create({} as never), `${B}/hl7/field-maps`, "POST"],
+    ["hl7FieldMaps.remove", () => brokerApi.hl7FieldMaps.remove(7), `${B}/hl7/field-maps/7`, "DELETE"],
+    // patient identifier reconciliation
+    ["patientMerges.create", () => brokerApi.patientMerges.create({} as never), `${B}/merges`, "POST"],
+    ["patientMerges.remove", () => brokerApi.patientMerges.remove(7), `${B}/merges/7`, "DELETE"],
+    ["patientMerges.resolve", () => brokerApi.patientMerges.resolve("P 1"), `${B}/merges/resolve/P%201`, "GET"],
+    ["mergeRules.create", () => brokerApi.mergeRules.create({} as never), `${B}/merge-rules`, "POST"],
+    ["mergeRules.remove", () => brokerApi.mergeRules.remove(7), `${B}/merge-rules/7`, "DELETE"],
+    // MPPS + stations
+    ["mpps.list", () => brokerApi.mpps.list(25), `${B}/mpps?limit=25`, "GET"],
+    ["mpps.forwardPending", () => brokerApi.mpps.forwardPending(), `${B}/mpps/forward-pending`, "POST"],
+    ["mpps.forward", () => brokerApi.mpps.forward(7), `${B}/mpps/7/forward`, "POST"],
+    ["stationRules.create", () => brokerApi.stationRules.create({} as never), `${B}/station-rules`, "POST"],
+    ["stationRules.update", () => brokerApi.stationRules.update(7, {} as never), `${B}/station-rules/7`, "PUT"],
+    ["stationRules.remove", () => brokerApi.stationRules.remove(7), `${B}/station-rules/7`, "DELETE"],
+    ["stationRules.simulate", () => brokerApi.stationRules.simulate("CT_01"), `${B}/simulate/station`, "POST"],
+    // access, retention, TLS, audit trail, alerting
+    ["retention.purge", () => brokerApi.retention.purge("seen_items"), `${B}/retention/purge?table=seen_items`, "POST"],
+    ["tls.generate", () => brokerApi.tls.generate({} as never), `${B}/tls/self-signed`, "POST"],
+    ["tls.upload", () => brokerApi.tls.upload({} as never), `${B}/tls/upload`, "POST"],
+    ["tls.test", () => brokerApi.tls.test({ host: "127.0.0.1", port: 2762 }), `${B}/tls/test`, "POST"],
+    ["atna.test", () => brokerApi.atna.test(), `${B}/atna/test`, "POST"],
+    ["notify.test", () => brokerApi.notify.test(), `${B}/notify/test`, "POST"],
+    // spool + cache
+    ["spool.items", () => brokerApi.spool.items({ status: "dead", limit: 5 }), `${B}/spool?status=dead&limit=5`, "GET"],
+    ["spool.retry", () => brokerApi.spool.retry(7), `${B}/spool/7/retry`, "POST"],
+    ["spool.discard", () => brokerApi.spool.discard(7, "duplicate"), `${B}/spool/7?reason=duplicate`, "DELETE"],
+    ["cache.items", () => brokerApi.cache.items({ limit: 5 }), `${B}/cache/items?limit=5`, "GET"],
+    ["cache.refresh", () => brokerApi.cache.refresh(7), `${B}/cache/refresh?source_id=7`, "POST"],
+    ["cache.clearSource", () => brokerApi.cache.clearSource(7), `${B}/cache/sources/7`, "DELETE"],
+    // change log, config, simulation, logs, reporting
+    ["audit.rollback", () => brokerApi.audit.rollback(7), `${B}/config/rollback/7`, "POST"],
+    ["config.import", () => brokerApi.config.import({} as never, true), `${B}/config/import?dry_run=true`, "POST"],
+    ["simulate.route", () => brokerApi.simulate.route({ accession: "A" }), `${B}/simulate/route`, "POST"],
+    ["simulate.transform", () => brokerApi.simulate.transform({} as never), `${B}/simulate/transform`, "POST"],
+    ["logs.queries", () => brokerApi.logs.queries({ limit: 5, since: "2026-01-01" }),
+      `${B}/logs/queries?limit=5&since=2026-01-01`, "GET"],
+    ["logs.stores", () => brokerApi.logs.stores(5), `${B}/logs/stores?limit=5`, "GET"],
+    ["statsOverview", () => brokerApi.statsOverview(30, "modality"),
+      `${B}/stats/overview?days=30&group_by=modality`, "GET"],
+  ];
+
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = BROKER_CFG;
+    loadConfig();
+  });
+  afterEach(() => { __resetConfigForTests(); vi.restoreAllMocks(); });
+
+  for (const [name, call, path, method] of CASES) {
+    it(`${name} → ${method} ${path}`, async () => {
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response("[]", { status: 200 }),
+      );
+      await call();
+
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(url).toBe(path);
+      expect(((init as RequestInit | undefined)?.method ?? "GET")).toBe(method);
+    });
+  }
+
+  it("hl7.orm posts the message as text/plain (not JSON)", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("{}", { status: 200 }),
+    );
+    await brokerApi.hl7.orm("MSH|^~\\&|RIS", false);
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(new Headers(init.headers).get("content-type")).toContain("text/plain");
+    expect(init.body).toBe("MSH|^~\\&|RIS");
+  });
+
+  it("the query builders skip the parameters nobody set", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("[]", { status: 200 }),
+    );
+    await brokerApi.spool.items({ limit: 10 });
+
+    expect(fetchMock.mock.calls[0][0]).toBe(`${B}/spool?limit=10`);
+  });
+});

@@ -84,3 +84,58 @@ describe('form drafts', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 });
+
+describe('form drafts — wenn der Browser keinen Speicher hergibt', () => {
+  const breakStorage = () => {
+    const boom = () => { throw new Error('storage disabled (private mode)'); };
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(boom);
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(boom);
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(boom);
+  };
+
+  it('reads nothing instead of throwing', () => {
+    breakStorage();
+    expect(loadDraft('x')).toBeNull();
+    vi.restoreAllMocks();
+  });
+
+  it('writes nothing instead of throwing — the form still works', () => {
+    breakStorage();
+    expect(() => saveDraft('x', { a: 1 })).not.toThrow();
+    expect(() => clearDraft('x')).not.toThrow();
+    vi.restoreAllMocks();
+  });
+
+  it('removes an unreadable draft instead of leaving it behind', () => {
+    sessionStorage.setItem('broker.draft.kaputt', '{not json');
+    expect(loadDraft('kaputt')).toBeNull();
+    expect(sessionStorage.getItem('broker.draft.kaputt')).toBeNull();
+  });
+
+  it('warns before leaving only while the form is dirty', () => {
+    const { rerender } = renderHook(({ dirty }) => useUnsavedWarning(dirty),
+      { initialProps: { dirty: false } });
+    const clean = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(clean);
+    expect(clean.defaultPrevented).toBe(false);
+
+    rerender({ dirty: true });
+    const dirty = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(dirty);
+    expect(dirty.defaultPrevented).toBe(true);
+
+    // and the listener is gone again once the form is clean
+    rerender({ dirty: false });
+    const cleanAgain = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(cleanAgain);
+    expect(cleanAgain.defaultPrevented).toBe(false);
+  });
+
+  it('drops the draft when the caller says it was saved', () => {
+    const { result } = renderHook(() => useDraftPersistence('z', { a: 1 }, true));
+    expect(loadDraft('z')).toEqual({ a: 1 });
+
+    act(() => { result.current(); });
+    expect(loadDraft('z')).toBeNull();
+  });
+});

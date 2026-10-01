@@ -76,3 +76,46 @@ describe('validateNodeField', () => {
     expect(UID_RE.test('1.2.840..5')).toBe(false);
   });
 });
+
+describe('validateSetting — die Regeln, die der Server ebenfalls prüft', () => {
+  const setting = (kind: string, extra: Record<string, unknown> = {}) =>
+    ({ key: 'k', value: '', default: '', source: 'env', kind, description: '', ...extra }) as never;
+
+  it('accepts an empty JSON value (the defaults apply)', () => {
+    expect(validateSetting(setting('json'), '')).toBeNull();
+    expect(validateSetting(setting('json'), '   ')).toBeNull();
+  });
+
+  it('rejects broken JSON before it reaches the server', () => {
+    expect(validateSetting(setting('json'), '{"accession": ')).toMatch(/not valid JSON/i);
+  });
+
+  it('accepts a JSON object of strings', () => {
+    expect(validateSetting(setting('json'), '{"accession":"6200"}')).toBeNull();
+  });
+
+  it('rejects a JSON array or scalar — a field map is an object', () => {
+    expect(validateSetting(setting('json'), '["6200"]')).toMatch(/JSON object/i);
+    expect(validateSetting(setting('json'), '42')).toMatch(/JSON object/i);
+  });
+
+  it('rejects non-string values in the field map', () => {
+    expect(validateSetting(setting('json'), '{"accession":6200}'))
+      .toMatch(/values must be strings: accession/i);
+  });
+
+  it('reads the allowed values from the kind when the API sends no choices', () => {
+    // the API always sends `choices`, but the kind carries them too — a
+    // half-configured client must not let an invalid value through
+    expect(validateSetting(setting('enum:off,enforce'), 'enforce')).toBeNull();
+    expect(validateSetting(setting('enum:off,enforce'), 'maybe')).toMatch(/must be one of/i);
+  });
+
+  it('lets an unset enum stay empty (falls back to the first choice)', () => {
+    expect(validateSetting(setting('enum:off,enforce'), '')).toBeNull();
+  });
+
+  it('has no opinion about a field it does not know', () => {
+    expect(validateNodeField('unknown' as never, 'x')).toBeNull();
+  });
+});

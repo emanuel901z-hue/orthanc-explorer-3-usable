@@ -8,12 +8,18 @@ import { auditQueryParams } from '../lib/config-diff';
 import '@/i18n';
 
 const {
-  mockAudit, mockRollback, mockExport, mockImport,
+  mockAudit, mockRollback, mockExport, mockImport, viewport,
 } = vi.hoisted(() => ({
   mockAudit: vi.fn(),
   mockRollback: vi.fn(),
   mockExport: vi.fn(),
   mockImport: vi.fn(),
+  // the change log renders a table on a desktop and cards on a phone
+  viewport: { mobile: false },
+}));
+
+vi.mock('@/shared/hooks/use-media-query', () => ({
+  useMediaQuery: () => viewport.mobile,
 }));
 
 vi.mock('@/api/broker', () => ({
@@ -62,7 +68,7 @@ describe('AuditPage', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (URL as any).revokeObjectURL = vi.fn();
   });
-  afterEach(() => { __resetConfigForTests(); vi.clearAllMocks(); });
+  afterEach(() => { __resetConfigForTests(); viewport.mobile = false; vi.clearAllMocks(); });
 
   it('lists the recorded changes', async () => {
     renderPage();
@@ -164,5 +170,17 @@ describe('AuditPage', () => {
     fireEvent.change(screen.getByTestId('audit-import-input'), { target: { files: [file] } });
 
     expect(await screen.findByTestId('import-error')).toBeInTheDocument();
+  });
+
+  it('lists the changes as cards on a phone instead of a scrolling table', async () => {
+    viewport.mobile = true;
+    mockAudit.mockResolvedValue([ENTRY]);
+    renderPage();
+
+    // the mobile branch has its own markup (ConfigRowCard) — the table would be
+    // unreadable at 375 px
+    await waitFor(() => expect(screen.getByText('Source changed')).toBeInTheDocument());
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.getByText('dr.mueller')).toBeInTheDocument();
   });
 });
