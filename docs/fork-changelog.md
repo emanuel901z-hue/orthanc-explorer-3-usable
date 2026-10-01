@@ -4,6 +4,36 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.6 — Abdeckung wird erzwungen, nicht nur berichtet (2026-10-01)
+
+**Die Abdeckung sinkt jetzt nicht mehr still.** Beide Ebenen prüfen sich selbst
+und brechen den Build:
+
+- `vitest.config.ts` → `coverage.thresholds` für den **Broker-Slice**
+  (`src/features/broker/**` + `src/api/broker.ts`): 95 % Statements, 85 %
+  Branches, 75 % Functions, 95 % Lines (Ist: 97,5 % / 86,3 % / 78,6 %).
+- Der Umfang steht in derselben Datei: der Rest von OE3 gehört dem geteilten
+  Fork und würde die Zahl nur verwässern (Gesamt-SPA liegt bei 49 %).
+- Gegengeprüft: mit künstlich hochgesetzten Schwellen schlägt der Lauf fehl.
+
+**Dazu die Lücken, die die Messung gezeigt hat** (Broker-Slice 95,8 → 97,5 %,
+typisierter Client 86,9 → 99,0 %):
+
+- `api/broker.test.ts`: eine Vertragsprüfung **pro Client-Methode** (Pfad +
+  Verb) — die Page-Tests mocken den Client, ein falscher Pfad wäre erst in
+  Produktion aufgefallen.
+- `setting-rules`: die JSON-Feldzuordnung (leer/kaputt/Array/Nicht-Strings) und
+  der Enum-Rückfall, wenn die API keine Auswahl mitliefert.
+- `PrefetchPage`: nicht konfiguriert, teils zugestellt, Abweisung im Klartext.
+- `AuditPage`: das Handy-Layout (Karten statt scrollender Tabelle).
+- `use-form-draft`: Speicher, der sich verweigert (Privatmodus), und die
+  Warnung vor dem Verlassen bei ungespeicherten Änderungen.
+
+Gates grün: `tsc` 0, `npm run lint` 0, `npm run i18n:check` vollständig,
+`npm run build` 0, **789 Tests**, Broker-Slice 97,5 % über den Schwellen.
+
+---
+
 ## v2.6.5 — Kein horizontales Scrollen mehr, Change-Log in Worten (2026-10-01)
 
 **Zwei Befunde aus dem laufenden Betrieb.**
