@@ -1163,6 +1163,8 @@
     "prefetchDestinationHint": "Das PACS-Ziel, das die Bilder empfängt. Der Abfrageknoten muss dessen AE-Titel als Move-Ziel kennen.",
     "prefetchChoose": "— bitte wählen —",
     "prefetchMax": "Höchstens (Studien)",
+    "prefetchExclude": "Diese Studie auslassen (optional)",
+    "prefetchExcludeHint": "Meist die gerade gelesene Studie — sie soll nicht erneut geholt werden.",
     "prefetchPreview": "Vorschau",
     "prefetchPreviewHint": "Es wird noch nichts verschoben — das fragt nur beim PACS nach.",
     "prefetchNone": "Keine früheren Untersuchungen gefunden — der Abfrageknoten kennt für diesen Patienten keine.",

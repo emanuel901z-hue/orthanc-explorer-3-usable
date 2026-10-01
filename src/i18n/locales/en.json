@@ -1163,6 +1163,8 @@
     "prefetchDestinationHint": "The PACS target that receives the images. The query node must know its AE title as a move destination.",
     "prefetchChoose": "— please choose —",
     "prefetchMax": "At most (studies)",
+    "prefetchExclude": "Leave out this study (optional)",
+    "prefetchExcludeHint": "Usually the study being read right now — it should not be pulled again.",
     "prefetchPreview": "Preview",
     "prefetchPreviewHint": "Nothing is moved yet — this only asks the PACS what it knows.",
     "prefetchNone": "No earlier studies found — the query node does not know any for this patient.",

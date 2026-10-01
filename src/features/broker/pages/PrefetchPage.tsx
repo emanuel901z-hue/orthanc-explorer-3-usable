@@ -66,6 +66,7 @@ export default function PrefetchPage() {
   const [destination, setDestination] = usePersistedState('broker.prefetch.destination', '');
   const [modality, setModality] = usePersistedState('broker.prefetch.modality', '');
   const [maxStudies, setMaxStudies] = usePersistedState('broker.prefetch.max', '5');
+  const [excludeStudy, setExcludeStudy] = usePersistedState('broker.prefetch.exclude', '');
 
   const [plan, setPlan] = useState<PrefetchResult | null>(null);
   const [result, setResult] = useState<PrefetchResult | null>(null);
@@ -98,6 +99,7 @@ export default function PrefetchPage() {
     query_node: queryNode,
     destination,
     ...(modality.trim() ? { modality: modality.trim() } : {}),
+    ...(excludeStudy.trim() ? { exclude_study_uid: excludeStudy.trim() } : {}),
     max_studies: Number(maxStudies) || 5,
   });
 
@@ -226,6 +228,17 @@ export default function PrefetchPage() {
                   onChange={(event) => setMaxStudies(event.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="prefetch-exclude">{t('broker.prefetchExclude')}</Label>
+              <Input
+                id="prefetch-exclude"
+                value={excludeStudy}
+                placeholder="1.2.840.113619…"
+                onChange={(event) => setExcludeStudy(event.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">{t('broker.prefetchExcludeHint')}</p>
             </div>
 
             <div className="sm:col-span-2 flex flex-wrap items-center gap-2">
