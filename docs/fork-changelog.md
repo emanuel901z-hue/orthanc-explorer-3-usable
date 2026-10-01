@@ -4,6 +4,25 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.7 — Herkunft eines lokalen Eintrags: vier Werte, übersetzt (2026-10-01)
+
+**Ein Fix aus der Wertemengen-Prüfung.** Der Client nannte `origin: 'manual' | 'hl7'`,
+das Backend liefert aber auch `gdt` (Auftrag aus der Praxis-EDV) und `ups` (Work Item).
+TypeScript konnte auf keinen der beiden einschränken, und das Badge druckte den Rohwert
+in die Oberfläche.
+
+- Das Schema deklariert die Menge jetzt als `Literal["hl7", "gdt", "manual", "ups"]` —
+  im OpenAPI als `enum`, also auch für API-Nutzer sichtbar.
+- Der Client nennt alle vier, und das Badge sagt „aus HL7" / „aus GDT" /
+  „hier angelegt" / „Work Item" (Rohwert bleibt der Fallback).
+- `PatientMerge.origin` ist ebenfalls eingeengt (`manual | adt`), und
+  `CacheSourceOut.state` deklariert seine drei Werte — beide vom selben Check gefunden.
+
+Gates grün: `tsc` 0, `npm run lint` 0, `npm run i18n:check` vollständig,
+`npm run build` 0, **795 Tests**.
+
+---
+
 ## v2.6.6 — Abdeckung wird erzwungen, nicht nur berichtet (2026-10-01)
 
 **Die Abdeckung sinkt jetzt nicht mehr still.** Beide Ebenen prüfen sich selbst
