@@ -66,7 +66,10 @@ describe('AuditPage', () => {
 
   it('lists the recorded changes', async () => {
     renderPage();
-    await waitFor(() => expect(screen.getByText('update.source')).toBeInTheDocument());
+    // the action is a code (`update.source`); the page shows the wording and
+    // must never print the raw code (reported from a running installation)
+    await waitFor(() => expect(screen.getByText('Source changed')).toBeInTheDocument());
+    expect(screen.queryByText('update.source')).not.toBeInTheDocument();
     expect(screen.getByText('dr.mueller')).toBeInTheDocument();
     expect(screen.getByText('ris-a')).toBeInTheDocument();
     expect(screen.getByText(/1 field/i)).toBeInTheDocument();
@@ -85,7 +88,10 @@ describe('AuditPage', () => {
 
   it('shows the before/after diff of a change', async () => {
     renderPage();
-    await waitFor(() => expect(screen.getByText('update.source')).toBeInTheDocument());
+    // the action is a code (`update.source`); the page shows the wording and
+    // must never print the raw code (reported from a running installation)
+    await waitFor(() => expect(screen.getByText('Source changed')).toBeInTheDocument());
+    expect(screen.queryByText('update.source')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /show changes/i }));
 
@@ -96,7 +102,10 @@ describe('AuditPage', () => {
 
   it('rolls a change back only after confirmation', async () => {
     renderPage();
-    await waitFor(() => expect(screen.getByText('update.source')).toBeInTheDocument());
+    // the action is a code (`update.source`); the page shows the wording and
+    // must never print the raw code (reported from a running installation)
+    await waitFor(() => expect(screen.getByText('Source changed')).toBeInTheDocument());
+    expect(screen.queryByText('update.source')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /roll this change back/i }));
     expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
@@ -109,7 +118,10 @@ describe('AuditPage', () => {
 
   it('exports the configuration as a file', async () => {
     renderPage();
-    await waitFor(() => expect(screen.getByText('update.source')).toBeInTheDocument());
+    // the action is a code (`update.source`); the page shows the wording and
+    // must never print the raw code (reported from a running installation)
+    await waitFor(() => expect(screen.getByText('Source changed')).toBeInTheDocument());
+    expect(screen.queryByText('update.source')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /export/i }));
 
@@ -119,7 +131,10 @@ describe('AuditPage', () => {
 
   it('imports through a dry-run diff and applies on confirmation', async () => {
     renderPage();
-    await waitFor(() => expect(screen.getByText('update.source')).toBeInTheDocument());
+    // the action is a code (`update.source`); the page shows the wording and
+    // must never print the raw code (reported from a running installation)
+    await waitFor(() => expect(screen.getByText('Source changed')).toBeInTheDocument());
+    expect(screen.queryByText('update.source')).not.toBeInTheDocument();
 
     const file = new File([
       JSON.stringify({ schema_version: 1, sources: [], targets: [], rules: [], transforms: [], settings: {} }),
@@ -140,7 +155,10 @@ describe('AuditPage', () => {
 
   it('reports an unreadable import file', async () => {
     renderPage();
-    await waitFor(() => expect(screen.getByText('update.source')).toBeInTheDocument());
+    // the action is a code (`update.source`); the page shows the wording and
+    // must never print the raw code (reported from a running installation)
+    await waitFor(() => expect(screen.getByText('Source changed')).toBeInTheDocument());
+    expect(screen.queryByText('update.source')).not.toBeInTheDocument();
 
     const file = new File(['not json'], 'broken.json', { type: 'application/json' });
     fireEvent.change(screen.getByTestId('audit-import-input'), { target: { files: [file] } });

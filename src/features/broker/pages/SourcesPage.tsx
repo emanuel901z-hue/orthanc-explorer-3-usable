@@ -181,7 +181,9 @@ export default function SourcesPage() {
                 <TableHead>{t('broker.endpoint')}</TableHead>
                 <TableHead className="hidden md:table-cell">{t('broker.charset')}</TableHead>
                 <TableHead className="hidden md:table-cell">{t('broker.timeout')}</TableHead>
-                <TableHead className="hidden lg:table-cell">{t('broker.priority')}</TableHead>
+                {/* Priority only from xl (1280): at 1024 all seven columns needed
+                    44 px more than the window, so the actions column was cut off */}
+                <TableHead className="hidden xl:table-cell">{t('broker.priority')}</TableHead>
                 <TableHead className="w-[140px]">{t('broker.echo')}</TableHead>
                 <TableHead className="w-[150px] text-right">{t('broker.actions')}</TableHead>
               </TableRow>
@@ -229,7 +231,7 @@ export default function SourcesPage() {
                   <TableCell className="hidden md:table-cell text-xs">
                     {row.timeout_s}s
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell text-xs">
+                  <TableCell className="hidden xl:table-cell text-xs">
                     {row.priority}
                   </TableCell>
                   <TableCell>

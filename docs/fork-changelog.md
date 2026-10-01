@@ -4,6 +4,48 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.5 — Kein horizontales Scrollen mehr, Change-Log in Worten (2026-10-01)
+
+**Zwei Befunde aus dem laufenden Betrieb.**
+
+**1. Die Studientabelle war immer breiter als ihr Container.** Gemeldet als
+„ich muss im default desktop mode schon horizontal scrollen". Die Ursache war
+ein Rechenfehler im automatischen Spalten-Layout: die Breite wurde proportional
+verteilt und *danach* jede Spalte auf ihr Minimum hochgesetzt — ohne das
+auszugleichen. Sobald eine Spalte ihr Minimum erreichte, war die Summe größer
+als der Container: gemessen **+66 px bei 1024**, +26 px bei 1280, **+21 px bei
+1440** — die Leiste erschien also auch auf einem breiten Bildschirm.
+
+- `distributeColumnWidths` verteilt jetzt per **Water-Filling**: wer sein
+  Minimum nicht erreicht, wird darauf festgesetzt, der Rest teilt den Rest —
+  die Summe ist exakt die Containerbreite (Pixel-Rest wird ausgegeben, ein
+  einzelnes Pixel zu viel zeigt schon eine Leiste).
+- Kopfzeilen **kürzen mit Tooltip** statt in die Nachbarspalte zu laufen, und das
+  Zellen-Padding der Studientabelle ist enger (`px-2` statt `px-4`, Kopf-Button
+  ohne eigenes Padding) — bei 1024 px waren das ~30 % der Textbreite.
+- Zwei weitere Stellen mit echtem Überhang bei 1024 px: die Prioritätsspalte der
+  Quellen (jetzt erst ab `xl`) und die Echo-Matrix auf der Monitoring-Seite
+  (Karten jetzt erst ab `xl` nebeneinander).
+
+**2. Das Änderungsprotokoll zeigte rohe Aktionscodes.** „update.setting" statt
+„Einstellung geändert": die Seite rendert `entry.action` direkt. Jetzt läuft sie
+über `auditActionKey()` (Punkt → Unterstrich, weil i18next den Punkt als
+Pfad-Trenner liest) mit **70 Labels** in en/de und dem Code als Fallback.
+`tests/test_audit_action_labels.py` liest die Aktionen per AST aus dem Backend
+(inkl. der f-String-Familien) und erzwingt ein Label — plus die Gegenrichtung:
+kein Label ohne Aktion.
+
+**Der Deep-UI-Audit hatte die Lücke, durch die das rutschte:** er prüfte nur
+1400 px (Desktop) und 375 px (Mobil) — und nur den *Dokument*-Überhang, nicht
+einen Container, der intern scrollt. Jetzt läuft eine **1024-px-Runde** mit
+(`laptop`), und die Prüfung „keine scrollende Tabelle/Karte" misst die inneren
+Scroller. **217 Checks** (vorher 161).
+
+Gates grün: `tsc` 0, `npm run lint` 0, `npm run i18n:check` vollständig,
+`npm run build` 0, **709 Tests**.
+
+---
+
 ## v2.6.4 — Voraufnahmen-Seite und schreibgeschützte Deployment-Werte (2026-09-30)
 
 **Neue Broker-Seite.** Der Broker kann seit dem letzten Workspace-Stand drei

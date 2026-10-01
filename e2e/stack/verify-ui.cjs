@@ -111,9 +111,16 @@ async function domReport(page) {
         return r.width > 0 && r.height > 0 && (r.height < 32 || r.width < 32);
       })
       .map((el) => `${el.tagName.toLowerCase()}[${(el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 24)}]=${Math.round(el.getBoundingClientRect().height)}px`);
+    // A table that is wider than its card does NOT widen the document — the
+    // container scrolls instead. Measuring only the document missed exactly
+    // that (the studies list and the echo matrix scrolled inside their cards).
+    const inner = [...document.querySelectorAll('*')]
+      .filter((el) => el.clientWidth > 300 && el.scrollWidth > el.clientWidth + 2)
+      .map((el) => el.scrollWidth - el.clientWidth);
     return {
       h1: [...document.querySelectorAll('h1')].map((h) => h.textContent.trim()),
       overflowX: doc.scrollWidth > doc.clientWidth,
+      innerOverflow: inner.length ? Math.max(...inner) : 0,
       scrollWidth: doc.scrollWidth,
       clientWidth: doc.clientWidth,
       tables: document.querySelectorAll('table').length,
@@ -130,6 +137,10 @@ async function domReport(page) {
   // ── 1. render all pages on desktop + mobile ──────────────────────────────
   for (const [isMobile, viewport, label] of [
     [false, { width: 1400, height: 900 }, 'desktop'],
+    // 1024 CSS px is a common "default desktop" (a 1280 display at 125 % or a
+    // small laptop). It was not covered, so a table that needed 66 px more than
+    // the window went unnoticed.
+    [false, { width: 1024, height: 768 }, 'laptop'],
     [true, { width: 375, height: 812 }, 'mobile'],
   ]) {
     const { ctx, page, errors } = await newPage(browser, viewport, isMobile);
@@ -147,6 +158,14 @@ async function domReport(page) {
       record(`${label}/${name}: genau ein H1 + Titel`, okH1, dom.h1.join('|'));
       record(`${label}/${name}: kein horizontales Overflow`, !dom.overflowX,
         `${dom.scrollWidth}/${dom.clientWidth}`);
+      // On a phone a wide log table scrolls inside its container on purpose
+      // (config rows become cards, but a six-column query log cannot). On a
+      // desktop it must fit — that is where the studies list and the echo matrix
+      // used to scroll for no reason.
+      if (!isMobile) {
+        record(`${label}/${name}: keine scrollende Tabelle/Karte`, dom.innerOverflow === 0,
+          `+${dom.innerOverflow}px`);
+      }
       record(`${label}/${name}: keine Bilder ohne alt`, dom.imgsWithoutAlt === 0);
       await page.screenshot({ path: path.join(SHOTS, `${label}-${name}.png`), fullPage: true });
     }

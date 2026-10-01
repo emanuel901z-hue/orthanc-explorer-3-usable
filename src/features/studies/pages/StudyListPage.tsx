@@ -145,16 +145,20 @@ function SortableHeader({
     <Button
       variant="ghost"
       size="sm"
-      className="gap-1 -ml-2 h-8 font-semibold"
+      // `w-full min-w-0 overflow-hidden` + the truncating span below: a narrow
+      // column shortens its label instead of letting it run into the neighbour
+      // (measured: at 1024 px the nine default columns get 83 px each, and
+      // "Patientenname" overlapped "Studiendatum" without this).
+      className="gap-1 -ml-1 h-8 px-0 font-semibold w-full min-w-0 justify-start overflow-hidden"
       onClick={() => column.toggleSorting()}
     >
-      {label}
+      <span className="truncate" title={label}>{label}</span>
       {sorted === 'asc' ? (
-        <ArrowUp className="h-3.5 w-3.5" />
+        <ArrowUp className="h-3.5 w-3.5 shrink-0" />
       ) : sorted === 'desc' ? (
-        <ArrowDown className="h-3.5 w-3.5" />
+        <ArrowDown className="h-3.5 w-3.5 shrink-0" />
       ) : (
-        <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />
+        <ArrowUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
       )}
     </Button>
   );
@@ -1198,6 +1202,10 @@ export default function StudyListPage() {
                   {hg.headers.map((header) => (
                     <TableHead
                       key={header.id}
+                      // px-2 instead of the default px-4: the studies list has
+                      // nine columns, and the padding alone ate ~30 % of a
+                      // narrow column's text width
+                      className="px-2"
                       style={{ width: header.getSize(), position: 'relative' }}
                     >
                       {header.isPlaceholder
@@ -1257,7 +1265,7 @@ export default function StudyListPage() {
                     onClick={() => navigate(`/studies/${row.original.id}`)}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} style={{ width: cell.column.getSize() }}>
+                      <TableCell key={cell.id} className="px-2" style={{ width: cell.column.getSize() }}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}

@@ -244,7 +244,9 @@ export default function BrokerPage() {
       </Card>
 
       {/* Sources + targets */}
-      <div className="grid lg:grid-cols-2 gap-4">
+      {/* side by side only from xl (1280): at 1024 each card got ~350 px and the
+          echo matrix (Name | Endpoint | C-ECHO) needed 36 px more than that */}
+      <div className="grid xl:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">{t('broker.sources')}</CardTitle>

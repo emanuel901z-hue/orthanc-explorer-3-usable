@@ -46,6 +46,7 @@ import { ConfigRowCard } from '../components/ConfigRowCard';
 import { ConfigDiffTable } from '../components/ConfigDiffTable';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useBrokerAuditWrites } from '../hooks/use-broker-audit';
+import { auditActionKey } from '../lib/audit-action';
 import { describeEntry, diffFields } from '../lib/config-diff';
 import { usePersistedState } from '@/store/ui-state';
 
@@ -215,7 +216,8 @@ export default function AuditPage() {
                   </>
                 }
                 fields={[
-                  { label: t('broker.auditAction'), value: entry.action },
+                  { label: t('broker.auditAction'),
+                    value: t(auditActionKey(entry.action), { defaultValue: entry.action }) },
                   { label: t('broker.auditActor'), value: entry.actor },
                   { label: t('broker.auditTime'), value: format(new Date(entry.ts), 'dd.MM.yyyy HH:mm:ss') },
                 ]}
@@ -255,7 +257,9 @@ export default function AuditPage() {
                         {format(new Date(entry.ts), 'dd.MM.yyyy HH:mm:ss')}
                       </TableCell>
                       <TableCell className="text-xs">{entry.actor}</TableCell>
-                      <TableCell className="font-mono text-xs">{entry.action}</TableCell>
+                      <TableCell className="text-xs">
+                          {t(auditActionKey(entry.action), { defaultValue: entry.action })}
+                        </TableCell>
                       <TableCell className="text-xs">
                         {name}
                         <Badge variant="outline" className="ml-2 text-[10px]">
@@ -291,7 +295,7 @@ export default function AuditPage() {
           <DialogHeader>
             <DialogTitle>{t('broker.auditDetails')}</DialogTitle>
             <DialogDescription>
-              {detail ? `${detail.action} · ${detail.actor} · ${format(new Date(detail.ts), 'dd.MM.yyyy HH:mm:ss')}` : ''}
+              {detail ? `${t(auditActionKey(detail.action), { defaultValue: detail.action })} · ${detail.actor} · ${format(new Date(detail.ts), 'dd.MM.yyyy HH:mm:ss')}` : ''}
             </DialogDescription>
           </DialogHeader>
           {detail && <ConfigDiffTable before={detail.before_json} after={detail.after_json} />}
@@ -368,7 +372,9 @@ export default function AuditPage() {
       <ConfirmDeleteDialog
         open={rollbackTarget !== null}
         onOpenChange={(open) => { if (!open) setRollbackTarget(null); }}
-        itemName={rollbackTarget ? `${rollbackTarget.action} #${rollbackTarget.id}` : ''}
+        itemName={rollbackTarget
+            ? `${t(auditActionKey(rollbackTarget.action), { defaultValue: rollbackTarget.action })} #${rollbackTarget.id}`
+            : ''}
         warning={t('broker.auditRollbackWarning')}
         pending={rollback.isPending}
         onConfirm={() => {
