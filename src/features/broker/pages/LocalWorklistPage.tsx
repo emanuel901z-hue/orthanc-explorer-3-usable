@@ -238,7 +238,9 @@ export default function LocalWorklistPage() {
               title={item.accession}
               badges={
                 <>
-                  <Badge variant="outline" className="text-[10px]">{item.origin}</Badge>
+                  <Badge variant="outline" className="text-[10px]">
+                      {t(`broker.origin_${item.origin}`, { defaultValue: item.origin })}
+                    </Badge>
                   {item.enabled
                     ? <Badge variant="secondary" className="text-[10px]">{t('broker.localEnabled')}</Badge>
                     : <Badge variant="outline" className="text-[10px]">{t('broker.localDisabled')}</Badge>}
@@ -281,7 +283,9 @@ export default function LocalWorklistPage() {
                     <TableCell className="text-xs">
                       <span className="font-medium">{item.accession}</span>
                       <span className="ml-2 inline-flex gap-1">
-                        <Badge variant="outline" className="text-[10px]">{item.origin}</Badge>
+                        <Badge variant="outline" className="text-[10px]">
+                      {t(`broker.origin_${item.origin}`, { defaultValue: item.origin })}
+                    </Badge>
                         {!item.enabled && (
                           <Badge variant="outline" className="text-[10px]">
                             {t('broker.localDisabled')}

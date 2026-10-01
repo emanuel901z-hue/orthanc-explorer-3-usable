@@ -210,7 +210,8 @@ export type LocalItem = {
   sps_status: string;
   valid_until: string | null;
   enabled: boolean;
-  origin: 'manual' | 'hl7';
+  /** hl7 (ORM/OMG), gdt (practice system), manual (entered here), ups (work item). */
+  origin: 'hl7' | 'gdt' | 'manual' | 'ups';
   created_at: string;
   updated_at: string;
 };
@@ -685,7 +686,8 @@ export type PatientMerge = {
   new_patient_id: string;
   reason: string;
   actor: string;
-  origin: string;
+  /** manual (entered here) | adt (came in with an ADT message). */
+  origin: 'manual' | 'adt';
   /** merge = the old identifier is retired (ADT A40); link = both stay valid (A24). */
   kind: 'merge' | 'link';
   active: boolean;
