@@ -4,6 +4,38 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.4 — Voraufnahmen-Seite und schreibgeschützte Deployment-Werte (2026-09-30)
+
+**Neue Broker-Seite.** Der Broker kann seit dem letzten Workspace-Stand drei
+Schnittstellen bedienen (GDT/BDT, UPS-RS-Abonnements, Voraufnahmen-Prefetch) —
+für den Anwender am Befundplatz gab es dafür keine Oberfläche.
+
+- Neu: `/broker/prefetch` („Prior studies" / „Voraufnahmen"). Patienten-ID,
+  Abfrageknoten, Ziel, Modalität, maximale Anzahl; **erst Vorschau** (ein
+  Studien-C-FIND verschiebt nichts), und erst danach wird „Holen" freigeschaltet.
+  „Holen" braucht die Schreibrolle, die Vorschau nicht — genau wie die
+  RBAC-Policy des Brokers es vorgibt. Darunter die UPS-RS-Ereignis-Abonnements
+  mit Entfernen-Dialog.
+- Die **Patienten-ID ist PHI** und liegt nur im Speicher (`useRememberedState`),
+  nie im `localStorage` — dieselbe Regel wie bei den Suchfiltern.
+- Neue i18n-Schlüssel in en/de (Seite, Hilfe-Seite `prefetch`, Fehlermeldungen).
+
+**Deployment-eigene Einstellungen sind schreibgeschützt.** `spool_dir`,
+`tls_dir`, `tls_inbound_port` und `instance_id` müssen zum Compose-Mapping bzw.
+zum gemounteten Volume passen; ein Schreibzugriff über die Oberfläche hätte
+gepufferte Bilder oder erzeugte Zertifikate auf das ephemere
+Container-Dateisystem geschrieben. Die Karten zeigen den Wert jetzt nur noch an
+und nennen den Grund, statt ein Eingabefeld anzubieten, das der Broker mit 409
+ablehnt.
+
+**Der Deep-UI-Audit** (`e2e/stack/verify-ui.cjs`) deckt die neue Seite mit ab —
+Desktop 1400×900 und Mobil 375×812, damit sind es **161 Checks**.
+
+Gates grün: `tsc` 0 Fehler, `npm run lint` 0 Fehler, `npm run i18n:check`
+vollständig, `npm run build` 0 Fehler, **703 Tests**.
+
+---
+
 ## v2.6.3 — Einstiegs-Anleitung für das geteilte Repo (2026-09-30)
 
 **Doku, keine Code-Änderung.** Die Regeln standen verstreut (`CLAUDE.md`,
