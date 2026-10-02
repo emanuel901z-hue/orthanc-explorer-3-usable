@@ -274,6 +274,36 @@ async function checkDialogs(page, viewport) {
   await page.goto(`${BASE}/oe3/broker`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1200);
 
+  // study detail: the rare actions live behind "More" — check that the dialog
+  // opens and that every entry carries a label (a missing translation would show
+  // an empty button)
+  await page.goto(`${BASE}/oe3/studies`, { waitUntil: 'domcontentloaded' });
+  // the list is a table on a desktop and cards on a phone
+  await page.waitForSelector('[data-testid="study-row"], [data-testid="study-card"]',
+                             { timeout: 15000 }).catch(() => {});
+  await page.locator('[data-testid="study-row"], [data-testid="study-card"]')
+    .first().click().catch(() => {});
+  await page.waitForTimeout(1600);
+  await page.getByTestId('study-more-actions').click().catch(() => {});
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: join(SHOTS, `${tag('dialog-more-actions')}.png`), fullPage: false });
+  const moreItems = await page.evaluate(() => {
+    const d = document.querySelector('[role="dialog"]');
+    if (!d) return null;
+    const labels = [...d.querySelectorAll('button')].map((b) => (b.textContent || '').trim());
+    return labels.filter((l) => l && !/close|schließen/i.test(l));
+  });
+  record(`${tag('dialog-more-actions')}: "Mehr"-Dialog geöffnet`, moreItems !== null);
+  record(`${tag('dialog-more-actions')}: jede Aktion ist beschriftet`,
+    Boolean(moreItems) && moreItems.length >= 4 && moreItems.every((l) => l.length > 1),
+    (moreItems || []).join(' | ').slice(0, 80));
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(400);
+
+  // back to a page that has a help button — this block started on /oe3/settings
+  await page.goto(`${BASE}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1200);
+
   // help dialog ("what is this?")
   await page.keyboard.press('Escape');
   await page.waitForTimeout(400);

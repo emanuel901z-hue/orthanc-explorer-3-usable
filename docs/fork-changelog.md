@@ -4,6 +4,18 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.11 — Der „Mehr"-Dialog wird mitgeprüft (2026-10-01)
+
+**Test-Änderung.** Der Screenshot-Audit öffnet jetzt den Dialog hinter „Mehr" und
+prüft, dass **jede** Aktion eine Beschriftung trägt (ein fehlender Text würde einen
+leeren Knopf zeigen) — auf Desktop und Mobil. Dabei fiel auf, dass die Studienliste
+auf dem Telefon **Karten** statt einer Tabelle zeigt; der Audit adressiert jetzt
+beides (`study-row` / `study-card`).
+
+**33/33** Checks im Dialog-Durchlauf (vorher 29).
+
+---
+
 ## v2.6.10 — Weniger Schaltflächen, verständliche Fehler (2026-10-01)
 
 **Die Studien-Aktionsleiste zeigt nur noch, was im Alltag gebraucht wird.** Bis zu
