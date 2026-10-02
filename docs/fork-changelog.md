@@ -4,6 +4,42 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.10 — Weniger Schaltflächen, verständliche Fehler (2026-10-01)
+
+**Die Studien-Aktionsleiste zeigt nur noch, was im Alltag gebraucht wird.** Bis zu
+15 Schaltflächen standen nebeneinander; jetzt sind es zehn in Gruppen (übertragen ·
+ansehen · herunterladen · kennzeichnen · ändern · Datenschutz), und die seltenen
+Aktionen liegen hinter **„Mehr"**:
+
+- Im Dialog (nicht als Aufklapp-Menü): DICOM-DIR, migrieren/zusammenführen,
+  aufteilen, Serie hinzufügen, Link teilen, Orthanc-API, löschen. Jede Aktion mit
+  Icon und Beschriftung, der Löschen-Knopf in Rot — und alle weiterhin im
+  Änderungsprotokoll.
+- Ein Dialog statt eines Menüs, weil er jede Aktion **erklärt**, mit dem Finger
+  bedienbar ist und im Test geprüft werden kann (Radix-Menüs öffnen sich in jsdom
+  nicht — das hat der Testversuch gezeigt).
+
+**Fehlertexte sind jetzt in der Sprache des Bedieners.** Die vorformulierten
+HTTP-Texte standen in `errors.ts` fest auf Englisch — und damit in jedem Toast,
+jedem Inline-Hinweis und jedem Dialog einer deutschen Oberfläche. Sie werden
+jetzt **an der Quelle** übersetzt (i18next-Kern, englischer Text als Fallback),
+statt an ~60 Anzeigestellen:
+
+| vorher | jetzt (deutsch) |
+|---|---|
+| `A conflict occurred.` | „Das kollidiert mit dem, was schon da ist (z. B. gleicher Name)." |
+| `The requested resource was not found.` | „Nicht gefunden — evtl. wurde es inzwischen gelöscht." |
+| `Network error. Please try again.` | „Keine Verbindung zum Server. Bitte erneut versuchen." |
+| `You are not authorized to perform this action.` | „Dafür fehlt Ihnen die Berechtigung." |
+
+**Beschriftungen:** „Share" heißt **„Link teilen"**, „API" heißt
+**„Orthanc-API öffnen"**.
+
+Gates grün: `tsc` 0, `npm run lint` 0, `npm run i18n:check` vollständig,
+`npm run build` 0, **802 Tests**.
+
+---
+
 ## v2.6.9 — Nachbesserung an der Hilfe und der Aktionsleiste (2026-10-01)
 
 Zwei Fehler aus v2.6.8, in der laufenden Oberfläche gesehen:

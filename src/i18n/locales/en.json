@@ -213,7 +213,10 @@
     "noActivity": "No activity recorded",
     "loadingActivity": "Loading activity…",
     "noActivityHint": "Past Orthanc changes and jobs for this study will appear here.",
-    "sortBy": "Sort by"
+    "sortBy": "Sort by",
+    "apiView": "Open Orthanc API",
+    "moreTitle": "More actions",
+    "moreHint": "Rarely used actions — everything here is logged in the change log."
   },
   "quickReport": {
     "title": "Quick Report",
@@ -449,7 +452,9 @@
     "delete": "Delete",
     "label": "Label",
     "quarantine": "Quarantine",
-    "sendToPeer": "To peer"
+    "sendToPeer": "To peer",
+    "share": "Share link",
+    "more": "More"
   },
   "common": {
     "save": "Save",
@@ -2398,5 +2403,18 @@
     "help_iid_wrong": [
       "An error means the request was incomplete: it needs either studyUID or accessionNumber (not both) and a valid requestType."
     ]
+  },
+  "errors": {
+    "network": "No connection to the server. Please try again.",
+    "http400": "The request was invalid — please check the entries.",
+    "http401": "Login required — please sign in again.",
+    "http403": "You are not allowed to do this.",
+    "http404": "Not found — it may have been deleted in the meantime.",
+    "http409": "This clashes with what is already there (e.g. the same name).",
+    "http413": "The file is too large.",
+    "http500": "The server had an error — please try again.",
+    "http502": "The system behind it does not answer.",
+    "http503": "The service is not available right now — please try again later.",
+    "httpOther": "Request failed ({{status}})."
   }
 }

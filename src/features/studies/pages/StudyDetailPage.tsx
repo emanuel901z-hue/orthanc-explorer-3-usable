@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Trash2, Send, Eye, Shield, ShieldAlert, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown, Server, Scissors } from 'lucide-react';
+import {
+  MoreHorizontal, Download, Trash2, Send, Eye, Shield, ShieldAlert, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown, Server, Scissors } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -39,6 +40,14 @@ import StudyActivityLog from '@/features/studies/components/StudyActivityLog';
 import { ModifyStudyDialog } from '@/features/studies/components/ModifyStudyDialog';
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
 import { deleteStudyAction } from '@/actions/deleteStudy';
 import { PageHelp } from '@/shared/components/PageHelp';
 import { deleteSeriesAction } from '@/actions/deleteSeries';import { downloadStudyAction } from '@/actions/downloadStudy';
@@ -133,6 +142,8 @@ export default function StudyDetailPage() {
   const [migrateOpen, setMigrateOpen] = useState(false);
   const [splitOpen, setSplitOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [labelOpen, setLabelOpen] = useState(false);
   const [quarantineOpen, setQuarantineOpen] = useState(false);
   const [addSeriesOpen, setAddSeriesOpen] = useState(false);
@@ -467,30 +478,6 @@ export default function StudyDetailPage() {
               <TooltipContent>{t('studyDetail.downloadTooltip', { defaultValue: 'Download as DICOM ZIP archive' })}</TooltipContent>
             </Tooltip>
           )}
-          {canDownload && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  disabled={downloadDicomDirMutation.isPending}
-                  onClick={() => {
-                    audit({ action: 'download', title: `Study DICOM-DIR downloaded: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'info', metadata: { 'Study ID': studyId!, 'Format': 'DICOM-DIR ZIP' } });
-                    downloadDicomDirMutation.mutate(studyId!);
-                  }}
-                >
-                  {downloadDicomDirMutation.isPending ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <FolderArchive className="h-3.5 w-3.5" />
-                  )}
-                  {downloadDicomDirMutation.isPending ? t('studyDetail.preparingDicomDir', { defaultValue: 'Preparing DICOM-DIR...' }) : t('studyDetail.dicomDir', { defaultValue: 'DICOM-DIR' })}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('studyDetail.dicomDirTooltip', { defaultValue: 'Download as ZIP with DICOMDIR index' })}</TooltipContent>
-            </Tooltip>
-          )}
           {canEditLabels && labelsSupported && <ActionGroupDivider />}
           {canEditLabels && labelsSupported && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setLabelOpen(true)}><Tag className="h-3.5 w-3.5" /> {t('actions.label')}</Button>
@@ -499,33 +486,83 @@ export default function StudyDetailPage() {
           {canModify && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setModifyOpen(true)}><Pencil className="h-3.5 w-3.5" /> {t('actions.modify')}</Button>
           )}
-          {canModify && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setMigrateOpen(true)}><GitMerge className="h-3.5 w-3.5" /> {t('migrate.title')}</Button>
-          )}
-          {canModify && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSplitOpen(true)}><Scissors className="h-3.5 w-3.5" /> {t('split.title', { defaultValue: 'Split' })}</Button>
-          )}
           {canAnonymize && <ActionGroupDivider />}
           {canAnonymize && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAnonOpen(true)}><Shield className="h-3.5 w-3.5" /> {t('actions.anonymize')}</Button>
           )}
           <ActionGroupDivider />
-          {/* ApiView — open the Orthanc REST API URL for this study in a new tab */}
+          <ActionGroupDivider />
+          {/* Die seltenen Aktionen liegen hinter "Mehr" — sichtbar bleibt, was man
+              im Alltag braucht. Ein Dialog statt eines Aufklapp-Menüs: er erklärt
+              jede Aktion, ist mit dem Finger bedienbar und im Test prüfbar. */}
           <Button
             variant="outline"
             size="sm"
             className="gap-1.5"
-            onClick={() => {
-              const orthancUrl = getConfig().orthancUrl;
-              window.open(`${orthancUrl}/studies/${studyId}`, '_blank');
-            }}
+            data-testid="study-more-actions"
+            onClick={() => setToolsOpen(true)}
           >
-            <Code className="h-3.5 w-3.5" /> {t('studyDetail.apiView', { defaultValue: 'API' })}
+            <MoreHorizontal className="h-3.5 w-3.5" /> {t('actions.more')}
           </Button>
-          {/* Share Study — create shareable link */}
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShareOpen(true)}>
-            <Share2 className="h-3.5 w-3.5" /> {t('actions.share', { defaultValue: 'Share' })}
-          </Button>
+
+          <Dialog open={toolsOpen} onOpenChange={setToolsOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>{t('studyDetail.moreTitle')}</DialogTitle>
+                <DialogDescription>{t('studyDetail.moreHint')}</DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-2">
+                {canDownload && (
+                  <Button variant="outline" className="justify-start gap-2" onClick={() => { setToolsOpen(false); downloadDicomDirMutation.mutate(studyId!); }}>
+                    <FolderArchive className="h-4 w-4" /> {t('studyDetail.dicomDir', { defaultValue: 'DICOM-DIR' })}
+                  </Button>
+                )}
+                {canModify && (
+                  <Button variant="outline" className="justify-start gap-2" onClick={() => { setToolsOpen(false); setMigrateOpen(true); }}>
+                    <GitMerge className="h-4 w-4" /> {t('migrate.title')}
+                  </Button>
+                )}
+                {canModify && (
+                  <Button variant="outline" className="justify-start gap-2" onClick={() => { setToolsOpen(false); setSplitOpen(true); }}>
+                    <Scissors className="h-4 w-4" /> {t('split.title')}
+                  </Button>
+                )}
+                {canModify && (
+                  <Button variant="outline" className="justify-start gap-2" onClick={() => { setToolsOpen(false); setAddSeriesOpen(true); }}>
+                    <Plus className="h-4 w-4" /> {t('study.addSeries')}
+                  </Button>
+                )}
+                {canQuarantine && (
+                  <Button variant="outline" className="justify-start gap-2" onClick={() => { setToolsOpen(false); setQuarantineOpen(true); }}>
+                    <ShieldAlert className="h-4 w-4" /> {t('actions.quarantine')}
+                  </Button>
+                )}
+                <Button variant="outline" className="justify-start gap-2" onClick={() => { setToolsOpen(false); setShareOpen(true); }}>
+                  <Share2 className="h-4 w-4" /> {t('actions.share')}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="justify-start gap-2"
+                  onClick={() => {
+                    setToolsOpen(false);
+                    const orthancUrl = getConfig().orthancUrl;
+                    window.open(`${orthancUrl}/studies/${studyId}`, '_blank');
+                  }}
+                >
+                  <Code className="h-4 w-4" /> {t('studyDetail.apiView')}
+                </Button>
+                {canDelete && (
+                  <Button
+                    variant="outline"
+                    className="justify-start gap-2 text-destructive"
+                    onClick={() => { setToolsOpen(false); setDeleteOpen(true); }}
+                  >
+                    <Trash2 className="h-4 w-4" /> {t('actions.delete')}
+                  </Button>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
           {/* Custom Buttons (configurable via Settings) */}
           {(() => {
             const buttons = loadCustomButtons().filter((b) => !b.level || b.level === 'study');
@@ -549,20 +586,8 @@ export default function StudyDetailPage() {
               </Button>
             ));
           })()}
-          {/* Add Series (PDF/Image/STL) */}
-          {canModify && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAddSeriesOpen(true)}>
-              <Plus className="h-3.5 w-3.5" /> {t('study.addSeries', { defaultValue: 'Add Series' })}
-            </Button>
-          )}
-          {canQuarantine && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setQuarantineOpen(true)}><ShieldAlert className="h-3.5 w-3.5" /> {t('actions.quarantine')}</Button>
-          )}
           {canDelete && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5 text-destructive"><Trash2 className="h-3.5 w-3.5" /> {t('actions.delete')}</Button>
-              </AlertDialogTrigger>
+            <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle className="flex items-center gap-2">

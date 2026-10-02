@@ -213,7 +213,10 @@
     "noActivity": "Keine Aktivität aufgezeichnet",
     "loadingActivity": "Aktivität wird geladen…",
     "noActivityHint": "Frühere Orthanc-Änderungen und -Jobs für diese Studie erscheinen hier.",
-    "sortBy": "Sortieren nach"
+    "sortBy": "Sortieren nach",
+    "apiView": "Orthanc-API öffnen",
+    "moreTitle": "Weitere Aktionen",
+    "moreHint": "Selten gebrauchte Aktionen — alles hier landet im Änderungsprotokoll."
   },
   "quickReport": {
     "title": "Schnellbericht",
@@ -449,7 +452,9 @@
     "delete": "Löschen",
     "label": "Kennzeichnung",
     "quarantine": "In Quarantäne",
-    "sendToPeer": "An Peer"
+    "sendToPeer": "An Peer",
+    "share": "Link teilen",
+    "more": "Mehr"
   },
   "common": {
     "save": "Speichern",
@@ -2398,5 +2403,18 @@
     "help_iid_wrong": [
       "Eine Fehlermeldung heißt: die Anfrage war unvollständig. Sie braucht entweder studyUID oder accessionNumber (nicht beides) und einen gültigen requestType."
     ]
+  },
+  "errors": {
+    "network": "Keine Verbindung zum Server. Bitte erneut versuchen.",
+    "http400": "Die Anfrage war ungültig — bitte die Eingaben prüfen.",
+    "http401": "Anmeldung erforderlich — bitte neu anmelden.",
+    "http403": "Dafür fehlt Ihnen die Berechtigung.",
+    "http404": "Nicht gefunden — evtl. wurde es inzwischen gelöscht.",
+    "http409": "Das kollidiert mit dem, was schon da ist (z. B. gleicher Name).",
+    "http413": "Die Datei ist zu groß.",
+    "http500": "Der Server hatte einen Fehler — bitte erneut versuchen.",
+    "http502": "Das dahinterliegende System antwortet nicht.",
+    "http503": "Der Dienst ist gerade nicht verfügbar — bitte später erneut.",
+    "httpOther": "Die Anfrage ist fehlgeschlagen ({{status}})."
   }
 }

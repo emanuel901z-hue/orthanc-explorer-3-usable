@@ -14,7 +14,7 @@
 import { getConfig, type OE3Config } from '@/config/runtime';
 import { newCorrelationId } from './correlation';
 import { healthTracker } from './health';
-import { OrthancError } from './errors';
+import { OrthancError, scrubbedHttpMessage } from './errors';
 import { logger } from './logger';
 
 /** Shared Content-Type header for JSON request bodies. */
@@ -84,6 +84,6 @@ export async function orthancFetch<T>(
     // the UI never surfaces raw network diagnostics that could leak details.
     healthTracker.recordFailure();
     logger.error('orthanc.fetch.failed', { path, correlationId });
-    throw new OrthancError(0, correlationId, 'Network error. Please try again.');
+    throw new OrthancError(0, correlationId, scrubbedHttpMessage(0));
   }
 }

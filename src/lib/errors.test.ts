@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { OrthancError, scrubbedHttpMessage } from '@/lib/errors';
+import i18n from '@/i18n';
 
 describe('OrthancError', () => {
   it('stores status and correlationId', async () => {
@@ -12,7 +13,7 @@ describe('OrthancError', () => {
 
   it('produces user-friendly messages per status', async () => {
     const err = await OrthancError.from(new Response('', { status: 403 }), 'c');
-    expect(err.message).toMatch(/not authorized/i);
+    expect(err.message).toMatch(/not allowed/i);
   });
 
   it('sets err.name to OrthancError', async () => {
@@ -33,9 +34,21 @@ describe('OrthancError', () => {
 });
 
 describe('scrubbedHttpMessage', () => {
-  it('returns pre-scripted message for known status codes', () => {
-    expect(scrubbedHttpMessage(403)).toBe('You are not authorized to perform this action.');
-    expect(scrubbedHttpMessage(404)).toBe('The requested resource was not found.');
+  it('returns the translated message for known status codes', () => {
+    // the wording lives in the locale, so the test pins the wiring, not the text
+    expect(scrubbedHttpMessage(403)).toBe(i18n.t('errors.http403'));
+    expect(scrubbedHttpMessage(404)).toBe(i18n.t('errors.http404'));
+  });
+
+  it('speaks the operator language — a German UI shows German errors', async () => {
+    // the message is what a toast, an inline alert and a dialog print, so it has
+    // to follow the interface language (it used to be English everywhere)
+    await i18n.changeLanguage('de');
+    expect(scrubbedHttpMessage(409)).toContain('kollidiert');
+    expect(scrubbedHttpMessage(0)).toContain('Keine Verbindung');
+
+    await i18n.changeLanguage('en');
+    expect(scrubbedHttpMessage(409)).toContain('clashes');
   });
   it('returns generic fallback for unknown codes', () => {
     expect(scrubbedHttpMessage(418)).toBe('Request failed (418).');

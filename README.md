@@ -3,7 +3,7 @@
 > A modern React admin UI for [Orthanc](https://www.orthanc-server.com/) — the open-source DICOM server. Runs as a Docker sidecar with no backend server required.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 801](https://img.shields.io/badge/tests-801%20passed-brightgreen)](#testing)
+[![Tests: 801](https://img.shields.io/badge/tests-802%20passed-brightgreen)](#testing)
 [![Languages: 9](https://img.shields.io/badge/i18n-9%20languages-blue)](#internationalization)
 
 ---
@@ -123,7 +123,7 @@ Orthanc Explorer 2 (the official UI) is a Vue.js plugin compiled into C++ — up
 | Routing | React Router v6 |
 | Validation | Zod |
 | i18n | i18next (9 languages) |
-| Testing | Vitest + React Testing Library (801 unit tests) |
+| Testing | Vitest + React Testing Library (802 unit tests) |
 | E2E Testing | Playwright (production viewport tests) |
 | Backend | Orthanc DICOM server (external, via REST API) |
 
@@ -228,7 +228,7 @@ npm run build
 
 ### Unit Tests (Vitest)
 
-801 unit tests covering the API layer, audit seam, health tracker, DICOM tag utilities, auth context, session store, the whole MWL broker slice and feature components.
+802 unit tests covering the API layer, audit seam, health tracker, DICOM tag utilities, auth context, session store, the whole MWL broker slice and feature components.
 
 ```bash
 npm run test          # Single pass

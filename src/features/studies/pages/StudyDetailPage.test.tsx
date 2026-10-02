@@ -148,6 +148,17 @@ describe('StudyDetailPage — accessibility', () => {
   });
 });
 
+
+/** Opens the "more actions" dialog and clicks the action matching `name`. */
+async function openMoreMenu(name: RegExp) {
+  fireEvent.click(screen.getByTestId('study-more-actions'));
+  const item = await screen.findByRole('button', { name });
+  await act(async () => {
+    fireEvent.click(item);
+  });
+  return item;
+}
+
 describe('StudyDetailPage — mutation error handlers', () => {
   beforeEach(() => {
     mockDeleteStudyAction.mockReset();
@@ -161,11 +172,9 @@ describe('StudyDetailPage — mutation error handlers', () => {
 
     renderPage();
 
-    // i18n keys are returned as-is in test env: t('actions.delete')
-    const deleteButton = screen.getByRole('button', { name: /actions\.delete/i });
-    act(() => {
-      fireEvent.click(deleteButton);
-    });
+    // the delete action lives in the "more" menu now (i18n keys are returned
+    // as-is in the test env, so the labels are the key names)
+    await openMoreMenu(/actions\.delete/i);
 
     // Confirm in the dialog
     // i18n keys are returned as-is in test env: t('studies.deletePermanently')
@@ -220,10 +229,7 @@ describe('StudyDetailPage — mutation error handlers', () => {
 
     renderPage();
 
-    const deleteButton = screen.getByRole('button', { name: /delete/i });
-    act(() => {
-      fireEvent.click(deleteButton);
-    });
+    await openMoreMenu(/actions\.delete/i);
 
     // i18n keys are returned as-is in test env: t('studies.deletePermanently')
     const confirmButton = await screen.findByRole('button', { name: /studies\.deletePermanently/i });
