@@ -35,6 +35,7 @@ const ENTRY = {
   entity: 'source' as const, entity_id: 1,
   before_json: { name: 'ris-a', port: 11114 }, after_json: { name: 'ris-a', port: 11199 },
   correlation_id: '',
+    rollbackable: true,
 };
 
 function renderPage() {

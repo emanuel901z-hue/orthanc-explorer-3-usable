@@ -7,6 +7,7 @@ function entry(overrides: Partial<ConfigAuditEntry> = {}): ConfigAuditEntry {
     id: 1, ts: '2026-09-17T10:00:00Z', actor: 'api', action: 'update.source',
     entity: 'source', entity_id: 1, before_json: null, after_json: null,
     correlation_id: '',
+    rollbackable: true,
     ...overrides,
   };
 }
@@ -73,7 +74,7 @@ describe('describeEntry — entries without a name or ID', () => {
   it('does not invent a "#?" for cache/spool/TLS actions', () => {
     const entry = {
       id: 1, ts: '2026-09-21T10:00:00Z', actor: 'api', action: 'cache.refresh',
-      entity: 'cache', entity_id: null, correlation_id: '',
+      entity: 'cache', entity_id: null, correlation_id: '', rollbackable: false,
       before_json: null, after_json: { sources: 2 },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
@@ -87,7 +88,7 @@ describe('describeEntry — entries without a name or ID', () => {
   it('still shows the ID when there is one', () => {
     const entry = {
       id: 2, ts: '2026-09-21T10:00:00Z', actor: 'api', action: 'delete.source',
-      entity: 'source', entity_id: 42, correlation_id: '',
+      entity: 'source', entity_id: 42, correlation_id: '', rollbackable: true,
       before_json: { host: 'h' }, after_json: null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;

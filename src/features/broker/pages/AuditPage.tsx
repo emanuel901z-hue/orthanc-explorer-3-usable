@@ -124,15 +124,19 @@ export default function AuditPage() {
       >
         <History className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-9 w-9 p-0"
-        aria-label={t('broker.auditRollback')}
-        onClick={() => setRollbackTarget(entry)}
-      >
-        <RotateCcw className="h-4 w-4" />
-      </Button>
+      {/* Only entries with a stored snapshot can be undone — the rest would
+          answer 422 ("cannot be rolled back"), so the button is not offered. */}
+      {entry.rollbackable && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-9 w-9 p-0"
+          aria-label={t('broker.auditRollback')}
+          onClick={() => setRollbackTarget(entry)}
+        >
+          <RotateCcw className="h-4 w-4" />
+        </Button>
+      )}
     </>
   );
 

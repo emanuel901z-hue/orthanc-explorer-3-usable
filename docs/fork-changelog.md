@@ -4,6 +4,29 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.14 — Der Rollback-Knopf nur, wo er greift (2026-10-01)
+
+**Aus dem API-Audit.** Das Änderungsprotokoll bot „Zurücksetzen" für **jede**
+Zeile an — auch für die Entities, die der Broker mit 422 ablehnt
+(„entity 'patient_merge' cannot be rolled back"). Neun der siebzehn Entities
+haben keinen Snapshot: cache, hl7_field_map, hl7_message, merge_rule, mpps_step,
+patient_merge, prefetch, spool, tls.
+
+- `AuditEntryOut.rollbackable` sagt jetzt, ob ein Eintrag zurücknehmbar ist
+  (`ConfigAudit.rollbackable` prüft gegen `audit.SERIALIZERS`), und die Seite
+  zeigt den Knopf nur dann. Live: 50 Zeilen, 33 Knöpfe.
+- Zwei Aktionscodes waren im Protokoll noch roh (`patient.merge`,
+  `patient.link`) — die Erweiterung im Label-Test kannte nur die ADT-Formen
+  (`patient.merged`). Labels ergänzt, Test erweitert; live sind **0** rohe Codes
+  übrig.
+- `SpoolStatus` im Client kannte `claimed` nicht (der Wert steht in der Tabelle,
+  während gesendet wird).
+
+Gates grün: `tsc` 0, `npm run lint` 0, `npm run i18n:check` vollständig,
+`npm run build` 0, **807 Tests**.
+
+---
+
 ## v2.6.13 — Eine Stelle für Fehlertexte, auch im Broker (2026-10-01)
 
 **Der Broker hatte seinen eigenen Helfer.** `errorMessage(error)` gab einfach

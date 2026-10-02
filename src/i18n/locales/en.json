@@ -2077,7 +2077,10 @@
     "pirEffectLink": "A link keeps both IDs valid: nothing is moved and no answer is rewritten.",
     "gateTitle": "MWL broker is not part of this deployment",
     "gateHint": "The broker console is switched off here. Set brokerUrl (and enableMwlBroker: true) in config.js if this installation should manage the modalities' worklists.",
-    "i18nNote": "The visible interface is translated; the detailed help texts are available in German and English (English fills the rest)."
+    "i18nNote": "The visible interface is translated; the detailed help texts are available in German and English (English fills the rest).",
+    "action_patient_rejected": "Patient message refused",
+    "action_patient_merge": "Patient merge created",
+    "action_patient_link": "Patient link created"
   },
   "shortcuts": {
     "nav": {

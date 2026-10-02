@@ -271,7 +271,7 @@ export type StationPreview = {
 
 /** Access mode for this caller (decided by the proxy). */
 export type RbacStatus = {
-  mode: string;
+  mode: 'off' | 'enforce';
   enforced: boolean;
   roles_header: string;
   write_role: string;
@@ -330,7 +330,7 @@ export type TlsKey = {
 export type TlsOverview = {
   inbound_enabled: boolean;
   inbound_port: number;
-  inbound_client_auth: string;
+  inbound_client_auth: 'none' | 'optional' | 'required';
   outbound_verify: boolean;
   directory: string;
   entries: Record<string, TlsCertificate | TlsKey | { ok: boolean | null }>;
@@ -351,7 +351,7 @@ export type TlsTestResult = {
   port: number;
   ok: boolean;
   error: string;
-  protocol: string;
+  protocol: 'tcp' | 'tls';
   cipher: string;
   peer_subject: string;
   peer_issuer: string;
@@ -369,7 +369,7 @@ export type AtnaStats = {
   configured: boolean;
   host: string;
   port: number;
-  protocol: string;
+  protocol: 'tcp' | 'tls';
   queue_size: number;
   queue_max: number;
   worker_running: boolean;
@@ -404,7 +404,7 @@ export type SpoolStats = {
   accept_when_queued: boolean;
 };
 
-export type SpoolStatus = 'queued' | 'failed' | 'dead' | 'sent';
+export type SpoolStatus = 'queued' | 'claimed' | 'sent' | 'failed' | 'dead';
 
 /** One spooled C-STORE instance (metadata only, payload stays on disk). */
 export type SpoolItem = {
@@ -539,6 +539,8 @@ export type ConfigAuditEntry = {
   before_json: Record<string, unknown> | null;
   after_json: Record<string, unknown> | null;
   correlation_id: string;
+  /** Only entities with a stored snapshot can be rolled back. */
+  rollbackable: boolean;
 };
 
 /** Portable configuration document (export/import). */
@@ -731,14 +733,14 @@ export type StatsOverview = {
   totals: StatsTotals;
   groups: StatsGroup[];
   series: StatsDay[];
-  group_by: string;
+  group_by: 'source' | 'modality' | 'station';
 };
 
 export type MppsStep = {
   id: number;
   ts: string;
   sop_instance_uid: string;
-  status: string;
+  status: 'IN PROGRESS' | 'COMPLETED' | 'DISCONTINUED';
   accession: string;
   patient_id: string;
   sps_id: string;

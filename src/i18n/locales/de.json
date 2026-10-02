@@ -2077,7 +2077,10 @@
     "pirEffectLink": "Eine Verknüpfung lässt beide IDs gültig: es wird nichts umgezogen und keine Antwort umgeschrieben.",
     "gateTitle": "MWL-Broker gehört nicht zu dieser Installation",
     "gateHint": "Die Broker-Konsole ist hier abgeschaltet. brokerUrl (und enableMwlBroker: true) in config.js setzen, wenn diese Installation die Arbeitslisten der Modalitäten bedienen soll.",
-    "i18nNote": "Die sichtbare Oberfläche ist übersetzt; die ausführlichen Hilfetexte liegen auf Deutsch und Englisch vor (Englisch füllt den Rest)."
+    "i18nNote": "Die sichtbare Oberfläche ist übersetzt; die ausführlichen Hilfetexte liegen auf Deutsch und Englisch vor (Englisch füllt den Rest).",
+    "action_patient_rejected": "Patienten-Nachricht abgewiesen",
+    "action_patient_merge": "Zusammenführung angelegt",
+    "action_patient_link": "Verknüpfung angelegt"
   },
   "shortcuts": {
     "nav": {
