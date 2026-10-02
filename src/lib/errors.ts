@@ -74,3 +74,29 @@ export class OrthancError extends Error {
     return new OrthancError(res.status, correlationId, msg);
   }
 }
+
+/**
+ * Turn any thrown thing into a sentence the operator can read.
+ *
+ * `OrthancError.message` is already translated (see above); an action's own
+ * Error carries whatever it says; anything else gets the generic sentence.
+ * The correlation id is appended when there is one — support asks for it, and
+ * it is the only way to find the matching log line.
+ *
+ * `t` comes from the caller's `useTranslation()`, so the helper stays free of
+ * the global instance (see the note above).
+ */
+export function describeError(
+  error: unknown,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  if (error instanceof OrthancError) {
+    return t('errors.withRef', {
+      message: error.message,
+      ref: error.correlationId,
+      defaultValue: error.message,
+    });
+  }
+  if (error instanceof Error && error.message) return error.message;
+  return t('errors.unknown');
+}

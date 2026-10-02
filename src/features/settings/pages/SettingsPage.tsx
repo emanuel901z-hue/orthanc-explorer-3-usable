@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { describeError } from '@/lib/errors';
 import { PageHelp } from '@/shared/components/PageHelp';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -340,7 +341,9 @@ export default function SettingsPage() {
                 setAddModalityOpen(false);
                 setEditModality(null);
               },
-              onError: () => toast.error(`Failed to save modality "${values.name}"`),
+              onError: (e) => toast.error(t('settings.saveModalityFailed'), {
+                description: describeError(e, t),
+              }),
             },
           );
         }}

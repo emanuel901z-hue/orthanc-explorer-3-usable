@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { OrthancError, scrubbedHttpMessage } from '@/lib/errors';
+import { OrthancError, scrubbedHttpMessage, describeError } from '@/lib/errors';
 import i18n from '@/i18n';
 
 describe('OrthancError', () => {
@@ -52,5 +52,32 @@ describe('scrubbedHttpMessage', () => {
   });
   it('returns generic fallback for unknown codes', () => {
     expect(scrubbedHttpMessage(418)).toBe('Request failed (418).');
+  });
+});
+
+describe('describeError', () => {
+  const t = (key: string, options?: Record<string, unknown>) =>
+    String(i18n.t(key, options as never));
+
+  it('appends the correlation id — support asks for it', () => {
+    const err = new OrthancError(500, 'corr-42', 'The server encountered an error.');
+    expect(describeError(err, t)).toContain('corr-42');
+    expect(describeError(err, t)).toContain('The server encountered an error.');
+  });
+
+  it('passes an action error through unchanged', () => {
+    expect(describeError(new Error('no route to host'), t)).toBe('no route to host');
+  });
+
+  it('has a sentence for something that is not an error at all', () => {
+    expect(describeError({ weird: true }, t)).toBe(i18n.t('errors.unknown'));
+    expect(describeError(undefined, t)).toBe(i18n.t('errors.unknown'));
+  });
+
+  it('speaks the operator language', async () => {
+    await i18n.changeLanguage('de');
+    const err = new OrthancError(409, 'c1', 'Das kollidiert mit dem, was schon da ist.');
+    expect(describeError(err, t)).toContain('Ref: c1');
+    await i18n.changeLanguage('en');
   });
 });

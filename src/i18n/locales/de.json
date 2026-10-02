@@ -66,7 +66,8 @@
     "pluginActive": "Aktiv",
     "pluginLoaded": "Geladen",
     "noPluginsLoaded": "Keine Plugins geladen",
-    "peers": "Peers"
+    "peers": "Peers",
+    "saveModalityFailed": "Die Modalität konnte nicht gespeichert werden"
   },
   "studies": {
     "title": "Studien",
@@ -200,9 +201,9 @@
     "preparingDownload": "Wird vorbereitet...",
     "preparingDicomDir": "DICOM-DIR wird vorbereitet...",
     "downloadStarted": "Download gestartet",
-    "downloadFailed": "Download fehlgeschlagen",
+    "downloadFailed": "Der Download ist fehlgeschlagen",
     "dicomDirStarted": "DICOM-DIR-Download gestartet",
-    "dicomDirFailed": "DICOM-DIR-Download fehlgeschlagen",
+    "dicomDirFailed": "Der DICOM-DIR-Download ist fehlgeschlagen",
     "dicomDir": "DICOM-DIR",
     "number": "Nr.",
     "modality": "Modalität",
@@ -216,7 +217,9 @@
     "sortBy": "Sortieren nach",
     "apiView": "Orthanc-API öffnen",
     "moreTitle": "Weitere Aktionen",
-    "moreHint": "Selten gebrauchte Aktionen — alles hier landet im Änderungsprotokoll."
+    "moreHint": "Selten gebrauchte Aktionen — alles hier landet im Änderungsprotokoll.",
+    "deleteFailed": "Die Studie konnte nicht gelöscht werden",
+    "customButtonFailed": "Die eigene Schaltfläche ist fehlgeschlagen"
   },
   "quickReport": {
     "title": "Schnellbericht",
@@ -425,7 +428,8 @@
       "system": "System"
     },
     "title": "Activity",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "actionFailed": "Die Aktion ist fehlgeschlagen"
   },
   "remote": {
     "title": "Remote-Quellen",
@@ -788,7 +792,7 @@
     "deleteConfirmPrefix": "Dies löscht dauerhaft",
     "deleteConfirmSuffix": "und alle {{series}} Serien ({{instances}} Instanzen). Diese Aktion kann nicht rückgängig gemacht werden.",
     "bulkDownloadSuccess": "{{count}} Serien heruntergeladen",
-    "bulkDownloadFailed": "Serien-Download fehlgeschlagen.",
+    "bulkDownloadFailed": "Der Download ist fehlgeschlagen",
     "apiView": "API",
     "addSeries": "Serie hinzufügen",
     "addSeriesDesc": "Anhang oder echte DICOM-Dateien zu dieser Studie hinzufügen",
@@ -2415,6 +2419,8 @@
     "http500": "Der Server hatte einen Fehler — bitte erneut versuchen.",
     "http502": "Das dahinterliegende System antwortet nicht.",
     "http503": "Der Dienst ist gerade nicht verfügbar — bitte später erneut.",
-    "httpOther": "Die Anfrage ist fehlgeschlagen ({{status}})."
+    "httpOther": "Die Anfrage ist fehlgeschlagen ({{status}}).",
+    "unknown": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "withRef": "{{message}} (Ref: {{ref}})"
   }
 }

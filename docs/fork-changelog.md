@@ -4,6 +4,35 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.12 — Fehlermeldungen aus den Aktionen laufen zentral (2026-10-01)
+
+**Der letzte englische Rest.** Löschen, Herunterladen, DICOM-DIR, Massen-Download
+und die eigenen Schaltflächen bauten ihren Text selbst: `Failed to delete study.`
+plus angehängter Correlation-Kennung — englisch, und am zentralen Übersetzungspunkt
+vorbei. Dasselbe Muster gab es an vier Stellen im Aktivitäts-Detail
+(`e.message : 'Failed'`) und beim Speichern einer Modalität.
+
+Jetzt gibt es **einen** Helfer, `describeError(error, t)` in `src/lib/errors.ts`:
+
+- `OrthancError` → sein (bereits übersetzter) Text **plus** die Correlation-Kennung
+  über `errors.withRef` — die Kennung braucht der Support, um die Log-Zeile zu finden.
+- Ein Fehler aus einer Aktion → seine eigene Aussage.
+- Alles andere → `errors.unknown` („Etwas ist schiefgelaufen. Bitte erneut versuchen.").
+
+Die Toasts sind damit überall gleich aufgebaut: **Titel = was fehlgeschlagen ist**
+(übersetzt), **Beschreibung = warum** (übersetzt, mit Ref). Live geprüft: ein
+abgebrochener Löschaufruf zeigt
+
+```
+Die Studie konnte nicht gelöscht werden
+Keine Verbindung zum Server. Bitte erneut versuchen. (Ref: 4727dc89-…)
+```
+
+Gates grün: `tsc` 0, `npm run lint` 0, `npm run i18n:check` vollständig,
+`npm run build` 0, **806 Tests**.
+
+---
+
 ## v2.6.11 — Der „Mehr"-Dialog wird mitgeprüft (2026-10-01)
 
 **Test-Änderung.** Der Screenshot-Audit öffnet jetzt den Dialog hinter „Mehr" und

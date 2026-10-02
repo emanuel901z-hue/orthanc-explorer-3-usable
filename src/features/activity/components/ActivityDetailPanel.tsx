@@ -40,6 +40,7 @@ import { ActivityEvent, ActivityCategory, ActivitySeverity } from '@/shared/type
 import { jobsApi } from '@/api/jobs';
 import { resourceRefId, resourceRefType } from '@/features/activity/lib/orthanc-resources';
 import { cn } from '@/lib/utils';
+import { describeError } from '@/lib/errors';
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
   upload: <Upload className="h-4 w-4" />,
@@ -366,7 +367,7 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
                       toast.success(t('activity.detail.jobCancelled'));
                       queryClient.invalidateQueries({ queryKey: ['orthanc-jobs-expanded'] });
                     } catch (e) {
-                      toast.error(e instanceof Error ? e.message : 'Failed');
+                      toast.error(t('activity.actionFailed'), { description: describeError(e, t) });
                     } finally {
                       setJobActionLoading(null);
                     }
@@ -390,7 +391,7 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
                       toast.success(t('activity.detail.jobPaused'));
                       queryClient.invalidateQueries({ queryKey: ['orthanc-jobs-expanded'] });
                     } catch (e) {
-                      toast.error(e instanceof Error ? e.message : 'Failed');
+                      toast.error(t('activity.actionFailed'), { description: describeError(e, t) });
                     } finally {
                       setJobActionLoading(null);
                     }
@@ -414,7 +415,7 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
                       toast.success(t('activity.detail.jobResumed'));
                       queryClient.invalidateQueries({ queryKey: ['orthanc-jobs-expanded'] });
                     } catch (e) {
-                      toast.error(e instanceof Error ? e.message : 'Failed');
+                      toast.error(t('activity.actionFailed'), { description: describeError(e, t) });
                     } finally {
                       setJobActionLoading(null);
                     }
@@ -438,7 +439,7 @@ export function ActivityDetailPanel({ event, onClose }: ActivityDetailPanelProps
                       toast.success(t('activity.detail.jobRetried'));
                       queryClient.invalidateQueries({ queryKey: ['orthanc-jobs-expanded'] });
                     } catch (e) {
-                      toast.error(e instanceof Error ? e.message : 'Failed');
+                      toast.error(t('activity.actionFailed'), { description: describeError(e, t) });
                     } finally {
                       setJobActionLoading(null);
                     }

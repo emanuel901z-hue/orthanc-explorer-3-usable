@@ -66,7 +66,8 @@
     "pluginActive": "Active",
     "pluginLoaded": "Loaded",
     "noPluginsLoaded": "No plugins loaded",
-    "peers": "Peers"
+    "peers": "Peers",
+    "saveModalityFailed": "The modality could not be saved"
   },
   "studies": {
     "title": "Studies",
@@ -200,9 +201,9 @@
     "preparingDownload": "Preparing...",
     "preparingDicomDir": "Preparing DICOM-DIR...",
     "downloadStarted": "Download started",
-    "downloadFailed": "Download failed",
+    "downloadFailed": "The download failed",
     "dicomDirStarted": "DICOM-DIR download started",
-    "dicomDirFailed": "DICOM-DIR download failed",
+    "dicomDirFailed": "The DICOM-DIR download failed",
     "dicomDir": "DICOM-DIR",
     "number": "#",
     "modality": "Modality",
@@ -216,7 +217,9 @@
     "sortBy": "Sort by",
     "apiView": "Open Orthanc API",
     "moreTitle": "More actions",
-    "moreHint": "Rarely used actions — everything here is logged in the change log."
+    "moreHint": "Rarely used actions — everything here is logged in the change log.",
+    "deleteFailed": "The study could not be deleted",
+    "customButtonFailed": "The custom button failed"
   },
   "quickReport": {
     "title": "Quick Report",
@@ -425,7 +428,8 @@
       "system": "System"
     },
     "title": "Activity",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "actionFailed": "The action failed"
   },
   "remote": {
     "title": "Remote Sources",
@@ -788,7 +792,7 @@
     "deleteConfirmPrefix": "This will permanently delete",
     "deleteConfirmSuffix": "and all {{series}} series ({{instances}} instances). This action cannot be undone.",
     "bulkDownloadSuccess": "{{count}} series downloaded",
-    "bulkDownloadFailed": "Bulk download failed.",
+    "bulkDownloadFailed": "The download failed",
     "apiView": "API",
     "addSeries": "Add Series",
     "addSeriesDesc": "Add an attachment or real DICOM files to this study",
@@ -2415,6 +2419,8 @@
     "http500": "The server had an error — please try again.",
     "http502": "The system behind it does not answer.",
     "http503": "The service is not available right now — please try again later.",
-    "httpOther": "Request failed ({{status}})."
+    "httpOther": "Request failed ({{status}}).",
+    "unknown": "Something went wrong. Please try again.",
+    "withRef": "{{message}} (Ref: {{ref}})"
   }
 }

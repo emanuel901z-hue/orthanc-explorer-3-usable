@@ -183,9 +183,13 @@ describe('StudyDetailPage — mutation error handlers', () => {
       fireEvent.click(confirmButton);
     });
 
+    // title = the action that failed, description = the reason with the Ref
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        expect.stringContaining('corr-abc-123'),
+        'studyDetail.deleteFailed',
+        expect.objectContaining({
+          description: 'The server encountered an error.',
+        }),
       );
     });
   });
@@ -204,7 +208,10 @@ describe('StudyDetailPage — mutation error handlers', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        expect.stringContaining('corr-xyz-789'),
+        'studyDetail.downloadFailed',
+        expect.objectContaining({
+          description: 'The server encountered an error.',
+        }),
       );
     });
   });
@@ -220,7 +227,10 @@ describe('StudyDetailPage — mutation error handlers', () => {
     });
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Download failed');
+      expect(toast.error).toHaveBeenCalledWith(
+        'studyDetail.downloadFailed',
+        expect.objectContaining({ description: 'Network error' }),
+      );
     });
   });
 
@@ -238,7 +248,10 @@ describe('StudyDetailPage — mutation error handlers', () => {
     });
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Failed to delete study.');
+      expect(toast.error).toHaveBeenCalledWith(
+        'studyDetail.deleteFailed',
+        expect.objectContaining({ description: 'Network error' }),
+      );
     });
   });
 });

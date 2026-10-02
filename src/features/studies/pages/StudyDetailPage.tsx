@@ -51,7 +51,7 @@ import {
 import { deleteStudyAction } from '@/actions/deleteStudy';
 import { PageHelp } from '@/shared/components/PageHelp';
 import { deleteSeriesAction } from '@/actions/deleteSeries';import { downloadStudyAction } from '@/actions/downloadStudy';
-import { OrthancError } from '@/lib/errors';
+import { describeError } from '@/lib/errors';
 import { useFeature } from '@/config/features';
 import { getConfig } from '@/config/runtime';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
@@ -186,10 +186,9 @@ export default function StudyDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['studies'] });
       navigate('/studies');
     },
-    onError: (err) => {
-      const ref = err instanceof OrthancError ? ` (Ref: ${err.correlationId})` : '';
-      toast.error(`Failed to delete study.${ref}`);
-    },
+    onError: (err) => toast.error(t('studyDetail.deleteFailed'), {
+      description: describeError(err, t),
+    }),
   });
 
   const downloadMutation = useMutation({
@@ -198,10 +197,9 @@ export default function StudyDetailPage() {
     onSuccess: () => {
       toast.success(t('studyDetail.downloadStarted', { defaultValue: 'Download started' }));
     },
-    onError: (err) => {
-      const ref = err instanceof OrthancError ? ` (Ref: ${err.correlationId})` : '';
-      toast.error(t('studyDetail.downloadFailed', { defaultValue: 'Download failed' }) + ref);
-    },
+    onError: (err) => toast.error(t('studyDetail.downloadFailed'), {
+      description: describeError(err, t),
+    }),
   });
 
   // P0: DICOM-DIR download (ZIP with DICOMDIR index)
@@ -213,10 +211,9 @@ export default function StudyDetailPage() {
         { dicomDir: true },
       ),
     onSuccess: () => toast.success(t('studyDetail.dicomDirStarted', { defaultValue: 'DICOM-DIR download started' })),
-    onError: (err) => {
-      const ref = err instanceof OrthancError ? ` (Ref: ${err.correlationId})` : '';
-      toast.error(t('studyDetail.dicomDirFailed', { defaultValue: 'DICOM-DIR download failed' }) + ref);
-    },
+    onError: (err) => toast.error(t('studyDetail.dicomDirFailed'), {
+      description: describeError(err, t),
+    }),
   });
 
   // Update tab label with patient name when loaded
@@ -317,8 +314,7 @@ export default function StudyDetailPage() {
       toast.success(t('study.bulkDownloadSuccess', { count: ids.length }));
       setSelectedSeriesIds(new Set());
     } catch (e) {
-      const ref = e instanceof OrthancError ? ` (Ref: ${e.correlationId})` : '';
-      toast.error(`${t('study.bulkDownloadFailed')}${ref}`);
+      toast.error(t('study.bulkDownloadFailed'), { description: describeError(e, t) });
     } finally {
       setBulkDownloading(false);
     }
@@ -579,7 +575,9 @@ export default function StudyDetailPage() {
                     patientId: study.patientId,
                     patientName: study.patientName,
                     accessionNumber: study.accessionNumber,
-                  }).catch((e) => toast.error(`Custom button failed: ${e.message}`));
+                  }).catch((e) => toast.error(t('studyDetail.customButtonFailed'), {
+                    description: describeError(e, t),
+                  }));
                 }}
               >
                 {btn.label}
