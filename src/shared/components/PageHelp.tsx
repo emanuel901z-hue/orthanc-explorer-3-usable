@@ -7,7 +7,7 @@
  * mistakes to avoid and how to check the result — without leaving the page.
  *
  * `prefix` selects the translation section: the broker pages own
- * `broker.help_<id>_*`, the rest of the UI uses `help.<id>_*`. The wording
+ * `broker.help_<id>_*`, the rest of the UI uses `help.help_<id>_*`. The wording
  * pattern is the same in both — what it is / how to work with it / what to do
  * when nothing arrives.
  */
@@ -73,8 +73,8 @@ export function PageHelp({ helpId, prefix = 'broker' }: {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto" data-testid="page-help-dialog">
           <DialogHeader>
-            <DialogTitle>{t(`broker.help_${helpId}_title`, { defaultValue: t('broker.helpButton') })}</DialogTitle>
-            <DialogDescription>{t('broker.helpIntro')}</DialogDescription>
+            <DialogTitle>{t(`${prefix}.help_${helpId}_title`, { defaultValue: t(`${prefix}.helpButton`) })}</DialogTitle>
+            <DialogDescription>{t(`${prefix}.helpIntro`)}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 text-sm">
             {sections.filter((section) => section.items.length > 0).map((section) => (

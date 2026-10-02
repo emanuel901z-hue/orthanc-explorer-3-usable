@@ -4,6 +4,24 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.9 — Nachbesserung an der Hilfe und der Aktionsleiste (2026-10-01)
+
+Zwei Fehler aus v2.6.8, in der laufenden Oberfläche gesehen:
+
+- **Der Hilfedialog der Basis-Seiten hieß „Was ist das?" statt „Studien — die
+  Liste".** `PageHelp` hatte zwei Stellen, die noch fest auf `broker.*` zeigten
+  (Titel und Einleitungssatz) — die Überschriften und Aufzählungen kamen schon
+  aus dem `prefix`, der Titel nicht. Beides läuft jetzt über `prefix`.
+- **Der Hilfe-Knopf stand mitten in den Aktionsschaltflächen** (zwischen „An
+  Peer" und „Viewer") — er steht jetzt am Anfang der Leiste, die Aktionsgruppen
+  bleiben zusammen. Die Trenner sind außerdem deutlicher (`bg-muted-foreground/40`,
+  `h-6`), vorher waren sie kaum zu sehen.
+
+Gates grün: `tsc` 0, `npm run lint` 0, `npm run i18n:check` vollständig,
+`npm run build` 0, **801 Tests**, Screenshot-Audit 267/267.
+
+---
+
 ## v2.6.8 — „Was ist das?" auf jeder Seite, Aktionsleiste gruppiert (2026-10-01)
 
 **Hilfe war eine Broker-Eigenschaft.** Elf Broker-Seiten hatten einen Hilfetext,

@@ -86,7 +86,7 @@ function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
 
 /** Dünner Trenner zwischen den Aktionsgruppen. */
 function ActionGroupDivider() {
-  return <span className="hidden sm:block h-5 w-px bg-border mx-0.5" aria-hidden="true" />;
+  return <span className="hidden sm:block h-6 w-px bg-muted-foreground/40 mx-0.5" aria-hidden="true" />;
 }
 
 export default function StudyDetailPage() {
@@ -379,6 +379,7 @@ export default function StudyDetailPage() {
           {/* Gruppen in der Reihenfolge, in der man sie braucht: übertragen,
               herunterladen, kennzeichnen, ändern, Datenschutz, Werkzeuge. Der
               Trenner macht die Gruppen sichtbar, ohne etwas zu verstecken. */}
+          <PageHelp helpId="studyDetail" prefix="help" />
           <ActionGroupDivider />
           {canSend && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('actions.send')}</Button>
@@ -391,7 +392,6 @@ export default function StudyDetailPage() {
               <TooltipContent>{t('peer.buttonHint')}</TooltipContent>
             </Tooltip>
           )}
-          <PageHelp helpId="studyDetail" prefix="help" />
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate(`/viewer/${studyId}`)}><Eye className="h-3.5 w-3.5" /> {t('actions.viewer')}</Button>
           <Button
             variant="outline"
