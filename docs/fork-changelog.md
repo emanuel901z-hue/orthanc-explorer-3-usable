@@ -4,6 +4,35 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.13 — Eine Stelle für Fehlertexte, auch im Broker (2026-10-01)
+
+**Der Broker hatte seinen eigenen Helfer.** `errorMessage(error)` gab einfach
+`error.message` zurück — an 13 Stellen, ohne Übersetzung und ohne
+Correlation-Kennung. Dabei wirft `brokerFetch` **denselben** `OrthancError` wie der
+Orthanc-Client; es gab also nie einen Grund für zwei Wege.
+
+- `errorMessage` ist weg. Die 13 Stellen (Broker-Einstellungen, Voraufnahmen,
+  TLS-, ATNA- und Alerting-Karte, die Schreib-Hooks) nutzen `describeError(x, t)`
+  — und zeigen damit erstmals die **Correlation-Kennung**, die der Support zum
+  Auffinden der Log-Zeile braucht.
+- Zwei hartkodierte englische Texte im Broker-Client sind mit übersetzt:
+  `'MWL broker is not configured.'` → `errors.brokerNotConfigured`,
+  `'Network error. Please try again.'` → `errors.network`.
+- Der Key-Wächter prüft jetzt **auch den `errors`-Abschnitt** (kein toter
+  Fehlertext, keine fehlende Übersetzung) — inklusive der Literale
+  (`errors.http400` …) und der dynamischen Form.
+
+Live geprüft mit einem abgebrochenen Broker-Aufruf:
+
+```
+Keine Verbindung zum Server. Bitte erneut versuchen. (Ref: 9ba9f6d2-…)
+```
+
+Gates grün: `tsc` 0, `npm run lint` 0, `npm run i18n:check` vollständig,
+`npm run build` 0, **807 Tests**.
+
+---
+
 ## v2.6.12 — Fehlermeldungen aus den Aktionen laufen zentral (2026-10-01)
 
 **Der letzte englische Rest.** Löschen, Herunterladen, DICOM-DIR, Massen-Download

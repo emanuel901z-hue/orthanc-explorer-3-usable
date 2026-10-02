@@ -58,12 +58,16 @@ const sources = [
   readFileSync(join(SRC, 'api', 'broker.ts'), 'utf8'),
   // the shared help component builds both sections' keys from its `prefix` prop
   readFileSync(join(SRC, 'shared', 'components', 'PageHelp.tsx'), 'utf8'),
+  // the error sentences are built from the status code (`errors.http${status}`)
+  readFileSync(join(SRC, 'lib', 'errors.ts'), 'utf8'),
 ].join('\n');
 
 const locale = JSON.parse(readFileSync(join(LOCALES, 'en.json'), 'utf8'));
 const broker = locale.broker as Record<string, unknown>;
 /** The shared help texts of the base pages live in their own section. */
 const baseHelp = locale.help as Record<string, unknown>;
+/** Error sentences (translated at the source, see `src/lib/errors.ts`). */
+const errorTexts = locale.errors as Record<string, unknown>;
 const keys = Object.keys(broker);
 
 /** `t(\`broker.xyz_${...}\`)` → the prefix "xyz_". */
@@ -83,6 +87,16 @@ const prefixBuilt = new Set(
 );
 const prefixBuiltFamilies = new Set(
   [...sources.matchAll(/\$\{prefix\}\.(\w+)\$\{/g)].map((m) => m[1]),
+);
+
+/** Quoted `"<section>.X"` literals — for sections that name their keys. */
+const literalsOf = (section: string) =>
+  new Set([...sources.matchAll(new RegExp(`['"\`]${section}\\.(\\w+)['"\`]`, 'g'))]
+    .map((m) => m[1]));
+const errorLiterals = literalsOf('errors');
+/** `errors.http${status}` in `src/lib/errors.ts` → the prefix "http". */
+const errorFamilies = new Set(
+  [...sources.matchAll(/errors\.(\w+)\$\{/g)].map((m) => m[1]),
 );
 
 /** Keys that appear as a whole string literal somewhere. */
@@ -128,6 +142,17 @@ describe('broker translation keys', () => {
   it('has no base help key that nothing can reach', () => {
     const unreachable = unreachableKeys(Object.keys(baseHelp));
     expect(unreachable, `dead help keys: ${unreachable.join(', ')}`).toEqual([]);
+  });
+
+  it('has no error sentence that nothing can reach', () => {
+    // `errors.http403` is built as `errors.http${status}`; the two exceptions are
+    // the ones a module asks for by name (`translated(...)`)
+    const unreachable = Object.keys(errorTexts).filter((key) => {
+      if (errorLiterals.has(key)) return false;                 // 'errors.http400'
+      if ([...errorFamilies].some((prefix) => key.startsWith(prefix))) return false;
+      return unreachableKeys([key]).length > 0;
+    });
+    expect(unreachable, `dead error texts: ${unreachable.join(', ')}`).toEqual([]);
   });
 
   it('has a translation for every key the code names', () => {

@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { auditClient, type AuditResourceType } from '@/lib/audit';
+import { describeError } from '@/lib/errors';
 import { brokerApi } from '@/api/broker';
 
 type AuditedMutationOptions<TArgs, TResult> = {
@@ -33,11 +34,6 @@ type AuditedMutationOptions<TArgs, TResult> = {
 };
 
 /** Pull the operator-readable message out of a failed request. */
-export function errorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
-
 export function useAuditedMutation<TArgs, TResult>({
   action,
   resourceType,
@@ -81,7 +77,7 @@ export function useAuditedMutation<TArgs, TResult>({
     onError: (error) => {
       // always tell the operator what went wrong (unless the caller shows it)
       if (!silentError) {
-        toast.error(t('broker.writeFailed', { error: errorMessage(error) }));
+        toast.error(t('broker.writeFailed', { error: describeError(error, t) }));
       }
     },
   });

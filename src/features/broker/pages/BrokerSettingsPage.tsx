@@ -7,6 +7,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { describeError } from '@/lib/errors';
 import { useQuery } from '@tanstack/react-query';
 import { RotateCcw, Save } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +30,7 @@ import { NotificationsCard } from '../components/NotificationsCard';
 import { AtnaCard } from '../components/AtnaCard';
 import { TlsCard } from '../components/TlsCard';
 import { RetentionCard } from '../components/RetentionCard';
-import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
 import { validateSetting } from '../lib/setting-rules';
 
 const isTrue = (value: string) => ['true', '1', 'yes', 'on'].includes(value.trim().toLowerCase());
@@ -169,7 +170,7 @@ function SettingRow({ setting }: { setting: BrokerSetting }) {
           {/* the server validates every value — say so instead of failing silently */}
           {setValue.error && (
             <p role="alert" className="text-xs text-destructive break-words">
-              {t('broker.settingRejected', { error: errorMessage(setValue.error) })}
+              {t('broker.settingRejected', { error: describeError(setValue.error, t) })}
             </p>
           )}
         </div>

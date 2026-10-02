@@ -16,6 +16,7 @@
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { describeError } from '@/lib/errors';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, Loader2, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -38,17 +39,17 @@ import {
   type PrefetchResult,
 } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
-import { errorMessage } from '../hooks/use-broker-writes';
 import { useCanWrite } from '../hooks/use-can-write';
 import { BrokerPageShell } from '../components/BrokerPageShell';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { usePersistedState, useRememberedState } from '@/store/ui-state';
 
 function ErrorCard({ error }: { error: unknown }) {
+  const { t } = useTranslation();
   return (
     <Card className="border-destructive/30 bg-destructive/5">
       <CardContent className="p-3 text-sm text-destructive break-words">
-        {errorMessage(error)}
+        {describeError(error, t)}
       </CardContent>
     </Card>
   );
@@ -91,7 +92,7 @@ export default function PrefetchPage() {
       toast.success(t('broker.prefetchSubscriptionRemoved'));
       queryClient.invalidateQueries({ queryKey: ['broker', 'ups-subscriptions'] });
     },
-    onError: (error) => toast.error(errorMessage(error)),
+    onError: (error) => toast.error(describeError(error, t)),
   });
 
   const body = (): PrefetchRequest => ({
@@ -125,7 +126,7 @@ export default function PrefetchPage() {
         }));
       }
     },
-    onError: (error) => toast.error(errorMessage(error)),
+    onError: (error) => toast.error(describeError(error, t)),
   });
 
   if (!configured) {

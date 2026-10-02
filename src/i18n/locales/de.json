@@ -2421,6 +2421,7 @@
     "http503": "Der Dienst ist gerade nicht verfügbar — bitte später erneut.",
     "httpOther": "Die Anfrage ist fehlgeschlagen ({{status}}).",
     "unknown": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
-    "withRef": "{{message}} (Ref: {{ref}})"
+    "withRef": "{{message}} (Ref: {{ref}})",
+    "brokerNotConfigured": "Der MWL-Broker ist in dieser Installation nicht konfiguriert."
   }
 }

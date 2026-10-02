@@ -44,7 +44,7 @@
  */
 import { getConfig } from '@/config/runtime';
 import { newCorrelationId } from '@/lib/correlation';
-import { OrthancError } from '@/lib/errors';
+import { OrthancError, scrubbedHttpMessage, translated } from '@/lib/errors';
 import { logger } from '@/lib/logger';
 import { JSON_CONTENT_HEADERS } from '@/lib/client';
 
@@ -886,7 +886,8 @@ async function brokerFetch<T>(path: string, init: RequestInit = {}): Promise<T> 
   const cfg = getConfig();
   const correlationId = newCorrelationId();
   if (!cfg.brokerUrl) {
-    throw new OrthancError(0, correlationId, 'MWL broker is not configured.');
+    throw new OrthancError(0, correlationId, translated('errors.brokerNotConfigured',
+      'The MWL broker is not configured in this installation.'));
   }
   const headers = new Headers(init.headers);
   headers.set('X-Request-Id', correlationId);
@@ -912,7 +913,7 @@ async function brokerFetch<T>(path: string, init: RequestInit = {}): Promise<T> 
   } catch (e) {
     if (e instanceof OrthancError) throw e;
     logger.error('broker.fetch.failed', { path, correlationId });
-    throw new OrthancError(0, correlationId, 'Network error. Please try again.');
+    throw new OrthancError(0, correlationId, scrubbedHttpMessage(0));
   }
 }
 

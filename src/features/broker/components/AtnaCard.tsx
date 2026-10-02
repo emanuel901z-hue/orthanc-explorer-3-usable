@@ -8,6 +8,7 @@
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { describeError } from '@/lib/errors';
 import { useQuery } from '@tanstack/react-query';
 import { FileCode2, Send, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +26,7 @@ import {
 } from '@/components/ui/select';
 import { brokerApi, type BrokerSetting } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
-import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
 import { useSettingDraft } from '../hooks/use-setting-draft';
 
 const KEYS = [
@@ -225,7 +226,7 @@ export function AtnaCard({ settings }: { settings: BrokerSetting[] }) {
 
         {setValue.error && (
           <p role="alert" className="text-xs text-destructive break-words">
-            {t('broker.settingRejected', { error: errorMessage(setValue.error) })}
+            {t('broker.settingRejected', { error: describeError(setValue.error, t) })}
           </p>
         )}
 

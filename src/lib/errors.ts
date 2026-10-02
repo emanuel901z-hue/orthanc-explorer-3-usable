@@ -42,6 +42,15 @@ const KEY_BY_STATUS: Record<number, string> = {
   503: 'errors.http503',
 };
 
+/**
+ * Translate a key with an English fallback — for modules that need a sentence
+ * but have no `t` at hand (API layer). Same rule as above: no app-instance
+ * import, the core only.
+ */
+export function translated(key: string, fallback: string): string {
+  return i18next.isInitialized ? i18next.t(key, { defaultValue: fallback }) : fallback;
+}
+
 export function scrubbedHttpMessage(status: number): string {
   const fallback = SCRUBBED_MESSAGES[status] ?? `Request failed (${status}).`;
   const key = KEY_BY_STATUS[status] ?? 'errors.httpOther';

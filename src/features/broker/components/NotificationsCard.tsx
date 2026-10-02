@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { describeError } from '@/lib/errors';
 import { useQuery } from '@tanstack/react-query';
 import { BellRing, Send } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { brokerApi, type BrokerSetting } from '@/api/broker';
 import { getConfig } from '@/config/runtime';
-import { errorMessage, useBrokerSettingWrites } from '../hooks/use-broker-writes';
+import { useBrokerSettingWrites } from '../hooks/use-broker-writes';
 
 const SEVERITY_VARIANT: Record<string, 'destructive' | 'secondary' | 'outline'> = {
   error: 'destructive',
@@ -196,7 +197,7 @@ export function NotificationsCard({ settings }: { settings: BrokerSetting[] }) {
         {/* the server validates every value — say so instead of failing silently */}
         {setValue.error && (
           <p role="alert" className="text-xs text-destructive break-words">
-            {t('broker.settingRejected', { error: errorMessage(setValue.error) })}
+            {t('broker.settingRejected', { error: describeError(setValue.error, t) })}
           </p>
         )}
 
