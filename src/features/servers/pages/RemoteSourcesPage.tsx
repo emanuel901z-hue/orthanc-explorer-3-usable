@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { Globe, Radio, Search, Wifi, WifiOff, Download, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -144,9 +145,12 @@ export default function RemoteSourcesPage() {
 
   return (
     <div className="p-4 md:p-6 space-y-4 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{t('remote.title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('remote.subtitle')}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{t('remote.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('remote.subtitle')}</p>
+        </div>
+        <PageHelp helpId="remoteSources" prefix="help" />
       </div>
 
       <Tabs defaultValue="dicom" className="space-y-4">

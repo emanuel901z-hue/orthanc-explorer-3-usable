@@ -6,6 +6,7 @@
  */
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { format } from 'date-fns';
 import { Shield, Search, Trash2, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,7 +82,8 @@ export default function AuditLogsPage() {
             {t('auditLogs.subtitle')}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <PageHelp helpId="auditLogs" prefix="help" />
           <Button variant="outline" size="sm" onClick={handleExport} disabled={filtered.length === 0}>
             <Download className="h-3.5 w-3.5" /> {t('auditLogs.export')}
           </Button>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { useSearchParams } from 'react-router-dom';
 import {
   Server,
@@ -75,9 +76,12 @@ export default function SettingsPage() {
 
   return (
     <div className="p-4 md:p-6 space-y-4 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{t('settings.title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('settings.subtitle')}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{t('settings.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('settings.subtitle')}</p>
+        </div>
+        <PageHelp helpId="settings" prefix="help" />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

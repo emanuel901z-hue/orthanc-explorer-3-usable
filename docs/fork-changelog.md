@@ -4,6 +4,36 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.8 — „Was ist das?" auf jeder Seite, Aktionsleiste gruppiert (2026-10-01)
+
+**Hilfe war eine Broker-Eigenschaft.** Elf Broker-Seiten hatten einen Hilfetext,
+die Basis-Seiten keinen. Jetzt trägt **jede** Arbeitsseite den Knopf „Was ist
+das?" mit denselben drei Abschnitten (was ist das / wie bediene ich das / wenn
+etwas nicht klappt):
+
+- `PageHelp` liegt in `src/shared/components/` und nimmt ein `prefix`: der
+  Broker-Slice schreibt weiter nach `broker.help_<id>_*`, die Basis nach
+  `help.help_<id>_*`. Neu: Studien, Studie/Serie/Instanz im Detail, Hochladen,
+  Aktivität, Änderungsprotokoll, Remote-Quellen, Einstellungen, Arbeitslisten,
+  IID. Der Viewer bewusst **nicht** — das ist ein Werkzeug, keine Arbeitsseite.
+- Der Screenshot-Audit prüft den Knopf auf jeder Ansicht. Das ist zugleich die
+  Prüfung des Inhalts: fehlt ein Text, rendert der Knopf nicht (die Komponente
+  gibt dann nichts aus) — der Audit schlägt fehl. **267 Checks** (vorher 225).
+
+**Leere Trefferliste:** „0 Studien gefunden" bot keinen Weg zurück. Jetzt steht
+dort **„Filter zurücksetzen"** — und nur dann, wenn wirklich ein Filter gesetzt
+ist.
+
+**Aktionsleiste:** die bis zu 15 Schaltflächen einer Studie sind jetzt gruppiert
+(übertragen · herunterladen · kennzeichnen · ändern · Datenschutz · Werkzeuge)
+mit dünnen Trennern, und **Senden/An Peer stehen vorn** statt hinter den
+Download-Knöpfen. „Label" heißt auf Deutsch **„Kennzeichnung"**.
+
+Gates grün: `tsc` 0, `npm run lint` 0, `npm run i18n:check` vollständig,
+`npm run build` 0, **801 Tests**.
+
+---
+
 ## v2.6.7 — Herkunft eines lokalen Eintrags: vier Werte, übersetzt (2026-10-01)
 
 **Ein Fix aus der Wertemengen-Prüfung.** Der Client nannte `origin: 'manual' | 'hl7'`,

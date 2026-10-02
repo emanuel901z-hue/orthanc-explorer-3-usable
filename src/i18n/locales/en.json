@@ -181,7 +181,8 @@
       "bulkSuccess": "{{count}} study/studies moved to quarantine.",
       "partial": "{{ok}} of {{total}} moved — {{failed}} failed.",
       "error": "Quarantine failed."
-    }
+    },
+    "resetFilters": "Reset filters"
   },
   "studyDetail": {
     "patientId": "Patient ID",
@@ -1615,7 +1616,6 @@
     "duplicateAet": "This AE title is already used by {{name}} — two nodes with the same AE title cannot be told apart.",
     "duplicateRule": "A rule for this source and target already exists.",
     "tagInvalid": "DICOM tag or keyword expected, e.g. (0010,0010) or PatientName.",
-    "i18nBrokerNote": "The visible interface is translated; the detailed help texts are available in German and English (English fills the rest).",
     "errHost": "Enter the address only: no spaces, no slashes, no http://.",
     "helpButton": "What is this?",
     "helpIntro": "Short version: what the page is for, what to fill in and what usually goes wrong.",
@@ -2067,7 +2067,8 @@
     "pirEffectMerge": "A merge retires the old ID: the worklist answer and the routing follow the current one.",
     "pirEffectLink": "A link keeps both IDs valid: nothing is moved and no answer is rewritten.",
     "gateTitle": "MWL broker is not part of this deployment",
-    "gateHint": "The broker console is switched off here. Set brokerUrl (and enableMwlBroker: true) in config.js if this installation should manage the modalities' worklists."
+    "gateHint": "The broker console is switched off here. Set brokerUrl (and enableMwlBroker: true) in config.js if this installation should manage the modalities' worklists.",
+    "i18nNote": "The visible interface is translated; the detailed help texts are available in German and English (English fills the rest)."
   },
   "shortcuts": {
     "nav": {
@@ -2260,5 +2261,142 @@
     "partialFailure": "{{failed}} instance(s) could not be moved — the source instances were kept.",
     "deleteWarning": "{{count}} source instance(s) could not be removed.",
     "error": "Move failed"
+  },
+  "help": {
+    "helpButton": "What is this?",
+    "helpIntro": "Short and plain: what the page is for, how to work with it, and what to do when nothing arrives.",
+    "helpWhat": "What is it?",
+    "helpHow": "How do I work with it?",
+    "helpWrong": "If something does not work",
+    "i18nNote": "The visible interface is translated; the detailed help texts are available in German and English (English fills the rest).",
+    "help_studies_title": "Studies — the list",
+    "help_studies_what": [
+      "Every study that lives in this house's Orthanc — the working list for the day.",
+      "The search covers patient name, accession number, date, modality, UID and description."
+    ],
+    "help_studies_how": [
+      "Type a search term (several terms separated by commas), click a row for the details.",
+      "Show or hide columns under \"Columns\" — the choice is kept."
+    ],
+    "help_studies_wrong": [
+      "Nothing found? The filter is usually too narrow — reset it.",
+      "A study that was just acquired may still be arriving (status \"receiving\")."
+    ],
+    "help_studyDetail_title": "One study in detail",
+    "help_studyDetail_what": [
+      "The study with its series, images and DICOM tags.",
+      "The buttons on the right act on the whole study."
+    ],
+    "help_studyDetail_how": [
+      "Click a series to see its images; use the action buttons for sending, labelling, editing, anonymising.",
+      "The tabs below switch between overview, DICOM tags and the activity log."
+    ],
+    "help_studyDetail_wrong": [
+      "Images missing? They may still be transferring — check the status.",
+      "Anonymising and deleting cannot be undone. Check the patient first."
+    ],
+    "help_seriesDetail_title": "One series",
+    "help_seriesDetail_what": [
+      "A series is one examination step inside a study — e.g. the native phase of a CT."
+    ],
+    "help_seriesDetail_how": [
+      "Click an image for its details; the buttons above act on the whole series."
+    ],
+    "help_seriesDetail_wrong": [
+      "An empty preview is not an error: some image formats cannot be shown in the browser.",
+      "The metadata are complete even when the preview stays blank."
+    ],
+    "help_instanceDetail_title": "One image",
+    "help_instanceDetail_what": [
+      "A single image with its tags, transfer syntax and a preview."
+    ],
+    "help_instanceDetail_how": [
+      "Use the preview to check the image, the tag list to look something up, the buttons above to act."
+    ],
+    "help_instanceDetail_wrong": [
+      "No preview for some formats — the metadata are still complete.",
+      "Deleting a single image changes the study; the counters in the list follow."
+    ],
+    "help_upload_title": "Upload",
+    "help_upload_what": [
+      "Files into this Orthanc: DICOM folders, ZIP archives or single files."
+    ],
+    "help_upload_how": [
+      "Drop the files here or pick them; the progress runs per file.",
+      "Uploaded studies appear in the study list."
+    ],
+    "help_upload_wrong": [
+      "A large ZIP takes a while — wait for the progress bar.",
+      "A duplicate is not replaced; Orthanc stores it as a new instance."
+    ],
+    "help_activity_title": "Activity",
+    "help_activity_what": [
+      "What happened in this installation: accesses, uploads, changes.",
+      "Handy when somebody asks \"who touched this study?\"."
+    ],
+    "help_activity_how": [
+      "Pick a period and a type, click a row for the details.",
+      "Export as CSV if it has to go into a file."
+    ],
+    "help_activity_wrong": [
+      "Nothing to see? The period is too short — widen it."
+    ],
+    "help_auditLogs_title": "Change log (this installation)",
+    "help_auditLogs_what": [
+      "Who changed what, and when: anonymising, deleting, sending.",
+      "The counterpart of the broker's own change log."
+    ],
+    "help_auditLogs_how": [
+      "Filter by action or period, open a row for the details."
+    ],
+    "help_auditLogs_wrong": [
+      "Entries only exist from the moment this installation was set up.",
+      "An action that is not listed was not performed through this interface."
+    ],
+    "help_remoteSources_title": "Remote sources",
+    "help_remoteSources_what": [
+      "Other systems this one may query: DICOM nodes (Q/R) and DICOMweb servers."
+    ],
+    "help_remoteSources_how": [
+      "Pick a source, enter a search term, open a result — or test the connection first."
+    ],
+    "help_remoteSources_wrong": [
+      "No answer? Check host, port and the release at the other end; the test button says what is missing.",
+      "\"DICOMweb\" needs a URL, \"DICOM Q/R\" needs a host and port."
+    ],
+    "help_settings_title": "Settings",
+    "help_settings_what": [
+      "Everything that configures this installation: system, modalities, DICOMweb servers, peers, viewer, look.",
+      "Modalities are the imaging devices; peers are other Orthanc instances to send to."
+    ],
+    "help_settings_how": [
+      "Pick a tab, add or change an entry, save.",
+      "Changes take effect immediately — except where \"after a restart\" is written."
+    ],
+    "help_settings_wrong": [
+      "A device does not answer? Test the echo first, then check host, port and AE title.",
+      "A setting marked \"set by the deployment\" cannot be changed here."
+    ],
+    "help_worklists_title": "Worklists",
+    "help_worklists_what": [
+      "Worklists from the RIS — visible here only when the worklist plugin is installed in this Orthanc."
+    ],
+    "help_worklists_how": [
+      "Pick a list, search for a patient, open the result."
+    ],
+    "help_worklists_wrong": [
+      "The page says the plugin is missing? Then it is not installed here.",
+      "The modalities still get their worklist from the broker — this page is only for looking."
+    ],
+    "help_iid_title": "Open study (IID)",
+    "help_iid_what": [
+      "The entry point another RIS/KIS calls to jump straight to a study (IHE Invoke Image Display)."
+    ],
+    "help_iid_how": [
+      "This page is meant to be called, not clicked: the request opens the study when it fits."
+    ],
+    "help_iid_wrong": [
+      "An error means the request was incomplete: it needs either studyUID or accessionNumber (not both) and a valid requestType."
+    ]
   }
 }

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { Download, Image, Send, Eye, Trash2, Pencil, Shield, Search, GitMerge, FileText, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -180,7 +181,8 @@ export default function InstanceDetailPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          <PageHelp helpId="instanceDetail" prefix="help" />
           <Button variant="outline" size="sm" className="gap-1.5"><Eye className="h-3.5 w-3.5" /> {t('instance.viewer')}</Button>
           {canDownload && (
             <TooltipProvider>

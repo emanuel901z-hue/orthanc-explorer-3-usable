@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { RadioTower } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { getConfig } from '@/config/runtime';
-import { PageHelp } from './PageHelp';
+import { PageHelp } from '@/shared/components/PageHelp';
 
 export function BrokerPageShell({
   titleKey,

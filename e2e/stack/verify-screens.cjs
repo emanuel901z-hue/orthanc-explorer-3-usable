@@ -127,6 +127,11 @@ async function checkView(page, view, viewport) {
     `${snapshot.scrollWidth}>${snapshot.innerWidth}`);
   record(`${tag}: keine Rohschlüssel`, snapshot.rawKeys.length === 0, snapshot.rawKeys.join(','));
   record(`${tag}: Ansicht ist nicht leer`, snapshot.length > 40, `${snapshot.length} Zeichen`);
+  // Every page in the walk carries the "what is this?" button. It only renders
+  // when the help texts resolve — a missing translation makes the button vanish,
+  // so this doubles as a check for the help content itself.
+  record(`${tag}: Hilfe-Knopf vorhanden`,
+    (await page.getByTestId('page-help').count()) > 0);
   record(`${tag}: erwarteter Inhalt sichtbar`, view.expect.test(snapshot.text),
     snapshot.text.split('\n')[0].slice(0, 60));
 

@@ -1,10 +1,15 @@
 /**
- * PageHelp — „Was ist das?" für jede Broker-Seite.
+ * PageHelp — „Was ist das?" für jede Seite.
  *
  * A novice opens a page called "Routing rules" and has no idea what a rule does,
  * what the priority means or what happens if it is wrong. The help button
  * answers that in plain words: what the page is for, what to fill in, the
  * mistakes to avoid and how to check the result — without leaving the page.
+ *
+ * `prefix` selects the translation section: the broker pages own
+ * `broker.help_<id>_*`, the rest of the UI uses `help.<id>_*`. The wording
+ * pattern is the same in both — what it is / how to work with it / what to do
+ * when nothing arrives.
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,26 +23,30 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-export function PageHelp({ helpId }: { helpId: string }) {
+export function PageHelp({ helpId, prefix = 'broker' }: {
+  helpId: string;
+  prefix?: 'broker' | 'help';
+}) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   // the visible chrome is translated into every language; the detailed help
   // bodies currently exist in German and English (English fills the rest)
-  const detailedHelpInEnglish = !['en', 'de'].includes(i18n.resolvedLanguage ?? 'en');
+  // a page rendered without the i18n setup must not crash — English is the fallback
+  const detailedHelpInEnglish = !['en', 'de'].includes(i18n?.resolvedLanguage ?? 'en');
 
   // every help text has: what it is / what to fill in / what goes wrong
   const sections: { heading: string; items: string[] }[] = [
     {
-      heading: t('broker.helpWhat'),
-      items: t(`broker.help_${helpId}_what`, { returnObjects: true, defaultValue: [] }) as string[],
+      heading: t(`${prefix}.helpWhat`),
+      items: t(`${prefix}.help_${helpId}_what`, { returnObjects: true, defaultValue: [] }) as string[],
     },
     {
-      heading: t('broker.helpHow'),
-      items: t(`broker.help_${helpId}_how`, { returnObjects: true, defaultValue: [] }) as string[],
+      heading: t(`${prefix}.helpHow`),
+      items: t(`${prefix}.help_${helpId}_how`, { returnObjects: true, defaultValue: [] }) as string[],
     },
     {
-      heading: t('broker.helpWrong'),
-      items: t(`broker.help_${helpId}_wrong`, { returnObjects: true, defaultValue: [] }) as string[],
+      heading: t(`${prefix}.helpWrong`),
+      items: t(`${prefix}.help_${helpId}_wrong`, { returnObjects: true, defaultValue: [] }) as string[],
     },
   ].map((section) => ({
     ...section,
@@ -54,11 +63,11 @@ export function PageHelp({ helpId }: { helpId: string }) {
         variant="outline"
         size="sm"
         data-testid="page-help"
-        aria-label={t('broker.helpButton')}
+        aria-label={t(`${prefix}.helpButton`)}
         onClick={() => setOpen(true)}
       >
         <HelpCircle className="h-4 w-4 mr-1" />
-        {t('broker.helpButton')}
+        {t(`${prefix}.helpButton`)}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -78,7 +87,7 @@ export function PageHelp({ helpId }: { helpId: string }) {
             ))}
             {detailedHelpInEnglish && (
               <p className="border-t pt-3 text-xs text-muted-foreground">
-                {t('broker.i18nBrokerNote')}
+                {t(`${prefix}.i18nNote`)}
               </p>
             )}
           </div>

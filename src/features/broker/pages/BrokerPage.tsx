@@ -39,7 +39,7 @@ import { MppsCard } from '../components/MppsCard';
 import { StatsCard } from '../components/StatsCard';
 import { SpoolCard } from '../components/SpoolCard';
 import { RbacBanner } from '../components/RbacBanner';
-import { PageHelp } from '../components/PageHelp';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { useBrokerSourceWrites } from '../hooks/use-broker-writes';
 import { usePersistedState } from '@/store/ui-state';
 

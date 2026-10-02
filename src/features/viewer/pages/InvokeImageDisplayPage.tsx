@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -83,7 +84,10 @@ export default function InvokeImageDisplayPage() {
     <div className="min-h-screen flex items-center justify-center p-6 bg-background">
       <Card className="w-full max-w-xl">
         <CardContent className="pt-6 space-y-3">
-          <h1 className="text-lg font-semibold">{t('iid.title')}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-lg font-semibold">{t('iid.title')}</h1>
+            <PageHelp helpId="iid" prefix="help" />
+          </div>
 
           {request.error ? (
             <>

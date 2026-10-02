@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { format, startOfDay, endOfDay } from 'date-fns';
 import {
   Upload,
@@ -570,8 +571,9 @@ export default function ActivityPage() {
       <div className="flex-1 overflow-auto p-4 md:p-6 space-y-4 animate-fade-in">
         {/* Header — H1 for accessibility (screen-reader-only, visible title is the summary badges) */}
         <h1 className="sr-only">{t('activity.title')}</h1>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <p className="text-sm text-muted-foreground hidden sm:block">{t('activity.subtitle')}</p>
+          <PageHelp helpId="activity" prefix="help" />
           <Button variant="outline" size="sm" className="gap-1.5 ml-auto" onClick={exportCsv}>
             <FileDown className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t('activity.exportCsv')}</span>

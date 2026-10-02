@@ -70,6 +70,7 @@ import StudyLabelDialog from '@/features/studies/components/StudyLabelDialog';
 import QuickReportDialog from '@/features/studies/components/QuickReportDialog';
 import { FileText } from 'lucide-react';
 import { useFeature } from '@/config/features';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { smartSearch } from '@/lib/smart-search';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { deleteStudyAction } from '@/actions/deleteStudy';
@@ -356,6 +357,19 @@ export default function StudyListPage() {
     },
     [setSearchParams],
   );
+
+  // "0 Studien gefunden" is usually a filter that is too narrow — the empty state
+  // has to offer the way back, otherwise the operator is stuck.
+  const FILTER_KEYS = ['q', 'patientId', 'accession', 'description', 'modality',
+                       'labelMode', 'withoutLabels'];
+  const hasFilters = FILTER_KEYS.some((key) => (searchParams.get(key) ?? '') !== '');
+  const clearFilters = useCallback(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      for (const key of FILTER_KEYS) next.delete(key);
+      return next;
+    });
+  }, [setSearchParams]);
 
   const columns: ColumnDef<Study>[] = useMemo(
     () => [
@@ -707,13 +721,14 @@ export default function StudyListPage() {
   return (
     <div className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('studies.title')}</h1>
           <p className="text-sm text-muted-foreground">
             {t('studies.studiesFound', { count: filteredStudies.length })}
           </p>
         </div>
+        <PageHelp helpId="studies" prefix="help" />
       </div>
 
       {/* Search Bar */}
@@ -1061,8 +1076,13 @@ export default function StudyListPage() {
                 </div>
               ))
             ) : table.getRowModel().rows.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                {t('studyList.empty')}
+              <div className="text-center py-12 text-muted-foreground space-y-3">
+                <p>{t('studyList.empty')}</p>
+                {hasFilters && (
+                  <Button variant="outline" size="sm" onClick={clearFilters}>
+                    {t('studyList.resetFilters')}
+                  </Button>
+                )}
               </div>
             ) : (
               table.getRowModel().rows.map((row) => {
@@ -1252,7 +1272,14 @@ export default function StudyListPage() {
                     colSpan={columns.length}
                     className="text-center py-12 text-muted-foreground"
                   >
-                    {t('studyList.empty')}
+                    <div className="space-y-3">
+                      <p>{t('studyList.empty')}</p>
+                      {hasFilters && (
+                        <Button variant="outline" size="sm" onClick={clearFilters}>
+                          {t('studyList.resetFilters')}
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (

@@ -39,6 +39,9 @@ const KEYS_FROM_A_VARIABLE = [
   'localAccessionRequired',
   'localStationInvalid',
   'localUidInvalid',
+  // the shared PageHelp builds its keys from the `prefix` prop
+  // (`t(`${prefix}.i18nNote`)`), so the broker variant is not a literal anywhere
+  'i18nNote',
 ];
 
 function sourceFiles(dir: string): string[] {
@@ -53,9 +56,14 @@ function sourceFiles(dir: string): string[] {
 const sources = [
   ...sourceFiles(HERE).map((path) => readFileSync(path, 'utf8')),
   readFileSync(join(SRC, 'api', 'broker.ts'), 'utf8'),
+  // the shared help component builds both sections' keys from its `prefix` prop
+  readFileSync(join(SRC, 'shared', 'components', 'PageHelp.tsx'), 'utf8'),
 ].join('\n');
 
-const broker = JSON.parse(readFileSync(join(LOCALES, 'en.json'), 'utf8')).broker as Record<string, unknown>;
+const locale = JSON.parse(readFileSync(join(LOCALES, 'en.json'), 'utf8'));
+const broker = locale.broker as Record<string, unknown>;
+/** The shared help texts of the base pages live in their own section. */
+const baseHelp = locale.help as Record<string, unknown>;
 const keys = Object.keys(broker);
 
 /** `t(\`broker.xyz_${...}\`)` → the prefix "xyz_". */
@@ -66,6 +74,17 @@ const prefixFamilies = new Set(
 const suffixFamilies = new Set(
   [...sources.matchAll(/broker\.\$\{\w+\}(\w+)/g)].map((m) => m[1]),
 );
+/**
+ * Keys the shared `PageHelp` builds from its `prefix` prop: `${prefix}.helpWhat`
+ * and `${prefix}.help_${helpId}_what` — neither is a literal anywhere.
+ */
+const prefixBuilt = new Set(
+  [...sources.matchAll(/\$\{prefix\}\.(\w+)(?!\$\{)/g)].map((m) => m[1]),
+);
+const prefixBuiltFamilies = new Set(
+  [...sources.matchAll(/\$\{prefix\}\.(\w+)\$\{/g)].map((m) => m[1]),
+);
+
 /** Keys that appear as a whole string literal somewhere. */
 /**
  * Forward direction: any quoted `broker.X` counts as reachable — the pages pass
@@ -90,17 +109,25 @@ describe('broker translation keys', () => {
     expect(suffixFamilies.size).toBeGreaterThanOrEqual(2);
   });
 
-  it('has no key that nothing can reach', () => {
-    const unreachable = keys.filter((key) => {
+  const unreachableKeys = (candidate: string[]) => candidate.filter((key) => {
       if (referencedKeys.has(key) || KEYS_FROM_A_VARIABLE.includes(key)) return false;
-      if (CHROME_KEYS.includes(key)) return false;
+      if (prefixBuilt.has(key)) return false;
       if ([...prefixFamilies].some((prefix) => key.startsWith(prefix))) return false;
-      if ([...suffixFamilies].some((suffix) => key.endsWith(suffix))) return false;
-      return true;
-    });
+      if (CHROME_KEYS.includes(key)) return false;
+    if ([...prefixBuiltFamilies].some((prefix) => key.startsWith(prefix))) return false;
+    if ([...suffixFamilies].some((suffix) => key.endsWith(suffix))) return false;
+    return true;
+  });
 
+  it('has no broker key that nothing can reach', () => {
+    const unreachable = unreachableKeys(keys);
     expect(unreachable, `dead keys (remove them or use them): ${unreachable.join(', ')}`)
       .toEqual([]);
+  });
+
+  it('has no base help key that nothing can reach', () => {
+    const unreachable = unreachableKeys(Object.keys(baseHelp));
+    expect(unreachable, `dead help keys: ${unreachable.join(', ')}`).toEqual([]);
   });
 
   it('has a translation for every key the code names', () => {

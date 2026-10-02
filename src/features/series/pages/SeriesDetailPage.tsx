@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { PageHelp } from '@/shared/components/PageHelp';
 import {
   Image,
   HardDrive,
@@ -323,7 +324,8 @@ export default function SeriesDetailPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          <PageHelp helpId="seriesDetail" prefix="help" />
           <Button variant="outline" size="sm" className="gap-1.5">
             <Eye className="h-3.5 w-3.5" /> {t('series.viewer')}
           </Button>

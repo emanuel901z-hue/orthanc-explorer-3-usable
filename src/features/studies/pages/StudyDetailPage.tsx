@@ -40,6 +40,7 @@ import { ModifyStudyDialog } from '@/features/studies/components/ModifyStudyDial
 import { useAuditLog } from '@/features/audit/hooks/use-audit-log';
 import { toast } from 'sonner';
 import { deleteStudyAction } from '@/actions/deleteStudy';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { deleteSeriesAction } from '@/actions/deleteSeries';import { downloadStudyAction } from '@/actions/downloadStudy';
 import { OrthancError } from '@/lib/errors';
 import { useFeature } from '@/config/features';
@@ -81,6 +82,11 @@ function SeriesThumbnail({ instanceId }: { instanceId?: string }) {
       <Image className="h-6 w-6 text-muted-foreground" />
     </div>
   );
+}
+
+/** Dünner Trenner zwischen den Aktionsgruppen. */
+function ActionGroupDivider() {
+  return <span className="hidden sm:block h-5 w-px bg-border mx-0.5" aria-hidden="true" />;
 }
 
 export default function StudyDetailPage() {
@@ -369,7 +375,23 @@ export default function StudyDetailPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          {/* Gruppen in der Reihenfolge, in der man sie braucht: übertragen,
+              herunterladen, kennzeichnen, ändern, Datenschutz, Werkzeuge. Der
+              Trenner macht die Gruppen sichtbar, ohne etwas zu verstecken. */}
+          <ActionGroupDivider />
+          {canSend && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('actions.send')}</Button>
+          )}
+          {canSend && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPeerOpen(true)}><Server className="h-3.5 w-3.5" /> {t('actions.sendToPeer', { defaultValue: 'To peer' })}</Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('peer.buttonHint')}</TooltipContent>
+            </Tooltip>
+          )}
+          <PageHelp helpId="studyDetail" prefix="help" />
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate(`/viewer/${studyId}`)}><Eye className="h-3.5 w-3.5" /> {t('actions.viewer')}</Button>
           <Button
             variant="outline"
@@ -420,6 +442,7 @@ export default function StudyDetailPage() {
                 </Button>
               ));
           })()}
+          {canDownload && <ActionGroupDivider />}
           {canDownload && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -468,20 +491,11 @@ export default function StudyDetailPage() {
               <TooltipContent>{t('studyDetail.dicomDirTooltip', { defaultValue: 'Download as ZIP with DICOMDIR index' })}</TooltipContent>
             </Tooltip>
           )}
+          {canEditLabels && labelsSupported && <ActionGroupDivider />}
           {canEditLabels && labelsSupported && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setLabelOpen(true)}><Tag className="h-3.5 w-3.5" /> {t('actions.label')}</Button>
           )}
-          {canSend && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('actions.send')}</Button>
-          )}
-          {canSend && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPeerOpen(true)}><Server className="h-3.5 w-3.5" /> {t('actions.sendToPeer', { defaultValue: 'To peer' })}</Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('peer.buttonHint')}</TooltipContent>
-            </Tooltip>
-          )}
+          {canModify && <ActionGroupDivider />}
           {canModify && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setModifyOpen(true)}><Pencil className="h-3.5 w-3.5" /> {t('actions.modify')}</Button>
           )}
@@ -491,9 +505,11 @@ export default function StudyDetailPage() {
           {canModify && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSplitOpen(true)}><Scissors className="h-3.5 w-3.5" /> {t('split.title', { defaultValue: 'Split' })}</Button>
           )}
+          {canAnonymize && <ActionGroupDivider />}
           {canAnonymize && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAnonOpen(true)}><Shield className="h-3.5 w-3.5" /> {t('actions.anonymize')}</Button>
           )}
+          <ActionGroupDivider />
           {/* ApiView — open the Orthanc REST API URL for this study in a new tab */}
           <Button
             variant="outline"

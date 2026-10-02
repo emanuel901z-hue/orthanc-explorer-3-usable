@@ -58,7 +58,7 @@ describe('PageHelp in a language without detailed help', () => {
     // the chrome *and* the note are French (the note is part of the broker
     // catalogue and translated in all nine languages); only the detailed help
     // texts themselves stay German/English, which the note explains
-    const note = i18nModule.t('broker.i18nBrokerNote');
+    const note = i18nModule.t('broker.i18nNote');
     expect(note.length).toBeGreaterThan(20);
     expect(dialog).toHaveTextContent(note.slice(0, 30));
     await i18nModule.changeLanguage('en');

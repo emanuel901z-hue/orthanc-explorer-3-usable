@@ -181,7 +181,8 @@
       "bulkSuccess": "{{count}} Studie(n) in Quarantäne verschoben.",
       "partial": "{{ok}} von {{total}} verschoben — {{failed}} fehlgeschlagen.",
       "error": "Quarantäne fehlgeschlagen."
-    }
+    },
+    "resetFilters": "Filter zurücksetzen"
   },
   "studyDetail": {
     "patientId": "Patienten-ID",
@@ -446,7 +447,7 @@
     "modify": "Bearbeiten",
     "anonymize": "Anonymisieren",
     "delete": "Löschen",
-    "label": "Label",
+    "label": "Kennzeichnung",
     "quarantine": "In Quarantäne",
     "sendToPeer": "An Peer"
   },
@@ -1615,7 +1616,6 @@
     "duplicateAet": "Diese AET wird bereits von {{name}} verwendet — zwei Knoten mit derselben AET sind nicht unterscheidbar.",
     "duplicateRule": "Für diese Quelle und dieses Ziel existiert bereits eine Regel.",
     "tagInvalid": "DICOM-Tag oder Schlüsselwort erwartet, z. B. (0010,0010) oder PatientName.",
-    "i18nBrokerNote": "Die sichtbare Oberfläche ist übersetzt; die ausführlichen Hilfetexte liegen auf Deutsch und Englisch vor (Englisch füllt den Rest).",
     "errHost": "Nur die Adresse eingeben: keine Leerzeichen, keine Schrägstriche, kein http://.",
     "helpButton": "Was ist das?",
     "helpIntro": "Kurz erklärt: wofür die Seite ist, was Sie eintragen und was typischerweise schiefgeht.",
@@ -2067,7 +2067,8 @@
     "pirEffectMerge": "Eine Zusammenführung entzieht die alte ID: Arbeitslisten-Antwort und Routing folgen der aktuellen.",
     "pirEffectLink": "Eine Verknüpfung lässt beide IDs gültig: es wird nichts umgezogen und keine Antwort umgeschrieben.",
     "gateTitle": "MWL-Broker gehört nicht zu dieser Installation",
-    "gateHint": "Die Broker-Konsole ist hier abgeschaltet. brokerUrl (und enableMwlBroker: true) in config.js setzen, wenn diese Installation die Arbeitslisten der Modalitäten bedienen soll."
+    "gateHint": "Die Broker-Konsole ist hier abgeschaltet. brokerUrl (und enableMwlBroker: true) in config.js setzen, wenn diese Installation die Arbeitslisten der Modalitäten bedienen soll.",
+    "i18nNote": "Die sichtbare Oberfläche ist übersetzt; die ausführlichen Hilfetexte liegen auf Deutsch und Englisch vor (Englisch füllt den Rest)."
   },
   "shortcuts": {
     "nav": {
@@ -2260,5 +2261,142 @@
     "partialFailure": "{{failed}} Instanz(en) konnten nicht verschoben werden — die Quell-Instanzen wurden behalten.",
     "deleteWarning": "{{count}} Quell-Instanz(en) konnten nicht gelöscht werden.",
     "error": "Verschieben fehlgeschlagen"
+  },
+  "help": {
+    "helpButton": "Was ist das?",
+    "helpIntro": "Kurz und in Worten: wofür die Seite da ist, wie man sie bedient und was zu tun ist, wenn nichts ankommt.",
+    "helpWhat": "Was ist das?",
+    "helpHow": "Wie bediene ich das?",
+    "helpWrong": "Wenn etwas nicht klappt",
+    "i18nNote": "Die sichtbare Oberfläche ist übersetzt; die ausführlichen Hilfetexte liegen auf Deutsch und Englisch vor (Englisch füllt den Rest).",
+    "help_studies_title": "Studien — die Liste",
+    "help_studies_what": [
+      "Alle Studien, die im Orthanc dieses Hauses liegen — die Arbeitsliste für den Tag.",
+      "Die Suche findet Patientenname, Zugangsnummer, Datum, Modalität, UID und Beschreibung."
+    ],
+    "help_studies_how": [
+      "Suchbegriff eintippen (mehrere Begriffe mit Komma trennen), Zeile anklicken für die Details.",
+      "Spalten über „Spalten\" ein- und ausblenden — die Auswahl bleibt erhalten."
+    ],
+    "help_studies_wrong": [
+      "Nichts gefunden? Der Filter ist meist zu eng — zurücksetzen.",
+      "Eine frisch aufgenommene Studie kann noch übertragen werden (Status „empfängt\")."
+    ],
+    "help_studyDetail_title": "Eine Studie im Detail",
+    "help_studyDetail_what": [
+      "Die Studie mit ihren Serien, Bildern und DICOM-Tags.",
+      "Die Schaltflächen rechts wirken auf die ganze Studie."
+    ],
+    "help_studyDetail_how": [
+      "Serie anklicken, um die Bilder zu sehen; die Schaltflächen für Senden, Kennzeichnen, Bearbeiten, Anonymisieren nutzen.",
+      "Die Reiter unten wechseln zwischen Übersicht, DICOM-Tags und Aktivitätsprotokoll."
+    ],
+    "help_studyDetail_wrong": [
+      "Bilder fehlen? Sie können noch übertragen werden — Status prüfen.",
+      "Anonymisieren und Löschen lassen sich nicht zurücknehmen. Vorher den Patienten prüfen."
+    ],
+    "help_seriesDetail_title": "Eine Serie",
+    "help_seriesDetail_what": [
+      "Eine Serie ist ein Untersuchungsschritt innerhalb einer Studie — z. B. die native Phase eines CT."
+    ],
+    "help_seriesDetail_how": [
+      "Bild anklicken für Details; die Schaltflächen oben wirken auf die ganze Serie."
+    ],
+    "help_seriesDetail_wrong": [
+      "Eine leere Vorschau ist kein Fehler: manche Bildformate kann der Browser nicht darstellen.",
+      "Die Metadaten sind auch dann vollständig, wenn die Vorschau leer bleibt."
+    ],
+    "help_instanceDetail_title": "Ein einzelnes Bild",
+    "help_instanceDetail_what": [
+      "Ein Bild mit seinen Tags, der Transfer-Syntax und einer Vorschau."
+    ],
+    "help_instanceDetail_how": [
+      "Vorschau zum Prüfen, Tag-Liste zum Nachschlagen, die Schaltflächen oben zum Handeln."
+    ],
+    "help_instanceDetail_wrong": [
+      "Bei manchen Formaten fehlt die Vorschau — die Metadaten sind trotzdem vollständig.",
+      "Ein einzelnes Bild zu löschen verändert die Studie; die Zähler in der Liste folgen."
+    ],
+    "help_upload_title": "Hochladen",
+    "help_upload_what": [
+      "Dateien in dieses Orthanc: DICOM-Ordner, ZIP-Archive oder einzelne Dateien."
+    ],
+    "help_upload_how": [
+      "Dateien hierher ziehen oder auswählen; der Fortschritt läuft pro Datei.",
+      "Hochgeladene Studien erscheinen in der Studienliste."
+    ],
+    "help_upload_wrong": [
+      "Ein großes ZIP dauert — auf den Fortschritt warten.",
+      "Ein Duplikat wird nicht ersetzt; Orthanc legt es als neue Instanz an."
+    ],
+    "help_activity_title": "Aktivität",
+    "help_activity_what": [
+      "Was in dieser Installation passiert ist: Zugriffe, Uploads, Änderungen.",
+      "Praktisch, wenn jemand fragt: „Wer hat diese Studie angefasst?\""
+    ],
+    "help_activity_how": [
+      "Zeitraum und Typ wählen, Zeile anklicken für die Details.",
+      "Als CSV exportieren, wenn es in eine Akte soll."
+    ],
+    "help_activity_wrong": [
+      "Nichts zu sehen? Der Zeitraum ist zu kurz — größer stellen."
+    ],
+    "help_auditLogs_title": "Änderungsprotokoll (diese Installation)",
+    "help_auditLogs_what": [
+      "Wer wann was geändert hat: Anonymisieren, Löschen, Senden.",
+      "Das Gegenstück zum Änderungsprotokoll des Brokers."
+    ],
+    "help_auditLogs_how": [
+      "Nach Aktion oder Zeitraum filtern, Zeile öffnen für die Details."
+    ],
+    "help_auditLogs_wrong": [
+      "Einträge gibt es erst ab dem Aufsetzen dieser Installation.",
+      "Eine Aktion, die hier nicht steht, lief nicht über diese Oberfläche."
+    ],
+    "help_remoteSources_title": "Remote-Quellen",
+    "help_remoteSources_what": [
+      "Fremde Systeme, die diese Installation abfragen darf: DICOM-Knoten (Q/R) und DICOMweb-Server."
+    ],
+    "help_remoteSources_how": [
+      "Quelle wählen, Suchbegriff eingeben, Ergebnis öffnen — oder zuerst die Verbindung testen."
+    ],
+    "help_remoteSources_wrong": [
+      "Keine Antwort? Host, Port und die Freigabe beim Ziel prüfen; der Test-Knopf sagt, was fehlt.",
+      "„DICOMweb\" braucht eine URL, „DICOM Q/R\" braucht Host und Port."
+    ],
+    "help_settings_title": "Einstellungen",
+    "help_settings_what": [
+      "Alles, was diese Installation konfiguriert: System, Modalitäten, DICOMweb-Server, Peers, Viewer, Darstellung.",
+      "Modalitäten sind die Bildgebungsgeräte; Peers sind andere Orthanc-Instanzen zum Hinsenden."
+    ],
+    "help_settings_how": [
+      "Reiter wählen, Eintrag anlegen oder ändern, speichern.",
+      "Änderungen wirken sofort — außer wo „Erst nach Neustart\" steht."
+    ],
+    "help_settings_wrong": [
+      "Ein Gerät antwortet nicht? Erst das Echo testen, dann Host, Port und AET prüfen.",
+      "Eine Einstellung mit „Vom Deployment gesetzt\" lässt sich hier nicht ändern."
+    ],
+    "help_worklists_title": "Arbeitslisten",
+    "help_worklists_what": [
+      "Arbeitslisten aus dem RIS — hier nur sichtbar, wenn die Arbeitslisten-Erweiterung in diesem Orthanc installiert ist."
+    ],
+    "help_worklists_how": [
+      "Liste wählen, Patienten suchen, Ergebnis öffnen."
+    ],
+    "help_worklists_wrong": [
+      "Die Seite meldet, die Erweiterung fehle? Dann ist sie hier nicht installiert.",
+      "Die Modalitäten bekommen ihre Arbeitsliste weiterhin vom Broker — diese Seite ist nur zum Nachsehen."
+    ],
+    "help_iid_title": "Studie öffnen (IID)",
+    "help_iid_what": [
+      "Der Einstiegspunkt, den ein fremdes RIS/KIS aufruft, um direkt zu einer Studie zu springen (IHE Invoke Image Display)."
+    ],
+    "help_iid_how": [
+      "Diese Seite ist zum Aufrufen gedacht, nicht zum Anklicken: passt die Anfrage, öffnet sie die Studie."
+    ],
+    "help_iid_wrong": [
+      "Eine Fehlermeldung heißt: die Anfrage war unvollständig. Sie braucht entweder studyUID oder accessionNumber (nicht beides) und einen gültigen requestType."
+    ]
   }
 }

@@ -6,6 +6,7 @@
  */
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PageHelp } from '@/shared/components/PageHelp';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFeature } from '@/config/features';
 import { ClipboardList, Upload, Trash2, Loader2, FileText, Search } from 'lucide-react';
@@ -61,10 +62,13 @@ export default function WorklistsPage() {
     // No plugin API in this deployment: explain instead of showing an empty list
     return (
       <div className="p-3 sm:p-4 md:p-6 space-y-4 animate-fade-in">
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <ClipboardList className="h-6 w-6" />
-          {t('worklists.title')}
-        </h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <ClipboardList className="h-6 w-6" />
+            {t('worklists.title')}
+          </h1>
+          <PageHelp helpId="worklists" prefix="help" />
+        </div>
         <Card className="border-warning/30 bg-warning/5">
           <CardContent className="p-3 text-sm text-warning">
             {t('worklists.disabled')}
@@ -86,6 +90,7 @@ export default function WorklistsPage() {
             {t('worklists.subtitle')}
           </p>
         </div>
+        <PageHelp helpId="worklists" prefix="help" />
         <Button
           size="sm"
           className="gap-1.5 shrink-0"
