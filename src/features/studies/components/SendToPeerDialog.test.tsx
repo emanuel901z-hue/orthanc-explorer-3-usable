@@ -62,7 +62,9 @@ describe('SendToPeerDialog', () => {
     renderDialog();
 
     await waitFor(() => {
-      expect(screen.getByText(/No Orthanc peers configured/i)).toBeInTheDocument();
+      expect(screen.getByText(/No destination is set up yet/i)).toBeInTheDocument();
+      // the hint has to lead somewhere: peers are created in the settings
+      expect(screen.getByText(/Settings → Peers/i)).toBeInTheDocument();
     });
   });
 });

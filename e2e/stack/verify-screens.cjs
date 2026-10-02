@@ -230,6 +230,45 @@ async function checkDialogs(page, viewport) {
   record(`${tag('dialog-about')}: About-Dialog geöffnet`,
     (await page.locator('[role="dialog"]').count()) > 0);
 
+  // peers: the tab behind the "send to peer" button. Before it existed the button
+  // led into a dialog that could only say "edit the Orthanc configuration file" —
+  // peers live in the database here, so there was no file to edit.
+  await page.keyboard.press('Escape');
+  await page.goto(`${BASE}/oe3/settings`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1200);
+  // by test id: below `sm` the tab labels are hidden, so the tabs carry only an
+  // icon and have no accessible name on a phone
+  await page.getByTestId('settings-tab-peers').first().click().catch(() => {});
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: join(SHOTS, `${tag('peers-tab')}.png`), fullPage: false });
+  record(`${tag('peers-tab')}: Peers-Tab erreichbar`,
+    (await page.getByTestId('peers-tab').count()) > 0);
+  record(`${tag('peers-tab')}: erklärt sich (leer oder Liste)`,
+    (await page.getByText(/noch keine peers|no peers yet|pacs-kh/i).count()) > 0);
+
+  const addPeer = page.getByRole('button', { name: /peer hinzufügen|add peer/i }).first();
+  await addPeer.click().catch(() => {});
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: join(SHOTS, `${tag('dialog-peer-add')}.png`), fullPage: false });
+  const peerFits = await page.evaluate(() => {
+    const d = document.querySelector('[role="dialog"]');
+    if (!d) return null;
+    const box = d.getBoundingClientRect();
+    return { top: Math.round(box.top), height: Math.round(box.height),
+             fits: box.top >= 0 && box.bottom <= window.innerHeight + 1 };
+  });
+  record(`${tag('dialog-peer-add')}: Dialog passt in den Viewport`,
+    peerFits !== null && peerFits.fits,
+    peerFits ? `top=${peerFits.top} height=${peerFits.height}` : 'kein Dialog');
+  record(`${tag('dialog-peer-add')}: URL-Feld erklärt das Format`,
+    (await page.getByText(/ohne pfad|without a path/i).count()) > 0);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(400);
+
+  // back to a page that has a help button — this block started on /oe3/settings
+  await page.goto(`${BASE}/oe3/broker`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1200);
+
   // help dialog ("what is this?")
   await page.keyboard.press('Escape');
   await page.waitForTimeout(400);

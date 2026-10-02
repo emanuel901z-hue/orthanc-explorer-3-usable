@@ -13,6 +13,7 @@ import {
   Monitor,
   Check,
   Languages,
+  Share2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +29,7 @@ import EmbeddedThemingCard from '@/features/settings/components/EmbeddedThemingC
 import SystemInfoTab from '@/features/settings/components/SystemInfoTab';
 import ModalitiesTab from '@/features/settings/components/ModalitiesTab';
 import DicomWebTab from '@/features/settings/components/DicomWebTab';
+import { PeersTab } from '@/features/settings/components/PeersTab';
 import ViewerTab from '@/features/settings/components/ViewerTab';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
 import { toast } from 'sonner';
@@ -92,6 +94,10 @@ export default function SettingsPage() {
             <Globe className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t('settings.dicomweb')}</span>
           </TabsTrigger>
+          <TabsTrigger value="peers" data-testid="settings-tab-peers" className="gap-1.5">
+            <Share2 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t('settings.peers')}</span>
+          </TabsTrigger>
           <TabsTrigger value="viewer" className="gap-1.5">
             <Eye className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t('settings.viewer')}</span>
@@ -118,6 +124,10 @@ export default function SettingsPage() {
             onAddClick={() => setAddServerOpen(true)}
             onEditClick={(s) => setEditServer(s)}
           />
+        </TabsContent>
+
+        <TabsContent value="peers" className="space-y-4">
+          <PeersTab />
         </TabsContent>
 
         <TabsContent value="viewer" className="space-y-4">

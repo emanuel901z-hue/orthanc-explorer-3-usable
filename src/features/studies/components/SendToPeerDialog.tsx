@@ -85,7 +85,8 @@ export function SendToPeerDialog({
           </DialogTitle>
           <DialogDescription>
             {t('peer.sendDescription', {
-              defaultValue: 'Transfer this resource directly to another Orthanc peer via HTTP.',
+              defaultValue: 'Transfers this study over HTTP to another Orthanc instance '
+                + '(not DICOM). The transfer is written to the audit trail.',
             })}
           </DialogDescription>
         </DialogHeader>
@@ -109,10 +110,12 @@ export function SendToPeerDialog({
           ) : peers.length === 0 ? (
             <div className="rounded-lg border border-dashed p-6 text-center text-xs text-muted-foreground">
               <Server className="h-8 w-8 mx-auto mb-2 opacity-30" />
-              <p>{t('peer.noPeers', { defaultValue: 'No Orthanc peers configured.' })}</p>
+              <p>{t('peer.noPeers', { defaultValue: 'No destination is set up yet.' })}</p>
+              {/* Peers live in the database in this deployment — there is no file
+                  to edit, so the hint has to point at the tab that can create one. */}
               <p className="text-[11px] mt-1 text-muted-foreground/70">
-                {t('peer.configureInOrthancJson', {
-                  defaultValue: 'Peers can be configured in Orthanc configuration file.',
+                {t('peer.addInSettings', {
+                  defaultValue: 'Add one under Settings → Peers.',
                 })}
               </p>
             </div>

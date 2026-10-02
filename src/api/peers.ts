@@ -3,6 +3,7 @@
  *
  * Covered:
  *   GET    /peers         — peersApi.list()
+ *   GET    /peers/:name   — peersApi.get()
  *   PUT    /peers/:name   — peersApi.put()
  *   DELETE /peers/:name   — peersApi.delete()
  */
@@ -18,6 +19,9 @@ export type PeerConfig = {
 export const peersApi = {
   /** GET /peers — Returns array of peer names (string[]). */
   list: () => orthancFetch<string[]>('/peers'),
+
+  /** GET /peers/:name — one peer's configuration (Url, Username, Password). */
+  get: (name: string) => orthancFetch<PeerConfig>(`/peers/${encodeURIComponent(name)}`),
 
   /** PUT /peers/:name — Creates or updates a peer. Body: PeerConfig. Returns 200 (void). */
   put: (name: string, body: PeerConfig) =>

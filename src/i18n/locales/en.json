@@ -65,7 +65,8 @@
     "installedPluginsHint": "Plugins installed on this Orthanc server.",
     "pluginActive": "Active",
     "pluginLoaded": "Loaded",
-    "noPluginsLoaded": "No plugins loaded"
+    "noPluginsLoaded": "No plugins loaded",
+    "peers": "Peers"
   },
   "studies": {
     "title": "Studies",
@@ -447,7 +448,7 @@
     "delete": "Delete",
     "label": "Label",
     "quarantine": "Quarantine",
-    "sendToPeer": "Peer"
+    "sendToPeer": "To peer"
   },
   "common": {
     "save": "Save",
@@ -2178,13 +2179,45 @@
   },
   "peer": {
     "sendTitle": "Send to Orthanc Peer",
-    "sendDescription": "Transfer this resource directly to another Orthanc peer via HTTP.",
+    "sendDescription": "Transfers this study over HTTP to another Orthanc instance (not DICOM). The transfer is written to the audit trail.",
     "selectPeer": "Select Destination Peer",
-    "noPeers": "No Orthanc peers configured.",
+    "noPeers": "No destination is set up yet.",
     "configureInOrthancJson": "Peers can be configured in Orthanc configuration file.",
     "send": "Send",
     "sendSuccess": "Successfully sent to peer {{peer}}.",
-    "sendError": "Failed to send to peer."
+    "sendError": "Failed to send to peer.",
+    "tabHint": "Peers are other Orthanc instances this one may send studies to (HTTP, not DICOM). The button \"Peer\" in a study uses them.",
+    "add": "Add peer",
+    "addTitle": "Add peer",
+    "editTitle": "Edit peer {{name}}",
+    "formHint": "A peer is another Orthanc instance. Sending to it transfers the images over HTTP — the receiving system must accept them.",
+    "name": "Name",
+    "nameHint": "How the destination appears in the list — e.g. the house or department.",
+    "nameImmutable": "The name cannot be changed: renaming would create a second peer and leave the old one behind.",
+    "url": "URL",
+    "urlHint": "Address of the other Orthanc, e.g. http://pacs-kh:8042 — without a path.",
+    "username": "User (optional)",
+    "password": "Password (optional)",
+    "credentialsHint": "Only if the other instance requires authentication. The password is stored in Orthanc and never shown again.",
+    "credentials": "Credentials",
+    "withCredentials": "with user",
+    "withoutCredentials": "without",
+    "actions": "Actions",
+    "edit": "Edit",
+    "remove": "Remove",
+    "removeTitle": "Remove peer {{name}}?",
+    "removeHint": "Images already sent stay where they are. Only the destination disappears from the list.",
+    "removed": "Peer {{name}} removed",
+    "removeFailed": "Could not remove the peer",
+    "savedNew": "Peer {{name}} added",
+    "savedExisting": "Peer {{name}} saved",
+    "saveFailed": "Could not save the peer",
+    "errName": "Please enter a name.",
+    "errUrl": "Please enter the URL.",
+    "empty": "No peers yet.",
+    "emptyHint": "Add the Orthanc of the other house or department to send studies there.",
+    "buttonHint": "Send over HTTP to another Orthanc instance (not the DICOM target) — destinations under Settings → Peers",
+    "addInSettings": "Add one under Settings → Peers."
   },
   "split": {
     "title": "Split Study",

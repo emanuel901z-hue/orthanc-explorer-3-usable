@@ -65,7 +65,8 @@
     "installedPluginsHint": "Auf diesem Orthanc-Server installierte Plugins.",
     "pluginActive": "Aktiv",
     "pluginLoaded": "Geladen",
-    "noPluginsLoaded": "Keine Plugins geladen"
+    "noPluginsLoaded": "Keine Plugins geladen",
+    "peers": "Peers"
   },
   "studies": {
     "title": "Studien",
@@ -447,7 +448,7 @@
     "delete": "Löschen",
     "label": "Label",
     "quarantine": "In Quarantäne",
-    "sendToPeer": "Peer"
+    "sendToPeer": "An Peer"
   },
   "common": {
     "save": "Speichern",
@@ -2178,13 +2179,45 @@
   },
   "peer": {
     "sendTitle": "An Orthanc-Peer senden",
-    "sendDescription": "Diese Ressource direkt per HTTP an eine andere Orthanc-Instanz übertragen.",
+    "sendDescription": "Überträgt diese Studie per HTTP an eine andere Orthanc-Instanz (nicht DICOM). Der Vorgang wird im Änderungsprotokoll festgehalten.",
     "selectPeer": "Ziel-Peer auswählen",
-    "noPeers": "Keine Orthanc-Peers konfiguriert.",
+    "noPeers": "Noch kein Ziel eingerichtet.",
     "configureInOrthancJson": "Peers können in der Orthanc-Konfigurationsdatei hinterlegt werden.",
     "send": "Senden",
     "sendSuccess": "Erfolgreich an Peer {{peer}} gesendet.",
-    "sendError": "Übertragung an Peer fehlgeschlagen."
+    "sendError": "Übertragung an Peer fehlgeschlagen.",
+    "tabHint": "Peers sind andere Orthanc-Instanzen, an die diese senden darf (HTTP, nicht DICOM). Die Schaltfläche „Peer“ in einer Studie nutzt sie.",
+    "add": "Peer hinzufügen",
+    "addTitle": "Peer hinzufügen",
+    "editTitle": "Peer {{name}} bearbeiten",
+    "formHint": "Ein Peer ist eine andere Orthanc-Instanz. Beim Senden werden die Bilder per HTTP übertragen — das empfangende System muss sie annehmen.",
+    "name": "Name",
+    "nameHint": "Wie das Ziel in der Liste erscheint — z. B. Haus oder Abteilung.",
+    "nameImmutable": "Der Name lässt sich nicht ändern: ein Umbenennen würde einen zweiten Peer anlegen und den alten zurücklassen.",
+    "url": "URL",
+    "urlHint": "Adresse des anderen Orthanc, z. B. http://pacs-kh:8042 — ohne Pfad.",
+    "username": "Benutzer (optional)",
+    "password": "Passwort (optional)",
+    "credentialsHint": "Nur wenn die andere Instanz eine Anmeldung verlangt. Das Passwort liegt im Orthanc und wird nie wieder angezeigt.",
+    "credentials": "Anmeldung",
+    "withCredentials": "mit Benutzer",
+    "withoutCredentials": "ohne",
+    "actions": "Aktionen",
+    "edit": "Bearbeiten",
+    "remove": "Entfernen",
+    "removeTitle": "Peer {{name}} entfernen?",
+    "removeHint": "Bereits gesendete Bilder bleiben, wo sie sind. Nur das Ziel verschwindet aus der Liste.",
+    "removed": "Peer {{name}} entfernt",
+    "removeFailed": "Peer konnte nicht entfernt werden",
+    "savedNew": "Peer {{name}} angelegt",
+    "savedExisting": "Peer {{name}} gespeichert",
+    "saveFailed": "Peer konnte nicht gespeichert werden",
+    "errName": "Bitte einen Namen eingeben.",
+    "errUrl": "Bitte die URL eingeben.",
+    "empty": "Noch keine Peers.",
+    "emptyHint": "Den Orthanc des anderen Hauses bzw. der Abteilung hinzufügen, um Studien dorthin zu senden.",
+    "buttonHint": "Per HTTP an eine andere Orthanc-Instanz senden (nicht an das DICOM-Ziel) — Ziele unter Einstellungen → Peers",
+    "addInSettings": "Unter Einstellungen → Peers hinzufügen."
   },
   "split": {
     "title": "Studie aufteilen",

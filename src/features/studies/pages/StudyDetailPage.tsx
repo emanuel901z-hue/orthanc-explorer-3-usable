@@ -475,7 +475,12 @@ export default function StudyDetailPage() {
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSendOpen(true)}><Send className="h-3.5 w-3.5" /> {t('actions.send')}</Button>
           )}
           {canSend && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPeerOpen(true)}><Server className="h-3.5 w-3.5" /> {t('actions.sendToPeer', { defaultValue: 'Peer' })}</Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPeerOpen(true)}><Server className="h-3.5 w-3.5" /> {t('actions.sendToPeer', { defaultValue: 'To peer' })}</Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('peer.buttonHint')}</TooltipContent>
+            </Tooltip>
           )}
           {canModify && (
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setModifyOpen(true)}><Pencil className="h-3.5 w-3.5" /> {t('actions.modify')}</Button>
