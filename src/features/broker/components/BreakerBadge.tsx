@@ -20,20 +20,22 @@ export function BreakerBadge({ state, retryInS, onReset, pending }: {
   const isOpen = state === 'open';
   const Icon = isOpen ? CircleOff : TriangleAlert;
   return (
+    // The reason ("retry in 0s") wraps rather than widening the row past a
+    // laptop viewport — the reset button stays at its own size.
     <span
-      className={`inline-flex items-center gap-1 whitespace-nowrap text-xs ${
+      className={`inline-flex items-center gap-1 text-xs break-words ${
         isOpen ? 'text-destructive' : 'text-amber-600'
       }`}
       title={isOpen ? t('broker.breakerOpenHint') : t('broker.breakerHalfOpenHint')}
     >
-      <Icon className="h-3 w-3" />
+      <Icon className="h-3 w-3 shrink-0" />
       {isOpen
         ? t('broker.breakerOpen', { seconds: retryInS ?? '?' })
         : t('broker.breakerHalfOpen')}
       <Button
         variant="ghost"
         size="sm"
-        className="h-9 w-9 p-0 sm:h-7 sm:w-7"
+        className="h-9 w-9 shrink-0 p-0 sm:h-7 sm:w-7"
         aria-label={t('broker.breakerReset')}
         onClick={onReset}
         disabled={pending}

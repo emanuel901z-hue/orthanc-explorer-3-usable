@@ -26,6 +26,16 @@ const BY_CODE: Record<string, string> = {
   no_enabled_source: '/broker/sources',
   no_working_source: '/broker/sources',
   aet_whitelist_empty: '/broker/settings',
+  // TLS has no entity of its own; the certificate handling lives on the
+  // settings page. Without this the finding is a dead end for the operator —
+  // exactly the trap the runbook warns about ("where do I fix this?").
+  tls_configuration_incomplete: '/broker/settings',
+  tls_file_unusable: '/broker/settings',
+  tls_key_mismatch: '/broker/settings',
+  tls_key_world_readable: '/broker/settings',
+  tls_verification_disabled: '/broker/settings',
+  tls_certificate_expiring: '/broker/settings',
+  tls_certificate_expired: '/broker/settings',
 };
 
 const SEVERITY_ICON: Record<FindingSeverity, typeof CircleAlert> = {

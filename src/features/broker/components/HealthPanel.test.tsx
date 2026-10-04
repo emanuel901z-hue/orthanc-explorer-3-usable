@@ -143,6 +143,27 @@ describe('HealthPanel', () => {
     expect(onNavigate).toHaveBeenCalledWith('/broker/settings');
   });
 
+  it('deep-links TLS findings to the certificate handling on the settings page', () => {
+    // A TLS finding carries no entity of its own. Without a code fallback it had
+    // no "Fix" button at all — a dead end for the operator who has to act on it.
+    const onNavigate = vi.fn();
+    render(
+      <HealthPanel
+        health={health({
+          findings: [{
+            code: 'tls_file_unusable', severity: 'error',
+            message: 'fallback', entity: {},
+            details: { role: 'inbound_cert', path: '/var/lib/mwl-broker/tls/mwl-broker.crt' },
+          }],
+          summary: { error: 1, warning: 0, info: 0 },
+        })}
+        onNavigate={onNavigate}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /fix/i }));
+    expect(onNavigate).toHaveBeenCalledWith('/broker/settings');
+  });
+
   it('shows the warning count when there are no errors', () => {
     render(
       <HealthPanel

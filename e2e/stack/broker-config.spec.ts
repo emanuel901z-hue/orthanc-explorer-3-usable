@@ -236,9 +236,10 @@ test.describe('stack: broker config pages', () => {
       fullPage: true,
     });
 
-    // the health panel reports it as well
+    // the health panel reports it as well — `.first()`, because more than one
+    // source may legitimately be skipped at the same time
     await openPage(page, '/oe3/broker', /MWL/i);
-    await expect(page.getByTestId('broker-health').getByText(/temporarily skipped|übersprungen/i))
+    await expect(page.getByTestId('broker-health').getByText(/temporarily skipped|übersprungen/i).first())
       .toBeVisible();
 
     // operator reset → the badge disappears

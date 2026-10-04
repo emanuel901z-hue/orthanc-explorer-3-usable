@@ -114,7 +114,10 @@ async function domReport(page) {
     // A table that is wider than its card does NOT widen the document — the
     // container scrolls instead. Measuring only the document missed exactly
     // that (the studies list and the echo matrix scrolled inside their cards).
+    // Form controls are excluded: a long value inside an <input> scrolls within
+    // the field by design and is not a layout defect.
     const inner = [...document.querySelectorAll('*')]
+      .filter((el) => !['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName))
       .filter((el) => el.clientWidth > 300 && el.scrollWidth > el.clientWidth + 2)
       .map((el) => el.scrollWidth - el.clientWidth);
     return {
@@ -567,8 +570,10 @@ async function domReport(page) {
       await page.goto(`${OE3}${path}?lng=${lng}`, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(600);
       const text = await page.locator('main').first().innerText().catch(() => '');
-      // a raw key looks like "broker.sourcesTitle" / "common.save"
-      if (/\b(broker|common|nav|settings|shortcuts)\.[a-z][A-Za-z]+/.test(text)) {
+      // a raw key looks like "broker.sourcesTitle" / "common.save" — but a file
+      // path like "/var/lib/mwl-broker/tls/mwl-broker.crt" is not a key. The
+      // lookbehind keeps paths (preceded by "-", "/" or a word char) out.
+      if (/(?<![\w\-/])(broker|common|nav|settings|shortcuts)\.[a-z][A-Za-z]+/.test(text)) {
         rawKeyLanguages.push(`${lng}${path}`);
       }
       // Arabic is written right-to-left: without <html dir> the whole layout
@@ -706,8 +711,13 @@ async function domReport(page) {
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#setting-echo_interval_s', { timeout: 15000 });
   const persisted = await page.locator('#setting-echo_interval_s').inputValue();
+  // The field must show the ENV default again — that value differs per stack
+  // (30 on the dev stack, 15 in .env.test), so it is read from the API instead
+  // of hardcoding one deployment's number.
+  const echoSetting = (await api('/settings')).find((s) => s.key === 'echo_interval_s');
   record('settings: der abgelehnte Wert wurde nicht gespeichert',
-    persisted === '30', `nach Reload zeigt das Feld: ${persisted}`);
+    persisted !== '99999' && persisted === String(echoSetting?.default),
+    `nach Reload zeigt das Feld: ${persisted} (Default ${echoSetting?.default})`);
 
   // retention card (deletion concept)
   await page.goto(`${OE3}/oe3/broker/settings`, { waitUntil: 'domcontentloaded' });

@@ -4,6 +4,33 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.15 — Fehlerhafte Badges brechen um, TLS-Befunde verlinken (2026-10-04)
+
+**Aus der MFA/MTA-Verifikation.** Wiederholter multimodaler Audit (Chromium-
+Screenshots + DOM-Messungen) bei Desktop 1400×900, Laptop 1024×768 und Mobil
+375×812 gegen den isolierten Stack.
+
+- **Quellentabelle lief bei 1024 px über (+52 px), sobald eine Quelle einen
+  offenen Circuit Breaker oder C-ECHO-Fehler zeigte** — die Spalte *Actions*
+  war abgeschnitten, also genau im Problemfall. `whitespace-nowrap` an
+  `BreakerBadge`/`EchoBadge` ließ den Fehlertext („association rejected",
+  „breaker open · retry in 0s") die Zeile nicht umbrechen. Die Badges brechen
+  jetzt um (Icon und Knopf `shrink-0`); gemessen 1024 px: **718/718** statt
+  770/718.
+- **TLS-Health-Befunde waren eine Sackgasse**: sie tragen keine Entity und
+  hatten deshalb keinen „Fix"-Knopf. `HealthPanel.BY_CODE` führt die TLS-Codes
+  jetzt auf `/broker/settings` (Zertifikatsverwaltung) — mit Test.
+- Prüfumgebung entfehlalarmt: `verify-ui.cjs` hielt Dateipfade aus
+  Health-Befunden für i18n-Rohschlüssel und langen `<input>`-Text für
+  Layout-Overflow; der „abgelehnte Wert"-Check verglich mit einem hartkodierten
+  Default; das Breaker-Szenario in `broker-config.spec.ts` brach an mehreren
+  gleichzeitig offenen Breakern (strict mode).
+
+Gates grün: `tsc` 0, `npm run lint` 0 Fehler, `npm run i18n:check` vollständig,
+`npm run build` 0, **808 Tests**.
+
+---
+
 ## v2.6.14 — Der Rollback-Knopf nur, wo er greift (2026-10-01)
 
 **Aus dem API-Audit.** Das Änderungsprotokoll bot „Zurücksetzen" für **jede**
