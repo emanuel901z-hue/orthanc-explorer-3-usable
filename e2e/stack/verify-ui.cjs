@@ -813,7 +813,15 @@ async function domReport(page) {
   const notifyVisible = await notifyCard.count() > 0 && await notifyCard.first().isVisible();
   record('settings: Alerting-Karte wird gerendert', notifyVisible);
   if (notifyVisible) {
-    const eventCount = await notifyCard.getByTestId('notify-events').locator('input[type=checkbox]').count();
+    // The card renders as soon as the settings resolve, but the event catalog
+    // is a separate query — counting right away raced it and reported "0 events"
+    // on a page that showed all ten a moment later. Poll, like the other checks.
+    let eventCount = 0;
+    for (let attempt = 0; attempt < 24 && eventCount < 5; attempt += 1) {
+      eventCount = await notifyCard.getByTestId('notify-events')
+        .locator('input[type=checkbox]').count().catch(() => 0);
+      if (eventCount < 5) await page.waitForTimeout(250);
+    }
     record('settings: Alerting listet die verfügbaren Ereignisse', eventCount >= 5, `${eventCount} Ereignisse`);
     const notifyDom = await notifyCard.evaluate((el) => ({ overflow: el.scrollWidth > el.clientWidth }));
     record('settings: Alerting-Karte ohne Overflow', !notifyDom.overflow);

@@ -4,6 +4,19 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.6.16 — Der Alerting-Check flackert nicht mehr (2026-10-04)
+
+Nachzieher zu v2.6.15. Der Deep-Audit zählte die Alerting-Ereignisse, sobald
+die Karte sichtbar war — der Ereigniskatalog ist aber eine **eigene** Abfrage,
+und ein Lauf direkt nach einem Container-Neustart meldete „0 Ereignisse" für
+eine Seite, die einen Moment später alle zehn zeigte (live gegengeprüft).
+`verify-ui.cjs` pollt jetzt wie die übrigen Checks, statt einmal zu zählen.
+
+Gates unverändert grün: `tsc` 0, `npm run lint` 0 Fehler, `npm run i18n:check`
+vollständig, `npm run build` 0, **808 Tests**.
+
+---
+
 ## v2.6.15 — Fehlerhafte Badges brechen um, TLS-Befunde verlinken (2026-10-04)
 
 **Aus der MFA/MTA-Verifikation.** Wiederholter multimodaler Audit (Chromium-
