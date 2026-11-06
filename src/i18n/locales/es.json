@@ -2419,5 +2419,24 @@
     "unknown": "Algo salió mal. Inténtelo de nuevo.",
     "withRef": "{{message}} (Ref.: {{ref}})",
     "brokerNotConfigured": "El broker MWL no está configurado en esta instalación."
+  },
+  "targets": {
+    "title": "Destinos de copia",
+    "description": "Destinos a los que entrega el archivo. Basta el AE title: el archivo conoce la dirección. Visible para todos.",
+    "aet": "AE title",
+    "aetPlaceholder": "AE title (máx. 16)",
+    "label": "Etiqueta",
+    "labelPlaceholder": "Etiqueta (p. ej. casa o servicio)",
+    "add": "Añadir",
+    "remove": "Eliminar {{aet}}",
+    "empty": "Aún no hay destinos.",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "saved": "Destinos guardados",
+    "saveFailed": "No se pudieron guardar los destinos",
+    "errAet": "Introduzca un AE title.",
+    "errAetLength": "Un AE title tiene como máximo 16 caracteres.",
+    "errDuplicate": "Ese AE title ya existe."
   }
 }

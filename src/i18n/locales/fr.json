@@ -2419,5 +2419,24 @@
     "unknown": "Une erreur est survenue. Veuillez réessayer.",
     "withRef": "{{message}} (Réf. : {{ref}})",
     "brokerNotConfigured": "Le broker MWL n'est pas configuré sur cette installation."
+  },
+  "targets": {
+    "title": "Destinations de copie",
+    "description": "Destinations vers lesquelles l'archive livre. Seul l'AE title suffit : l'archive connaît l'adresse. Visible pour tous.",
+    "aet": "AE title",
+    "aetPlaceholder": "AE title (max. 16)",
+    "label": "Libellé",
+    "labelPlaceholder": "Libellé (p. ex. maison ou service)",
+    "add": "Ajouter",
+    "remove": "Supprimer {{aet}}",
+    "empty": "Pas encore de destinations.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "saved": "Destinations enregistrées",
+    "saveFailed": "Les destinations n'ont pas pu être enregistrées",
+    "errAet": "Veuillez saisir un AE title.",
+    "errAetLength": "Un AE title compte au maximum 16 caractères.",
+    "errDuplicate": "Cet AE title existe déjà."
   }
 }

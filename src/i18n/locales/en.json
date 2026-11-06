@@ -2545,5 +2545,24 @@
     "unknown": "Something went wrong. Please try again.",
     "withRef": "{{message}} (Ref: {{ref}})",
     "brokerNotConfigured": "The MWL broker is not configured in this installation."
+  },
+  "targets": {
+    "title": "Copy targets",
+    "description": "Destinations the archive delivers to. Only the AE title is needed — the archive knows the address. Visible to all users.",
+    "aet": "AE title",
+    "aetPlaceholder": "AE title (max. 16)",
+    "label": "Label",
+    "labelPlaceholder": "Label (e.g. house or department)",
+    "add": "Add",
+    "remove": "Remove {{aet}}",
+    "empty": "No targets yet.",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "saved": "Targets saved",
+    "saveFailed": "Targets could not be saved",
+    "errAet": "Please enter an AE title.",
+    "errAetLength": "An AE title has at most 16 characters.",
+    "errDuplicate": "This AE title already exists."
   }
 }

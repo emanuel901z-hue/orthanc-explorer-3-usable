@@ -2419,5 +2419,24 @@
     "unknown": "問題が発生しました。もう一度お試しください。",
     "withRef": "{{message}} (参照: {{ref}})",
     "brokerNotConfigured": "この環境では MWL ブローカーが設定されていません。"
+  },
+  "targets": {
+    "title": "コピー先",
+    "description": "アーカイブが配信する宛先。AE タイトルだけで十分です（アドレスはアーカイブが知っています）。全ユーザーに表示されます。",
+    "aet": "AE タイトル",
+    "aetPlaceholder": "AE タイトル（最大 16）",
+    "label": "ラベル",
+    "labelPlaceholder": "ラベル（例: 拠点や診療科）",
+    "add": "追加",
+    "remove": "{{aet}} を削除",
+    "empty": "宛先はまだありません。",
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "キャンセル",
+    "saved": "宛先を保存しました",
+    "saveFailed": "宛先を保存できませんでした",
+    "errAet": "AE タイトルを入力してください。",
+    "errAetLength": "AE タイトルは最大 16 文字です。",
+    "errDuplicate": "この AE タイトルは既にあります。"
   }
 }

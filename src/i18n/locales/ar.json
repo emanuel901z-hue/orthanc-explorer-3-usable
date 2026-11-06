@@ -2419,5 +2419,24 @@
     "unknown": "حدث خطأ ما. يُرجى المحاولة مرة أخرى.",
     "withRef": "{{message}} (المرجع: {{ref}})",
     "brokerNotConfigured": "وسيط MWL غير مُهيّأ في هذا التنصيب."
+  },
+  "targets": {
+    "title": "أهداف النسخ",
+    "description": "الأهداف التي يسلّم إليها الأرشيف. يكفي AE title — العنوان يعرفه الأرشيف. مرئي لجميع المستخدمين.",
+    "aet": "AE title",
+    "aetPlaceholder": "AE title (حتى 16)",
+    "label": "التسمية",
+    "labelPlaceholder": "التسمية (مثل البيت أو القسم)",
+    "add": "إضافة",
+    "remove": "إزالة {{aet}}",
+    "empty": "لا توجد أهداف بعد.",
+    "save": "حفظ",
+    "saving": "جارٍ الحفظ…",
+    "cancel": "إلغاء",
+    "saved": "تم حفظ الأهداف",
+    "saveFailed": "تعذّر حفظ الأهداف",
+    "errAet": "يُرجى إدخال AE title.",
+    "errAetLength": "AE title لا يزيد عن 16 حرفًا.",
+    "errDuplicate": "AE title موجود بالفعل."
   }
 }

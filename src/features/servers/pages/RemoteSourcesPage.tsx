@@ -1,5 +1,4 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHelp } from '@/shared/components/PageHelp';
 import {
@@ -48,6 +47,9 @@ import { retrieveModalityAction } from '@/actions/retrieveModality';
 import { moveResourcesAction } from '@/actions/moveResources';
 import { getConfig } from '@/config/runtime';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { targetsApi, type CopyTarget } from '@/api/targets';
+import TargetsDialog from '@/features/servers/components/TargetsDialog';
 import { describeCopyJob, looksQueuedOnly } from '@/features/servers/lib/copy-job';
 import { buildRemoteQuery } from '@/features/servers/lib/remote-query';
 import {
@@ -116,11 +118,22 @@ export default function RemoteSourcesPage() {
   const [selectedModality, setSelectedModality] = usePersistedState('remoteSources.modality', '');
   // Copy targets come from the deployment config (AET only — the archive that
   // holds the study knows the host). Persisted: the chosen archive is not PHI.
-  // Ziele = konfigurierte Liste (config/targets.csv) PLUS alle Orthanc-
-  // Modalitäten außer der gerade gewählten Quelle. So wird ein in
-  // „Einstellungen → Modalitäten“ angelegtes PACS sofort zum Kopierziel.
+  // Ziele = gepflegte Liste (Dienst /targets-api, für alle Benutzer) PLUS alle
+  // Orthanc-Modalitäten außer der gerade gewählten Quelle. Ist der Dienst
+  // nicht erreichbar, gilt die mitgelieferte Config.
+  const queryClient = useQueryClient();
+  const [targetsOpen, setTargetsOpen] = useState(false);
+  const [savingTargets, setSavingTargets] = useState(false);
+  const { data: managedTargets } = useQuery({
+    queryKey: ['copy-targets'],
+    queryFn: () => targetsApi.list(),
+    staleTime: 60_000,
+    retry: false,
+  });
   const copyTargets = useMemo(() => {
-    const configured = getConfig().cmoveTargets ?? [];
+    const configured: CopyTarget[] = (managedTargets ?? getConfig().cmoveTargets ?? []).flatMap(
+      (target) => (target.aet ? [{ aet: target.aet, label: target.label }] : []),
+    );
     const seen = new Set(configured.map((target) => target.aet));
     const fromModalities = modalityDetails
       .filter((modality) => modality.id !== selectedModality && !seen.has(modality.aet))
@@ -129,7 +142,21 @@ export default function RemoteSourcesPage() {
         label: modality.id === modality.aet ? undefined : modality.id,
       }));
     return [...configured, ...fromModalities];
-  }, [modalityDetails, selectedModality]);
+  }, [managedTargets, modalityDetails, selectedModality]);
+
+  const saveTargets = async (next: CopyTarget[]) => {
+    setSavingTargets(true);
+    try {
+      await targetsApi.replace(next);
+      await queryClient.invalidateQueries({ queryKey: ['copy-targets'] });
+      setTargetsOpen(false);
+      toast.success(t('targets.saved', { defaultValue: 'Targets saved' }));
+    } catch {
+      toast.error(t('targets.saveFailed', { defaultValue: 'Targets could not be saved' }));
+    } finally {
+      setSavingTargets(false);
+    }
+  };
   const [selectedTarget, setSelectedTarget] = usePersistedState('remoteSources.copyTarget', '');
   // The copy runs as an Orthanc job; the job list (polled every 3 s) is where
   // progress and the DIMSE status of the destination come from.
@@ -533,12 +560,10 @@ export default function RemoteSourcesPage() {
                     variant="ghost"
                     size="sm"
                     className="h-7 gap-1 px-2 text-xs"
-                    asChild
+                    onClick={() => setTargetsOpen(true)}
                   >
-                    <Link to="/settings?tab=modalities">
-                      <Settings className="h-3.5 w-3.5" />
-                      {t('remote.manageTargets', { defaultValue: 'Manage targets' })}
-                    </Link>
+                    <Settings className="h-3.5 w-3.5" />
+                    {t('remote.manageTargets', { defaultValue: 'Manage targets' })}
                   </Button>
                   <Button
                     variant="outline"
@@ -791,6 +816,14 @@ export default function RemoteSourcesPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <TargetsDialog
+        open={targetsOpen}
+        onOpenChange={setTargetsOpen}
+        targets={copyTargets}
+        onSave={saveTargets}
+        saving={savingTargets}
+      />
 
       <RemoteStudyDetailDialog
         study={detail}

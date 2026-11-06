@@ -2545,5 +2545,24 @@
     "unknown": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
     "withRef": "{{message}} (Ref: {{ref}})",
     "brokerNotConfigured": "Der MWL-Broker ist in dieser Installation nicht konfiguriert."
+  },
+  "targets": {
+    "title": "Kopierziele",
+    "description": "Ziele, an die das Archiv zustellt. Es genügt der AE-Titel — die Adresse kennt das Archiv. Für alle Benutzer sichtbar.",
+    "aet": "AE-Titel",
+    "aetPlaceholder": "AE-Titel (max. 16)",
+    "label": "Bezeichnung",
+    "labelPlaceholder": "Bezeichnung (z. B. Haus oder Abteilung)",
+    "add": "Hinzufügen",
+    "remove": "{{aet}} entfernen",
+    "empty": "Noch keine Ziele.",
+    "save": "Speichern",
+    "saving": "Speichern…",
+    "cancel": "Abbrechen",
+    "saved": "Ziele gespeichert",
+    "saveFailed": "Ziele konnten nicht gespeichert werden",
+    "errAet": "Bitte einen AE-Titel eingeben.",
+    "errAetLength": "Ein AE-Titel hat höchstens 16 Zeichen.",
+    "errDuplicate": "Diesen AE-Titel gibt es schon."
   }
 }

@@ -2419,5 +2419,24 @@
     "unknown": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
     "withRef": "{{message}} (Ref: {{ref}})",
     "brokerNotConfigured": "Bu kurulumda MWL broker yapılandırılmamış."
+  },
+  "targets": {
+    "title": "Kopyalama hedefleri",
+    "description": "Arşivin teslim ettiği hedefler. Yalnızca AE başlığı yeterli — adresi arşiv bilir. Tüm kullanıcılara görünür.",
+    "aet": "AE başlığı",
+    "aetPlaceholder": "AE başlığı (en fazla 16)",
+    "label": "Etiket",
+    "labelPlaceholder": "Etiket (ör. ev veya bölüm)",
+    "add": "Ekle",
+    "remove": "{{aet}} kaldır",
+    "empty": "Henüz hedef yok.",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "cancel": "İptal",
+    "saved": "Hedefler kaydedildi",
+    "saveFailed": "Hedefler kaydedilemedi",
+    "errAet": "Lütfen bir AE başlığı girin.",
+    "errAetLength": "AE başlığı en fazla 16 karakterdir.",
+    "errDuplicate": "Bu AE başlığı zaten var."
   }
 }

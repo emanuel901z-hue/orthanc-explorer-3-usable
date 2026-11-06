@@ -2419,5 +2419,24 @@
     "unknown": "出现问题，请重试。",
     "withRef": "{{message}}（参考：{{ref}}）",
     "brokerNotConfigured": "此安装未配置 MWL 代理。"
+  },
+  "targets": {
+    "title": "复制目标",
+    "description": "归档送达的目标。只需 AE 标题 — 地址由归档掌握。对所有用户可见。",
+    "aet": "AE 标题",
+    "aetPlaceholder": "AE 标题（最多 16）",
+    "label": "标签",
+    "labelPlaceholder": "标签（例如院区或科室）",
+    "add": "添加",
+    "remove": "移除 {{aet}}",
+    "empty": "还没有目标。",
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "取消",
+    "saved": "目标已保存",
+    "saveFailed": "无法保存目标",
+    "errAet": "请输入 AE 标题。",
+    "errAetLength": "AE 标题最多 16 个字符。",
+    "errDuplicate": "该 AE 标题已存在。"
   }
 }
