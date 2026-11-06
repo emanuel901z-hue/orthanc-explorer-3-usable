@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHelp } from '@/shared/components/PageHelp';
 import { Globe, Radio, Search, Wifi, WifiOff, Download, Copy, Loader2, CheckCircle2, XCircle } from 'lucide-react';
@@ -28,7 +28,8 @@ import { modalitiesApi } from '@/api/modalities';
 import { queryModalityAction } from '@/actions/queryModality';
 import { retrieveModalityAction } from '@/actions/retrieveModality';
 import { getConfig } from '@/config/runtime';
-import { DIMSE_SUCCESS, extractDimseStatus, formatDimseStatus } from '@/features/servers/lib/dimse-status';
+import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
+import { describeCopyJob } from '@/features/servers/lib/copy-job';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { usePersistedState, useRememberedState } from '@/store/ui-state';
@@ -48,10 +49,8 @@ interface RemoteStudy {
   error: boolean;
   /** C-MOVE to a target archive — the study does not land in this Orthanc. */
   copying: boolean;
-  copied: boolean;
-  copyError: boolean;
-  /** DIMSE status of the copy as reported by the archive (e.g. "0x0000"). */
-  copyStatus?: string;
+  /** Orthanc job the copy runs as; its state is the status shown in the row. */
+  copyJobId?: string;
 }
 
 export default function RemoteSourcesPage() {
@@ -78,6 +77,13 @@ export default function RemoteSourcesPage() {
   // holds the study knows the host). Persisted: the chosen archive is not PHI.
   const copyTargets = getConfig().cmoveTargets ?? [];
   const [selectedTarget, setSelectedTarget] = usePersistedState('remoteSources.copyTarget', '');
+  // The copy runs as an Orthanc job; the job list (polled every 3 s) is where
+  // progress and the DIMSE status of the destination come from.
+  const { data: jobs = [] } = useOrthancJobs();
+  const copyJobs = useMemo(
+    () => new Map(jobs.map((job) => [job.ID, describeCopyJob(job)])),
+    [jobs],
+  );
   const [selectedServer, setSelectedServer] = usePersistedState('remoteSources.server', '');
   const [queryPatientName, setQueryPatientName] = useRememberedState('remoteSources.queryPatientName', '');
   const [queryPatientId, setQueryPatientId] = useRememberedState('remoteSources.queryPatientId', '');
@@ -122,8 +128,6 @@ export default function RemoteSourcesPage() {
           retrieved: false,
           error: false,
           copying: false,
-          copied: false,
-          copyError: false,
         };
       });
 
@@ -159,8 +163,9 @@ export default function RemoteSourcesPage() {
   };
 
   // Copy: C-MOVE through the queried archive to a target archive. The study
-  // never passes through this Orthanc — the archive delivers it directly, so
-  // only the DIMSE status tells us whether it arrived.
+  // never passes through this Orthanc — the archive delivers it directly.
+  // The order runs as an Orthanc job, so the row can show progress and the
+  // DIMSE status the archive reported, and the job list keeps the history.
   const handleCopy = async (study: RemoteStudy, index: number) => {
     if (!selectedTarget) {
       toast.error(t('remote.copyNoTarget', { defaultValue: 'Choose a target first' }));
@@ -169,26 +174,20 @@ export default function RemoteSourcesPage() {
     const mark = (patch: Partial<RemoteStudy>) =>
       setRemoteStudies((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
 
-    mark({ copying: true, copyError: false });
+    mark({ copying: true, copyJobId: undefined });
     try {
-      const result = await retrieveModalityAction(selectedModality, study.queryId, study.answerIndex, selectedTarget);
-      const status = extractDimseStatus(result);
-      if (status !== undefined && status !== DIMSE_SUCCESS) {
-        mark({ copying: false, copyError: true, copyStatus: formatDimseStatus(status) });
-        toast.error(t('remote.copyFailed', {
-          status: formatDimseStatus(status),
-          defaultValue: `Copy failed (DIMSE ${formatDimseStatus(status)})`,
-        }));
-        return;
-      }
-      mark({
-        copying: false,
-        copied: true,
-        copyStatus: status === undefined ? undefined : formatDimseStatus(status),
-      });
+      const result = await retrieveModalityAction(
+        selectedModality,
+        study.queryId,
+        study.answerIndex,
+        selectedTarget,
+        { asynchronous: true },
+      );
+      const jobId = typeof result.ID === 'string' ? result.ID : undefined;
+      mark({ copying: false, copyJobId: jobId });
       toast.success(t('remote.copyStarted', { target: selectedTarget, defaultValue: `C-MOVE to ${selectedTarget} sent` }));
     } catch {
-      mark({ copying: false, copyError: true });
+      mark({ copying: false });
       toast.error(t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' }));
     }
   };
@@ -200,7 +199,7 @@ export default function RemoteSourcesPage() {
     }
     for (let i = 0; i < remoteStudies.length; i++) {
       const s = remoteStudies[i];
-      if (!s.copied && !s.copying) {
+      if (!s.copyJobId && !s.copying) {
         await handleCopy(s, i);
       }
     }
@@ -378,55 +377,71 @@ export default function RemoteSourcesPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {remoteStudies.map((study, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="text-sm">{study.patientName}</TableCell>
-                        <TableCell className="text-sm font-mono">{study.patientId}</TableCell>
-                        <TableCell className="text-sm">{study.studyDate}</TableCell>
-                        <TableCell className="text-sm">{study.studyDescription}</TableCell>
-                        <TableCell className="text-sm font-mono">{study.accessionNumber}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1.5">
-                            {study.retrieved ? (
-                              <CheckCircle2 className="h-4 w-4 text-success" />
-                            ) : study.error ? (
-                              <XCircle className="h-4 w-4 text-destructive" />
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5 h-7"
-                                disabled={study.retrieving}
-                                onClick={() => handleRetrieve(study, i)}
-                              >
-                                {study.retrieving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                                {t('remote.retrieve', { defaultValue: 'Retrieve' })}
-                              </Button>
-                            )}
-                            {study.copied ? (
-                              <span className="flex items-center gap-1 text-xs text-success">
-                                <CheckCircle2 className="h-4 w-4" />
-                                {study.copyStatus}
-                              </span>
-                            ) : study.copyError ? (
-                              <XCircle className="h-4 w-4 text-destructive" />
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5 h-7"
-                                disabled={study.copying || !selectedTarget}
-                                title={selectedTarget ? undefined : t('remote.copyNoTarget', { defaultValue: 'Choose a target first' })}
-                                onClick={() => handleCopy(study, i)}
-                              >
-                                {study.copying ? <Loader2 className="h-3 w-3 animate-spin" /> : <Copy className="h-3 w-3" />}
-                                {t('remote.copy', { defaultValue: 'Copy' })}
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {remoteStudies.map((study, i) => {
+                      const copyJob = study.copyJobId ? copyJobs.get(study.copyJobId) : undefined;
+                      return (
+                        <TableRow key={i}>
+                          <TableCell className="text-sm">{study.patientName}</TableCell>
+                          <TableCell className="text-sm font-mono">{study.patientId}</TableCell>
+                          <TableCell className="text-sm">{study.studyDate}</TableCell>
+                          <TableCell className="text-sm">{study.studyDescription}</TableCell>
+                          <TableCell className="text-sm font-mono">{study.accessionNumber}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              {study.retrieved ? (
+                                <CheckCircle2 className="h-4 w-4 text-success" />
+                              ) : study.error ? (
+                                <XCircle className="h-4 w-4 text-destructive" />
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 h-7"
+                                  disabled={study.retrieving}
+                                  onClick={() => handleRetrieve(study, i)}
+                                >
+                                  {study.retrieving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                                  {t('remote.retrieve', { defaultValue: 'Retrieve' })}
+                                </Button>
+                              )}
+                              {study.copying ? (
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  {t('remote.copySending', { defaultValue: 'sending' })}
+                                </span>
+                              ) : copyJob?.state === 'success' ? (
+                                <span className="flex items-center gap-1 text-xs text-success">
+                                  <CheckCircle2 className="h-4 w-4" />
+                                  {copyJob.dimseStatus}
+                                </span>
+                              ) : copyJob?.state === 'failed' ? (
+                                <span className="flex items-center gap-1 text-xs text-destructive" title={copyJob.error}>
+                                  <XCircle className="h-4 w-4" />
+                                  {copyJob.dimseStatus ?? t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' })}
+                                </span>
+                              ) : copyJob ? (
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  {copyJob.progress}%
+                                </span>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 h-7"
+                                  disabled={!selectedTarget}
+                                  title={selectedTarget ? undefined : t('remote.copyNoTarget', { defaultValue: 'Choose a target first' })}
+                                  onClick={() => handleCopy(study, i)}
+                                >
+                                  <Copy className="h-3 w-3" />
+                                  {t('remote.copy', { defaultValue: 'Copy' })}
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </CardContent>

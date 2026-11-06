@@ -7,14 +7,19 @@ import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
 import '@/i18n';
 
-const { mockQuery, mockRetrieve, mockToast, mockEcho } = vi.hoisted(() => ({
+const { mockQuery, mockRetrieve, mockToast, mockEcho, mockJobs } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
   mockRetrieve: vi.fn(),
   mockToast: { success: vi.fn(), error: vi.fn() },
   mockEcho: vi.fn(),
+  mockJobs: vi.fn(),
 }));
 
 vi.mock('sonner', () => ({ toast: mockToast }));
+
+vi.mock('@/features/activity/hooks/useOrthancJobs', () => ({
+  useOrthancJobs: () => mockJobs(),
+}));
 
 vi.mock('@/api/modalities', () => ({
   modalitiesApi: { list: vi.fn(() => Promise.resolve(['ARCHIVE'])), echo: mockEcho },
@@ -85,16 +90,16 @@ function renderPage() {
   );
 }
 
-function configure(cmoves: { aet: string; label?: string }[] | undefined) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).__OE3_CONFIG__ = {
-    orthancUrl: '',
-    authMode: 'none',
-    features: {},
-    cmoveTargets: cmoves,
+function copyJob(state: 'Running' | 'Success' | 'Failure', dimse = 0) {
+  return {
+    ID: 'job-1',
+    Type: 'DicomMoveScu',
+    State: state,
+    Progress: state === 'Running' ? 40 : 100,
+    CreationTime: '20261106T114657.025637',
+    ErrorDescription: state === 'Failure' ? 'Error in the network protocol' : 'Success',
+    Content: { TargetAet: 'hst_burn2CD', Details: [{ DimseErrorStatus: dimse }] },
   };
-  __resetConfigForTests();
-  loadConfig();
 }
 
 /** Modality pick (Radix stand-in) + query, so the results table exists. */
@@ -113,6 +118,7 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     vi.clearAllMocks();
     mockQuery.mockResolvedValue(ANSWERS);
     mockEcho.mockResolvedValue({});
+    mockJobs.mockReturnValue({ data: [], isLoading: false, isError: false });
   });
 
   afterEach(() => {
@@ -135,37 +141,63 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     expect(screen.getByRole('option', { name: 'JungPacs' })).toBeInTheDocument();
   });
 
-  it('schickt den C-MOVE mit dem gewählten Ziel-AET', async () => {
+  it('beauftragt den C-MOVE als Job mit dem gewählten Ziel-AET', async () => {
     configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
-    mockRetrieve.mockResolvedValue({ TargetAet: 'hst_burn2CD', Details: [{ DimseErrorStatus: 0 }] });
-    renderPage();
+    mockRetrieve.mockResolvedValue({ ID: 'job-1', Type: 'DicomMoveScu' });
+    const { rerender } = renderPage();
     await queryStudies();
 
     fireEvent.change(screen.getByLabelText(/copy to|kopieren nach/i), { target: { value: 'hst_burn2CD' } });
     fireEvent.click(screen.getByRole('button', { name: /^Copy$|^Kopieren$/ }));
 
     await waitFor(() =>
-      expect(mockRetrieve).toHaveBeenCalledWith('ARCHIVE', 'q-1', 0, 'hst_burn2CD'),
+      expect(mockRetrieve).toHaveBeenCalledWith('ARCHIVE', 'q-1', 0, 'hst_burn2CD', { asynchronous: true }),
     );
-    // der DIMSE-Status der Gegenstelle wird angezeigt, nicht nur „ok“
-    expect(await screen.findByText('0x0000')).toBeInTheDocument();
     expect(mockToast.success).toHaveBeenCalled();
+
+    // Solange der Job läuft, zeigt die Zeile den Fortschritt
+    mockJobs.mockReturnValue({ data: [copyJob('Running')], isLoading: false, isError: false });
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <RemoteSourcesPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText(/40\s*%/)).toBeInTheDocument();
+
+    // Danach den DIMSE-Status der Gegenstelle, nicht nur „ok“
+    mockJobs.mockReturnValue({ data: [copyJob('Success')], isLoading: false, isError: false });
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <RemoteSourcesPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText('0x0000')).toBeInTheDocument();
   });
 
-  it('meldet einen DIMSE-Fehlstatus als Fehlschlag', async () => {
+  it('zeigt einen DIMSE-Fehlstatus des Jobs als Fehlschlag', async () => {
     configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
-    mockRetrieve.mockResolvedValue({ Details: [{ DimseErrorStatus: 0xc000 }] });
-    renderPage();
+    mockRetrieve.mockResolvedValue({ ID: 'job-1' });
+    const { rerender } = renderPage();
     await queryStudies();
-    // der C-FIND meldet „1 studies found“ — hier zählt nur der Kopier-Toast
-    mockToast.success.mockClear();
-    mockToast.error.mockClear();
 
     fireEvent.change(screen.getByLabelText(/copy to|kopieren nach/i), { target: { value: 'hst_burn2CD' } });
     fireEvent.click(screen.getByRole('button', { name: /^Copy$|^Kopieren$/ }));
+    await waitFor(() => expect(mockRetrieve).toHaveBeenCalled());
 
-    await waitFor(() => expect(mockToast.error).toHaveBeenCalled());
-    expect(mockToast.success).not.toHaveBeenCalled();
+    mockJobs.mockReturnValue({ data: [copyJob('Failure', 0xa801)], isLoading: false, isError: false });
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <RemoteSourcesPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByText('0xA801')).toBeInTheDocument();
   });
 
   it('kopiert ohne Ziel nicht', async () => {
@@ -186,3 +218,15 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     expect(screen.getByRole('option', { name: /no targets configured|keine ziele konfiguriert/i })).toBeInTheDocument();
   });
 });
+
+function configure(cmoves: { aet: string; label?: string }[] | undefined) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).__OE3_CONFIG__ = {
+    orthancUrl: '',
+    authMode: 'none',
+    features: {},
+    cmoveTargets: cmoves,
+  };
+  __resetConfigForTests();
+  loadConfig();
+}

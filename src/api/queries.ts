@@ -47,14 +47,30 @@ export const queriesApi = {
    * Without a target AET the study comes into this Orthanc. With a target AET
    * the queried archive delivers it straight to that destination — Orthanc
    * only accepts that as an object payload; the legacy plain-string form ends
-   * in "Internal error" (verified against Orthanc 1.13). */
-  retrieveAnswer: (queryId: string, answerIndex: number, targetAet?: string, timeoutSeconds = 300) =>
+   * in "Internal error" (verified against Orthanc 1.13).
+   *
+   * `asynchronous` returns a job resource (`{ ID }`) instead of blocking the
+   * HTTP request until the archive has pushed every instance — that is what
+   * large studies need, and the job is where the progress lives. */
+  retrieveAnswer: (
+    queryId: string,
+    answerIndex: number,
+    targetAet?: string,
+    options: { asynchronous?: boolean; timeoutSeconds?: number } = {},
+  ) =>
     orthancFetch<Record<string, unknown>>(`/queries/${queryId}/answers/${answerIndex}/retrieve`, {
       method: 'POST',
       headers: JSON_CONTENT_HEADERS,
-      body: targetAet
-        ? JSON.stringify({ TargetAet: targetAet, Timeout: timeoutSeconds })
-        : JSON.stringify(''),
+      // Der reine Abruf in den lokalen Orthanc bleibt beim leeren String —
+      // nur ein Ziel oder ein Job braucht den Objekt-Body.
+      body:
+        !targetAet && options.asynchronous !== true
+          ? JSON.stringify('')
+          : JSON.stringify({
+            ...(targetAet ? { TargetAet: targetAet } : {}),
+            Timeout: options.timeoutSeconds ?? 300,
+            Asynchronous: options.asynchronous === true,
+          }),
     }),
 
   /** DELETE /queries/:id — Removes the temporary query resource from Orthanc memory. */

@@ -13,6 +13,7 @@ import {
   Shield,
   ClipboardList,
   RadioTower,
+  Copy,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -81,24 +82,25 @@ export function AppSidebar() {
       : []),
     ...(brokerEnabled
       ? [{
-          title: t('nav.broker', { defaultValue: 'MWL Broker' }),
-          url: '/broker',
-          icon: RadioTower,
-          children: [
-            { title: t('broker.sourcesTitle'), url: '/broker/sources' },
-            { title: t('broker.targetsTitle'), url: '/broker/targets' },
-            { title: t('broker.rulesTitle'), url: '/broker/rules' },
-            { title: t('broker.transformsTitle'), url: '/broker/transforms' },
-            { title: t('broker.settingsTitle'), url: '/broker/settings' },
-            { title: t('broker.spoolPageTitle'), url: '/broker/spool' },
-            { title: t('broker.localTitle'), url: '/broker/worklist' },
-            { title: t('broker.stationTitle'), url: '/broker/stations' },
-            { title: t('broker.prefetchTitle'), url: '/broker/prefetch' },
-            { title: t('broker.auditTitle'), url: '/broker/audit' },
-          ],
-        }]
+        title: t('nav.broker', { defaultValue: 'MWL Broker' }),
+        url: '/broker',
+        icon: RadioTower,
+        children: [
+          { title: t('broker.sourcesTitle'), url: '/broker/sources' },
+          { title: t('broker.targetsTitle'), url: '/broker/targets' },
+          { title: t('broker.rulesTitle'), url: '/broker/rules' },
+          { title: t('broker.transformsTitle'), url: '/broker/transforms' },
+          { title: t('broker.settingsTitle'), url: '/broker/settings' },
+          { title: t('broker.spoolPageTitle'), url: '/broker/spool' },
+          { title: t('broker.localTitle'), url: '/broker/worklist' },
+          { title: t('broker.stationTitle'), url: '/broker/stations' },
+          { title: t('broker.prefetchTitle'), url: '/broker/prefetch' },
+          { title: t('broker.auditTitle'), url: '/broker/audit' },
+        ],
+      }]
       : []),
     { title: t('nav.remoteSources'), url: '/remote-sources', icon: Globe },
+    { title: t('nav.copyJobs', { defaultValue: 'Copy jobs' }), url: '/copy-jobs', icon: Copy },
     { title: t('nav.settings'), url: '/settings', icon: Settings },
   ];
 

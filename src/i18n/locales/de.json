@@ -6,6 +6,7 @@
     "activity": "Aktivität",
     "broker": "MWL-Broker",
     "remoteSources": "Remote-Quellen",
+    "copyJobs": "Kopieraufträge",
     "settings": "Einstellungen",
     "demoMode": "Demo-Modus",
     "collapse": "Einklappen",
@@ -457,8 +458,29 @@
     "copyStarted": "C-MOVE an {{target}} gesendet",
     "copyFailed": "Kopieren fehlgeschlagen (DIMSE {{status}})",
     "copyFailedGeneric": "Kopieren fehlgeschlagen",
+    "copySending": "wird gesendet",
     "studyDate": "Studiendatum",
     "studyDescription": "Studienbeschreibung"
+  },
+  "copyJobs": {
+    "title": "Kopieraufträge",
+    "subtitle": "C-MOVE-Aufträge dieser Workstation an das Archiv — Status und Ergebnis je Studie",
+    "filterAll": "Alle",
+    "stateRunning": "läuft",
+    "stateSuccess": "zugestellt",
+    "stateFailed": "fehlgeschlagen",
+    "when": "Zeit",
+    "source": "Quelle",
+    "target": "Ziel",
+    "study": "Studie",
+    "state": "Status",
+    "dimse": "DIMSE",
+    "duration": "Dauer",
+    "empty": "Noch keine Kopieraufträge. Remote-Quellen → Ziel wählen → „Kopieren“.",
+    "emptyFiltered": "Keine Aufträge in diesem Filter.",
+    "loading": "Lade Aufträge…",
+    "loadFailed": "Aufträge konnten nicht geladen werden",
+    "hint": "Die Liste kommt aus der Job-Historie von Orthanc — sie liegt im Speicher und ist durch „JobHistorySize“ begrenzt."
   },
   "actions": {
     "viewer": "Viewer",
@@ -2389,6 +2411,20 @@
     "help_remoteSources_wrong": [
       "Keine Antwort? Host, Port und die Freigabe beim Ziel prüfen; der Test-Knopf sagt, was fehlt.",
       "„DICOMweb\" braucht eine URL, „DICOM Q/R\" braucht Host und Port."
+    ],
+    "help_copyJobs_title": "Kopieraufträge",
+    "help_copyJobs_what": [
+      "Alle Kopieraufträge dieser Workstation: welche Studie aus welchem Archiv an welches Zielarchiv gehen sollte.",
+      "Ein Auftrag ist ein C-MOVE an das Quellarchiv; das Archiv stellt die Studie selbst an das Ziel zu."
+    ],
+    "help_copyJobs_how": [
+      "Nach Status filtern (läuft, zugestellt, fehlgeschlagen) und die Zeile lesen: Ziel, Studie, DIMSE-Status, Dauer.",
+      "DIMSE 0x0000 heißt: das Archiv meldet alle Teiloperationen als erfolgreich zugestellt."
+    ],
+    "help_copyJobs_wrong": [
+      "Fehlschlag mit 0xA801: das Ziel-AET ist im Quellarchiv nicht bekannt.",
+      "Fehlschlag mit 0xC000: das Archiv konnte die Studie nicht verarbeiten — Studie und Ziel prüfen.",
+      "Liste leer, obwohl kopiert wurde? Orthanc hält nur die letzten Aufträge im Speicher (JobHistorySize), nach einem Neustart ist sie leer."
     ],
     "help_settings_title": "Einstellungen",
     "help_settings_what": [

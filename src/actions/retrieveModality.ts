@@ -11,6 +11,7 @@ export async function retrieveModalityAction(
   queryId: string,
   answerIndex: number,
   targetAet?: string,
+  options: { asynchronous?: boolean } = {},
 ): Promise<Record<string, unknown>> {
   const base = makeAuditBase('modality.retrieve', 'modality', modalityName);
   // With a target AET the study does not come into this Orthanc — the archive
@@ -19,14 +20,14 @@ export async function retrieveModalityAction(
   auditClient.emit({
     ...base,
     outcome: 'started',
-    detail: { queryId, answerIndex, targetAet },
+    detail: { queryId, answerIndex, targetAet, asynchronous: options.asynchronous === true },
   });
   try {
-    const result = await queriesApi.retrieveAnswer(queryId, answerIndex, targetAet);
+    const result = await queriesApi.retrieveAnswer(queryId, answerIndex, targetAet, options);
     auditClient.emit({
       ...base,
       outcome: 'success',
-      detail: { queryId, answerIndex },
+      detail: { queryId, answerIndex, jobId: result.ID },
     });
     return result;
   } catch (e) {

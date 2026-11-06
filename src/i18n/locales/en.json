@@ -6,6 +6,7 @@
     "activity": "Activity",
     "broker": "MWL Broker",
     "remoteSources": "Remote Sources",
+    "copyJobs": "Copy jobs",
     "settings": "Settings",
     "demoMode": "Demo Mode",
     "collapse": "Collapse",
@@ -457,8 +458,29 @@
     "copyStarted": "C-MOVE to {{target}} sent",
     "copyFailed": "Copy failed (DIMSE {{status}})",
     "copyFailedGeneric": "Copy failed",
+    "copySending": "sending",
     "studyDate": "Study Date",
     "studyDescription": "Study Description"
+  },
+  "copyJobs": {
+    "title": "Copy jobs",
+    "subtitle": "C-MOVE orders this workstation sent to the archive — status and result per study",
+    "filterAll": "All",
+    "stateRunning": "running",
+    "stateSuccess": "delivered",
+    "stateFailed": "failed",
+    "when": "Time",
+    "source": "Source",
+    "target": "Target",
+    "study": "Study",
+    "state": "Status",
+    "dimse": "DIMSE",
+    "duration": "Duration",
+    "empty": "No copy orders yet. Remote Sources → pick a target → “Copy”.",
+    "emptyFiltered": "No jobs in this filter.",
+    "loading": "Loading jobs…",
+    "loadFailed": "Jobs could not be loaded",
+    "hint": "The list comes from the Orthanc job history — it is kept in memory and limited by \"JobHistorySize\"."
   },
   "actions": {
     "viewer": "Viewer",
@@ -2389,6 +2411,20 @@
     "help_remoteSources_wrong": [
       "No answer? Check host, port and the release at the other end; the test button says what is missing.",
       "\"DICOMweb\" needs a URL, \"DICOM Q/R\" needs a host and port."
+    ],
+    "help_copyJobs_title": "Copy jobs",
+    "help_copyJobs_what": [
+      "Every copy order this workstation sent: which study from which archive to which target archive.",
+      "An order is a C-MOVE to the source archive; the archive itself delivers the study to the target."
+    ],
+    "help_copyJobs_how": [
+      "Filter by status (running, delivered, failed) and read the row: target, study, DIMSE status, duration.",
+      "DIMSE 0x0000 means the archive reports every sub-operation as delivered."
+    ],
+    "help_copyJobs_wrong": [
+      "Failure with 0xA801: the target AET is not known at the source archive.",
+      "Failure with 0xC000: the archive could not process the study — check study and target.",
+      "Empty list although you copied? Orthanc keeps only the most recent jobs in memory (JobHistorySize); after a restart the list is empty."
     ],
     "help_settings_title": "Settings",
     "help_settings_what": [

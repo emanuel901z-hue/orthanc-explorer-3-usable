@@ -25,7 +25,7 @@ describe('retrieveModalityAction', () => {
 
     await retrieveModalityAction('MODALITY_1', 'q-1', 0, 'LOCAL_AET');
 
-    expect(queriesApi.retrieveAnswer).toHaveBeenCalledWith('q-1', 0, 'LOCAL_AET');
+    expect(queriesApi.retrieveAnswer).toHaveBeenCalledWith('q-1', 0, 'LOCAL_AET', {});
     expect(auditClient.emit).toHaveBeenCalledWith(
       expect.objectContaining({ outcome: 'started', action: 'modality.retrieve', resourceId: 'MODALITY_1' }),
     );
@@ -39,7 +39,7 @@ describe('retrieveModalityAction', () => {
 
     await retrieveModalityAction('MODALITY_1', 'q-1', 0, 'hst_burn2CD');
 
-    expect(queriesApi.retrieveAnswer).toHaveBeenCalledWith('q-1', 0, 'hst_burn2CD');
+    expect(queriesApi.retrieveAnswer).toHaveBeenCalledWith('q-1', 0, 'hst_burn2CD', {});
     expect(auditClient.emit).toHaveBeenCalledWith(
       expect.objectContaining({ outcome: 'started', destinationId: 'hst_burn2CD' }),
     );

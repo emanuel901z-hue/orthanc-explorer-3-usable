@@ -53,7 +53,18 @@ describe('queriesApi', () => {
     expect(orthancFetch).toHaveBeenCalledWith('/queries/query-123/answers/0/retrieve', expect.objectContaining({
       method: 'POST',
       // Orthanc nimmt ein Ziel nur als Objekt an, nicht als reinen String
-      body: JSON.stringify({ TargetAet: 'LOCAL_PACS', Timeout: 300 }),
+      body: JSON.stringify({ TargetAet: 'LOCAL_PACS', Timeout: 300, Asynchronous: false }),
+    }));
+  });
+
+  it('retrieveAnswer() kann asynchron laufen (Job statt blockierendem Request)', async () => {
+    vi.mocked(orthancFetch).mockResolvedValue({ ID: 'job-1' });
+
+    await queriesApi.retrieveAnswer('query-123', 0, 'ZIEL_AET', { asynchronous: true });
+
+    expect(orthancFetch).toHaveBeenCalledWith('/queries/query-123/answers/0/retrieve', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ TargetAet: 'ZIEL_AET', Timeout: 300, Asynchronous: true }),
     }));
   });
 

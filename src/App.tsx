@@ -12,6 +12,7 @@ import ViewerPage from "@/features/viewer/pages/ViewerPage";
 import InvokeImageDisplayPage from "@/features/viewer/pages/InvokeImageDisplayPage";
 import UploadPage from "@/features/upload/pages/UploadPage";
 import RemoteSourcesPage from "@/features/servers/pages/RemoteSourcesPage";
+import CopyJobsPage from "@/features/servers/pages/CopyJobsPage";
 import ActivityPage from "@/features/activity/pages/ActivityPage";
 import AuditLogsPage from "@/features/audit/pages/AuditLogsPage";
 import WorklistsPage from "@/features/worklists/pages/WorklistsPage";
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="broker/stations" element={<BrokerGate><StationsPage /></BrokerGate>} />
               <Route path="broker/prefetch" element={<BrokerGate><PrefetchPage /></BrokerGate>} />
               <Route path="remote-sources" element={<RemoteSourcesPage />} />
+              <Route path="copy-jobs" element={<CopyJobsPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
             <Route path="viewer/:studyId" element={<ViewerPage />} />
