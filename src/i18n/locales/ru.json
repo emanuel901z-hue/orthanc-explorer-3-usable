@@ -449,11 +449,12 @@
     "copySeriesCount": "Копировать серий: {{count}}",
     "copyDuration": "за {{seconds}} с",
     "copyTooFast": "Подозрительно быстро для {{count}} снимков — возможно, архив только поставил задание в очередь.",
-    "targetsHint": "Назначения — это записи в разделе Настройки → Модальности.",
+    "targetsHint": "Назначения берутся из Настройки → Модальности (в базе, для всех) и из config/targets.csv (только AET).",
     "retrieveSeriesCount_one": "Получить серий: {{count}}",
     "retrieveSeriesCount_other": "Получить серий: {{count}}",
     "copySeriesCount_one": "Копировать серий: {{count}}",
-    "copySeriesCount_other": "Копировать серий: {{count}}"
+    "copySeriesCount_other": "Копировать серий: {{count}}",
+    "manageTargets": "Управлять назначениями"
   },
   "actions": {
     "viewer": "Просмотрщик",

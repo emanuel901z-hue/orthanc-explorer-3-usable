@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHelp } from '@/shared/components/PageHelp';
 import {
@@ -16,6 +17,7 @@ import {
   ArrowDown,
   ArrowUpDown,
   AlertTriangle,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -527,11 +529,17 @@ export default function RemoteSourcesPage() {
                       </option>
                     ))}
                   </select>
-                  <span className="text-xs text-muted-foreground">
-                    {t('remote.targetsHint', {
-                      defaultValue: 'Targets are the entries under Settings → Modalities.',
-                    })}
-                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1 px-2 text-xs"
+                    asChild
+                  >
+                    <Link to="/settings?tab=modalities">
+                      <Settings className="h-3.5 w-3.5" />
+                      {t('remote.manageTargets', { defaultValue: 'Manage targets' })}
+                    </Link>
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

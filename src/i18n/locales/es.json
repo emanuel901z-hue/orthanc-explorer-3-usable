@@ -360,11 +360,12 @@
     "copySeriesCount": "Copiar {{count}} series",
     "copyDuration": "en {{seconds}} s",
     "copyTooFast": "Sospechosamente rápido para {{count}} imágenes: el archivo quizá solo puso el pedido en cola.",
-    "targetsHint": "Los destinos son las entradas en Ajustes → Modalidades.",
+    "targetsHint": "Los destinos provienen de Ajustes → Modalidades (en la base de datos, para todos los usuarios) y de config/targets.csv (solo AET).",
     "retrieveSeriesCount_one": "Recuperar {{count}} series",
     "retrieveSeriesCount_other": "Recuperar {{count}} series",
     "copySeriesCount_one": "Copiar {{count}} series",
-    "copySeriesCount_other": "Copiar {{count}} series"
+    "copySeriesCount_other": "Copiar {{count}} series",
+    "manageTargets": "Gestionar destinos"
   },
   "actions": {
     "viewer": "Visor",

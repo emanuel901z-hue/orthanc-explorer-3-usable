@@ -360,11 +360,12 @@
     "copySeriesCount": "{{count}} シリーズをコピー",
     "copyDuration": "{{seconds}} 秒",
     "copyTooFast": "{{count}} 枚にしては速すぎます — アーカイブは指示をキューに入れただけの可能性があります。",
-    "targetsHint": "宛先は「設定 → モダリティ」の項目です。",
+    "targetsHint": "宛先は「設定 → モダリティ」（データベース、全ユーザー共通）と config/targets.csv（AET のみ）から来ます。",
     "retrieveSeriesCount_one": "{{count}} シリーズを取得",
     "retrieveSeriesCount_other": "{{count}} シリーズを取得",
     "copySeriesCount_one": "{{count}} シリーズをコピー",
-    "copySeriesCount_other": "{{count}} シリーズをコピー"
+    "copySeriesCount_other": "{{count}} シリーズをコピー",
+    "manageTargets": "宛先を管理"
   },
   "actions": {
     "viewer": "ビューア",

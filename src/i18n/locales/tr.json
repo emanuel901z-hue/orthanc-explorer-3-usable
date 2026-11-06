@@ -449,11 +449,12 @@
     "copySeriesCount": "{{count}} seriyi kopyala",
     "copyDuration": "{{seconds}} sn",
     "copyTooFast": "{{count}} görüntü için şüpheli derecede hızlı — arşiv emri yalnızca kuyruğa almış olabilir.",
-    "targetsHint": "Hedefler, Ayarlar → Modaliteler altındaki kayıtlardır.",
+    "targetsHint": "Hedefler Ayarlar → Modaliteler (veritabanında, tüm kullanıcılar için) ve config/targets.csv (yalnızca AET) kaynaklarından gelir.",
     "retrieveSeriesCount_one": "{{count}} seriyi getir",
     "retrieveSeriesCount_other": "{{count}} seriyi getir",
     "copySeriesCount_one": "{{count}} seriyi kopyala",
-    "copySeriesCount_other": "{{count}} seriyi kopyala"
+    "copySeriesCount_other": "{{count}} seriyi kopyala",
+    "manageTargets": "Hedefleri yönet"
   },
   "actions": {
     "viewer": "Görüntüleyici",

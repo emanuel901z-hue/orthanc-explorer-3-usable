@@ -360,11 +360,12 @@
     "copySeriesCount": "Copier {{count}} séries",
     "copyDuration": "en {{seconds}} s",
     "copyTooFast": "Suspicieusement rapide pour {{count}} images : l'archive a peut-être seulement mis l'ordre en file.",
-    "targetsHint": "Les destinations sont les entrées sous Réglages → Modalités.",
+    "targetsHint": "Les destinations viennent de Réglages → Modalités (dans la base, pour tous les utilisateurs) et de config/targets.csv (AET seul).",
     "retrieveSeriesCount_one": "Récupérer {{count}} séries",
     "retrieveSeriesCount_other": "Récupérer {{count}} séries",
     "copySeriesCount_one": "Copier {{count}} séries",
-    "copySeriesCount_other": "Copier {{count}} séries"
+    "copySeriesCount_other": "Copier {{count}} séries",
+    "manageTargets": "Gérer les destinations"
   },
   "actions": {
     "viewer": "Visionneuse",

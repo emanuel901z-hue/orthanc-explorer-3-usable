@@ -512,7 +512,8 @@
     "copySeriesCount_other": "Copy {{count}} series",
     "copyDuration": "in {{seconds}} s",
     "copyTooFast": "Suspiciously fast for {{count}} images — the archive may only have queued the order, not delivered it yet.",
-    "targetsHint": "Targets are the entries under Settings → Modalities."
+    "targetsHint": "Targets come from Settings → Modalities (stored in the database, shared by all users) and from config/targets.csv (AET only).",
+    "manageTargets": "Manage targets"
   },
   "copyJobs": {
     "title": "Copy jobs",

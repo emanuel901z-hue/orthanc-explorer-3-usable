@@ -512,7 +512,8 @@
     "copySeriesCount_other": "{{count}} Serien kopieren",
     "copyDuration": "in {{seconds}} s",
     "copyTooFast": "Verdächtig schnell für {{count}} Bilder — das Archiv hat den Auftrag vermutlich nur eingereiht, noch nicht zugestellt.",
-    "targetsHint": "Ziele sind die Einträge unter Einstellungen → Modalitäten."
+    "targetsHint": "Ziele kommen aus Einstellungen → Modalitäten (in der Datenbank, für alle Benutzer) und aus config/targets.csv (nur AET).",
+    "manageTargets": "Ziele verwalten"
   },
   "copyJobs": {
     "title": "Kopieraufträge",
