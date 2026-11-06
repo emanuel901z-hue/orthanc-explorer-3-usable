@@ -509,13 +509,28 @@
     "target": "Target",
     "study": "Study",
     "state": "Status",
-    "dimse": "DIMSE",
     "duration": "Duration",
     "empty": "No copy orders yet. Remote Sources → pick a target → “Copy”.",
     "emptyFiltered": "No jobs in this filter.",
     "loading": "Loading jobs…",
     "loadFailed": "Jobs could not be loaded",
-    "hint": "The list comes from the Orthanc job history — it is kept in memory and limited by \"JobHistorySize\"."
+    "hint": "The list comes from the Orthanc job history — it is kept in memory and limited by \"JobHistorySize\".",
+    "start": "Start",
+    "end": "End",
+    "stillRunning": "running…",
+    "stateWarning": "partly delivered",
+    "dimse": "DIMSE",
+    "dimseMeaning": {
+      "success": "all sub-operations delivered",
+      "partial": "partly delivered — some images failed",
+      "unknown": "no status reported",
+      "outOfResources": "archive or target out of resources",
+      "unknownDestination": "target AET unknown at the archive",
+      "dataSetMismatch": "study does not match the destination",
+      "unableToProcess": "archive could not process the study",
+      "canceled": "canceled",
+      "other": "archive reported a problem"
+    }
   },
   "actions": {
     "viewer": "Viewer",

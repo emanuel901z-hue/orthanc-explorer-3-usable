@@ -2217,7 +2217,22 @@
     "emptyFiltered": "لا توجد مهام في هذا التصفية.",
     "loading": "جارٍ تحميل المهام…",
     "loadFailed": "تعذّر تحميل المهام",
-    "hint": "القائمة من سجل مهام Orthanc — تُحفظ في الذاكرة وتُحدّ بـ «JobHistorySize»."
+    "hint": "القائمة من سجل مهام Orthanc — تُحفظ في الذاكرة وتُحدّ بـ «JobHistorySize».",
+    "start": "البداية",
+    "end": "النهاية",
+    "stillRunning": "قيد التنفيذ…",
+    "stateWarning": "تم التسليم جزئيًا",
+    "dimseMeaning": {
+      "success": "تم تسليم كل العمليات الفرعية",
+      "partial": "تسليم جزئي — فشل بعض الصور",
+      "unknown": "لم تُبلَّغ حالة",
+      "outOfResources": "الأرشيف أو الهدف بلا موارد",
+      "unknownDestination": "AET الهدف غير معروف في الأرشيف",
+      "dataSetMismatch": "الفحص لا يطابق الهدف",
+      "unableToProcess": "لم يستطع الأرشيف معالجة الفحص",
+      "canceled": "أُلغي",
+      "other": "الأرشيف يبلّغ عن مشكلة"
+    }
   },
   "help": {
     "help_copyJobs_title": "مهام النسخ",

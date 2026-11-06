@@ -2217,7 +2217,22 @@
     "emptyFiltered": "此筛选条件下没有任务。",
     "loading": "正在加载任务…",
     "loadFailed": "无法加载任务",
-    "hint": "列表来自 Orthanc 的任务历史 — 保存在内存中，并受 “JobHistorySize” 限制。"
+    "hint": "列表来自 Orthanc 的任务历史 — 保存在内存中，并受 “JobHistorySize” 限制。",
+    "start": "开始",
+    "end": "结束",
+    "stillRunning": "进行中…",
+    "stateWarning": "部分送达",
+    "dimseMeaning": {
+      "success": "所有子操作已送达",
+      "partial": "部分送达 — 部分图像失败",
+      "unknown": "未报告状态",
+      "outOfResources": "归档或目标资源不足",
+      "unknownDestination": "归档中未知的目标 AET",
+      "dataSetMismatch": "检查与目标不匹配",
+      "unableToProcess": "归档无法处理该检查",
+      "canceled": "已取消",
+      "other": "归档报告了问题"
+    }
   },
   "help": {
     "help_copyJobs_title": "复制任务",

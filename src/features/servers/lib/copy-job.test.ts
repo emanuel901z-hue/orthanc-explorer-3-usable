@@ -125,3 +125,24 @@ describe('describeCopyJob — Robustheit gegenüber kargen Jobs', () => {
     expect(view.dimseStatus).toBeUndefined();
   });
 });
+
+describe('describeCopyJob — Teilfehler sind kein Erfolg', () => {
+  it('meldet einen Job mit DIMSE 0xB000 als Warnung', () => {
+    const view = describeCopyJob(moveJob({ Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xb000 }] } }));
+    expect(view.state).toBe('warning');
+    expect(view.dimseStatus).toBe('0xB000');
+    expect(view.dimseKey).toBe('partial');
+  });
+
+  it('meldet einen Job mit DIMSE 0x0000 als Erfolg', () => {
+    const view = describeCopyJob(moveJob());
+    expect(view.state).toBe('success');
+    expect(view.dimseKey).toBe('success');
+  });
+
+  it('bleibt bei einem Fehlerstatus ein Fehlschlag', () => {
+    const view = describeCopyJob(moveJob({ Content: { Details: [{ DimseErrorStatus: 0xa801 }] } }));
+    expect(view.state).toBe('failed');
+    expect(view.dimseKey).toBe('unknownDestination');
+  });
+});

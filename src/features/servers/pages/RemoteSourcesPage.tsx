@@ -15,6 +15,7 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -603,6 +604,11 @@ export default function RemoteSourcesPage() {
                               ) : copyJob?.state === 'success' ? (
                                 <span className="flex items-center gap-1 text-xs text-success">
                                   <CheckCircle2 className="h-4 w-4" />
+                                  {copyJob.dimseStatus}
+                                </span>
+                              ) : copyJob?.state === 'warning' ? (
+                                <span className="flex items-center gap-1 text-xs text-warning" title={copyJob.error}>
+                                  <AlertTriangle className="h-4 w-4" />
                                   {copyJob.dimseStatus}
                                 </span>
                               ) : copyJob?.state === 'failed' ? (

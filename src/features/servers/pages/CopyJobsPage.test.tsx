@@ -181,6 +181,58 @@ describe('CopyJobsPage', () => {
     expect(screen.getByRole('button', { name: /running|läuft/i })).toHaveTextContent('(0)');
   });
 
+  it('zeigt Start, Ende und die Bedeutung des DIMSE-Status', async () => {
+    await i18n.changeLanguage('de');
+    mockJobs.mockReturnValue({
+      data: [job({
+        CreationTime: '20261106T114657.025637',
+        CompletionTime: '20261106T114703.029587',
+        EffectiveRuntime: 6,
+      })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('Start')).toBeInTheDocument();
+    expect(screen.getByText('Ende')).toBeInTheDocument();
+    expect(screen.getByText('06.11.2026, 11:46')).toBeInTheDocument();
+    expect(screen.getByText('06.11.2026, 11:47')).toBeInTheDocument();
+    // Bedeutung steht als Tooltip am Code, nicht als zweite Zeile
+    expect(screen.getByText('0x0000')).toHaveAttribute('title', 'alle Teiloperationen zugestellt');
+  });
+
+  it('zeigt einen laufenden Auftrag ohne Endzeit', async () => {
+    await i18n.changeLanguage('de');
+    mockJobs.mockReturnValue({
+      data: [job({ State: 'Running', Progress: 30, CompletionTime: undefined })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('läuft…')).toBeInTheDocument();
+  });
+
+  it('markiert einen Teilfehler als Warnung, nicht als Erfolg', async () => {
+    await i18n.changeLanguage('de');
+    mockJobs.mockReturnValue({
+      data: [job({ Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xb000 }] } })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+
+    // Filterknopf und Status-Badge tragen beide das Label
+    expect(screen.getAllByText('teilweise zugestellt').length).toBeGreaterThan(1);
+    expect(screen.getByText('0xB000')).toHaveAttribute('title', 'teilweise zugestellt — einzelne Bilder fehlgeschlagen');
+    // nicht als „zugestellt“ zählen
+    expect(screen.getByRole('button', { name: /^zugestellt/i })).toHaveTextContent('(0)');
+  });
+
   it('erklärt einen Filter ohne Treffer', () => {
     mockJobs.mockReturnValue({ data: [job()], isLoading: false, isError: false });
 

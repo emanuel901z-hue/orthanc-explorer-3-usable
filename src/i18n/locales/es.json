@@ -2217,7 +2217,22 @@
     "emptyFiltered": "No hay trabajos en este filtro.",
     "loading": "Cargando trabajos…",
     "loadFailed": "No se pudieron cargar los trabajos",
-    "hint": "La lista proviene del historial de trabajos de Orthanc: se guarda en memoria y está limitada por «JobHistorySize»."
+    "hint": "La lista proviene del historial de trabajos de Orthanc: se guarda en memoria y está limitada por «JobHistorySize».",
+    "start": "Inicio",
+    "end": "Fin",
+    "stillRunning": "en curso…",
+    "stateWarning": "entregado parcialmente",
+    "dimseMeaning": {
+      "success": "todas las suboperaciones entregadas",
+      "partial": "entrega parcial — algunas imágenes fallaron",
+      "unknown": "sin estado informado",
+      "outOfResources": "archivo o destino sin recursos",
+      "unknownDestination": "AET de destino desconocido en el archivo",
+      "dataSetMismatch": "el estudio no coincide con el destino",
+      "unableToProcess": "el archivo no pudo procesar el estudio",
+      "canceled": "cancelado",
+      "other": "el archivo informa un problema"
+    }
   },
   "help": {
     "help_copyJobs_title": "Trabajos de copia",

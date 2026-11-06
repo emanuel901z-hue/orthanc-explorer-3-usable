@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Copy, Loader2, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Copy, Loader2, XCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ import { describeCopyJob, isMoveJob, type CopyJobView } from '@/features/servers
 import { usePersistedState } from '@/store/ui-state';
 import { formatDicomDateTime } from '@/lib/dicom-date';
 
-type JobFilter = 'all' | 'running' | 'failed' | 'success';
+type JobFilter = 'all' | 'running' | 'failed' | 'warning' | 'success';
 
 function formatDuration(seconds?: number): string {
   if (seconds === undefined) return '—';
@@ -34,6 +34,14 @@ function StatusCell({ job }: { job: CopyJobView }) {
       <Badge variant="secondary" className="gap-1">
         <CheckCircle2 className="h-3.5 w-3.5 text-success" />
         {t('copyJobs.stateSuccess', { defaultValue: 'delivered' })}
+      </Badge>
+    );
+  }
+  if (job.state === 'warning') {
+    return (
+      <Badge variant="outline" className="gap-1 border-warning text-warning">
+        <AlertTriangle className="h-3.5 w-3.5" />
+        {t('copyJobs.stateWarning', { defaultValue: 'partly delivered' })}
       </Badge>
     );
   }
@@ -68,6 +76,7 @@ export default function CopyJobsPage() {
     running: copies.filter((job) => job.state === 'running').length,
     success: copies.filter((job) => job.state === 'success').length,
     failed: copies.filter((job) => job.state === 'failed').length,
+    warning: copies.filter((job) => job.state === 'warning').length,
   }), [copies]);
   const visible = filter === 'all' ? copies : copies.filter((job) => job.state === filter);
 
@@ -75,6 +84,7 @@ export default function CopyJobsPage() {
     { id: 'all', label: t('copyJobs.filterAll', { defaultValue: 'All' }), count: counts.all },
     { id: 'running', label: t('copyJobs.stateRunning', { defaultValue: 'running' }), count: counts.running },
     { id: 'failed', label: t('copyJobs.stateFailed', { defaultValue: 'failed' }), count: counts.failed },
+    { id: 'warning', label: t('copyJobs.stateWarning', { defaultValue: 'partly delivered' }), count: counts.warning },
     { id: 'success', label: t('copyJobs.stateSuccess', { defaultValue: 'delivered' }), count: counts.success },
   ];
 
@@ -121,23 +131,29 @@ export default function CopyJobsPage() {
               : t('copyJobs.emptyFiltered', { defaultValue: 'No jobs in this filter.' })}
           </CardContent>
         ) : (
-          <CardContent className="p-0">
-            <Table>
+          <CardContent className="p-0 overflow-x-auto">
+            <Table className="min-w-[1050px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('copyJobs.when', { defaultValue: 'Time' })}</TableHead>
-                  <TableHead>{t('copyJobs.source', { defaultValue: 'Source' })}</TableHead>
-                  <TableHead>{t('copyJobs.target', { defaultValue: 'Target' })}</TableHead>
+                  <TableHead className="w-[150px]">{t('copyJobs.start', { defaultValue: 'Start' })}</TableHead>
+                  <TableHead className="w-[150px]">{t('copyJobs.end', { defaultValue: 'End' })}</TableHead>
+                  <TableHead className="w-[120px]">{t('copyJobs.source', { defaultValue: 'Source' })}</TableHead>
+                  <TableHead className="w-[140px]">{t('copyJobs.target', { defaultValue: 'Target' })}</TableHead>
                   <TableHead>{t('copyJobs.study', { defaultValue: 'Study' })}</TableHead>
-                  <TableHead>{t('copyJobs.state', { defaultValue: 'Status' })}</TableHead>
-                  <TableHead>{t('copyJobs.dimse', { defaultValue: 'DIMSE' })}</TableHead>
-                  <TableHead>{t('copyJobs.duration', { defaultValue: 'Duration' })}</TableHead>
+                  <TableHead className="w-[150px]">{t('copyJobs.state', { defaultValue: 'Status' })}</TableHead>
+                  <TableHead className="w-[200px]">{t('copyJobs.dimse', { defaultValue: 'DIMSE' })}</TableHead>
+                  <TableHead className="w-[90px]">{t('copyJobs.duration', { defaultValue: 'Duration' })}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {visible.map((job) => (
                   <TableRow key={job.jobId}>
                     <TableCell className="text-sm whitespace-nowrap">{formatDicomDateTime(job.creationTime, locale)}</TableCell>
+                    <TableCell className="text-sm whitespace-nowrap">
+                      {job.state === 'running'
+                        ? t('copyJobs.stillRunning', { defaultValue: 'running…' })
+                        : formatDicomDateTime(job.completionTime, locale)}
+                    </TableCell>
                     <TableCell className="text-sm">{job.sourceAet ?? '—'}</TableCell>
                     <TableCell className="text-sm font-medium">{job.targetAet ?? '—'}</TableCell>
                     <TableCell className="text-sm font-mono">
@@ -154,7 +170,12 @@ export default function CopyJobsPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm font-mono">{job.dimseStatus ?? '—'}</TableCell>
+                    <TableCell
+                      className="text-sm font-mono"
+                      title={t(`copyJobs.dimseMeaning.${job.dimseKey}`, { defaultValue: job.dimseStatus ?? '' })}
+                    >
+                      {job.dimseStatus ?? '—'}
+                    </TableCell>
                     <TableCell className="text-sm whitespace-nowrap">{formatDuration(job.durationSeconds)}</TableCell>
                   </TableRow>
                 ))}

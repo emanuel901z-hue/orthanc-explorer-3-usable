@@ -509,13 +509,28 @@
     "target": "Ziel",
     "study": "Studie",
     "state": "Status",
-    "dimse": "DIMSE",
     "duration": "Dauer",
     "empty": "Noch keine Kopieraufträge. Remote-Quellen → Ziel wählen → „Kopieren“.",
     "emptyFiltered": "Keine Aufträge in diesem Filter.",
     "loading": "Lade Aufträge…",
     "loadFailed": "Aufträge konnten nicht geladen werden",
-    "hint": "Die Liste kommt aus der Job-Historie von Orthanc — sie liegt im Speicher und ist durch „JobHistorySize“ begrenzt."
+    "hint": "Die Liste kommt aus der Job-Historie von Orthanc — sie liegt im Speicher und ist durch „JobHistorySize“ begrenzt.",
+    "start": "Start",
+    "end": "Ende",
+    "stillRunning": "läuft…",
+    "stateWarning": "teilweise zugestellt",
+    "dimse": "DIMSE",
+    "dimseMeaning": {
+      "success": "alle Teiloperationen zugestellt",
+      "partial": "teilweise zugestellt — einzelne Bilder fehlgeschlagen",
+      "unknown": "kein Status gemeldet",
+      "outOfResources": "Archiv oder Ziel ohne Ressourcen",
+      "unknownDestination": "Ziel-AET im Archiv unbekannt",
+      "dataSetMismatch": "Studie passt nicht zum Ziel",
+      "unableToProcess": "Archiv konnte die Studie nicht verarbeiten",
+      "canceled": "abgebrochen",
+      "other": "das Archiv meldet ein Problem"
+    }
   },
   "actions": {
     "viewer": "Viewer",

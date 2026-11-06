@@ -2217,7 +2217,22 @@
     "emptyFiltered": "Bu filtrede iş yok.",
     "loading": "İşler yükleniyor…",
     "loadFailed": "İşler yüklenemedi",
-    "hint": "Liste Orthanc iş geçmişinden gelir — bellekte tutulur ve „JobHistorySize“ ile sınırlıdır."
+    "hint": "Liste Orthanc iş geçmişinden gelir — bellekte tutulur ve „JobHistorySize“ ile sınırlıdır.",
+    "start": "Başlangıç",
+    "end": "Bitiş",
+    "stillRunning": "çalışıyor…",
+    "stateWarning": "kısmen teslim edildi",
+    "dimseMeaning": {
+      "success": "tüm alt işlemler teslim edildi",
+      "partial": "kısmen teslim — bazı görüntüler başarısız",
+      "unknown": "durum bildirilmedi",
+      "outOfResources": "arşiv veya hedef kaynak yetersiz",
+      "unknownDestination": "hedef AET arşivde tanımsız",
+      "dataSetMismatch": "inceleme hedefe uymuyor",
+      "unableToProcess": "arşiv incelemeyi işleyemedi",
+      "canceled": "iptal edildi",
+      "other": "arşiv bir sorun bildiriyor"
+    }
   },
   "help": {
     "help_copyJobs_title": "Kopyalama işleri",

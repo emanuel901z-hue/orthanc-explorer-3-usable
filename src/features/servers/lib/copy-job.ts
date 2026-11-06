@@ -4,9 +4,15 @@
  * DIMSE-Status der Gegenstelle, Quelle, Ziel, Studie und Laufzeit.
  */
 import type { OrthancJob } from '@/api/jobs';
-import { DIMSE_SUCCESS, extractDimseStatus, formatDimseStatus } from './dimse-status';
+import {
+  DIMSE_SUCCESS,
+  dimseSeverity,
+  dimseStatusKey,
+  extractDimseStatus,
+  formatDimseStatus,
+} from './dimse-status';
 
-export type CopyJobState = 'running' | 'success' | 'failed';
+export type CopyJobState = 'running' | 'success' | 'warning' | 'failed';
 
 export type CopyJobView = {
   jobId: string;
@@ -20,6 +26,8 @@ export type CopyJobView = {
   patientId?: string;
   /** DIMSE-Status der Gegenstelle, z. B. "0x0000". */
   dimseStatus?: string;
+  /** Übersetzungsschlüssel zur Bedeutung (`copyJobs.dimse.<key>`). */
+  dimseKey: string;
   /** Nur bei Fehlschlag: Klartext aus dem Job. */
   error?: string;
   creationTime?: string;
@@ -55,11 +63,14 @@ export function describeCopyJob(job: OrthancJob): CopyJobView {
   const content = job.Content;
   const query = firstQuery(content);
   const dimse = extractDimseStatus(content);
-  const failed = job.State === 'Failure';
+  const severity = dimseSeverity(dimse);
+  const failed = job.State === 'Failure' || (job.State === 'Success' && severity === 'error');
 
   return {
     jobId: job.ID,
-    state: job.State === 'Success' ? 'success' : failed ? 'failed' : 'running',
+    // Ein Auftrag kann „Success“ sein und trotzdem nur teilweise zugestellt
+    // haben (DIMSE 0xBxxx) — das ist eine Warnung, kein Erfolg.
+    state: failed ? 'failed' : job.State === 'Success' ? (severity === 'warning' ? 'warning' : 'success') : 'running',
     rawState: job.State,
     progress: typeof job.Progress === 'number' ? job.Progress : 0,
     sourceAet: contentString(content, 'RemoteAet'),
@@ -67,6 +78,7 @@ export function describeCopyJob(job: OrthancJob): CopyJobView {
     studyInstanceUid: queryTag(query, 'StudyInstanceUID', '0020,000d'),
     patientId: queryTag(query, 'PatientID', '0010,0020'),
     dimseStatus: dimse === undefined ? undefined : formatDimseStatus(dimse),
+    dimseKey: dimseStatusKey(dimse),
     error: failed
       ? job.ErrorDescription && job.ErrorDescription !== 'Success'
         ? job.ErrorDescription

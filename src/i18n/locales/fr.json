@@ -2217,7 +2217,22 @@
     "emptyFiltered": "Aucune tâche dans ce filtre.",
     "loading": "Chargement des tâches…",
     "loadFailed": "Les tâches n'ont pas pu être chargées",
-    "hint": "La liste provient de l'historique des tâches d'Orthanc : conservée en mémoire et limitée par « JobHistorySize »."
+    "hint": "La liste provient de l'historique des tâches d'Orthanc : conservée en mémoire et limitée par « JobHistorySize ».",
+    "start": "Début",
+    "end": "Fin",
+    "stillRunning": "en cours…",
+    "stateWarning": "livré partiellement",
+    "dimseMeaning": {
+      "success": "toutes les sous-opérations livrées",
+      "partial": "livraison partielle — certaines images ont échoué",
+      "unknown": "aucun état signalé",
+      "outOfResources": "archive ou destination à court de ressources",
+      "unknownDestination": "AET de destination inconnu dans l'archive",
+      "dataSetMismatch": "l'examen ne correspond pas à la destination",
+      "unableToProcess": "l'archive n'a pas pu traiter l'examen",
+      "canceled": "annulé",
+      "other": "l'archive signale un problème"
+    }
   },
   "help": {
     "help_copyJobs_title": "Tâches de copie",
