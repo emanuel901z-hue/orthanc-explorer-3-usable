@@ -357,7 +357,9 @@
     "seriesSelect": "Seleccionar serie",
     "selectNone": "Ninguna",
     "retrieveSeriesCount": "Recuperar {{count}} series",
-    "copySeriesCount": "Copiar {{count}} series"
+    "copySeriesCount": "Copiar {{count}} series",
+    "copyDuration": "en {{seconds}} s",
+    "copyTooFast": "Sospechosamente rápido para {{count}} imágenes: el archivo quizá solo puso el pedido en cola."
   },
   "actions": {
     "viewer": "Visor",

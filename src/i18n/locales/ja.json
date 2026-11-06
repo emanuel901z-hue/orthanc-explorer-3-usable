@@ -357,7 +357,9 @@
     "seriesSelect": "シリーズを選択",
     "selectNone": "なし",
     "retrieveSeriesCount": "{{count}} シリーズを取得",
-    "copySeriesCount": "{{count}} シリーズをコピー"
+    "copySeriesCount": "{{count}} シリーズをコピー",
+    "copyDuration": "{{seconds}} 秒",
+    "copyTooFast": "{{count}} 枚にしては速すぎます — アーカイブは指示をキューに入れただけの可能性があります。"
   },
   "actions": {
     "viewer": "ビューア",

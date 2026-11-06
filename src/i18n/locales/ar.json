@@ -446,7 +446,9 @@
     "seriesSelect": "تحديد السلسلة",
     "selectNone": "لا شيء",
     "retrieveSeriesCount": "استرجاع {{count}} سلسلة",
-    "copySeriesCount": "نسخ {{count}} سلسلة"
+    "copySeriesCount": "نسخ {{count}} سلسلة",
+    "copyDuration": "خلال {{seconds}} ث",
+    "copyTooFast": "سريع بشكل مريب لـ {{count}} صورة — قد يكون الأرشيف وضع الطلب في قائمة الانتظار فقط."
   },
   "actions": {
     "viewer": "العارض",

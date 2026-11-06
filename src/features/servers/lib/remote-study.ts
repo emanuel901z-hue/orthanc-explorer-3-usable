@@ -14,6 +14,8 @@ export type RemoteStudy = {
   studyDescription: string;
   accessionNumber: string;
   modalities: string;
+  /** Bildanzahl laut Archiv — Grundlage für die Plausibilitätsprüfung. */
+  instances?: number;
   studyInstanceUid: string;
   retrieving: boolean;
   retrieved: boolean;
@@ -43,6 +45,7 @@ export function mapRemoteAnswer(
     studyDescription: tag(tags, 'StudyDescription', '0008,1030'),
     accessionNumber: tag(tags, 'AccessionNumber', '0008,0050'),
     modalities: tag(tags, 'ModalitiesInStudy', '0008,0061'),
+    instances: Number(tags['NumberOfStudyRelatedInstances'] ?? tags['0020,1208'] ?? '') || undefined,
     studyInstanceUid: tags['StudyInstanceUID'] || tags['0020,000d'] || '',
     retrieving: false,
     retrieved: false,

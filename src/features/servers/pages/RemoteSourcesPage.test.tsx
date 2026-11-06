@@ -411,6 +411,47 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     expect(rows[0].textContent).toContain('CT');
   });
 
+  it('zeigt nach dem Kopieren die Dauer und warnt bei verdächtig kurzer Laufzeit', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    mockQuery.mockReset();
+    mockQuery.mockResolvedValue({
+      queryId: 'q-1',
+      answers: [{ index: 0, tags: { ...ANSWERS.answers[0].tags, NumberOfStudyRelatedInstances: '1200' } }],
+    });
+    mockRetrieve.mockResolvedValue({ ID: 'job-1' });
+    const { rerender } = renderPage();
+    await queryStudies('Muster');
+
+    fireEvent.change(screen.getByLabelText(/copy to|kopieren nach/i), { target: { value: 'hst_burn2CD' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Copy$|^Kopieren$/ }));
+    await waitFor(() => expect(mockRetrieve).toHaveBeenCalled());
+
+    mockJobs.mockReturnValue({
+      data: [{
+        ID: 'job-1',
+        Type: 'DicomMoveScu',
+        State: 'Success',
+        Progress: 100,
+        CreationTime: '20261106T114657.025637',
+        EffectiveRuntime: 0.05,
+        Content: { TargetAet: 'hst_burn2CD', Details: [{ DimseErrorStatus: 0 }] },
+      }],
+      isLoading: false,
+      isError: false,
+    });
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <RemoteSourcesPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByText('0x0000')).toBeInTheDocument();
+    expect(screen.getByText(/in 0\.1 s|in 0,1 s/)).toBeInTheDocument();
+    expect(screen.getByTitle(/verdächtig schnell|suspiciously fast/i)).toBeInTheDocument();
+  });
+
   it('öffnet beim Klick auf eine Zeile die Detailansicht mit den Tags', async () => {
     configure([]);
     renderPage();

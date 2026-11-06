@@ -62,6 +62,7 @@ export const REMOTE_RETURN_KEYS: Record<string, string> = {
   StudyDescription: '',
   AccessionNumber: '',
   ModalitiesInStudy: '',
+  NumberOfStudyRelatedInstances: '',
   StudyInstanceUID: '',
 };
 

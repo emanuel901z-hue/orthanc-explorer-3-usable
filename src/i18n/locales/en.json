@@ -509,7 +509,9 @@
     "retrieveSeriesCount_one": "Retrieve {{count}} series",
     "retrieveSeriesCount_other": "Retrieve {{count}} series",
     "copySeriesCount_one": "Copy {{count}} series",
-    "copySeriesCount_other": "Copy {{count}} series"
+    "copySeriesCount_other": "Copy {{count}} series",
+    "copyDuration": "in {{seconds}} s",
+    "copyTooFast": "Suspiciously fast for {{count}} images — the archive may only have queued the order, not delivered it yet."
   },
   "copyJobs": {
     "title": "Copy jobs",

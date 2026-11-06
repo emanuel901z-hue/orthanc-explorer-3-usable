@@ -357,7 +357,9 @@
     "seriesSelect": "选择序列",
     "selectNone": "无",
     "retrieveSeriesCount": "取回 {{count}} 个序列",
-    "copySeriesCount": "复制 {{count}} 个序列"
+    "copySeriesCount": "复制 {{count}} 个序列",
+    "copyDuration": "{{seconds}} 秒",
+    "copyTooFast": "对 {{count}} 张图像来说快得可疑 — 归档可能只是把指令排入队列。"
   },
   "actions": {
     "viewer": "查看器",

@@ -509,7 +509,9 @@
     "retrieveSeriesCount_one": "{{count}} Serie abrufen",
     "retrieveSeriesCount_other": "{{count}} Serien abrufen",
     "copySeriesCount_one": "{{count}} Serie kopieren",
-    "copySeriesCount_other": "{{count}} Serien kopieren"
+    "copySeriesCount_other": "{{count}} Serien kopieren",
+    "copyDuration": "in {{seconds}} s",
+    "copyTooFast": "Verdächtig schnell für {{count}} Bilder — das Archiv hat den Auftrag vermutlich nur eingereiht, noch nicht zugestellt."
   },
   "copyJobs": {
     "title": "Kopieraufträge",

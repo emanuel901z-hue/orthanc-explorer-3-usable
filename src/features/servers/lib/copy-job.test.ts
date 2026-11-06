@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { describeCopyJob, isCopyConfirmed, isMoveJob } from './copy-job';
+import { describeCopyJob, isCopyConfirmed, isMoveJob, looksQueuedOnly } from './copy-job';
 import type { OrthancJob } from '@/api/jobs';
 
 function moveJob(overrides: Partial<OrthancJob> = {}): OrthancJob {
@@ -144,5 +144,28 @@ describe('describeCopyJob — Teilfehler sind kein Erfolg', () => {
     const view = describeCopyJob(moveJob({ Content: { Details: [{ DimseErrorStatus: 0xa801 }] } }));
     expect(view.state).toBe('failed');
     expect(view.dimseKey).toBe('unknownDestination');
+  });
+});
+
+describe('looksQueuedOnly — nur eingereiht statt zugestellt?', () => {
+  it('verdächtigt eine große Studie, die in Millisekunden „fertig“ war', () => {
+    expect(looksQueuedOnly(1200, 0.05)).toBe(true);
+    expect(looksQueuedOnly(200, 0.4)).toBe(true);
+  });
+
+  it('verdächtigt eine echte Übertragung nicht', () => {
+    expect(looksQueuedOnly(1200, 45)).toBe(false);
+    expect(looksQueuedOnly(200, 12)).toBe(false);
+  });
+
+  it('lässt kleine Studien in Ruhe (Rauschen vermeiden)', () => {
+    expect(looksQueuedOnly(5, 0.01)).toBe(false);
+    expect(looksQueuedOnly(19, 0.01)).toBe(false);
+  });
+
+  it('ohne Bildzahl oder Dauer kein Urteil', () => {
+    expect(looksQueuedOnly(undefined, 0.01)).toBe(false);
+    expect(looksQueuedOnly(1200, undefined)).toBe(false);
+    expect(looksQueuedOnly(0, 0.01)).toBe(false);
   });
 });

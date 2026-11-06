@@ -446,7 +446,9 @@
     "seriesSelect": "Выбрать серию",
     "selectNone": "Нет",
     "retrieveSeriesCount": "Получить серий: {{count}}",
-    "copySeriesCount": "Копировать серий: {{count}}"
+    "copySeriesCount": "Копировать серий: {{count}}",
+    "copyDuration": "за {{seconds}} с",
+    "copyTooFast": "Подозрительно быстро для {{count}} снимков — возможно, архив только поставил задание в очередь."
   },
   "actions": {
     "viewer": "Просмотрщик",

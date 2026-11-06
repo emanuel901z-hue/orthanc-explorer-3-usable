@@ -94,3 +94,13 @@ export function describeCopyJob(job: OrthancJob): CopyJobView {
 export function isCopyConfirmed(view: CopyJobView): boolean {
   return view.state === 'success' && view.dimseStatus === formatDimseStatus(DIMSE_SUCCESS);
 }
+
+/**
+ * Verdacht „nur eingereiht“: Für viele Bilder in wenigen Millisekunden kann
+ * nichts übertragen worden sein. Bewusst konservativ — erst ab 20 Bildern und
+ * unter 5 ms pro Bild, damit kleine Studien nicht falsch verdächtigt werden.
+ */
+export function looksQueuedOnly(instances: number | undefined, durationSeconds: number | undefined): boolean {
+  if (!instances || instances < 20 || durationSeconds === undefined) return false;
+  return durationSeconds * 1000 < instances * 5;
+}

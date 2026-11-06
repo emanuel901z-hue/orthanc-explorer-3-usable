@@ -46,7 +46,7 @@ import { retrieveModalityAction } from '@/actions/retrieveModality';
 import { moveResourcesAction } from '@/actions/moveResources';
 import { getConfig } from '@/config/runtime';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
-import { describeCopyJob } from '@/features/servers/lib/copy-job';
+import { describeCopyJob, looksQueuedOnly } from '@/features/servers/lib/copy-job';
 import { buildRemoteQuery } from '@/features/servers/lib/remote-query';
 import {
   mapRemoteAnswer,
@@ -637,6 +637,25 @@ export default function RemoteSourcesPage() {
                                 <span className="flex items-center gap-1 text-xs text-success">
                                   <CheckCircle2 className="h-4 w-4" />
                                   {copyJob.dimseStatus}
+                                  {copyJob.durationSeconds !== undefined && (
+                                    <span className="text-muted-foreground">
+                                      {t('remote.copyDuration', {
+                                        seconds: copyJob.durationSeconds.toFixed(1),
+                                        defaultValue: 'in {{seconds}} s',
+                                      })}
+                                    </span>
+                                  )}
+                                  {looksQueuedOnly(study.instances, copyJob.durationSeconds) && (
+                                    <span
+                                      title={t('remote.copyTooFast', {
+                                        count: study.instances,
+                                        defaultValue:
+                                          'Suspiciously fast for {{count}} images — the archive may only have queued the order.',
+                                      })}
+                                    >
+                                      <AlertTriangle className="h-4 w-4 text-warning" />
+                                    </span>
+                                  )}
                                 </span>
                               ) : copyJob?.state === 'warning' ? (
                                 <span className="flex items-center gap-1 text-xs text-warning" title={copyJob.error}>

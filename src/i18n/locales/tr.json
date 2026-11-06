@@ -446,7 +446,9 @@
     "seriesSelect": "Seriyi seç",
     "selectNone": "Hiçbiri",
     "retrieveSeriesCount": "{{count}} seriyi getir",
-    "copySeriesCount": "{{count}} seriyi kopyala"
+    "copySeriesCount": "{{count}} seriyi kopyala",
+    "copyDuration": "{{seconds}} sn",
+    "copyTooFast": "{{count}} görüntü için şüpheli derecede hızlı — arşiv emri yalnızca kuyruğa almış olabilir."
   },
   "actions": {
     "viewer": "Görüntüleyici",
