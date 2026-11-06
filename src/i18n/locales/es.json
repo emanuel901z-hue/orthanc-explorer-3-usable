@@ -315,14 +315,15 @@
     "studyDescription": "Descripción del estudio",
     "searchPlaceholder": "Buscar: nombre, ID de paciente, admisión, fecha, modalidad",
     "searchParsed": "Se envía como:",
-    "searchHint": "Varias palabras forman el nombre del paciente (Muster Erika → MUSTER^ERIKA*), los números la ID de paciente, letras+números la admisión, las fechas con año filtran por fecha del estudio. Los prefijos name: id: acc: date: mod: fuerzan un campo.",
+    "searchHint": "Coma separa entradas (Muster,Erika,030626), el espacio separa partes de una entrada. Los números cuentan como fecha de nacimiento (03.06.2026, 030626, 03062026, 3623) y si no como ID de paciente; datum: fuerza la fecha del estudio, name: id: acc: geb: mod: el campo correspondiente.",
     "searchIgnored": "No usado: {{value}} — una fecha necesita año.",
     "searchEmpty": "Introduzca nombre, ID de paciente, admisión o fecha",
     "searchKind": {
       "name": "Nombre",
       "patientId": "ID de paciente",
       "accession": "Admisión",
-      "date": "Fecha",
+      "birthDate": "Fecha de nacimiento",
+      "studyDate": "Fecha del estudio",
       "modality": "Modalidad"
     },
     "searchFoundAs": "Encontrado como {{kind}}: {{value}}",

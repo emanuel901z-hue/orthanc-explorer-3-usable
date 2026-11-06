@@ -9,18 +9,26 @@
  * Oberfläche zeigen, was sie daraus gemacht hat — damit niemand raten muss,
  * warum nichts kommt.
  *
+ * Der Alltag in der Praxis ist `Nachname,Vorname,Geburtsdatum` — oder direkt
+ * die Patienten-ID, oder die Zugangsnummer. Geburtsdaten kommen in vielen
+ * Schreibweisen: `03.06.2026`, `030626`, `03062026`, `3623` (3.6.23). Zahlen
+ * sind deshalb mehrdeutig; die wahrscheinlichste Deutung wird gesucht und die
+ * übrigen als `alternatives` mitgeliefert, damit die Oberfläche sie probieren
+ * kann, wenn nichts kommt.
+ *
  * Regeln:
- *   - mehrere Wörter/Teile (durch Komma oder Leerzeichen) → ein Patientenname
- *     mit `^` zwischen den Teilen, Präfix-Suche mit `*`
- *   - reine Zahlen → Patienten-ID
- *   - Buchstaben+Zahlen oder mit Bindestrich → Zugangsnummer
- *   - Datum mit Jahr (29.08.2026, 2026-08-29, 20260829, auch als Bereich) →
- *     StudyDate
+ *   - Komma trennt Angaben (`Muster,Erika,030626`), Leerzeichen trennt Teile
+ *     derselben Angabe (`Muster Erika`)
+ *   - Wörter → Patientenname, Teile mit `^` verbunden, Präfix-Suche mit `*`
+ *   - Datum → **Geburtsdatum** (der Normalfall), mit `datum:`/`date:` wird es
+ *     zum Studiendatum
+ *   - reine Zahlen → Geburtsdatum (wenn gültig), sonst Patienten-ID
+ *   - Buchstaben+Zahlen → Zugangsnummer
  *   - Modalität (CT, MR, …) → ModalitiesInStudy
- *   - Präfixe erzwingen ein Feld: name:, id:, acc:, date:, mod:
+ *   - Präfixe erzwingen ein Feld: name: id: acc: geb: datum: mod:
  */
 
-export type RemoteQueryKind = 'name' | 'patientId' | 'accession' | 'date' | 'modality';
+export type RemoteQueryKind = 'name' | 'patientId' | 'accession' | 'birthDate' | 'studyDate' | 'modality';
 
 export type RemoteQueryChip = {
   kind: RemoteQueryKind;
@@ -33,8 +41,7 @@ export type RemoteQueryPlan = {
   chips: RemoteQueryChip[];
   /** Teile, die nicht verwendet werden konnten (z. B. Datum ohne Jahr). */
   ignored: string[];
-  /** Zweitdeutungen für mehrdeutige Teile: erst wenn die erste Abfrage nichts
-   *  findet, wird die nächste probiert (ACC-1 kann Zugangsnummer oder ID sein). */
+  /** Weitere Deutungen für mehrdeutige Teile, in der Reihenfolge zum Probieren. */
   alternatives: { query: Record<string, string>; chip: RemoteQueryChip }[];
 };
 
@@ -42,6 +49,7 @@ export type RemoteQueryPlan = {
 export const REMOTE_RETURN_KEYS: Record<string, string> = {
   PatientName: '',
   PatientID: '',
+  PatientBirthDate: '',
   StudyDate: '',
   StudyDescription: '',
   AccessionNumber: '',
@@ -53,55 +61,79 @@ const MODALITIES = new Set([
   'CT', 'MR', 'CR', 'DX', 'US', 'XA', 'PT', 'NM', 'MG', 'OT', 'RF', 'SC', 'ES', 'XC', 'SR', 'SEG',
 ]);
 
-const DATE_WITH_YEAR = [
-  /^(\d{4})-(\d{2})-(\d{2})$/, // 2026-08-29
-  /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/, // 29.08.2026
-  /^(\d{1,2})\.(\d{1,2})\.(\d{2})$/, // 29.08.26
-  /^(\d{4})(\d{2})(\d{2})$/, // 20260829
-];
+/** Zweistellige Jahre: alles bis zum laufenden Jahr ist 20xx, der Rest 19xx. */
+function expandYear(yy: number): number {
+  const current = new Date().getFullYear() % 100;
+  return yy <= current ? 2000 + yy : 1900 + yy;
+}
 
-function isoDate(token: string): string | undefined {
-  let year = '';
-  let month = '';
-  let day = '';
+function isoDate(year: number, month: number, day: number): string | undefined {
+  if (month < 1 || month > 12 || day < 1 || day > 31) return undefined;
+  return `${year}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`;
+}
 
-  let match = DATE_WITH_YEAR[0].exec(token);
-  if (match) [, year, month, day] = match;
-  if (!match) {
-    match = DATE_WITH_YEAR[1].exec(token);
-    if (match) [, day, month, year] = match;
+/**
+ * Erkennt eine Datumsangabe und gibt sie als DICOM-Datum (YYYYMMDD) zurück.
+ * Unterstützt `03.06.2026`, `03.06.26`, `2026-06-03`, `03062026`, `030626`,
+ * `3623` (3.6.23) und `19920502`.
+ */
+export function parseDateToken(token: string): string | undefined {
+  // mit Trennern: 03.06.2026, 3.6.26, 2026-06-03, 03/06/2026
+  const dotted = /^(\d{1,4})[.\-/](\d{1,2})[.\-/](\d{1,4})$/.exec(token);
+  if (dotted) {
+    const [, first, second, third] = dotted;
+    if (first.length === 4) return isoDate(Number(first), Number(second), Number(third));
+    const year = third.length <= 2 ? expandYear(Number(third)) : Number(third);
+    return isoDate(year, Number(second), Number(first));
   }
-  if (!match) {
-    match = DATE_WITH_YEAR[2].exec(token);
-    if (match) {
-      [, day, month, year] = match;
-      year = `${Number(year) > 30 ? '19' : '20'}${year}`;
+
+  if (!/^\d{4,8}$/.test(token)) return undefined;
+
+  // 8 Ziffern: 19920502 (yyyyMMdd) oder 02051992 (ddMMyyyy)
+  if (token.length === 8) {
+    const head = Number(token.slice(0, 4));
+    if (head >= 1900 && head <= 2099) {
+      return isoDate(head, Number(token.slice(4, 6)), Number(token.slice(6, 8)));
+    }
+    return isoDate(
+      Number(token.slice(4, 8)),
+      Number(token.slice(2, 4)),
+      Number(token.slice(0, 2)),
+    );
+  }
+
+  // 6 Ziffern: 030626 → 03.06.2026
+  if (token.length === 6) {
+    return isoDate(
+      expandYear(Number(token.slice(4, 6))),
+      Number(token.slice(2, 4)),
+      Number(token.slice(0, 2)),
+    );
+  }
+
+  // 4 Ziffern: 3623 → 3.6.23 (Tag und Monat ein- oder zweistellig)
+  if (token.length === 4) {
+    for (const [dayLength, monthLength] of [[1, 1], [2, 1], [1, 2]] as const) {
+      const day = Number(token.slice(0, dayLength));
+      const month = Number(token.slice(dayLength, dayLength + monthLength));
+      const yearDigits = token.slice(dayLength + monthLength);
+      if (yearDigits.length !== 2) continue;
+      const result = isoDate(expandYear(Number(yearDigits)), month, day);
+      if (result) return result;
     }
   }
-  if (!match) {
-    match = DATE_WITH_YEAR[3].exec(token);
-    if (match) [, year, month, day] = match;
-  }
-  if (!match) return undefined;
 
-  const m = Number(month);
-  const d = Number(day);
-  if (m < 1 || m > 12 || d < 1 || d > 31) return undefined;
-  return `${year}${String(m).padStart(2, '0')}${String(d).padStart(2, '0')}`;
+  return undefined;
 }
 
 /** „01.01.2026-31.01.2026“ oder „20260101-20260131“ → DICOM-Bereich. */
 function dateRange(token: string): string | undefined {
   const parts = token.split('-');
   if (parts.length !== 2) return undefined;
-  const from = isoDate(parts[0]);
-  const to = isoDate(parts[1]);
+  const from = parseDateToken(parts[0]);
+  const to = parseDateToken(parts[1]);
   if (!from || !to) return undefined;
   return `${from}-${to}`;
-}
-
-function isDate(token: string): string | undefined {
-  return dateRange(token) ?? isoDate(token);
 }
 
 /** „29.08“ / „29.08.“ — ein Datum ohne Jahr kann DICOM nicht ausdrücken. */
@@ -114,7 +146,6 @@ function looksLikeModality(token: string): boolean {
 }
 
 function looksLikeAccession(token: string): boolean {
-  // Mit Trenner (ACC-1, E2E-COPY-1) oder Buchstaben gefolgt von Ziffern (XS1234)
   if (/^[A-Za-z0-9]+[-_][A-Za-z0-9-]+$/.test(token)) return true;
   return /^[A-Za-z]{2,}\d{2,}[A-Za-z0-9-]*$/.test(token) || /^\d{2,}[A-Za-z]{2,}$/.test(token);
 }
@@ -123,17 +154,22 @@ function looksLikePatientId(token: string): boolean {
   return /^\d{3,}$/.test(token) || /^[A-Za-z]{1,4}\d{3,}$/.test(token);
 }
 
-/** Mehrdeutig: enthält Ziffern und Buchstaben — ID, Zugangsnummer oder Name? */
 function isAmbiguous(token: string): boolean {
   return /[A-Za-z]/.test(token) && /\d/.test(token) && !token.includes('*') && !token.includes('?');
 }
 
-/** Erste Deutung eines freien Teils. */
-function guessKind(text: string): RemoteQueryKind {
-  if (looksLikeModality(text)) return 'modality';
-  if (looksLikePatientId(text)) return 'patientId';
-  if (looksLikeAccession(text)) return 'accession';
-  return 'name';
+/**
+ * Alle plausiblen Deutungen eines Teils, wahrscheinlichste zuerst.
+ * Zahlen sind der schwierige Fall: `030626` kann Geburtsdatum oder ID sein,
+ * `3623` genauso.
+ */
+export function candidatesFor(text: string): RemoteQueryKind[] {
+  if (looksLikeModality(text)) return ['modality'];
+  if (parseDateToken(text) || dateRange(text)) return ['birthDate', 'patientId', 'accession'];
+  if (looksLikePatientId(text)) return ['patientId', 'accession'];
+  if (looksLikeAccession(text)) return ['accession', 'patientId'];
+  if (isAmbiguous(text)) return ['name', 'accession'];
+  return ['name'];
 }
 
 /** DICOM-Personennamen: Teile mit `^`, Präfix-Suche mit `*`. */
@@ -155,8 +191,12 @@ const PREFIXES: Record<string, RemoteQueryKind> = {
   pid: 'patientId',
   acc: 'accession',
   accession: 'accession',
-  date: 'date',
-  datum: 'date',
+  geb: 'birthDate',
+  birth: 'birthDate',
+  gebdat: 'birthDate',
+  datum: 'studyDate',
+  date: 'studyDate',
+  studydate: 'studyDate',
   mod: 'modality',
   modality: 'modality',
 };
@@ -175,6 +215,47 @@ type BuildResult = Omit<RemoteQueryPlan, 'alternatives'> & {
   ambiguous: { text: string; alternatives: RemoteQueryKind[] }[];
 };
 
+function assign(
+  query: Record<string, string>,
+  chips: RemoteQueryChip[],
+  kind: RemoteQueryKind,
+  text: string,
+): boolean {
+  if (kind === 'birthDate') {
+    const value = dateRange(text) ?? parseDateToken(text);
+    if (!value || query.PatientBirthDate) return false;
+    query.PatientBirthDate = value;
+    chips.push({ kind, value });
+    return true;
+  }
+  if (kind === 'studyDate') {
+    const value = dateRange(text) ?? parseDateToken(text);
+    if (!value || query.StudyDate) return false;
+    query.StudyDate = value;
+    chips.push({ kind, value });
+    return true;
+  }
+  if (kind === 'patientId') {
+    if (query.PatientID) return false;
+    query.PatientID = text;
+    chips.push({ kind, value: text });
+    return true;
+  }
+  if (kind === 'accession') {
+    if (query.AccessionNumber) return false;
+    query.AccessionNumber = text;
+    chips.push({ kind, value: text });
+    return true;
+  }
+  if (kind === 'modality') {
+    if (query.ModalitiesInStudy) return false;
+    query.ModalitiesInStudy = text.toUpperCase();
+    chips.push({ kind, value: text.toUpperCase() });
+    return true;
+  }
+  return false;
+}
+
 function buildWithOverrides(
   input: string,
   overrides: Record<string, RemoteQueryKind>,
@@ -188,66 +269,42 @@ function buildWithOverrides(
   // Suchkriterium, Attribut ohne Wert = Rückgabefeld).
   const query: Record<string, string> = { ...REMOTE_RETURN_KEYS };
 
-  const rawTokens = input
-    .split(/[,\s]+/)
-    .map((token) => token.trim())
-    .filter(Boolean);
+  // Komma trennt Angaben (Name, Vorname, Geburtsdatum), Leerzeichen trennt
+  // Teile derselben Angabe.
+  const segments = input.split(',').map((segment) => segment.trim()).filter(Boolean);
 
-  for (const raw of rawTokens) {
-    const token = classify(raw);
-    const forced = overrides[token.text] ?? token.kind;
-    const text = token.text;
+  for (const segment of segments) {
+    for (const raw of segment.split(/\s+/).filter(Boolean)) {
+      const token = classify(raw);
+      const text = token.text;
+      const forced = overrides[text] ?? token.kind;
 
-    const date = forced === 'date' ? (dateRange(text) ?? isoDate(text)) : forced ? undefined : isDate(text);
-    if (date) {
-      query.StudyDate = date;
-      chips.push({ kind: 'date', value: date });
-      continue;
-    }
-    if (forced === 'date') {
-      ignored.push(raw);
-      continue;
-    }
-    if (!forced && isPartialDate(text)) {
-      ignored.push(raw);
-      continue;
-    }
-
-    const kind: RemoteQueryKind = forced ?? guessKind(text);
-
-    if (kind === 'name') {
-      nameParts.push(text);
-      if (!forced && isAmbiguous(text)) ambiguous.push({ text, alternatives: ['accession'] });
-      continue;
-    }
-    if (kind === 'modality') {
-      if (!query.ModalitiesInStudy) {
-        query.ModalitiesInStudy = text.toUpperCase();
-        chips.push({ kind: 'modality', value: text.toUpperCase() });
+      if (forced) {
+        if (forced === 'name') {
+          nameParts.push(text);
+          continue;
+        }
+        if (!assign(query, chips, forced, text)) {
+          if (forced === 'birthDate' || forced === 'studyDate') ignored.push(raw);
+        }
         continue;
       }
-      nameParts.push(text);
-      continue;
-    }
-    if (kind === 'patientId') {
-      if (!query.PatientID) {
-        query.PatientID = text;
-        chips.push({ kind: 'patientId', value: text });
-        if (!forced && isAmbiguous(text)) ambiguous.push({ text, alternatives: ['accession'] });
+
+      if (isPartialDate(text)) {
+        ignored.push(raw);
         continue;
       }
-      nameParts.push(text);
-      continue;
-    }
-    if (kind === 'accession') {
-      if (!query.AccessionNumber) {
-        query.AccessionNumber = text;
-        chips.push({ kind: 'accession', value: text });
-        if (!forced) ambiguous.push({ text, alternatives: ['patientId'] });
-        continue;
+
+      const candidates = candidatesFor(text);
+      const primary = candidates[0];
+      if (primary === 'name') {
+        nameParts.push(text);
+      } else if (!assign(query, chips, primary, text)) {
+        nameParts.push(text);
       }
-      nameParts.push(text);
-      continue;
+      if (candidates.length > 1) {
+        ambiguous.push({ text, alternatives: candidates.slice(1) });
+      }
     }
   }
 
@@ -261,9 +318,9 @@ function buildWithOverrides(
 }
 
 /**
- * Aus freiem Text wird eine C-FIND-Abfrage. Mehrdeutige Teile (Buchstaben und
- * Ziffern, z. B. „ACC-1“) landen zusätzlich als `alternatives` im Ergebnis:
- * die Oberfläche fragt sie erst, wenn die erste Deutung nichts findet.
+ * Aus freiem Text wird eine C-FIND-Abfrage. Mehrdeutige Teile landen zusätzlich
+ * als `alternatives` im Ergebnis — die Oberfläche probiert sie erst, wenn die
+ * erste Deutung nichts findet.
  */
 export function buildRemoteQuery(
   input: string,
@@ -274,13 +331,16 @@ export function buildRemoteQuery(
     Object.keys(overrides).length > 0
       ? []
       : plan.ambiguous
-        .map((entry) => {
-          const kind = entry.alternatives[0];
-          const alt = buildWithOverrides(input, { [entry.text]: kind });
-          const chip = alt.chips.find((candidate) => candidate.kind === kind);
-          return chip ? { query: alt.query, chip } : undefined;
-        })
-        .filter((entry): entry is { query: Record<string, string>; chip: RemoteQueryChip } => entry !== undefined);
+        .flatMap((entry) =>
+          entry.alternatives.map((kind) => {
+            const alt = buildWithOverrides(input, { [entry.text]: kind });
+            const chip = alt.chips.find((candidate) => candidate.kind === kind);
+            return chip ? { query: alt.query, chip } : undefined;
+          }),
+        )
+        .filter((entry): entry is { query: Record<string, string>; chip: RemoteQueryChip } => entry !== undefined)
+        // doppelte Varianten nicht mehrfach abfragen
+        .filter((entry, index, all) => all.findIndex((other) => other.chip.kind === entry.chip.kind) === index);
 
   return { query: plan.query, chips: plan.chips, ignored: plan.ignored, alternatives };
 }

@@ -404,14 +404,15 @@
     "studyDescription": "İnceleme açıklaması",
     "searchPlaceholder": "Ara: ad, hasta ID, erişim numarası, tarih, modalite",
     "searchParsed": "Gönderilen:",
-    "searchHint": "Birden çok kelime hasta adını oluşturur (Muster Erika → MUSTER^ERIKA*), sayılar hasta ID'sini, harf+sayı erişim numarasını, yıllı tarihler inceleme tarihini filtreler. name: id: acc: date: mod: önekleri alanı zorlar.",
+    "searchHint": "Virgül girdileri ayırır (Muster,Erika,030626), boşluk bir girdinin parçalarını. Sayılar doğum tarihi sayılır (03.06.2026, 030626, 03062026, 3623), olmazsa hasta ID'si; datum: inceleme tarihini, name: id: acc: geb: mod: ilgili alanı zorlar.",
     "searchIgnored": "Kullanılmadı: {{value}} — tarih için yıl gerekir.",
     "searchEmpty": "Ad, hasta ID, erişim numarası veya tarih girin",
     "searchKind": {
       "name": "Ad",
       "patientId": "Hasta ID",
       "accession": "Erişim no",
-      "date": "Tarih",
+      "birthDate": "Doğum tarihi",
+      "studyDate": "İnceleme tarihi",
       "modality": "Modalite"
     },
     "searchFoundAs": "{{kind}} olarak bulundu: {{value}}",

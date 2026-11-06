@@ -315,14 +315,15 @@
     "studyDescription": "検査説明",
     "searchPlaceholder": "検索: 氏名、患者ID、受付番号、日付、モダリティ",
     "searchParsed": "送信内容:",
-    "searchHint": "複数の語は患者名になります（Muster Erika → MUSTER^ERIKA*）。数字は患者ID、英字+数字は受付番号、年を含む日付は検査日で絞り込みます。接頭辞 name: id: acc: date: mod: で項目を固定できます。",
+    "searchHint": "カンマは項目の区切り（Muster,Erika,030626）、空白は同じ項目内の区切りです。数字は生年月日（03.06.2026、030626、03062026、3623）として、該当しなければ患者IDとして扱います。datum: は検査日、name: id: acc: geb: mod: は各項目を強制します。",
     "searchIgnored": "未使用: {{value}} — 日付には年が必要です。",
     "searchEmpty": "氏名、患者ID、受付番号、日付のいずれかを入力してください",
     "searchKind": {
       "name": "氏名",
       "patientId": "患者ID",
       "accession": "受付番号",
-      "date": "日付",
+      "birthDate": "生年月日",
+      "studyDate": "検査日",
       "modality": "モダリティ"
     },
     "searchFoundAs": "{{kind}} として見つかりました: {{value}}",

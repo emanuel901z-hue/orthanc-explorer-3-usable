@@ -463,14 +463,15 @@
     "studyDescription": "Studienbeschreibung",
     "searchPlaceholder": "Suche: Name, Patienten-ID, Zugangsnummer, Datum, Modalität",
     "searchParsed": "Gesendet als:",
-    "searchHint": "Mehrere Wörter ergeben den Patientennamen (Muster Erika → MUSTER^ERIKA*), Zahlen die Patienten-ID, Buchstaben+Zahlen die Zugangsnummer, Datumsangaben mit Jahr das Studiendatum. Präfixe name: id: acc: date: mod: erzwingen ein Feld.",
+    "searchHint": "Komma trennt Angaben (Muster,Erika,030626), Leerzeichen trennt Teile einer Angabe. Zahlen gelten als Geburtsdatum (03.06.2026, 030626, 03062026, 3623), sonst als Patienten-ID; datum: erzwingt das Studiendatum, name: id: acc: geb: mod: das jeweilige Feld.",
     "searchIgnored": "Nicht verwendet: {{value}} — ein Datum braucht ein Jahr.",
     "searchEmpty": "Name, Patienten-ID, Zugangsnummer oder Datum eingeben",
     "searchKind": {
       "name": "Name",
       "patientId": "Patienten-ID",
       "accession": "Zugangsnummer",
-      "date": "Datum",
+      "birthDate": "Geburtsdatum",
+      "studyDate": "Studiendatum",
       "modality": "Modalität"
     },
     "searchFoundAs": "Gefunden als {{kind}}: {{value}}",

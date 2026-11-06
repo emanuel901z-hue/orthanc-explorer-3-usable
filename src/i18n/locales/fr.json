@@ -315,14 +315,15 @@
     "studyDescription": "Description de l'examen",
     "searchPlaceholder": "Rechercher : nom, ID patient, admission, date, modalité",
     "searchParsed": "Envoyé comme :",
-    "searchHint": "Plusieurs mots forment le nom du patient (Muster Erika → MUSTER^ERIKA*), les nombres l'ID patient, lettres+chiffres l'admission, les dates avec année filtrent par date d'examen. Les préfixes name: id: acc: date: mod: forcent un champ.",
+    "searchHint": "La virgule sépare les saisies (Muster,Erika,030626), l'espace sépare les parties d'une saisie. Les nombres valent date de naissance (03.06.2026, 030626, 03062026, 3623), sinon ID patient ; datum: force la date d'examen, name: id: acc: geb: mod: le champ correspondant.",
     "searchIgnored": "Non utilisé : {{value}} — une date nécessite une année.",
     "searchEmpty": "Saisissez un nom, un ID patient, une admission ou une date",
     "searchKind": {
       "name": "Nom",
       "patientId": "ID patient",
       "accession": "Admission",
-      "date": "Date",
+      "birthDate": "Date de naissance",
+      "studyDate": "Date de l'examen",
       "modality": "Modalité"
     },
     "searchFoundAs": "Trouvé comme {{kind}} : {{value}}",

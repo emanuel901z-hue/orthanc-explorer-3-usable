@@ -239,7 +239,8 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     // Das Ziel-PACS liefert nur zurück, was angefragt wurde — also alles anfragen
     expect(params.Query).toMatchObject({
       PatientName: 'MUSTER*',
-      StudyDate: '20260829',
+      // ein Datum ohne Präfix gilt als Geburtsdatum (der Alltag: Name, Gebdat)
+      PatientBirthDate: '20260829',
       PatientID: '',
       StudyDescription: '',
       AccessionNumber: '',

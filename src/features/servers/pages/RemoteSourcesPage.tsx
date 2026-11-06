@@ -40,6 +40,8 @@ interface RemoteStudy {
   answerIndex: number;
   patientName: string;
   patientId: string;
+  /** Geburtsdatum aus der Antwort — hilft, Gleichnamige zu trennen. */
+  birthDate: string;
   studyDate: string;
   studyDescription: string;
   accessionNumber: string;
@@ -52,6 +54,12 @@ interface RemoteStudy {
   copying: boolean;
   /** Orthanc job the copy runs as; its state is the status shown in the row. */
   copyJobId?: string;
+}
+
+/** DICOM-Geburtsdatum (YYYYMMDD) → 02.05.1992 für die Anzeige. */
+function formatBirthDate(value: string): string {
+  if (!/^\d{8}$/.test(value)) return value;
+  return `${value.slice(6, 8)}.${value.slice(4, 6)}.${value.slice(0, 4)}`;
 }
 
 export default function RemoteSourcesPage() {
@@ -167,6 +175,7 @@ export default function RemoteSourcesPage() {
           answerIndex: ans.index,
           patientName: tags['0010,0010'] || tags['PatientName'] || '—',
           patientId: tags['0010,0020'] || tags['PatientID'] || '—',
+          birthDate: tags['0010,0030'] || tags['PatientBirthDate'] || '',
           studyDate: tags['0008,0020'] || tags['StudyDate'] || '—',
           studyDescription: tags['0008,1030'] || tags['StudyDescription'] || '—',
           accessionNumber: tags['0008,0050'] || tags['AccessionNumber'] || '—',
@@ -464,7 +473,12 @@ export default function RemoteSourcesPage() {
                       const copyJob = study.copyJobId ? copyJobs.get(study.copyJobId) : undefined;
                       return (
                         <TableRow key={i}>
-                          <TableCell className="text-sm">{study.patientName}</TableCell>
+                          <TableCell className="text-sm">
+                            <div>{study.patientName}</div>
+                            {study.birthDate && (
+                              <div className="text-xs text-muted-foreground">{formatBirthDate(study.birthDate)}</div>
+                            )}
+                          </TableCell>
                           <TableCell className="text-sm font-mono">{study.patientId}</TableCell>
                           <TableCell className="text-sm">{study.studyDate}</TableCell>
                           <TableCell className="text-sm">{study.studyDescription}</TableCell>

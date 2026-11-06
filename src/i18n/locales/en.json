@@ -463,14 +463,15 @@
     "studyDescription": "Study Description",
     "searchPlaceholder": "Search: name, patient ID, accession, date, modality",
     "searchParsed": "Sent as:",
-    "searchHint": "Several words form the patient name (Muster Erika → MUSTER^ERIKA*), numbers become the patient ID, letters+digits the accession number, dates with a year filter by study date. Prefixes name: id: acc: date: mod: force a field.",
+    "searchHint": "Comma separates entries (Muster,Erika,030626), a space separates parts of one entry. Numbers count as the birth date (03.06.2026, 030626, 03062026, 3623) and otherwise as the patient ID; datum: forces the study date, name: id: acc: geb: mod: force the respective field.",
     "searchIgnored": "Not used: {{value}} — a date needs a year.",
     "searchEmpty": "Enter a name, patient ID, accession number or date",
     "searchKind": {
       "name": "Name",
       "patientId": "Patient ID",
       "accession": "Accession",
-      "date": "Date",
+      "birthDate": "Birth date",
+      "studyDate": "Study date",
       "modality": "Modality"
     },
     "searchFoundAs": "Found as {{kind}}: {{value}}",

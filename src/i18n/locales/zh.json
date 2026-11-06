@@ -315,14 +315,15 @@
     "studyDescription": "检查描述",
     "searchPlaceholder": "搜索：姓名、患者 ID、登记号、日期、模态",
     "searchParsed": "发送为：",
-    "searchHint": "多个词组成患者姓名（Muster Erika → MUSTER^ERIKA*），数字作为患者 ID，字母+数字作为登记号，带年份的日期按检查日期筛选。前缀 name: id: acc: date: mod: 可强制指定字段。",
+    "searchHint": "逗号分隔各项（Muster,Erika,030626），空格分隔同一项内的部分。数字按出生日期处理（03.06.2026、030626、03062026、3623），否则作为患者 ID；datum: 强制检查日期，name: id: acc: geb: mod: 强制相应字段。",
     "searchIgnored": "未使用：{{value}} — 日期需要年份。",
     "searchEmpty": "请输入姓名、患者 ID、登记号或日期",
     "searchKind": {
       "name": "姓名",
       "patientId": "患者 ID",
       "accession": "登记号",
-      "date": "日期",
+      "birthDate": "出生日期",
+      "studyDate": "检查日期",
       "modality": "模态"
     },
     "searchFoundAs": "以{{kind}}找到：{{value}}",
