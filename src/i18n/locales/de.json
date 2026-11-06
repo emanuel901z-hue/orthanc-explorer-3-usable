@@ -484,7 +484,18 @@
     "echoFailed": "C-ECHO fehlgeschlagen",
     "retrieveStarted": "Abruf gestartet (C-MOVE)",
     "retrieveFailed": "Abruf fehlgeschlagen",
-    "lastEcho": "Letztes Echo"
+    "lastEcho": "Letztes Echo",
+    "selectAll": "Alle auswählen",
+    "selectRow": "Studie auswählen",
+    "selectedCount": "{{count}} ausgewählt",
+    "copySelected": "Kopieren ({{count}})",
+    "retrieveSelected": "Abrufen ({{count}})",
+    "copyTo": "Kopieren nach {{target}}",
+    "detailTags": "DICOM-Tags aus dem Archiv",
+    "detailTagName": "Name",
+    "detailTagValue": "Wert",
+    "detailLoading": "Lade Tags…",
+    "detailNoTags": "Das Archiv hat zu dieser Studie keine Tags geliefert."
   },
   "copyJobs": {
     "title": "Kopieraufträge",

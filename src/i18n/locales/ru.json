@@ -425,7 +425,18 @@
     "echoFailed": "C-ECHO не выполнен",
     "retrieveStarted": "Получение запущено (C-MOVE)",
     "retrieveFailed": "Получение не выполнено",
-    "lastEcho": "Последний echo"
+    "lastEcho": "Последний echo",
+    "selectAll": "Выбрать все",
+    "selectRow": "Выбрать исследование",
+    "selectedCount": "Выбрано: {{count}}",
+    "copySelected": "Копировать ({{count}})",
+    "retrieveSelected": "Получить ({{count}})",
+    "copyTo": "Копировать в {{target}}",
+    "detailTags": "Теги DICOM из архива",
+    "detailTagName": "Имя",
+    "detailTagValue": "Значение",
+    "detailLoading": "Загрузка тегов…",
+    "detailNoTags": "Архив не вернул теги для этого исследования."
   },
   "actions": {
     "viewer": "Просмотрщик",

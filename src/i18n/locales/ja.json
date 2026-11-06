@@ -336,7 +336,18 @@
     "echoFailed": "C-ECHO 失敗",
     "retrieveStarted": "取得を開始しました (C-MOVE)",
     "retrieveFailed": "取得に失敗しました",
-    "lastEcho": "最終 Echo"
+    "lastEcho": "最終 Echo",
+    "selectAll": "すべて選択",
+    "selectRow": "検査を選択",
+    "selectedCount": "{{count}} 件選択中",
+    "copySelected": "コピー ({{count}})",
+    "retrieveSelected": "取得 ({{count}})",
+    "copyTo": "{{target}} へコピー",
+    "detailTags": "アーカイブからの DICOM タグ",
+    "detailTagName": "名前",
+    "detailTagValue": "値",
+    "detailLoading": "タグを読み込み中…",
+    "detailNoTags": "この検査のタグは返されませんでした。"
   },
   "actions": {
     "viewer": "ビューア",

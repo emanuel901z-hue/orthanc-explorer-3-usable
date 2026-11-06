@@ -425,7 +425,18 @@
     "echoFailed": "C-ECHO başarısız",
     "retrieveStarted": "Getirme başladı (C-MOVE)",
     "retrieveFailed": "Getirme başarısız",
-    "lastEcho": "Son echo"
+    "lastEcho": "Son echo",
+    "selectAll": "Tümünü seç",
+    "selectRow": "İncelemeyi seç",
+    "selectedCount": "{{count}} seçili",
+    "copySelected": "Kopyala ({{count}})",
+    "retrieveSelected": "Getir ({{count}})",
+    "copyTo": "{{target}} hedefine kopyala",
+    "detailTags": "Arşivden gelen DICOM etiketleri",
+    "detailTagName": "Ad",
+    "detailTagValue": "Değer",
+    "detailLoading": "Etiketler yükleniyor…",
+    "detailNoTags": "Arşiv bu inceleme için etiket döndürmedi."
   },
   "actions": {
     "viewer": "Görüntüleyici",

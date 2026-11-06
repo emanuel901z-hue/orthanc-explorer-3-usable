@@ -1,10 +1,25 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHelp } from '@/shared/components/PageHelp';
-import { Globe, Radio, Search, Wifi, WifiOff, Download, Copy, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import {
+  Globe,
+  Radio,
+  Search,
+  Wifi,
+  WifiOff,
+  Download,
+  Copy,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -31,32 +46,52 @@ import { getConfig } from '@/config/runtime';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
 import { describeCopyJob } from '@/features/servers/lib/copy-job';
 import { buildRemoteQuery } from '@/features/servers/lib/remote-query';
+import {
+  mapRemoteAnswer,
+  sortRemoteStudies,
+  type RemoteSort,
+  type RemoteSortKey,
+  type RemoteStudy,
+} from '@/features/servers/lib/remote-study';
+import RemoteStudyDetailDialog from '@/features/servers/components/RemoteStudyDetailDialog';
 import { formatDicomDate } from '@/lib/dicom-date';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { usePersistedState, useRememberedState } from '@/store/ui-state';
 
-interface RemoteStudy {
-  queryId: string;
-  answerIndex: number;
-  patientName: string;
-  patientId: string;
-  /** Geburtsdatum aus der Antwort — hilft, Gleichnamige zu trennen. */
-  birthDate: string;
-  studyDate: string;
-  studyDescription: string;
-  accessionNumber: string;
-  modalities: string;
-  studyInstanceUid: string;
-  retrieving: boolean;
-  retrieved: boolean;
-  error: boolean;
-  /** C-MOVE to a target archive — the study does not land in this Orthanc. */
-  copying: boolean;
-  /** Orthanc job the copy runs as; its state is the status shown in the row. */
-  copyJobId?: string;
-}
+const DEFAULT_SORT: RemoteSort = { id: 'studyDate', desc: true };
 
+/** Sortierbarer Spaltenkopf wie in der Studienliste. */
+function SortHeader({
+  label,
+  column,
+  sort,
+  onSort,
+}: {
+  label: string;
+  column: RemoteSortKey;
+  sort: RemoteSort;
+  onSort: (column: RemoteSortKey) => void;
+}) {
+  const active = sort.id === column;
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="gap-1 -ml-1 h-8 px-0 font-semibold w-full min-w-0 justify-start overflow-hidden"
+      onClick={() => onSort(column)}
+    >
+      <span className="truncate" title={label}>{label}</span>
+      {active && !sort.desc ? (
+        <ArrowUp className="h-3.5 w-3.5 shrink-0" />
+      ) : active && sort.desc ? (
+        <ArrowDown className="h-3.5 w-3.5 shrink-0" />
+      ) : (
+        <ArrowUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+      )}
+    </Button>
+  );
+}
 
 export default function RemoteSourcesPage() {
   const { t, i18n } = useTranslation();
@@ -95,6 +130,40 @@ export default function RemoteSourcesPage() {
   const [querying, setQuerying] = useState(false);
   const [remoteStudies, setRemoteStudies] = useState<RemoteStudy[]>([]);
   const [echoLoading, setEchoLoading] = useState(false);
+  // Sortierung überlebt die Navigation; die Auswahl gilt für diesen Besuch.
+  const [sort, setSort] = usePersistedState<RemoteSort>('remoteSources.sort', DEFAULT_SORT);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [detail, setDetail] = useState<RemoteStudy | null>(null);
+
+  const sortedStudies = useMemo(() => sortRemoteStudies(remoteStudies, sort), [remoteStudies, sort]);
+  const selectedStudies = useMemo(
+    () => remoteStudies.filter((study) => selected.has(study.answerIndex)),
+    [remoteStudies, selected],
+  );
+
+  const toggleSort = (column: RemoteSortKey) => {
+    setSort((prev) => (prev.id === column ? { id: column, desc: !prev.desc } : { id: column, desc: false }));
+  };
+
+  const toggleSelected = (answerIndex: number) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(answerIndex)) next.delete(answerIndex);
+      else next.add(answerIndex);
+      return next;
+    });
+  };
+
+  /** Zustand einer Zeile ändern — über answerIndex, damit Sortieren nicht stört. */
+  const patchStudy = useCallback((study: RemoteStudy, patch: Partial<RemoteStudy>) => {
+    setRemoteStudies((prev) =>
+      prev.map((entry) =>
+        entry.queryId === study.queryId && entry.answerIndex === study.answerIndex
+          ? { ...entry, ...patch }
+          : entry,
+      ),
+    );
+  }, []);
 
   const runEcho = useCallback(
     async (name: string, options: { silent?: boolean } = {}) => {
@@ -139,6 +208,8 @@ export default function RemoteSourcesPage() {
     }
     setQuerying(true);
     setRemoteStudies([]);
+    setSelected(new Set());
+    setDetail(null);
     setSearchNote(undefined);
     try {
       let result = await queryModalityAction(selectedModality, {
@@ -165,26 +236,7 @@ export default function RemoteSourcesPage() {
         }
       }
 
-      const studies: RemoteStudy[] = result.answers.map((ans) => {
-        const tags = ans.tags;
-        return {
-          queryId: result.queryId,
-          answerIndex: ans.index,
-          patientName: tags['0010,0010'] || tags['PatientName'] || '—',
-          patientId: tags['0010,0020'] || tags['PatientID'] || '—',
-          birthDate: tags['0010,0030'] || tags['PatientBirthDate'] || '',
-          studyDate: tags['0008,0020'] || tags['StudyDate'] || '—',
-          studyDescription: tags['0008,1030'] || tags['StudyDescription'] || '—',
-          accessionNumber: tags['0008,0050'] || tags['AccessionNumber'] || '—',
-          modalities: tags['0008,0061'] || tags['ModalitiesInStudy'] || '—',
-          studyInstanceUid: tags['0020,000d'] || tags['StudyInstanceUID'] || '',
-          retrieving: false,
-          retrieved: false,
-          error: false,
-          copying: false,
-        };
-      });
-
+      const studies = result.answers.map((ans) => mapRemoteAnswer(result.queryId, ans.index, ans.tags));
       setRemoteStudies(studies);
       toast.success(t('remote.querySuccess', { count: studies.length, defaultValue: `${studies.length} studies found` }));
     } catch {
@@ -195,23 +247,22 @@ export default function RemoteSourcesPage() {
   };
 
   // C-MOVE retrieve for a specific query answer
-  const handleRetrieve = async (study: RemoteStudy, index: number) => {
-    setRemoteStudies((prev) => prev.map((s, i) => i === index ? { ...s, retrieving: true, error: false } : s));
+  const handleRetrieve = async (study: RemoteStudy) => {
+    patchStudy(study, { retrieving: true, error: false });
     try {
       await retrieveModalityAction(selectedModality, study.queryId, study.answerIndex);
-      setRemoteStudies((prev) => prev.map((s, i) => i === index ? { ...s, retrieving: false, retrieved: true } : s));
+      patchStudy(study, { retrieving: false, retrieved: true });
       toast.success(t('remote.retrieveStarted', { defaultValue: 'Retrieve started (C-MOVE)' }));
     } catch {
-      setRemoteStudies((prev) => prev.map((s, i) => i === index ? { ...s, retrieving: false, error: true } : s));
+      patchStudy(study, { retrieving: false, error: true });
       toast.error(t('remote.retrieveFailed', { defaultValue: 'Retrieve failed' }));
     }
   };
 
-  const handleRetrieveAll = async () => {
-    for (let i = 0; i < remoteStudies.length; i++) {
-      const s = remoteStudies[i];
-      if (!s.retrieved && !s.retrieving) {
-        await handleRetrieve(s, i);
+  const handleRetrieveMany = async (studies: RemoteStudy[]) => {
+    for (const study of studies) {
+      if (!study.retrieved && !study.retrieving) {
+        await handleRetrieve(study);
       }
     }
   };
@@ -220,15 +271,12 @@ export default function RemoteSourcesPage() {
   // never passes through this Orthanc — the archive delivers it directly.
   // The order runs as an Orthanc job, so the row can show progress and the
   // DIMSE status the archive reported, and the job list keeps the history.
-  const handleCopy = async (study: RemoteStudy, index: number) => {
+  const handleCopy = async (study: RemoteStudy) => {
     if (!selectedTarget) {
       toast.error(t('remote.copyNoTarget', { defaultValue: 'Choose a target first' }));
       return;
     }
-    const mark = (patch: Partial<RemoteStudy>) =>
-      setRemoteStudies((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
-
-    mark({ copying: true, copyJobId: undefined });
+    patchStudy(study, { copying: true, copyJobId: undefined });
     try {
       const result = await retrieveModalityAction(
         selectedModality,
@@ -238,23 +286,22 @@ export default function RemoteSourcesPage() {
         { asynchronous: true },
       );
       const jobId = typeof result.ID === 'string' ? result.ID : undefined;
-      mark({ copying: false, copyJobId: jobId });
+      patchStudy(study, { copying: false, copyJobId: jobId });
       toast.success(t('remote.copyStarted', { target: selectedTarget, defaultValue: `C-MOVE to ${selectedTarget} sent` }));
     } catch {
-      mark({ copying: false });
+      patchStudy(study, { copying: false });
       toast.error(t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' }));
     }
   };
 
-  const handleCopyAll = async () => {
+  const handleCopyMany = async (studies: RemoteStudy[]) => {
     if (!selectedTarget) {
       toast.error(t('remote.copyNoTarget', { defaultValue: 'Choose a target first' }));
       return;
     }
-    for (let i = 0; i < remoteStudies.length; i++) {
-      const s = remoteStudies[i];
-      if (!s.copyJobId && !s.copying) {
-        await handleCopy(s, i);
+    for (const study of studies) {
+      if (!study.copyJobId && !study.copying) {
+        await handleCopy(study);
       }
     }
   };
@@ -398,7 +445,7 @@ export default function RemoteSourcesPage() {
               )}
 
               <p className="text-xs text-muted-foreground">{t('remote.searchHint', {
-                defaultValue: 'Several words form the patient name (Muster Erika → MUSTER^ERIKA*), numbers become the patient ID, letters+digits the accession number, dates with a year filter by study date. Prefixes name: id: acc: date: mod: force a field.',
+                defaultValue: 'Comma separates entries (Muster,Erika,030626), a space separates parts of one entry.',
               })}</p>
             </CardContent>
           </Card>
@@ -409,6 +456,7 @@ export default function RemoteSourcesPage() {
               <div className="flex items-center justify-between gap-3 p-3 border-b flex-wrap">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   {t('remote.resultsCount', { count: remoteStudies.length, defaultValue: `${remoteStudies.length} studies found` })}
+                  {selected.size > 0 && ` · ${t('remote.selectedCount', { count: selected.size, defaultValue: `${selected.size} selected` })}`}
                 </span>
                 <div className="flex items-center gap-2 flex-wrap">
                   <label htmlFor="copy-target" className="text-xs text-muted-foreground">
@@ -436,20 +484,24 @@ export default function RemoteSourcesPage() {
                     variant="outline"
                     size="sm"
                     className="h-7 gap-1.5 text-xs"
-                    onClick={handleCopyAll}
+                    onClick={() => void handleCopyMany(selectedStudies.length > 0 ? selectedStudies : remoteStudies)}
                     disabled={!selectedTarget}
                   >
                     <Copy className="h-3.5 w-3.5" />
-                    {t('remote.copyAll', { defaultValue: 'Copy all' })}
+                    {selectedStudies.length > 0
+                      ? t('remote.copySelected', { count: selectedStudies.length, defaultValue: `Copy (${selectedStudies.length})` })
+                      : t('remote.copyAll', { defaultValue: 'Copy all' })}
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     className="h-7 gap-1.5 text-xs"
-                    onClick={handleRetrieveAll}
+                    onClick={() => void handleRetrieveMany(selectedStudies.length > 0 ? selectedStudies : remoteStudies)}
                   >
                     <Download className="h-3.5 w-3.5" />
-                    {t('remote.retrieveAll', { defaultValue: 'Retrieve all' })}
+                    {selectedStudies.length > 0
+                      ? t('remote.retrieveSelected', { count: selectedStudies.length, defaultValue: `Retrieve (${selectedStudies.length})` })
+                      : t('remote.retrieveAll', { defaultValue: 'Retrieve all' })}
                   </Button>
                 </div>
               </div>
@@ -457,19 +509,50 @@ export default function RemoteSourcesPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t('remote.patientName')}</TableHead>
-                      <TableHead>{t('remote.patientId')}</TableHead>
-                      <TableHead>{t('remote.studyDate')}</TableHead>
-                      <TableHead>{t('remote.studyDescription')}</TableHead>
-                      <TableHead>{t('remote.accessionNumber')}</TableHead>
+                      <TableHead className="w-[36px]">
+                        <Checkbox
+                          checked={selected.size > 0 && selected.size === remoteStudies.length}
+                          onCheckedChange={(value) => {
+                            setSelected(value ? new Set(remoteStudies.map((study) => study.answerIndex)) : new Set());
+                          }}
+                          aria-label={t('remote.selectAll', { defaultValue: 'Select all' })}
+                        />
+                      </TableHead>
+                      <TableHead>
+                        <SortHeader label={t('remote.patientName')} column="patientName" sort={sort} onSort={toggleSort} />
+                      </TableHead>
+                      <TableHead>
+                        <SortHeader label={t('remote.patientId')} column="patientId" sort={sort} onSort={toggleSort} />
+                      </TableHead>
+                      <TableHead>
+                        <SortHeader label={t('remote.studyDate')} column="studyDate" sort={sort} onSort={toggleSort} />
+                      </TableHead>
+                      <TableHead>
+                        <SortHeader label={t('remote.studyDescription')} column="studyDescription" sort={sort} onSort={toggleSort} />
+                      </TableHead>
+                      <TableHead>
+                        <SortHeader label={t('remote.accessionNumber')} column="accessionNumber" sort={sort} onSort={toggleSort} />
+                      </TableHead>
                       <TableHead className="w-[190px]">{t('remote.actions', { defaultValue: 'Actions' })}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {remoteStudies.map((study, i) => {
+                    {sortedStudies.map((study) => {
                       const copyJob = study.copyJobId ? copyJobs.get(study.copyJobId) : undefined;
                       return (
-                        <TableRow key={i}>
+                        <TableRow
+                          key={study.answerIndex}
+                          className="cursor-pointer"
+                          onClick={() => setDetail(study)}
+                          data-testid="remote-study-row"
+                        >
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selected.has(study.answerIndex)}
+                              onCheckedChange={() => toggleSelected(study.answerIndex)}
+                              aria-label={t('remote.selectRow', { defaultValue: 'Select study' })}
+                            />
+                          </TableCell>
                           <TableCell className="text-sm">
                             <div>{study.patientName}</div>
                             {study.birthDate && (
@@ -480,7 +563,7 @@ export default function RemoteSourcesPage() {
                           <TableCell className="text-sm">{formatDicomDate(study.studyDate, locale)}</TableCell>
                           <TableCell className="text-sm">{study.studyDescription}</TableCell>
                           <TableCell className="text-sm font-mono">{study.accessionNumber}</TableCell>
-                          <TableCell>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center gap-1.5">
                               {study.retrieved ? (
                                 <CheckCircle2 className="h-4 w-4 text-success" />
@@ -492,7 +575,7 @@ export default function RemoteSourcesPage() {
                                   size="sm"
                                   className="gap-1.5 h-7"
                                   disabled={study.retrieving}
-                                  onClick={() => handleRetrieve(study, i)}
+                                  onClick={() => void handleRetrieve(study)}
                                 >
                                   {study.retrieving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
                                   {t('remote.retrieve', { defaultValue: 'Retrieve' })}
@@ -525,7 +608,7 @@ export default function RemoteSourcesPage() {
                                   className="gap-1.5 h-7"
                                   disabled={!selectedTarget}
                                   title={selectedTarget ? undefined : t('remote.copyNoTarget', { defaultValue: 'Choose a target first' })}
-                                  onClick={() => handleCopy(study, i)}
+                                  onClick={() => void handleCopy(study)}
                                 >
                                   <Copy className="h-3 w-3" />
                                   {t('remote.copy', { defaultValue: 'Copy' })}
@@ -611,6 +694,22 @@ export default function RemoteSourcesPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <RemoteStudyDetailDialog
+        study={detail}
+        open={detail !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetail(null);
+        }}
+        locale={locale}
+        targetAet={selectedTarget}
+        onRetrieve={(study) => {
+          void handleRetrieve(study);
+        }}
+        onCopy={(study) => {
+          void handleCopy(study);
+        }}
+      />
     </div>
   );
 }

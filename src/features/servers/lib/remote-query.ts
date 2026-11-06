@@ -28,7 +28,15 @@
  *   - Präfixe erzwingen ein Feld: name: id: acc: geb: datum: mod:
  */
 
-export type RemoteQueryKind = 'name' | 'patientId' | 'accession' | 'birthDate' | 'studyDate' | 'modality';
+export type RemoteQueryKind =
+  | 'name'
+  | 'patientId'
+  | 'accession'
+  | 'birthDate'
+  | 'studyDate'
+  | 'studyDescription'
+  | 'studyInstanceUid'
+  | 'modality';
 
 export type RemoteQueryChip = {
   kind: RemoteQueryKind;
@@ -163,7 +171,13 @@ function isAmbiguous(token: string): boolean {
  * Zahlen sind der schwierige Fall: `030626` kann Geburtsdatum oder ID sein,
  * `3623` genauso.
  */
+/** DICOM-UID: mindestens vier Zahlenblöcke, z. B. 1.2.276.0.7230010.3.1.2.1234 */
+function looksLikeStudyInstanceUid(text: string): boolean {
+  return /^\d+(\.\d+){3,}$/.test(text);
+}
+
 export function candidatesFor(text: string): RemoteQueryKind[] {
+  if (looksLikeStudyInstanceUid(text)) return ['studyInstanceUid'];
   if (looksLikeModality(text)) return ['modality'];
   if (parseDateToken(text) || dateRange(text)) return ['birthDate', 'patientId', 'accession'];
   if (looksLikePatientId(text)) return ['patientId', 'accession'];
@@ -197,6 +211,12 @@ const PREFIXES: Record<string, RemoteQueryKind> = {
   datum: 'studyDate',
   date: 'studyDate',
   studydate: 'studyDate',
+  desc: 'studyDescription',
+  beschreibung: 'studyDescription',
+  text: 'studyDescription',
+  uid: 'studyInstanceUid',
+  siuid: 'studyInstanceUid',
+  studyinstanceuid: 'studyInstanceUid',
   mod: 'modality',
   modality: 'modality',
 };
@@ -253,6 +273,22 @@ function assign(
     chips.push({ kind, value: text.toUpperCase() });
     return true;
   }
+  if (kind === 'studyDescription') {
+    if (query.StudyDescription) return false;
+    // Freitext: „enthält“ ist das, was Mitarbeiter erwarten (Orthanc kann das).
+    // „beginnt mit“ kommt als Zweitdeutung, falls ein Archiv führende
+    // Platzhalter nicht mag.
+    const value = `*${text.toUpperCase()}*`;
+    query.StudyDescription = value;
+    chips.push({ kind, value });
+    return true;
+  }
+  if (kind === 'studyInstanceUid') {
+    if (query.StudyInstanceUID) return false;
+    query.StudyInstanceUID = text;
+    chips.push({ kind, value: text });
+    return true;
+  }
   return false;
 }
 
@@ -274,6 +310,24 @@ function buildWithOverrides(
   const segments = input.split(',').map((segment) => segment.trim()).filter(Boolean);
 
   for (const segment of segments) {
+    // Ein Präfix gilt für die ganze Angabe — „desc:CT Thorax“ ist eine
+    // Beschreibung, nicht das Feld „desc“ mit dem Wert „CT“.
+    const segmentPrefix = /^([A-Za-zäöü]+):\s*(.+)$/.exec(segment);
+    if (segmentPrefix) {
+      const kind = PREFIXES[segmentPrefix[1].toLowerCase()];
+      const value = segmentPrefix[2].trim();
+      if (kind && value) {
+        if (kind === 'name') {
+          nameParts.push(value);
+          continue;
+        }
+        if (!assign(query, chips, kind, value) && (kind === 'birthDate' || kind === 'studyDate')) {
+          ignored.push(segment);
+        }
+        continue;
+      }
+    }
+
     for (const raw of segment.split(/\s+/).filter(Boolean)) {
       const token = classify(raw);
       const text = token.text;
@@ -341,6 +395,17 @@ export function buildRemoteQuery(
         .filter((entry): entry is { query: Record<string, string>; chip: RemoteQueryChip } => entry !== undefined)
         // doppelte Varianten nicht mehrfach abfragen
         .filter((entry, index, all) => all.findIndex((other) => other.chip.kind === entry.chip.kind) === index);
+
+  // Beschreibungen sind Freitext: „enthält“ zuerst, „beginnt mit“ als
+  // Zweitversuch für Archive ohne führende Platzhalter.
+  const description = plan.query.StudyDescription;
+  if (Object.keys(overrides).length === 0 && description.startsWith('*') && description.endsWith('*')) {
+    const prefixValue = description.slice(1);
+    alternatives.unshift({
+      query: { ...plan.query, StudyDescription: prefixValue },
+      chip: { kind: 'studyDescription', value: prefixValue },
+    });
+  }
 
   return { query: plan.query, chips: plan.chips, ignored: plan.ignored, alternatives };
 }

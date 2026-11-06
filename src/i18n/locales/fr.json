@@ -336,7 +336,18 @@
     "echoFailed": "C-ECHO échoué",
     "retrieveStarted": "Récupération lancée (C-MOVE)",
     "retrieveFailed": "La récupération a échoué",
-    "lastEcho": "Dernier écho"
+    "lastEcho": "Dernier écho",
+    "selectAll": "Tout sélectionner",
+    "selectRow": "Sélectionner l'examen",
+    "selectedCount": "{{count}} sélectionnés",
+    "copySelected": "Copier ({{count}})",
+    "retrieveSelected": "Récupérer ({{count}})",
+    "copyTo": "Copier vers {{target}}",
+    "detailTags": "Tags DICOM de l'archive",
+    "detailTagName": "Nom",
+    "detailTagValue": "Valeur",
+    "detailLoading": "Chargement des tags…",
+    "detailNoTags": "L'archive n'a renvoyé aucun tag pour cet examen."
   },
   "actions": {
     "viewer": "Visionneuse",

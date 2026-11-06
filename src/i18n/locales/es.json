@@ -336,7 +336,18 @@
     "echoFailed": "C-ECHO fallido",
     "retrieveStarted": "Recuperación iniciada (C-MOVE)",
     "retrieveFailed": "La recuperación falló",
-    "lastEcho": "Último echo"
+    "lastEcho": "Último echo",
+    "selectAll": "Seleccionar todo",
+    "selectRow": "Seleccionar estudio",
+    "selectedCount": "{{count}} seleccionados",
+    "copySelected": "Copiar ({{count}})",
+    "retrieveSelected": "Recuperar ({{count}})",
+    "copyTo": "Copiar a {{target}}",
+    "detailTags": "Etiquetas DICOM del archivo",
+    "detailTagName": "Nombre",
+    "detailTagValue": "Valor",
+    "detailLoading": "Cargando etiquetas…",
+    "detailNoTags": "El archivo no devolvió etiquetas para este estudio."
   },
   "actions": {
     "viewer": "Visor",

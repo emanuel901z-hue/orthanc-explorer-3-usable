@@ -336,7 +336,18 @@
     "echoFailed": "C-ECHO 失败",
     "retrieveStarted": "已开始取回 (C-MOVE)",
     "retrieveFailed": "取回失败",
-    "lastEcho": "最近 Echo"
+    "lastEcho": "最近 Echo",
+    "selectAll": "全选",
+    "selectRow": "选择检查",
+    "selectedCount": "已选 {{count}} 项",
+    "copySelected": "复制 ({{count}})",
+    "retrieveSelected": "取回 ({{count}})",
+    "copyTo": "复制到 {{target}}",
+    "detailTags": "来自归档的 DICOM 标签",
+    "detailTagName": "名称",
+    "detailTagValue": "值",
+    "detailLoading": "正在加载标签…",
+    "detailNoTags": "归档未返回该检查的标签。"
   },
   "actions": {
     "viewer": "查看器",

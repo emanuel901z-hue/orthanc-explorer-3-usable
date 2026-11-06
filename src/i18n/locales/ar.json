@@ -425,7 +425,18 @@
     "echoFailed": "فشل C-ECHO",
     "retrieveStarted": "بدأ الاسترجاع (C-MOVE)",
     "retrieveFailed": "فشل الاسترجاع",
-    "lastEcho": "آخر Echo"
+    "lastEcho": "آخر Echo",
+    "selectAll": "تحديد الكل",
+    "selectRow": "تحديد الفحص",
+    "selectedCount": "تم تحديد {{count}}",
+    "copySelected": "نسخ ({{count}})",
+    "retrieveSelected": "استرجاع ({{count}})",
+    "copyTo": "نسخ إلى {{target}}",
+    "detailTags": "وسوم DICOM من الأرشيف",
+    "detailTagName": "الاسم",
+    "detailTagValue": "القيمة",
+    "detailLoading": "جارٍ تحميل الوسوم…",
+    "detailNoTags": "لم يُرجع الأرشيف وسومًا لهذا الفحص."
   },
   "actions": {
     "viewer": "العارض",

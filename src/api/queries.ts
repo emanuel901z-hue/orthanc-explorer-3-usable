@@ -42,6 +42,13 @@ export const queriesApi = {
   getAnswerContent: (queryId: string, answerIndex: number) =>
     orthancFetch<QueryAnswerContent>(`/queries/${queryId}/answers/${answerIndex}/content?simplify`),
 
+  /** GET /queries/:id/answers/:index/content — alle Tags mit Name, Typ und Wert
+   *  (für die Detailansicht einer entfernten Studie). */
+  getAnswerContentFull: (queryId: string, answerIndex: number) =>
+    orthancFetch<Record<string, { Name?: string; Type?: string; Value?: string | string[] }>>(
+      `/queries/${queryId}/answers/${answerIndex}/content`,
+    ),
+
   /** POST /queries/:id/answers/:index/retrieve — Initiates C-MOVE to retrieve the answer into Orthanc.
    *
    * Without a target AET the study comes into this Orthanc. With a target AET

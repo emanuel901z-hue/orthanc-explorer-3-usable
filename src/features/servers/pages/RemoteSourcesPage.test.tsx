@@ -37,6 +37,15 @@ vi.mock('@/features/settings/hooks/use-dicom-web-servers', () => ({
 }));
 
 vi.mock('@/actions/queryModality', () => ({ queryModalityAction: mockQuery }));
+
+vi.mock('@/api/queries', () => ({
+  queriesApi: {
+    getAnswerContentFull: vi.fn(() => Promise.resolve({
+      '0010,0010': { Name: 'PatientName', Value: 'MUSTERMANN^ERIKA' },
+      '0008,0020': { Name: 'StudyDate', Value: '20260101' },
+    })),
+  },
+}));
 vi.mock('@/actions/retrieveModality', () => ({ retrieveModalityAction: mockRetrieve }));
 
 // Radix Select does not open in jsdom; the page only needs a control that
@@ -323,6 +332,63 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     await waitFor(() => expect(mockRetrieve).toHaveBeenCalledTimes(2));
     expect(mockRetrieve).toHaveBeenCalledWith('ARCHIVE', 'q-1', 0, 'hst_burn2CD', { asynchronous: true });
     expect(mockRetrieve).toHaveBeenCalledWith('ARCHIVE', 'q-1', 1, 'hst_burn2CD', { asynchronous: true });
+  });
+
+  it('sortiert die Trefferliste über die Spaltenköpfe', async () => {
+    configure([]);
+    mockQuery.mockReset();
+    mockQuery.mockResolvedValue({
+      queryId: 'q-1',
+      answers: [
+        { index: 0, tags: { ...ANSWERS.answers[0].tags, StudyDate: '20260101' } },
+        { index: 1, tags: { ...ANSWERS.answers[0].tags, PatientName: 'ALBERT^BERT', StudyDate: '20260603' } },
+      ],
+    });
+    renderPage();
+    await queryStudies('Muster');
+
+    const rows = () => screen.getAllByTestId('remote-study-row').map((row) => row.textContent ?? '');
+    // Voreinstellung: Studiendatum absteigend
+    expect(rows()[0]).toContain('ALBERT^BERT');
+
+    fireEvent.click(screen.getByRole('button', { name: /Studiendatum|Study Date/i }));
+    expect(rows()[0]).toContain('MUSTERMANN^ERIKA');
+  });
+
+  it('wählt Zeilen aus und bietet die Sammelaktionen für die Auswahl an', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    renderPage();
+    await queryStudies('Muster');
+
+    fireEvent.click(screen.getByLabelText(/select study|studie auswählen/i));
+
+    expect(screen.getByText(/1 selected|1 ausgewählt/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Copy \(1\)|Kopieren \(1\)/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Retrieve \(1\)|Abrufen \(1\)/ })).toBeInTheDocument();
+  });
+
+  it('öffnet beim Klick auf eine Zeile die Detailansicht mit den Tags', async () => {
+    configure([]);
+    renderPage();
+    await queryStudies('Muster');
+
+    fireEvent.click(screen.getAllByTestId('remote-study-row')[0]);
+
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog).toHaveTextContent('MUSTERMANN^ERIKA');
+    // Tag-Tabelle aus der Antwort des Archivs
+    expect(await screen.findByText('PatientName')).toBeInTheDocument();
+    expect(screen.getByText('0010,0010')).toBeInTheDocument();
+  });
+
+  it('klickt beim Abrufen in der Zeile nicht die Detailansicht auf', async () => {
+    configure([]);
+    renderPage();
+    await queryStudies('Muster');
+
+    fireEvent.click(screen.getByRole('button', { name: /^Retrieve$|^Abrufen$/ }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('prüft die gewählte Modalität automatisch per C-ECHO', async () => {

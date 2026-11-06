@@ -484,7 +484,18 @@
     "echoFailed": "C-ECHO failed",
     "retrieveStarted": "Retrieve started (C-MOVE)",
     "retrieveFailed": "Retrieve failed",
-    "lastEcho": "Last echo"
+    "lastEcho": "Last echo",
+    "selectAll": "Select all",
+    "selectRow": "Select study",
+    "selectedCount": "{{count}} selected",
+    "copySelected": "Copy ({{count}})",
+    "retrieveSelected": "Retrieve ({{count}})",
+    "copyTo": "Copy to {{target}}",
+    "detailTags": "DICOM tags from the archive",
+    "detailTagName": "Name",
+    "detailTagValue": "Value",
+    "detailLoading": "Loading tags…",
+    "detailNoTags": "The archive returned no tags for this study."
   },
   "copyJobs": {
     "title": "Copy jobs",

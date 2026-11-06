@@ -187,3 +187,45 @@ describe('buildRemoteQuery — Zweitdeutungen für mehrdeutige Zahlen', () => {
     }
   });
 });
+
+describe('buildRemoteQuery — Beschreibung und Study Instance UID', () => {
+  it('sucht mit desc: in der Studienbeschreibung (enthält)', () => {
+    const plan = buildRemoteQuery('Muster,desc:CT Thorax');
+    expect(plan.query.PatientName).toBe('MUSTER*');
+    expect(plan.query.StudyDescription).toBe('*CT THORAX*');
+    expect(plan.chips.map((chip) => chip.kind)).toEqual(['name', 'studyDescription']);
+  });
+
+  it('nimmt den ganzen Text hinter dem Präfix, auch mit Leerzeichen', () => {
+    expect(buildRemoteQuery('beschreibung:CT Thorax nativ').query.StudyDescription).toBe(
+      '*CT THORAX NATIV*',
+    );
+  });
+
+  it('bietet für Beschreibungen zusätzlich die Präfix-Suche an', () => {
+    const plan = buildRemoteQuery('desc:CT Thorax');
+    const alt = plan.alternatives.find((entry) => entry.chip.kind === 'studyDescription');
+    expect(alt?.query.StudyDescription).toBe('CT THORAX*');
+  });
+
+  it('erkennt eine Study Instance UID an den Punktblöcken', () => {
+    const uid = '1.2.276.0.7230010.3.1.2.1650800183.1.1793969725.908463';
+    const plan = buildRemoteQuery(uid);
+    expect(plan.query.StudyInstanceUID).toBe(uid);
+    expect(plan.query.PatientName).toBe('');
+  });
+
+  it('lässt die UID auch per Präfix erzwingen', () => {
+    expect(buildRemoteQuery('uid:1.2.3').query.StudyInstanceUID).toBe('1.2.3');
+  });
+
+  it('kombiniert Name, Beschreibung, Geburtsdatum und Zugangsnummer', () => {
+    const plan = buildRemoteQuery('Muster,desc:CT Thorax,020592,ACC-17');
+    expect(plan.query).toMatchObject({
+      PatientName: 'MUSTER*',
+      StudyDescription: '*CT THORAX*',
+      PatientBirthDate: '19920502',
+      AccessionNumber: 'ACC-17',
+    });
+  });
+});
