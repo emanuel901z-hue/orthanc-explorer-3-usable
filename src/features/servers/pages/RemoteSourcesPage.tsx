@@ -78,10 +78,11 @@ function SortHeader({
     <Button
       variant="ghost"
       size="sm"
-      className="gap-1 -ml-1 h-8 px-0 font-semibold w-full min-w-0 justify-start overflow-hidden"
+      className="gap-1 -ml-1 h-8 px-0 font-semibold w-full min-w-0 justify-start whitespace-normal text-left"
       onClick={() => onSort(column)}
     >
-      <span className="truncate" title={label}>{label}</span>
+      {/* umbrechen statt abschneiden — „Studienbeschreibung“ passt nicht in 120 px */}
+      <span className="whitespace-normal leading-tight">{label}</span>
       {active && !sort.desc ? (
         <ArrowUp className="h-3.5 w-3.5 shrink-0" />
       ) : active && sort.desc ? (
@@ -505,8 +506,10 @@ export default function RemoteSourcesPage() {
                   </Button>
                 </div>
               </div>
-              <CardContent className="p-0">
-                <Table>
+              <CardContent className="p-0 overflow-x-auto">
+                {/* sieben Spalten: auf schmalen Fenstern lieber scrollen als
+                    die Köpfe abschneiden */}
+                <Table className="min-w-[1100px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[36px]">
@@ -532,6 +535,14 @@ export default function RemoteSourcesPage() {
                       </TableHead>
                       <TableHead>
                         <SortHeader label={t('remote.accessionNumber')} column="accessionNumber" sort={sort} onSort={toggleSort} />
+                      </TableHead>
+                      <TableHead className="w-[90px]">
+                        <SortHeader
+                          label={t('remote.searchKind.modality', { defaultValue: 'Modality' })}
+                          column="modalities"
+                          sort={sort}
+                          onSort={toggleSort}
+                        />
                       </TableHead>
                       <TableHead className="w-[190px]">{t('remote.actions', { defaultValue: 'Actions' })}</TableHead>
                     </TableRow>
@@ -563,6 +574,9 @@ export default function RemoteSourcesPage() {
                           <TableCell className="text-sm">{formatDicomDate(study.studyDate, locale)}</TableCell>
                           <TableCell className="text-sm">{study.studyDescription}</TableCell>
                           <TableCell className="text-sm font-mono">{study.accessionNumber}</TableCell>
+                          <TableCell className="text-sm">
+                            <Badge variant="outline" className="font-mono text-xs">{study.modalities}</Badge>
+                          </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center gap-1.5">
                               {study.retrieved ? (

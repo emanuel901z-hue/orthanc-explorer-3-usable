@@ -315,7 +315,7 @@
     "studyDescription": "检查描述",
     "searchPlaceholder": "搜索：姓名、患者 ID、登记号、日期、模态",
     "searchParsed": "发送为：",
-    "searchHint": "逗号分隔各项（Muster,Erika,030626），空格分隔同一项内的部分。数字按出生日期处理（03.06.2026、030626、03062026、3623），否则作为患者 ID；datum: 强制检查日期，name: id: acc: geb: mod: 强制相应字段。",
+    "searchHint": "逗号按固定顺序分隔各项：姓、名、出生日期、检查描述、检查日期、登记号、模态、检查 UID。示例：müller,paul,030847,mrt,07.08.2026。前缀可覆盖某个位置：name: id: acc: geb: datum: desc: uid: mod: — 单个值按内容识别（ID、日期、UID）。",
     "searchIgnored": "未使用：{{value}} — 日期需要年份。",
     "searchEmpty": "请输入姓名、患者 ID、登记号或日期",
     "searchKind": {

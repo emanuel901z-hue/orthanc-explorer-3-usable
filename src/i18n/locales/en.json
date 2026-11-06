@@ -463,7 +463,7 @@
     "studyDescription": "Study Description",
     "searchPlaceholder": "Search: name, patient ID, accession, date, modality",
     "searchParsed": "Sent as:",
-    "searchHint": "Comma separates entries (Muster,Erika,030626), a space separates parts of one entry. Numbers count as the birth date (03.06.2026, 030626, 03062026, 3623) and otherwise as the patient ID; datum: forces the study date, name: id: acc: geb: mod: force the respective field.",
+    "searchHint": "A comma separates entries in a fixed order: last name, first name, birth date, study description, study date, accession number, modality, study UID. Example: müller,paul,030847,mrt,07.08.2026. Prefixes override a position: name: id: acc: geb: datum: desc: uid: mod: — a single value is recognised by its content (ID, date, UID).",
     "searchIgnored": "Not used: {{value}} — a date needs a year.",
     "searchEmpty": "Enter a name, patient ID, accession number or date",
     "searchKind": {

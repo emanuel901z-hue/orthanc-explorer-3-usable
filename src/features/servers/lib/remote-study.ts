@@ -57,7 +57,8 @@ export type RemoteSortKey =
   | 'patientId'
   | 'studyDate'
   | 'studyDescription'
-  | 'accessionNumber';
+  | 'accessionNumber'
+  | 'modalities';
 
 export type RemoteSort = { id: RemoteSortKey; desc: boolean };
 

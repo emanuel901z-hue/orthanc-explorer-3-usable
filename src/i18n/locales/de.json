@@ -463,7 +463,7 @@
     "studyDescription": "Studienbeschreibung",
     "searchPlaceholder": "Suche: Name, Patienten-ID, Zugangsnummer, Datum, Modalität",
     "searchParsed": "Gesendet als:",
-    "searchHint": "Komma trennt Angaben (Muster,Erika,030626), Leerzeichen trennt Teile einer Angabe. Zahlen gelten als Geburtsdatum (03.06.2026, 030626, 03062026, 3623), sonst als Patienten-ID; datum: erzwingt das Studiendatum, name: id: acc: geb: mod: das jeweilige Feld.",
+    "searchHint": "Komma trennt Angaben in fester Reihenfolge: Nachname, Vorname, Geburtsdatum, Studienbeschreibung, Studiendatum, Zugangsnummer, Modalität, Study-UID. Beispiel: müller,paul,030847,mrt,07.08.2026. Präfixe überschreiben eine Position: name: id: acc: geb: datum: desc: uid: mod: — ein einzelner Wert wird am Inhalt erkannt (ID, Datum, UID).",
     "searchIgnored": "Nicht verwendet: {{value}} — ein Datum braucht ein Jahr.",
     "searchEmpty": "Name, Patienten-ID, Zugangsnummer oder Datum eingeben",
     "searchKind": {

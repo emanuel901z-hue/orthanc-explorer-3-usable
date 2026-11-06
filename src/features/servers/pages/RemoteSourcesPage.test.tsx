@@ -367,6 +367,28 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     expect(screen.getByRole('button', { name: /Retrieve \(1\)|Abrufen \(1\)/ })).toBeInTheDocument();
   });
 
+  it('zeigt die Modalität und sortiert danach', async () => {
+    configure([]);
+    mockQuery.mockReset();
+    mockQuery.mockResolvedValue({
+      queryId: 'q-1',
+      answers: [
+        { index: 0, tags: { ...ANSWERS.answers[0].tags, ModalitiesInStudy: 'CT' } },
+        { index: 1, tags: { ...ANSWERS.answers[0].tags, PatientName: 'ALBERT^BERT', ModalitiesInStudy: 'MR' } },
+      ],
+    });
+    renderPage();
+    await queryStudies('Muster');
+
+    // Spalte ist da und gefüllt
+    expect(screen.getByText('CT')).toBeInTheDocument();
+    expect(screen.getByText('MR')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Modalität|Modality/i }));
+    const rows = screen.getAllByTestId('remote-study-row');
+    expect(rows[0].textContent).toContain('CT');
+  });
+
   it('öffnet beim Klick auf eine Zeile die Detailansicht mit den Tags', async () => {
     configure([]);
     renderPage();

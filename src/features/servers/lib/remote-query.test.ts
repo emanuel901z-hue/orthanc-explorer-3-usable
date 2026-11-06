@@ -229,3 +229,57 @@ describe('buildRemoteQuery — Beschreibung und Study Instance UID', () => {
     });
   });
 });
+
+describe('buildRemoteQuery — Position nach dem Komma', () => {
+  it('liest Müller,Paul,030847,MRT,07.08.2026 positional', () => {
+    const plan = buildRemoteQuery('müller,paul,030847,mrt,07.08.2026');
+
+    expect(plan.query.PatientName).toBe('MÜLLER^PAUL*');
+    expect(plan.query.PatientBirthDate).toBe('19470803');
+    expect(plan.query.StudyDescription).toBe('*MRT*');
+    expect(plan.query.StudyDate).toBe('20260807');
+    expect(plan.chips.map((chip) => chip.kind)).toEqual([
+      'name',
+      'birthDate',
+      'studyDescription',
+      'studyDate',
+    ]);
+  });
+
+  it('nimmt an Position 6 die Zugangsnummer und an 7 die Modalität', () => {
+    const plan = buildRemoteQuery('Muster,Erika,020592,MRT Schädel,07.08.2026,ACC-17,MR');
+    expect(plan.query).toMatchObject({
+      PatientName: 'MUSTER^ERIKA*',
+      PatientBirthDate: '19920502',
+      StudyDescription: '*MRT SCHÄDEL*',
+      StudyDate: '20260807',
+      AccessionNumber: 'ACC-17',
+      ModalitiesInStudy: 'MR',
+    });
+  });
+
+  it('gibt auf, wenn der Inhalt nicht zur Position passt', () => {
+    // An Position 3 steht kein Datum, sondern eine Zugangsnummer
+    const plan = buildRemoteQuery('Muster,ACC-17');
+    expect(plan.query.PatientName).toBe('MUSTER*');
+    expect(plan.query.AccessionNumber).toBe('ACC-17');
+  });
+
+  it('schaltet bei Präfixen auf Inhaltserkennung um', () => {
+    // gemischt: Position wäre nicht mehr eindeutig
+    const plan = buildRemoteQuery('Muster,desc:MRT,020592');
+    expect(plan.query.PatientName).toBe('MUSTER*');
+    expect(plan.query.StudyDescription).toBe('*MRT*');
+    expect(plan.query.PatientBirthDate).toBe('19920502');
+  });
+
+  it('erkennt ein einzelnes Datum weiterhin am Inhalt', () => {
+    // eine Angabe: Position 1 wäre „Nachname“ — das wäre falsch
+    expect(buildRemoteQuery('020592').query.PatientBirthDate).toBe('19920502');
+  });
+
+  it('übersetzt deutsche Modalitätskürzel', () => {
+    expect(buildRemoteQuery('mod:MRT').query.ModalitiesInStudy).toBe('MR');
+    expect(buildRemoteQuery('mod:sono').query.ModalitiesInStudy).toBe('US');
+  });
+});

@@ -315,7 +315,7 @@
     "studyDescription": "検査説明",
     "searchPlaceholder": "検索: 氏名、患者ID、受付番号、日付、モダリティ",
     "searchParsed": "送信内容:",
-    "searchHint": "カンマは項目の区切り（Muster,Erika,030626）、空白は同じ項目内の区切りです。数字は生年月日（03.06.2026、030626、03062026、3623）として、該当しなければ患者IDとして扱います。datum: は検査日、name: id: acc: geb: mod: は各項目を強制します。",
+    "searchHint": "カンマは決まった順序で項目を区切ります: 姓、名、生年月日、検査説明、検査日、受付番号、モダリティ、検査 UID。例: müller,paul,030847,mrt,07.08.2026。接頭辞で位置を上書きできます: name: id: acc: geb: datum: desc: uid: mod: — 単一の値は内容から判定します（ID・日付・UID）。",
     "searchIgnored": "未使用: {{value}} — 日付には年が必要です。",
     "searchEmpty": "氏名、患者ID、受付番号、日付のいずれかを入力してください",
     "searchKind": {

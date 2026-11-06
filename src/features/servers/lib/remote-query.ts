@@ -231,6 +231,61 @@ function classify(raw: string): Token {
   return { text: raw };
 }
 
+/**
+ * Die Reihenfolge nach dem Komma — so arbeiten die Mitarbeiter:
+ * `Müller,Paul,030847,MRT,07.08.2026` heißt Nachname, Vorname, Geburtsdatum,
+ * Beschreibung, Studiendatum. Wer etwas anderes meint, schreibt ein Präfix
+ * davor (`acc:`, `mod:`, …).
+ */
+export const POSITIONAL_FIELDS: RemoteQueryKind[] = [
+  'name',
+  'name',
+  'birthDate',
+  'studyDescription',
+  'studyDate',
+  'accession',
+  'modality',
+  'studyInstanceUid',
+];
+
+/** Deutsche Kurzformen auf DICOM-Modalitätscodes. */
+const MODALITY_ALIASES: Record<string, string> = {
+  MRT: 'MR',
+  SONO: 'US',
+  MAMMO: 'MG',
+  SZINTI: 'NM',
+  PET: 'PT',
+};
+
+export function normalizeModality(text: string): string {
+  const upper = text.toUpperCase();
+  return MODALITY_ALIASES[upper] ?? upper;
+}
+
+/** Passt der Inhalt in das Feld, das an dieser Position steht? */
+function fitsSlot(kind: RemoteQueryKind, text: string): boolean {
+  const clean = text.trim();
+  if (!clean) return false;
+  switch (kind) {
+    case 'name':
+      // Namen ohne Ziffern und ohne bekannte Modalitätskürzel
+      return !/\d/.test(clean) && !looksLikeModality(clean);
+    case 'birthDate':
+    case 'studyDate':
+      return Boolean(parseDateToken(clean) || dateRange(clean));
+    case 'studyDescription':
+      return /[A-Za-zÄÖÜäöüß]/.test(clean);
+    case 'accession':
+      return true;
+    case 'modality':
+      return looksLikeModality(clean) || Object.prototype.hasOwnProperty.call(MODALITY_ALIASES, clean.toUpperCase());
+    case 'studyInstanceUid':
+      return looksLikeStudyInstanceUid(clean);
+    default:
+      return false;
+  }
+}
+
 type BuildResult = Omit<RemoteQueryPlan, 'alternatives'> & {
   ambiguous: { text: string; alternatives: RemoteQueryKind[] }[];
 };
@@ -269,8 +324,9 @@ function assign(
   }
   if (kind === 'modality') {
     if (query.ModalitiesInStudy) return false;
-    query.ModalitiesInStudy = text.toUpperCase();
-    chips.push({ kind, value: text.toUpperCase() });
+    const value = normalizeModality(text);
+    query.ModalitiesInStudy = value;
+    chips.push({ kind, value });
     return true;
   }
   if (kind === 'studyDescription') {
@@ -308,8 +364,11 @@ function buildWithOverrides(
   // Komma trennt Angaben (Name, Vorname, Geburtsdatum), Leerzeichen trennt
   // Teile derselben Angabe.
   const segments = input.split(',').map((segment) => segment.trim()).filter(Boolean);
+  // Entweder rein positional („Müller,Paul,030847“) oder mit Präfixen
+  // („Muster,desc:MRT“) — gemischt wäre die Position nicht mehr eindeutig.
+  const positionalMode = segments.length >= 2 && segments.every((segment) => !/^[A-Za-zäöü]+:\s*.+$/.test(segment));
 
-  for (const segment of segments) {
+  segments.forEach((segment, index) => {
     // Ein Präfix gilt für die ganze Angabe — „desc:CT Thorax“ ist eine
     // Beschreibung, nicht das Feld „desc“ mit dem Wert „CT“.
     const segmentPrefix = /^([A-Za-zäöü]+):\s*(.+)$/.exec(segment);
@@ -318,14 +377,27 @@ function buildWithOverrides(
       const value = segmentPrefix[2].trim();
       if (kind && value) {
         if (kind === 'name') {
-          nameParts.push(value);
-          continue;
+          nameParts.push(...value.split(/\s+/).filter(Boolean));
+          return;
         }
         if (!assign(query, chips, kind, value) && (kind === 'birthDate' || kind === 'studyDate')) {
           ignored.push(segment);
         }
-        continue;
+        return;
       }
+    }
+
+    // Position nach dem Komma bestimmt das Feld — solange der Inhalt passt.
+    // Ab zwei Angaben, weil ein einzelner Wert (ID, Datum, UID) über seinen
+    // Inhalt besser erkannt wird.
+    const positional = positionalMode ? POSITIONAL_FIELDS[index] : undefined;
+    if (positional && fitsSlot(positional, segment)) {
+      if (positional === 'name') {
+        nameParts.push(...segment.split(/\s+/).filter(Boolean));
+        return;
+      }
+      assign(query, chips, positional, segment.trim());
+      return;
     }
 
     for (const raw of segment.split(/\s+/).filter(Boolean)) {
@@ -360,7 +432,7 @@ function buildWithOverrides(
         ambiguous.push({ text, alternatives: candidates.slice(1) });
       }
     }
-  }
+  });
 
   if (nameParts.length > 0) {
     const name = personName(nameParts);
