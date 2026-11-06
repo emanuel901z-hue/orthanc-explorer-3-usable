@@ -524,6 +524,15 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('zeigt die Zielauswahl schon vor der Suche', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    renderPage();
+
+    // noch keine Treffer — Ziel und Verwaltung müssen trotzdem da sein
+    expect(screen.getByLabelText(/copy to|kopieren nach/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /manage targets|ziele verwalten/i })).toBeInTheDocument();
+  });
+
   it('bietet Orthanc-Modalitäten als Kopierziele an', async () => {
     configure([]);
     renderPage();

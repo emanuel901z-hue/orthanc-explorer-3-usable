@@ -496,6 +496,40 @@ export default function RemoteSourcesPage() {
                 </Button>
               </div>
 
+              {/* Zielauswahl immer sichtbar — man wählt das Ziel, bevor man sucht */}
+              <div className="flex items-center gap-2 flex-wrap pt-1">
+                <label htmlFor="copy-target" className="text-xs text-muted-foreground">
+                  {t('remote.copyTarget', { defaultValue: 'Copy to' })}
+                </label>
+                <select
+                  id="copy-target"
+                  aria-label={t('remote.copyTarget', { defaultValue: 'Copy to' })}
+                  className="h-7 rounded-md border border-input bg-background px-2 text-xs"
+                  value={selectedTarget}
+                  onChange={(e) => setSelectedTarget(e.target.value)}
+                >
+                  <option value="">
+                    {copyTargets.length === 0
+                      ? t('remote.copyTargetsEmpty', { defaultValue: 'No targets configured' })
+                      : t('remote.copyTargetNone', { defaultValue: '— target —' })}
+                  </option>
+                  {copyTargets.map((target) => (
+                    <option key={target.aet} value={target.aet}>
+                      {target.label ? `${target.label} (${target.aet})` : target.aet}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1 px-2 text-xs"
+                  onClick={() => setTargetsOpen(true)}
+                >
+                  <Settings className="h-3.5 w-3.5" />
+                  {t('remote.manageTargets', { defaultValue: 'Manage targets' })}
+                </Button>
+              </div>
+
               {plan.chips.length > 0 && (
                 <div className="flex items-center gap-1.5 flex-wrap text-xs">
                   <span className="text-muted-foreground">{t('remote.searchParsed', { defaultValue: 'Sent as:' })}</span>
@@ -535,36 +569,6 @@ export default function RemoteSourcesPage() {
                   {selected.size > 0 && ` · ${t('remote.selectedCount', { count: selected.size, defaultValue: `${selected.size} selected` })}`}
                 </span>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <label htmlFor="copy-target" className="text-xs text-muted-foreground">
-                    {t('remote.copyTarget', { defaultValue: 'Copy to' })}
-                  </label>
-                  <select
-                    id="copy-target"
-                    aria-label={t('remote.copyTarget', { defaultValue: 'Copy to' })}
-                    className="h-7 rounded-md border border-input bg-background px-2 text-xs"
-                    value={selectedTarget}
-                    onChange={(e) => setSelectedTarget(e.target.value)}
-                  >
-                    <option value="">
-                      {copyTargets.length === 0
-                        ? t('remote.copyTargetsEmpty', { defaultValue: 'No targets configured' })
-                        : t('remote.copyTargetNone', { defaultValue: '— target —' })}
-                    </option>
-                    {copyTargets.map((target) => (
-                      <option key={target.aet} value={target.aet}>
-                        {target.label ? `${target.label} (${target.aet})` : target.aet}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 gap-1 px-2 text-xs"
-                    onClick={() => setTargetsOpen(true)}
-                  >
-                    <Settings className="h-3.5 w-3.5" />
-                    {t('remote.manageTargets', { defaultValue: 'Manage targets' })}
-                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
