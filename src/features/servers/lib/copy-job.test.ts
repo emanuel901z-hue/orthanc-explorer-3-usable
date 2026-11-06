@@ -88,3 +88,40 @@ describe('isCopyConfirmed', () => {
     expect(isCopyConfirmed(describeCopyJob(moveJob({ State: 'Running' })))).toBe(false);
   });
 });
+
+describe('describeCopyJob — Robustheit gegenüber kargen Jobs', () => {
+  it('kommt ohne Content aus', () => {
+    const view = describeCopyJob(moveJob({ Content: undefined }));
+    expect(view.targetAet).toBeUndefined();
+    expect(view.dimseStatus).toBeUndefined();
+    expect(view.studyInstanceUid).toBeUndefined();
+  });
+
+  it('wertet einen angehaltenen Job als laufend', () => {
+    expect(describeCopyJob(moveJob({ State: 'Paused', Progress: 60 })).state).toBe('running');
+    expect(describeCopyJob(moveJob({ State: 'Retry', Progress: 0 })).state).toBe('running');
+    expect(describeCopyJob(moveJob({ State: 'Pending', Progress: 0 })).state).toBe('running');
+  });
+
+  it('lässt Zeitstempel und Laufzeit weg, wenn Orthanc sie nicht liefert', () => {
+    const view = describeCopyJob(moveJob({ CompletionTime: undefined, EffectiveRuntime: undefined }));
+    expect(view.completionTime).toBeUndefined();
+    expect(view.durationSeconds).toBeUndefined();
+    expect(view.creationTime).toBe('20261106T114657.025637');
+  });
+
+  it('nimmt ErrorDetails, wenn ErrorDescription nichts sagt', () => {
+    const view = describeCopyJob(moveJob({
+      State: 'Failure',
+      ErrorDescription: 'Success',
+      ErrorDetails: 'Association rejected',
+    }));
+    expect(view.error).toBe('Association rejected');
+  });
+
+  it('ignoriert ein leeres Query-Array', () => {
+    const view = describeCopyJob(moveJob({ Content: { Query: [], Details: [] } }));
+    expect(view.studyInstanceUid).toBeUndefined();
+    expect(view.dimseStatus).toBeUndefined();
+  });
+});

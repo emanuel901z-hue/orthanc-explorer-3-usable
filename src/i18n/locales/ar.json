@@ -423,7 +423,8 @@
     "echoSuccess": "نجح C-ECHO",
     "echoFailed": "فشل C-ECHO",
     "retrieveStarted": "بدأ الاسترجاع (C-MOVE)",
-    "retrieveFailed": "فشل الاسترجاع"
+    "retrieveFailed": "فشل الاسترجاع",
+    "lastEcho": "آخر Echo"
   },
   "actions": {
     "viewer": "العارض",

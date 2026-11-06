@@ -331,7 +331,12 @@ export default function RemoteSourcesPage() {
                         {m.host}:{m.port}
                       </strong>
                     </span>
-                    {m.lastEcho && <span>Last echo: {format(m.lastEcho, 'MMM dd, HH:mm')}</span>}
+                    {m.lastEcho && (
+                      <span>
+                        {t('remote.lastEcho', { defaultValue: 'Last echo' })}:{' '}
+                        {format(m.lastEcho, 'MMM dd, HH:mm')}
+                      </span>
+                    )}
                   </div>
                 );
               })()}

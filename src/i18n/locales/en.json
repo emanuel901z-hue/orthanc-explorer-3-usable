@@ -482,7 +482,8 @@
     "echoSuccess": "C-ECHO successful",
     "echoFailed": "C-ECHO failed",
     "retrieveStarted": "Retrieve started (C-MOVE)",
-    "retrieveFailed": "Retrieve failed"
+    "retrieveFailed": "Retrieve failed",
+    "lastEcho": "Last echo"
   },
   "copyJobs": {
     "title": "Copy jobs",

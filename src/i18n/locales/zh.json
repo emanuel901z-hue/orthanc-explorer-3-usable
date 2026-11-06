@@ -334,7 +334,8 @@
     "echoSuccess": "C-ECHO 成功",
     "echoFailed": "C-ECHO 失败",
     "retrieveStarted": "已开始取回 (C-MOVE)",
-    "retrieveFailed": "取回失败"
+    "retrieveFailed": "取回失败",
+    "lastEcho": "最近 Echo"
   },
   "actions": {
     "viewer": "查看器",

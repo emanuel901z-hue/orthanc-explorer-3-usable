@@ -482,7 +482,8 @@
     "echoSuccess": "C-ECHO erfolgreich",
     "echoFailed": "C-ECHO fehlgeschlagen",
     "retrieveStarted": "Abruf gestartet (C-MOVE)",
-    "retrieveFailed": "Abruf fehlgeschlagen"
+    "retrieveFailed": "Abruf fehlgeschlagen",
+    "lastEcho": "Letztes Echo"
   },
   "copyJobs": {
     "title": "Kopieraufträge",

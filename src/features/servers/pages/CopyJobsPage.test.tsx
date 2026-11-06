@@ -120,4 +120,48 @@ describe('CopyJobsPage', () => {
 
     expect(screen.getByText(/could not be loaded|konnten nicht geladen werden/i)).toBeInTheDocument();
   });
+
+  it('zeigt Zeit und Dauer lesbar statt im Orthanc-Format', () => {
+    mockJobs.mockReturnValue({
+      data: [job({ CreationTime: '20261106T114657.029587', EffectiveRuntime: 90 })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('06.11.2026 11:46')).toBeInTheDocument();
+    expect(screen.getByText('1 min 30 s')).toBeInTheDocument();
+  });
+
+  it('filtert laufende Aufträge', () => {
+    mockJobs.mockReturnValue({
+      data: [
+        job(),
+        job({ ID: 'job-2', State: 'Running', Progress: 20, Content: { TargetAet: 'JungPacs' } }),
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /running|läuft/i }));
+
+    expect(screen.getByText('JungPacs')).toBeInTheDocument();
+    expect(screen.queryByText('hst_burn2CD')).not.toBeInTheDocument();
+  });
+
+  it('zählt die Aufträge je Filter', () => {
+    mockJobs.mockReturnValue({
+      data: [job(), job({ ID: 'job-2', State: 'Failure', Content: { TargetAet: 'X' } })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+
+    expect(screen.getByRole('button', { name: /all|alle/i })).toHaveTextContent('(2)');
+    expect(screen.getByRole('button', { name: /failed|fehlgeschlagen/i })).toHaveTextContent('(1)');
+    expect(screen.getByRole('button', { name: /running|läuft/i })).toHaveTextContent('(0)');
+  });
 });

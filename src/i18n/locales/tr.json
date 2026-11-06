@@ -423,7 +423,8 @@
     "echoSuccess": "C-ECHO başarılı",
     "echoFailed": "C-ECHO başarısız",
     "retrieveStarted": "Getirme başladı (C-MOVE)",
-    "retrieveFailed": "Getirme başarısız"
+    "retrieveFailed": "Getirme başarısız",
+    "lastEcho": "Son echo"
   },
   "actions": {
     "viewer": "Görüntüleyici",

@@ -334,7 +334,8 @@
     "echoSuccess": "C-ECHO réussi",
     "echoFailed": "C-ECHO échoué",
     "retrieveStarted": "Récupération lancée (C-MOVE)",
-    "retrieveFailed": "La récupération a échoué"
+    "retrieveFailed": "La récupération a échoué",
+    "lastEcho": "Dernier écho"
   },
   "actions": {
     "viewer": "Visionneuse",

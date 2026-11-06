@@ -262,6 +262,46 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     expect(screen.getByText(/found as|gefunden als/i)).toBeInTheDocument();
   });
 
+  it('weist ein Datum ohne Jahr zurück, statt es als Namen zu suchen', async () => {
+    configure([]);
+    renderPage();
+    const modalityButton = await screen.findByRole('button', { name: /ARCHIVE/ });
+    fireEvent.click(modalityButton);
+
+    fireEvent.change(screen.getByLabelText(/search:|suche:/i), { target: { value: '29.08.' } });
+    expect(screen.getByText(/not used|nicht verwendet/i)).toBeInTheDocument();
+
+    // ohne verwertbares Kriterium wird gar nicht erst gesucht
+    fireEvent.click(screen.getByRole('button', { name: /^Query$|^Abfragen$/ }));
+    await waitFor(() => expect(mockToast.error).toHaveBeenCalled());
+    expect(mockQuery).not.toHaveBeenCalled();
+  });
+
+  it('fragt auch per Enter ab', async () => {
+    configure([]);
+    renderPage();
+    await queryStudies('Muster');
+    mockQuery.mockClear();
+
+    const input = screen.getByLabelText(/search:|suche:/i);
+    fireEvent.change(input, { target: { value: 'Muster' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    await waitFor(() => expect(mockQuery).toHaveBeenCalled());
+  });
+
+  it('verlangt vor der Abfrage ein Suchkriterium', async () => {
+    configure([]);
+    renderPage();
+    const modalityButton = await screen.findByRole('button', { name: /ARCHIVE/ });
+    fireEvent.click(modalityButton);
+
+    fireEvent.click(screen.getByRole('button', { name: /^Query$|^Abfragen$/ }));
+
+    await waitFor(() => expect(mockToast.error).toHaveBeenCalled());
+    expect(mockQuery).not.toHaveBeenCalled();
+  });
+
   it('prüft die gewählte Modalität automatisch per C-ECHO', async () => {
     configure([]);
     mockEcho.mockResolvedValue({});

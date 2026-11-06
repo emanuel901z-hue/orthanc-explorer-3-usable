@@ -46,6 +46,17 @@ describe("modalitiesApi", () => {
     expect((init as RequestInit).method).toBe("DELETE");
   });
 
+  it("listExpanded() holt Name, AET, Host und Port in einem Aufruf", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ ARCHIVE: { AET: "ARCHIVE", Host: "10.0.1.30", Port: 104 } }), {
+        status: 200,
+      }),
+    );
+    const expanded = await modalitiesApi.listExpanded();
+    expect(fetchMock.mock.calls[0][0]).toBe("/modalities?expand");
+    expect(expanded.ARCHIVE).toMatchObject({ AET: "ARCHIVE", Host: "10.0.1.30", Port: 104 });
+  });
+
   it("echo() uses POST method on /modalities/:name/echo", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("{}", { status: 200 }),

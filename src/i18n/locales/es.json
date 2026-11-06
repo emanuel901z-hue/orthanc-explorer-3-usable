@@ -334,7 +334,8 @@
     "echoSuccess": "C-ECHO correcto",
     "echoFailed": "C-ECHO fallido",
     "retrieveStarted": "Recuperación iniciada (C-MOVE)",
-    "retrieveFailed": "La recuperación falló"
+    "retrieveFailed": "La recuperación falló",
+    "lastEcho": "Último echo"
   },
   "actions": {
     "viewer": "Visor",

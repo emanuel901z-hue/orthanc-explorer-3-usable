@@ -423,7 +423,8 @@
     "echoSuccess": "C-ECHO успешно",
     "echoFailed": "C-ECHO не выполнен",
     "retrieveStarted": "Получение запущено (C-MOVE)",
-    "retrieveFailed": "Получение не выполнено"
+    "retrieveFailed": "Получение не выполнено",
+    "lastEcho": "Последний echo"
   },
   "actions": {
     "viewer": "Просмотрщик",

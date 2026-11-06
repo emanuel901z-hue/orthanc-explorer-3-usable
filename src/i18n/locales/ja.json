@@ -334,7 +334,8 @@
     "echoSuccess": "C-ECHO 成功",
     "echoFailed": "C-ECHO 失敗",
     "retrieveStarted": "取得を開始しました (C-MOVE)",
-    "retrieveFailed": "取得に失敗しました"
+    "retrieveFailed": "取得に失敗しました",
+    "lastEcho": "最終 Echo"
   },
   "actions": {
     "viewer": "ビューア",
