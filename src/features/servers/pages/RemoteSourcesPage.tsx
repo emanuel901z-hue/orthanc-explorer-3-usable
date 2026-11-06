@@ -31,6 +31,7 @@ import { getConfig } from '@/config/runtime';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
 import { describeCopyJob } from '@/features/servers/lib/copy-job';
 import { buildRemoteQuery } from '@/features/servers/lib/remote-query';
+import { formatDicomDate } from '@/lib/dicom-date';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { usePersistedState, useRememberedState } from '@/store/ui-state';
@@ -56,14 +57,10 @@ interface RemoteStudy {
   copyJobId?: string;
 }
 
-/** DICOM-Geburtsdatum (YYYYMMDD) → 02.05.1992 für die Anzeige. */
-function formatBirthDate(value: string): string {
-  if (!/^\d{8}$/.test(value)) return value;
-  return `${value.slice(6, 8)}.${value.slice(4, 6)}.${value.slice(0, 4)}`;
-}
 
 export default function RemoteSourcesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language;
   const { data: modalityDetails = [] } = useModalityDetails();
   const { data: dicomwebServers = [] } = useDicomWebServers();
   // Echo result per modality. The icon shows what the last check said:
@@ -476,11 +473,11 @@ export default function RemoteSourcesPage() {
                           <TableCell className="text-sm">
                             <div>{study.patientName}</div>
                             {study.birthDate && (
-                              <div className="text-xs text-muted-foreground">{formatBirthDate(study.birthDate)}</div>
+                              <div className="text-xs text-muted-foreground">{formatDicomDate(study.birthDate, locale)}</div>
                             )}
                           </TableCell>
                           <TableCell className="text-sm font-mono">{study.patientId}</TableCell>
-                          <TableCell className="text-sm">{study.studyDate}</TableCell>
+                          <TableCell className="text-sm">{formatDicomDate(study.studyDate, locale)}</TableCell>
                           <TableCell className="text-sm">{study.studyDescription}</TableCell>
                           <TableCell className="text-sm font-mono">{study.accessionNumber}</TableCell>
                           <TableCell>

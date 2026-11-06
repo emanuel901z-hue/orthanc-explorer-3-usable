@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import CopyJobsPage from './CopyJobsPage';
 import type { OrthancJob } from '@/api/jobs';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
-import '@/i18n';
+import i18n from '@/i18n';
 
 const { mockJobs } = vi.hoisted(() => ({ mockJobs: vi.fn() }));
 
@@ -121,7 +121,8 @@ describe('CopyJobsPage', () => {
     expect(screen.getByText(/could not be loaded|konnten nicht geladen werden/i)).toBeInTheDocument();
   });
 
-  it('zeigt Zeit und Dauer lesbar statt im Orthanc-Format', () => {
+  it('zeigt Zeit und Dauer lesbar statt im Orthanc-Format', async () => {
+    await i18n.changeLanguage('de');
     mockJobs.mockReturnValue({
       data: [job({ CreationTime: '20261106T114657.029587', EffectiveRuntime: 90 })],
       isLoading: false,
@@ -130,8 +131,23 @@ describe('CopyJobsPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('06.11.2026 11:46')).toBeInTheDocument();
+    // deutsch: dd.mm.yyyy, 24-Stunden-Zeit — nicht "20261106T114657"
+    expect(screen.getByText('06.11.2026, 11:46')).toBeInTheDocument();
     expect(screen.getByText('1 min 30 s')).toBeInTheDocument();
+  });
+
+  it('zeigt die Zeit in der englischen Schreibweise, wenn die Oberfläche englisch ist', async () => {
+    await i18n.changeLanguage('en');
+    mockJobs.mockReturnValue({
+      data: [job({ CreationTime: '20261106T114657.029587' })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+
+    expect(screen.getByText(/11\/06\/2026/)).toBeInTheDocument();
+    await i18n.changeLanguage('de');
   });
 
   it('filtert laufende Aufträge', () => {

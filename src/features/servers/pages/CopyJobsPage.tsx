@@ -16,16 +16,9 @@ import { PageHelp } from '@/shared/components/PageHelp';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
 import { describeCopyJob, isMoveJob, type CopyJobView } from '@/features/servers/lib/copy-job';
 import { usePersistedState } from '@/store/ui-state';
+import { formatDicomDateTime } from '@/lib/dicom-date';
 
 type JobFilter = 'all' | 'running' | 'failed' | 'success';
-
-function formatTime(value?: string): string {
-  // Orthanc liefert "20261106T114657.029587"
-  if (!value || value.length < 15) return '—';
-  const [, date = '', time = ''] = /^(\d{8})T(\d{6})/.exec(value) ?? [];
-  if (!date || !time) return value;
-  return `${date.slice(6, 8)}.${date.slice(4, 6)}.${date.slice(0, 4)} ${time.slice(0, 2)}:${time.slice(2, 4)}`;
-}
 
 function formatDuration(seconds?: number): string {
   if (seconds === undefined) return '—';
@@ -61,7 +54,8 @@ function StatusCell({ job }: { job: CopyJobView }) {
 }
 
 export default function CopyJobsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language;
   const { data: jobs = [], isLoading, isError } = useOrthancJobs();
   const [filter, setFilter] = usePersistedState<JobFilter>('copyJobs.filter', 'all');
 
@@ -143,7 +137,7 @@ export default function CopyJobsPage() {
               <TableBody>
                 {visible.map((job) => (
                   <TableRow key={job.jobId}>
-                    <TableCell className="text-sm whitespace-nowrap">{formatTime(job.creationTime)}</TableCell>
+                    <TableCell className="text-sm whitespace-nowrap">{formatDicomDateTime(job.creationTime, locale)}</TableCell>
                     <TableCell className="text-sm">{job.sourceAet ?? '—'}</TableCell>
                     <TableCell className="text-sm font-medium">{job.targetAet ?? '—'}</TableCell>
                     <TableCell className="text-sm font-mono">
