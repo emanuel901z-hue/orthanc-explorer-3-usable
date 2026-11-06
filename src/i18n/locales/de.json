@@ -444,7 +444,21 @@
     "queryHint": "Suchkriterien eingeben und auf Abfragen klicken, um Studien auf der Remote-Modalität zu finden.",
     "dicomwebServer": "DICOMweb-Server",
     "testConnection": "Verbindung testen",
-    "dicomwebHint": "DICOMweb-Browser — Studien von WADO-RS-kompatiblen Servern suchen und abrufen."
+    "dicomwebHint": "DICOMweb-Browser — Studien von WADO-RS-kompatiblen Servern suchen und abrufen.",
+    "actions": "Aktionen",
+    "retrieve": "Abrufen",
+    "retrieveAll": "Alle abrufen",
+    "copy": "Kopieren",
+    "copyAll": "Alle kopieren",
+    "copyTarget": "Kopieren nach",
+    "copyTargetNone": "— Ziel —",
+    "copyTargetsEmpty": "Keine Ziele konfiguriert",
+    "copyNoTarget": "Zuerst ein Ziel wählen",
+    "copyStarted": "C-MOVE an {{target}} gesendet",
+    "copyFailed": "Kopieren fehlgeschlagen (DIMSE {{status}})",
+    "copyFailedGeneric": "Kopieren fehlgeschlagen",
+    "studyDate": "Studiendatum",
+    "studyDescription": "Studienbeschreibung"
   },
   "actions": {
     "viewer": "Viewer",

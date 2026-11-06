@@ -81,4 +81,31 @@ describe('runtime config', () => {
     };
     expect(loadConfig().authCheck).toBe(false);
   });
+
+  it('parses cmoveTargets (AET + optional label)', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = {
+      orthancUrl: '', authMode: 'none', features: {},
+      cmoveTargets: [{ aet: 'hst_burn2CD', label: 'HST BRENNER' }, { aet: 'JungPacs' }],
+    };
+    expect(loadConfig().cmoveTargets).toEqual([
+      { aet: 'hst_burn2CD', label: 'HST BRENNER' },
+      { aet: 'JungPacs' },
+    ]);
+  });
+
+  it('leaves cmoveTargets undefined when the deployment configures none', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = { orthancUrl: '', authMode: 'none', features: {} };
+    expect(loadConfig().cmoveTargets).toBeUndefined();
+  });
+
+  it('rejects a copy target AET longer than 16 characters', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = {
+      orthancUrl: '', authMode: 'none', features: {},
+      cmoveTargets: [{ aet: 'ORTHANC-CP-SERVER' }],
+    };
+    expect(() => loadConfig()).toThrow();
+  });
 });

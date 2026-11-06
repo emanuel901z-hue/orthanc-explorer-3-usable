@@ -52,7 +52,19 @@ describe('queriesApi', () => {
 
     expect(orthancFetch).toHaveBeenCalledWith('/queries/query-123/answers/0/retrieve', expect.objectContaining({
       method: 'POST',
-      body: JSON.stringify('LOCAL_PACS'),
+      // Orthanc nimmt ein Ziel nur als Objekt an, nicht als reinen String
+      body: JSON.stringify({ TargetAet: 'LOCAL_PACS', Timeout: 300 }),
+    }));
+  });
+
+  it('retrieveAnswer() ohne Ziel holt in den lokalen Orthanc (leerer Body)', async () => {
+    vi.mocked(orthancFetch).mockResolvedValue({ Description: 'REST API' });
+
+    await queriesApi.retrieveAnswer('query-123', 1);
+
+    expect(orthancFetch).toHaveBeenCalledWith('/queries/query-123/answers/1/retrieve', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify(''),
     }));
   });
 });

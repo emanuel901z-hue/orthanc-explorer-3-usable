@@ -33,6 +33,14 @@ export const OE3ConfigSchema = z.object({
   /** Read-only viewer list: it comes from `viewers` and cannot be changed in
    * the UI (the operator sees why instead of a disabled button without reason). */
   viewersLocked: z.boolean().default(false),
+  /** C-MOVE destinations known by AET only. Used by Remote Sources to copy a
+   * study from the queried archive straight to another archive: the C-MOVE
+   * request names the AET, the archive that holds the study resolves it to a
+   * host. Empty/absent → no copy targets in the UI. */
+  cmoveTargets: z.array(z.object({
+    aet: z.string().min(1).max(16),
+    label: z.string().optional(),
+  })).optional(),
   branding: z.object({
     title: z.string(),
     logoUrl: z.string().optional(),

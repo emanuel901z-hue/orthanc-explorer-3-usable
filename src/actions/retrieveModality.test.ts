@@ -33,4 +33,18 @@ describe('retrieveModalityAction', () => {
       expect.objectContaining({ outcome: 'success', action: 'modality.retrieve', resourceId: 'MODALITY_1' }),
     );
   });
+
+  it('nennt das Zielarchiv im Audit-Event, wenn ein Ziel-AET gesetzt ist', async () => {
+    vi.mocked(queriesApi.retrieveAnswer).mockResolvedValue({ Description: 'Success' });
+
+    await retrieveModalityAction('MODALITY_1', 'q-1', 0, 'hst_burn2CD');
+
+    expect(queriesApi.retrieveAnswer).toHaveBeenCalledWith('q-1', 0, 'hst_burn2CD');
+    expect(auditClient.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'started', destinationId: 'hst_burn2CD' }),
+    );
+    expect(auditClient.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'success', destinationId: 'hst_burn2CD' }),
+    );
+  });
 });

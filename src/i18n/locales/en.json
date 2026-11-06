@@ -444,7 +444,21 @@
     "queryHint": "Enter search criteria and click Query to find studies on the remote modality.",
     "dicomwebServer": "DICOMweb Server",
     "testConnection": "Test Connection",
-    "dicomwebHint": "DICOMweb browser — search and retrieve studies from WADO-RS compatible servers."
+    "dicomwebHint": "DICOMweb browser — search and retrieve studies from WADO-RS compatible servers.",
+    "actions": "Actions",
+    "retrieve": "Retrieve",
+    "retrieveAll": "Retrieve all",
+    "copy": "Copy",
+    "copyAll": "Copy all",
+    "copyTarget": "Copy to",
+    "copyTargetNone": "— target —",
+    "copyTargetsEmpty": "No targets configured",
+    "copyNoTarget": "Choose a target first",
+    "copyStarted": "C-MOVE to {{target}} sent",
+    "copyFailed": "Copy failed (DIMSE {{status}})",
+    "copyFailedGeneric": "Copy failed",
+    "studyDate": "Study Date",
+    "studyDescription": "Study Description"
   },
   "actions": {
     "viewer": "Viewer",

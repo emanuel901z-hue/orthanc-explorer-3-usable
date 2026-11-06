@@ -13,6 +13,9 @@ export async function retrieveModalityAction(
   targetAet?: string,
 ): Promise<Record<string, unknown>> {
   const base = makeAuditBase('modality.retrieve', 'modality', modalityName);
+  // With a target AET the study does not come into this Orthanc — the archive
+  // sends it to that destination. The audit trail says which one.
+  if (targetAet) base.destinationId = targetAet;
   auditClient.emit({
     ...base,
     outcome: 'started',

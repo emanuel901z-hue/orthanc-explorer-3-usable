@@ -42,12 +42,19 @@ export const queriesApi = {
   getAnswerContent: (queryId: string, answerIndex: number) =>
     orthancFetch<QueryAnswerContent>(`/queries/${queryId}/answers/${answerIndex}/content?simplify`),
 
-  /** POST /queries/:id/answers/:index/retrieve — Initiates C-MOVE to retrieve the answer into Orthanc. */
-  retrieveAnswer: (queryId: string, answerIndex: number, targetAet?: string) =>
+  /** POST /queries/:id/answers/:index/retrieve — Initiates C-MOVE to retrieve the answer into Orthanc.
+   *
+   * Without a target AET the study comes into this Orthanc. With a target AET
+   * the queried archive delivers it straight to that destination — Orthanc
+   * only accepts that as an object payload; the legacy plain-string form ends
+   * in "Internal error" (verified against Orthanc 1.13). */
+  retrieveAnswer: (queryId: string, answerIndex: number, targetAet?: string, timeoutSeconds = 300) =>
     orthancFetch<Record<string, unknown>>(`/queries/${queryId}/answers/${answerIndex}/retrieve`, {
       method: 'POST',
       headers: JSON_CONTENT_HEADERS,
-      body: targetAet ? JSON.stringify(targetAet) : JSON.stringify(''),
+      body: targetAet
+        ? JSON.stringify({ TargetAet: targetAet, Timeout: timeoutSeconds })
+        : JSON.stringify(''),
     }),
 
   /** DELETE /queries/:id — Removes the temporary query resource from Orthanc memory. */
