@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHelp } from '@/shared/components/PageHelp';
 import { Globe, Radio, Search, Wifi, WifiOff, Download, Copy, Loader2, CheckCircle2, XCircle } from 'lucide-react';
@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useModalities } from '@/features/settings/hooks/use-modalities';
+import { useModalityDetails } from '@/features/settings/hooks/use-modality-details';
 import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
 import { modalitiesApi } from '@/api/modalities';
 import { queryModalityAction } from '@/actions/queryModality';
@@ -55,20 +55,15 @@ interface RemoteStudy {
 
 export default function RemoteSourcesPage() {
   const { t } = useTranslation();
-  const { data: modalityNames = [] } = useModalities();
+  const { data: modalityDetails = [] } = useModalityDetails();
   const { data: dicomwebServers = [] } = useDicomWebServers();
-  // Inline type intentionally widens the modality row with optional echo-status
-  // fields — without them, the SelectItem status icon would always render the
-  // "offline" variant even for reachable modalities. Defaults to undefined so
-  // the UI falls back to WifiOff until an explicit C-ECHO updates the state.
-  const modalities = modalityNames.map((name) => ({
-    id: name,
-    name,
-    aet: name,
-    host: '—',
-    port: 0,
-    lastEchoStatus: undefined as 'success' | 'failure' | undefined,
-    lastEcho: undefined as Date | undefined,
+  // Echo result per modality. The icon shows what the last check said:
+  // green = reachable, crossed out = failed, muted = not checked yet.
+  const [echoStatus, setEchoStatus] = useState<Record<string, { ok: boolean; at: Date }>>({});
+  const modalities = modalityDetails.map((modality) => ({
+    ...modality,
+    lastEchoStatus: echoStatus[modality.id] ? (echoStatus[modality.id].ok ? 'success' as const : 'failure' as const) : undefined,
+    lastEcho: echoStatus[modality.id]?.at,
   }));
   // Target selection survives navigation; the query fields can contain PHI and
   // are therefore only kept in memory.
@@ -91,6 +86,37 @@ export default function RemoteSourcesPage() {
   const [querying, setQuerying] = useState(false);
   const [remoteStudies, setRemoteStudies] = useState<RemoteStudy[]>([]);
   const [echoLoading, setEchoLoading] = useState(false);
+
+  const runEcho = useCallback(
+    async (name: string, options: { silent?: boolean } = {}) => {
+      if (!name) return;
+      setEchoLoading(true);
+      try {
+        await modalitiesApi.echo(name);
+        setEchoStatus((prev) => ({ ...prev, [name]: { ok: true, at: new Date() } }));
+        if (!options.silent) {
+          toast.success(t('remote.echoSuccess', { defaultValue: 'C-ECHO successful' }));
+        }
+      } catch {
+        setEchoStatus((prev) => ({ ...prev, [name]: { ok: false, at: new Date() } }));
+        if (!options.silent) {
+          toast.error(t('remote.echoFailed', { defaultValue: 'C-ECHO failed' }));
+        }
+      } finally {
+        setEchoLoading(false);
+      }
+    },
+    [t],
+  );
+
+  // Wer eine Remote-Modalität auswählt, will wissen, ob sie antwortet — also
+  // prüfen wir sie sofort (still, ohne Toast). Ein Fehlschlag wird nicht
+  // automatisch wiederholt; dafür ist der Echo-Knopf da.
+  useEffect(() => {
+    if (selectedModality && !echoStatus[selectedModality]) {
+      void runEcho(selectedModality, { silent: true });
+    }
+  }, [selectedModality, echoStatus, runEcho]);
 
   // C-FIND query against the selected modality
   const handleQuery = async () => {
@@ -244,10 +270,12 @@ export default function RemoteSourcesPage() {
                           <span className="flex items-center gap-2">
                             {m.lastEchoStatus === 'success' ? (
                               <Wifi className="h-3.5 w-3.5 text-success" />
-                            ) : (
+                            ) : m.lastEchoStatus === 'failure' ? (
                               <WifiOff className="h-3.5 w-3.5 text-destructive" />
+                            ) : (
+                              <Wifi className="h-3.5 w-3.5 text-muted-foreground" />
                             )}
-                            {m.name} ({m.aet})
+                            {m.id} ({m.aet})
                           </span>
                         </SelectItem>
                       ))}
@@ -259,18 +287,7 @@ export default function RemoteSourcesPage() {
                   size="sm"
                   className="mt-5 gap-1.5"
                   disabled={!selectedModality || echoLoading}
-                  onClick={async () => {
-                    if (!selectedModality) return;
-                    setEchoLoading(true);
-                    try {
-                      await modalitiesApi.echo(selectedModality);
-                      toast.success(t('remote.echoSuccess', { defaultValue: 'C-ECHO successful' }));
-                    } catch {
-                      toast.error(t('remote.echoFailed', { defaultValue: 'C-ECHO failed' }));
-                    } finally {
-                      setEchoLoading(false);
-                    }
-                  }}
+                  onClick={() => void runEcho(selectedModality)}
                 >
                   {echoLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wifi className="h-3.5 w-3.5" />}
                   {t('remote.echo')}

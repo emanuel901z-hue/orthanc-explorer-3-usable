@@ -10,7 +10,8 @@
     "collapse": "Daralt",
     "expand": "Genişlet",
     "broker": "MWL Broker",
-    "auditLogs": "Denetim kayıtları"
+    "auditLogs": "Denetim kayıtları",
+    "copyJobs": "Kopyalama işleri"
   },
   "settings": {
     "title": "Ayarlar",
@@ -65,7 +66,9 @@
       "traceDescription": "Full trace — logs every request and internal operation",
       "verbose": "Verbose",
       "verboseDescription": "Detailed logging — includes informational messages"
-    }
+    },
+    "peers": "Eşler",
+    "saveModalityFailed": "Modalite kaydedilemedi"
   },
   "studies": {
     "title": "Çalışmalar",
@@ -180,7 +183,8 @@
       "bulkSuccess": "{{count}} tetkik karantinaya alındı.",
       "partial": "{{total}} tetkikin {{ok}} tanesi alındı — {{failed}} başarısız.",
       "error": "Karantina başarısız."
-    }
+    },
+    "resetFilters": "Filtreleri sıfırla"
   },
   "upload": {
     "subtitle": "Yüklemek için DICOM dosyalarını veya klasörlerini sürükleyip bırakın",
@@ -366,7 +370,8 @@
       "system": "Sistem"
     },
     "title": "Activity",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "actionFailed": "İşlem başarısız"
   },
   "remote": {
     "title": "Uzak Kaynaklar",
@@ -381,7 +386,22 @@
     "queryHint": "Arama kriterlerini girin ve uzak modalitedeki çalışmaları bulmak için Sorgula'ya tıklayın.",
     "dicomwebServer": "DICOMweb Sunucusu",
     "testConnection": "Bağlantıyı Sına",
-    "dicomwebHint": "DICOMweb tarayıcısı — WADO-RS uyumlu sunuculardan çalışmaları arayın ve alın."
+    "dicomwebHint": "DICOMweb tarayıcısı — WADO-RS uyumlu sunuculardan çalışmaları arayın ve alın.",
+    "actions": "İşlemler",
+    "retrieve": "Getir",
+    "retrieveAll": "Tümünü getir",
+    "copy": "Kopyala",
+    "copyAll": "Tümünü kopyala",
+    "copyTarget": "Şuraya kopyala",
+    "copyTargetNone": "— hedef —",
+    "copyTargetsEmpty": "Hedef yapılandırılmamış",
+    "copyNoTarget": "Önce bir hedef seçin",
+    "copyStarted": "{{target}} hedefine C-MOVE gönderildi",
+    "copyFailed": "Kopyalama başarısız (DIMSE {{status}})",
+    "copyFailedGeneric": "Kopyalama başarısız",
+    "copySending": "gönderiliyor",
+    "studyDate": "İnceleme tarihi",
+    "studyDescription": "İnceleme açıklaması"
   },
   "actions": {
     "viewer": "Görüntüleyici",
@@ -393,7 +413,9 @@
     "delete": "Sil",
     "label": "Etiket",
     "quarantine": "Karantina",
-    "sendToPeer": "Eş (Peer)"
+    "sendToPeer": "Eş (Peer)",
+    "share": "Paylaşım bağlantısı",
+    "more": "Daha fazla"
   },
   "common": {
     "save": "Kaydet",
@@ -676,7 +698,12 @@
     "success": "Seri hedef çalışmaya başarıyla taşındı",
     "error": "Taşıma başarısız",
     "differentPatientWarning": "Uyarı: Seçilen hedef tetkik farklı bir hastaya ait. Taşıma işlemi seriyi o hastaya atayacaktır.",
-    "partialSuccess": "Seri taşındı, ancak {{failed}} örnek başarısız oldu."
+    "partialSuccess": "Seri taşındı, ancak {{failed}} örnek başarısız oldu.",
+    "titleBulk": "{{count}} seriyi taşı",
+    "descriptionBulk": "{{count}} seriyi hedef incelemeye taşı.",
+    "seriesToMigrateBulk": "Taşınacak seriler ({{count}})",
+    "migrateButtonBulk": "Taşı ({{count}})",
+    "bulkSuccess": "{{count}} seri hedef incelemeye taşındı."
   },
   "instanceMigrate": {
     "title": "Örneği taşı",
@@ -1045,7 +1072,12 @@
     "showAllStudiesForPatient": "Show all studies for this patient",
     "statistics": "Statistics",
     "studyInfo": "Study Info",
-    "sortBy": "Sırala"
+    "sortBy": "Sırala",
+    "apiView": "Orthanc API'sini aç",
+    "moreTitle": "Daha fazla işlem",
+    "moreHint": "Nadiren kullanılan işlemler — buradaki her şey değişiklik günlüğüne yazılır.",
+    "deleteFailed": "İnceleme silinemedi",
+    "customButtonFailed": "Özel düğme başarısız oldu"
   },
   "broker": {
     "title": "MWL Broker",
@@ -2056,7 +2088,39 @@
     "configureInOrthancJson": "Eşler Orthanc yapılandırma dosyasında ayarlanabilir.",
     "send": "Gönder",
     "sendSuccess": "{{peer}} eşine başarıyla gönderildi.",
-    "sendError": "Eşe gönderme başarısız oldu."
+    "sendError": "Eşe gönderme başarısız oldu.",
+    "tabHint": "Eşler, bu Orthanc'ın inceleme gönderebileceği diğer Orthanc örnekleridir (HTTP, DICOM değil). Bir incelemedeki «Eş» düğmesi bunları kullanır.",
+    "add": "Eş ekle",
+    "addTitle": "Eş ekle",
+    "editTitle": "{{name}} eşini düzenle",
+    "formHint": "Eş, başka bir Orthanc örneğidir. Ona göndermek görüntüleri HTTP ile aktarır; alıcı sistem buna izin vermelidir.",
+    "name": "Ad",
+    "nameHint": "Hedefin listede nasıl görüneceği — ör. ev veya bölüm.",
+    "nameImmutable": "Ad değiştirilemez: yeniden adlandırma ikinci bir eş oluşturur ve eskisini bırakır.",
+    "url": "URL",
+    "urlHint": "Diğer Orthanc'ın adresi, ör. http://pacs-kh:8042 — yol olmadan.",
+    "username": "Kullanıcı (isteğe bağlı)",
+    "password": "Parola (isteğe bağlı)",
+    "credentialsHint": "Yalnızca diğer örnek kimlik doğrulama istiyorsa. Parola Orthanc'ta saklanır ve bir daha gösterilmez.",
+    "credentials": "Kimlik bilgileri",
+    "withCredentials": "kullanıcı ile",
+    "withoutCredentials": "olmadan",
+    "actions": "İşlemler",
+    "edit": "Düzenle",
+    "remove": "Kaldır",
+    "removeTitle": "{{name}} eşi kaldırılsın mı?",
+    "removeHint": "Gönderilmiş görüntüler yerinde kalır. Yalnızca hedef listeden kaybolur.",
+    "removed": "{{name}} eşi kaldırıldı",
+    "removeFailed": "Eş kaldırılamadı",
+    "savedNew": "{{name}} eşi eklendi",
+    "savedExisting": "{{name}} eşi kaydedildi",
+    "saveFailed": "Eş kaydedilemedi",
+    "errName": "Lütfen bir ad girin.",
+    "errUrl": "Lütfen URL girin.",
+    "empty": "Henüz eş yok.",
+    "emptyHint": "Diğer evin veya bölümün Orthanc'ını ekleyin, incelemeleri oraya gönderin.",
+    "buttonHint": "Başka bir Orthanc örneğine HTTP ile gönder (DICOM hedefi değil) — hedefler Ayarlar → Eşler",
+    "addInSettings": "Ayarlar → Eşler altında ekleyin."
   },
   "split": {
     "title": "Tetkiki Böl",
@@ -2069,7 +2133,13 @@
     "warningCut": "Seçilen seriler bu tetkikten kaldırılacak ve yeni tetkike taşınacaktır.",
     "confirm": "Böl ({{count}})",
     "success": "{{count}} seri başarıyla yeni tetkike bölündü.",
-    "error": "Tetkik bölünemedi"
+    "error": "Tetkik bölünemedi",
+    "titleInstances": "Görüntüleri yeni incelemeye ayır",
+    "descriptionInstances": "Seçilen görüntüleri yeni bir StudyInstanceUID ile yeni incelemeye taşır.",
+    "selectedInstances": "Seçilen görüntüler",
+    "keepSourceInstances": "Kaynak görüntüleri koru (kesmek yerine kopyala)",
+    "warningCutInstances": "Seçilen görüntüler bu seriden çıkarılıp yeni incelemeye taşınacak.",
+    "successInstances": "{{count}} görüntü yeni incelemeye ayrıldı."
   },
   "moveToSeries": {
     "title": "Örnekleri başka bir seriye taşı",
@@ -2093,5 +2163,192 @@
     "partialFailure": "{{failed}} örnek taşınamadı — kaynak örnekler korundu.",
     "deleteWarning": "{{count}} kaynak örnek silinemedi.",
     "error": "Taşıma başarısız"
+  },
+  "copyJobs": {
+    "title": "Kopyalama işleri",
+    "subtitle": "Bu istasyondan arşive gönderilen C-MOVE emirleri — inceleme bazında durum ve sonuç",
+    "filterAll": "Tümü",
+    "stateRunning": "çalışıyor",
+    "stateSuccess": "teslim edildi",
+    "stateFailed": "başarısız",
+    "when": "Zaman",
+    "source": "Kaynak",
+    "target": "Hedef",
+    "study": "İnceleme",
+    "state": "Durum",
+    "dimse": "DIMSE",
+    "duration": "Süre",
+    "empty": "Henüz kopyalama emri yok. Uzak kaynaklar → hedef seçin → „Kopyala“.",
+    "emptyFiltered": "Bu filtrede iş yok.",
+    "loading": "İşler yükleniyor…",
+    "loadFailed": "İşler yüklenemedi",
+    "hint": "Liste Orthanc iş geçmişinden gelir — bellekte tutulur ve „JobHistorySize“ ile sınırlıdır."
+  },
+  "help": {
+    "help_copyJobs_title": "Kopyalama işleri",
+    "help_copyJobs_what": [
+      "Bu istasyonun tüm kopyalama emirleri: hangi inceleme, hangi arşivden, hangi hedef arşive.",
+      "Bir emir kaynak arşive C-MOVE'dur; incelemeyi hedefe arşiv teslim eder."
+    ],
+    "help_copyJobs_how": [
+      "Duruma göre filtreleyin (çalışıyor, teslim edildi, başarısız) ve satırı okuyun: hedef, inceleme, DIMSE durumu, süre.",
+      "DIMSE 0x0000, arşivin tüm alt işlemleri teslim edildi olarak bildirdiği anlamına gelir."
+    ],
+    "help_copyJobs_wrong": [
+      "0xA801 ile başarısız: hedef AET kaynak arşivde tanımlı değil.",
+      "0xC000 ile başarısız: arşiv incelemeyi işleyemedi — incelemeyi ve hedefi kontrol edin.",
+      "Kopyaladınız ama liste boş mu? Orthanc yalnızca son işleri saklar (JobHistorySize); yeniden başlatmadan sonra liste boştur."
+    ],
+    "helpButton": "Bu nedir?",
+    "helpIntro": "Kısa ve açık: sayfa ne için, nasıl çalışılır ve hiçbir şey gelmezse ne yapılır.",
+    "helpWhat": "Bu nedir?",
+    "helpHow": "Nasıl kullanılır?",
+    "helpWrong": "Bir şey çalışmazsa",
+    "i18nNote": "Görünen arayüz çevrildi; ayrıntılı yardım metinleri Almanca ve İngilizce mevcut (İngilizce diğerlerini tamamlar).",
+    "help_studies_title": "İncelemeler — liste",
+    "help_studies_what": [
+      "Bu evin Orthanc'ındaki tüm incelemeler — günün çalışma listesi.",
+      "Arama hasta, erişim numarası ve açıklamaları kapsar; virgülle ayrılan birden çok terim birleştirilir."
+    ],
+    "help_studies_how": [
+      "Bir arama terimi yazın (birkaçı virgülle), ayrıntılar için satıra tıklayın.",
+      "Sütunları gösterin/gizleyin ve genişliklerini ayarlayın; düzen korunur."
+    ],
+    "help_studies_wrong": [
+      "Hiçbir şey bulunamadı? Genellikle filtre çok dardır — sıfırlayın.",
+      "Yeni çekilen bir incelemenin görünmesi biraz sürebilir."
+    ],
+    "help_studyDetail_title": "Bir inceleme ayrıntıda",
+    "help_studyDetail_what": [
+      "İnceleme, serileri, görüntüleri ve DICOM etiketleriyle.",
+      "Sağdaki düğmeler tüm inceleme üzerinde işlem yapar."
+    ],
+    "help_studyDetail_how": [
+      "Görüntüleri görmek için bir seriye tıklayın; düğmeler gönderme, etiketleme, düzenleme ve anonimleştirme içindir.",
+      "Etkinlik günlüğü bu incelemeyle yapılanları gösterir."
+    ],
+    "help_studyDetail_wrong": [
+      "Görüntüler eksik mi? Hâlâ aktarılıyor olabilir — durumu kontrol edin.",
+      "Anonimleştirme ve silme geri alınamaz."
+    ],
+    "help_seriesDetail_title": "Bir seri",
+    "help_seriesDetail_what": [
+      "Seri, bir inceleme içindeki tek bir adımdır — ör. bir BT'nin nativ fazı."
+    ],
+    "help_seriesDetail_how": [
+      "Ayrıntılar için bir görüntüye tıklayın; yukarıdaki düğmeler tüm seri üzerinde işlem yapar."
+    ],
+    "help_seriesDetail_wrong": [
+      "Boş önizleme hata değildir: bazı biçimler tarayıcıda gösterilemez.",
+      "Önizleme olmasa da meta veriler tamdır."
+    ],
+    "help_instanceDetail_title": "Bir görüntü",
+    "help_instanceDetail_what": [
+      "Tek bir görüntü, etiketleri, aktarım sözdizimi ve önizlemesiyle."
+    ],
+    "help_instanceDetail_how": [
+      "Görüntüyü kontrol için önizlemeyi, arama için etiket listesini, işlem için yukarıdaki düğmeleri kullanın."
+    ],
+    "help_instanceDetail_wrong": [
+      "Bazı biçimlerde önizleme yok — meta veriler yine de tamdır.",
+      "Tek bir görüntüyü silmek incelemeyi değiştirir; geri alınamaz."
+    ],
+    "help_upload_title": "Yükleme",
+    "help_upload_what": [
+      "Bu Orthanc'a dosyalar: DICOM klasörleri, ZIP arşivleri veya tek dosyalar."
+    ],
+    "help_upload_how": [
+      "Dosyaları buraya bırakın veya seçin; ilerleme dosya bazındadır.",
+      "Yüklenen incelemeler inceleme listesinde görünür."
+    ],
+    "help_upload_wrong": [
+      "Büyük bir ZIP zaman alır — ilerleme çubuğunu bekleyin.",
+      "Kopya değiştirilmez; Orthanc onu ikinci nesne olarak saklar."
+    ],
+    "help_activity_title": "Etkinlik",
+    "help_activity_what": [
+      "Bu kurulumda olanlar: erişimler, yüklemeler, değişiklikler.",
+      "Biri «bu incelemeye kim dokundu?» diye sorduğunda işe yarar."
+    ],
+    "help_activity_how": [
+      "Bir dönem ve tür seçin, ayrıntılar için satıra tıklayın.",
+      "Dosyaya gitmesi gerekiyorsa CSV olarak dışa aktarın."
+    ],
+    "help_activity_wrong": [
+      "Bir şey görmüyor musunuz? Dönem çok kısa — genişletin."
+    ],
+    "help_auditLogs_title": "Değişiklik günlüğü (bu kurulum)",
+    "help_auditLogs_what": [
+      "Kim neyi ne zaman değiştirdi: anonimleştirme, silme, gönderme.",
+      "Broker'ın kendi değişiklik günlüğünün karşılığı."
+    ],
+    "help_auditLogs_how": [
+      "İşleme veya döneme göre filtreleyin, ayrıntılar için satırı açın."
+    ],
+    "help_auditLogs_wrong": [
+      "Kayıtlar yalnızca bu kurulum devreye alındığından beri var.",
+      "Burada listelenmeyen bir işlem bu arayüzden yapılmamıştır."
+    ],
+    "help_remoteSources_title": "Uzak kaynaklar",
+    "help_remoteSources_what": [
+      "Bu kurulumun sorgulayabildiği dış sistemler: DICOM düğümleri (Q/R) ve DICOMweb sunucuları."
+    ],
+    "help_remoteSources_how": [
+      "Bir kaynak seçin, arama terimi girin, sonucu açın — veya önce bağlantıyı test edin.",
+      "«Şuraya kopyala» ile bir inceleme doğrudan başka bir hedef arşive gider."
+    ],
+    "help_remoteSources_wrong": [
+      "Yanıt yok? Sunucu, bağlantı noktası ve karşı tarafın iznini kontrol edin; test düğmesi neyin eksik olduğunu söyler.",
+      "«DICOMweb» bir URL ister; «DICOM Q/R» sunucu ve bağlantı noktası ister."
+    ],
+    "help_settings_title": "Ayarlar",
+    "help_settings_what": [
+      "Bu kurulumu yapılandıran her şey: sistem, modaliteler, DICOMweb sunucuları, eşler, görüntüleyici, görünüm."
+    ],
+    "help_settings_how": [
+      "Bir sekme seçin, kayıt ekleyin veya değiştirin, kaydedin.",
+      "Değişiklikler «yeniden başlatmadan sonra» yazan yerler dışında hemen etkilidir."
+    ],
+    "help_settings_wrong": [
+      "Bir cihaz yanıt vermiyor? Önce echo testini, sonra sunucu, bağlantı noktası ve AE başlığını kontrol edin.",
+      "«Ortam tarafından ayarlanmış» işaretli bir ayar burada değiştirilemez."
+    ],
+    "help_worklists_title": "Çalışma listeleri",
+    "help_worklists_what": [
+      "RIS çalışma listeleri — burada yalnızca bu Orthanc'ta worklist eklentisi kuruluysa görünür."
+    ],
+    "help_worklists_how": [
+      "Bir liste seçin, hasta arayın, sonucu açın."
+    ],
+    "help_worklists_wrong": [
+      "Sayfa eklentinin eksik olduğunu mu söylüyor? O zaman burada kurulu değildir.",
+      "Modaliteler çalışma listelerini yine RIS'ten alır."
+    ],
+    "help_iid_title": "İncelemeyi aç (IID)",
+    "help_iid_what": [
+      "Başka bir RIS/KIS'in doğrudan bir incelemeye gitmek için çağırdığı giriş noktası (IHE Invoke Image Display)."
+    ],
+    "help_iid_how": [
+      "Bu sayfa tıklanmak için değil çağrılmak içindir: istek uyuyorsa incelemeyi açar."
+    ],
+    "help_iid_wrong": [
+      "Hata, isteğin eksik olduğu anlamına gelir: studyUID veya accessionNumber (biri) ve geçerli bir değer gerekir."
+    ]
+  },
+  "errors": {
+    "network": "Sunucuya bağlantı yok. Lütfen tekrar deneyin.",
+    "http400": "İstek geçersiz — lütfen girişleri kontrol edin.",
+    "http401": "Giriş gerekli — lütfen yeniden oturum açın.",
+    "http403": "Bunun için yetkiniz yok.",
+    "http404": "Bulunamadı — bu arada silinmiş olabilir.",
+    "http409": "Mevcut içerikle çakışıyor (ör. aynı ad).",
+    "http413": "Dosya çok büyük.",
+    "http500": "Sunucuda bir hata oluştu — lütfen tekrar deneyin.",
+    "http502": "Arkasındaki sistem yanıt vermiyor.",
+    "http503": "Hizmet şu anda kullanılamıyor — lütfen sonra tekrar deneyin.",
+    "httpOther": "İstek başarısız ({{status}}).",
+    "unknown": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+    "withRef": "{{message}} (Ref: {{ref}})",
+    "brokerNotConfigured": "Bu kurulumda MWL broker yapılandırılmamış."
   }
 }

@@ -22,6 +22,11 @@ export const modalitiesApi = {
   /** GET /modalities — Returns array of modality names (string[]). */
   list: () => orthancFetch<string[]>('/modalities'),
 
+  /** GET /modalities?expand — Namen plus AET, Host und Port in einem Aufruf.
+   *  Die Liste allein liefert nur Namen; die Seite braucht die Adresse, um
+   *  „Host:Port“ anzuzeigen statt eines Platzhalters. */
+  listExpanded: () => orthancFetch<Record<string, ModalityConfig>>('/modalities?expand'),
+
   /** GET /modalities/:name/configuration — Returns ModalityConfig (AET, Host, Port). */
   get: (name: string) => orthancFetch<ModalityConfig>(`/modalities/${name}/configuration`),
 

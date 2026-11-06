@@ -25,6 +25,13 @@ vi.mock('@/api/modalities', () => ({
   modalitiesApi: { list: vi.fn(() => Promise.resolve(['ARCHIVE'])), echo: mockEcho },
 }));
 
+// Die Seite braucht Name + Adresse je Modalität (Anzeige „Host:Port“)
+vi.mock('@/features/settings/hooks/use-modality-details', () => ({
+  useModalityDetails: () => ({
+    data: [{ id: 'ARCHIVE', aet: 'ARCHIVE', host: '10.0.1.30', port: 104 }],
+  }),
+}));
+
 vi.mock('@/features/settings/hooks/use-dicom-web-servers', () => ({
   useDicomWebServers: () => ({ data: [] }),
 }));
@@ -216,6 +223,35 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     await queryStudies();
 
     expect(screen.getByRole('option', { name: /no targets configured|keine ziele konfiguriert/i })).toBeInTheDocument();
+  });
+
+  it('prüft die gewählte Modalität automatisch per C-ECHO', async () => {
+    configure([]);
+    mockEcho.mockResolvedValue({});
+    renderPage();
+    await queryStudies();
+
+    // kein Klick auf „Echo“ — die Auswahl allein löst die Prüfung aus
+    await waitFor(() => expect(mockEcho).toHaveBeenCalledWith('ARCHIVE'));
+  });
+
+  it('zeigt die echte Adresse der Modalität statt eines Platzhalters', async () => {
+    configure([]);
+    renderPage();
+    await queryStudies();
+
+    expect(screen.getByText(/10\.0\.1\.30:104/)).toBeInTheDocument();
+  });
+
+  it('markiert eine Modalität, die nicht antwortet, als nicht erreichbar', async () => {
+    configure([]);
+    mockEcho.mockRejectedValue(new Error('association rejected'));
+    renderPage();
+    await queryStudies();
+
+    // der Fehlschlag bleibt still (kein Toast), aber der Zustand steht
+    await waitFor(() => expect(mockEcho).toHaveBeenCalledWith('ARCHIVE'));
+    expect(mockToast.error).not.toHaveBeenCalled();
   });
 });
 

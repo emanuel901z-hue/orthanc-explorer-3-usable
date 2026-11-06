@@ -10,7 +10,8 @@
     "collapse": "Réduire",
     "expand": "Développer",
     "broker": "Broker MWL",
-    "auditLogs": "Journal d'audit"
+    "auditLogs": "Journal d'audit",
+    "copyJobs": "Tâches de copie"
   },
   "settings": {
     "title": "Paramètres",
@@ -65,7 +66,9 @@
       "traceDescription": "Full trace — logs every request and internal operation",
       "verbose": "Verbose",
       "verboseDescription": "Detailed logging — includes informational messages"
-    }
+    },
+    "peers": "Peers",
+    "saveModalityFailed": "La modalité n'a pas pu être enregistrée"
   },
   "studies": {
     "title": "Études",
@@ -278,7 +281,8 @@
       "system": "Système"
     },
     "title": "Activity",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "actionFailed": "L'action a échoué"
   },
   "remote": {
     "title": "Sources Distantes",
@@ -293,7 +297,22 @@
     "queryHint": "Entrez les critères de recherche et cliquez sur Interroger pour trouver des études sur la modalité distante.",
     "dicomwebServer": "Serveur DICOMweb",
     "testConnection": "Tester la Connexion",
-    "dicomwebHint": "Navigateur DICOMweb — recherchez et récupérez des études depuis des serveurs compatibles WADO-RS."
+    "dicomwebHint": "Navigateur DICOMweb — recherchez et récupérez des études depuis des serveurs compatibles WADO-RS.",
+    "actions": "Actions",
+    "retrieve": "Récupérer",
+    "retrieveAll": "Tout récupérer",
+    "copy": "Copier",
+    "copyAll": "Tout copier",
+    "copyTarget": "Copier vers",
+    "copyTargetNone": "— destination —",
+    "copyTargetsEmpty": "Aucune destination configurée",
+    "copyNoTarget": "Choisissez d'abord une destination",
+    "copyStarted": "C-MOVE envoyé vers {{target}}",
+    "copyFailed": "Échec de la copie (DIMSE {{status}})",
+    "copyFailedGeneric": "Échec de la copie",
+    "copySending": "envoi en cours",
+    "studyDate": "Date de l'examen",
+    "studyDescription": "Description de l'examen"
   },
   "actions": {
     "viewer": "Visionneuse",
@@ -305,7 +324,9 @@
     "openInOhif": "Ouvrir dans OHIF",
     "label": "Étiquette",
     "quarantine": "Quarantaine",
-    "sendToPeer": "Pair (Peer)"
+    "sendToPeer": "Pair (Peer)",
+    "share": "Lien de partage",
+    "more": "Plus"
   },
   "common": {
     "save": "Enregistrer",
@@ -588,7 +609,12 @@
     "success": "Série migrée avec succès vers l'étude cible",
     "error": "Échec de la migration",
     "differentPatientWarning": "Avertissement : L'étude cible sélectionnée appartient à un autre patient. La migration attribuera la série à ce patient.",
-    "partialSuccess": "Série migrée, mais {{failed}} instance(s) ont échoué."
+    "partialSuccess": "Série migrée, mais {{failed}} instance(s) ont échoué.",
+    "titleBulk": "Migrer {{count}} séries",
+    "descriptionBulk": "Déplacer {{count}} séries vers un examen cible.",
+    "seriesToMigrateBulk": "Séries à migrer ({{count}})",
+    "migrateButtonBulk": "Migrer ({{count}})",
+    "bulkSuccess": "{{count}} séries migrées vers l'examen cible."
   },
   "instanceMigrate": {
     "title": "Migrer l'instance",
@@ -694,7 +720,8 @@
       "bulkSuccess": "{{count}} étude(s) mises en quarantaine.",
       "partial": "{{ok}} sur {{total}} mises — {{failed}} en échec.",
       "error": "La mise en quarantaine a échoué."
-    }
+    },
+    "resetFilters": "Réinitialiser les filtres"
   },
   "study": {
     "modifyTitle": "Modifier les étiquettes de l'étude",
@@ -1045,7 +1072,12 @@
     "showAllStudiesForPatient": "Show all studies for this patient",
     "statistics": "Statistics",
     "studyInfo": "Study Info",
-    "sortBy": "Trier par"
+    "sortBy": "Trier par",
+    "apiView": "Ouvrir l'API Orthanc",
+    "moreTitle": "Autres actions",
+    "moreHint": "Actions rarement utilisées — tout est consigné dans le journal des modifications.",
+    "deleteFailed": "L'examen n'a pas pu être supprimé",
+    "customButtonFailed": "Le bouton personnalisé a échoué"
   },
   "broker": {
     "title": "MWL Broker",
@@ -2056,7 +2088,39 @@
     "configureInOrthancJson": "Les pairs peuvent être configurés dans le fichier de configuration Orthanc.",
     "send": "Envoyer",
     "sendSuccess": "Envoyé avec succès au pair {{peer}}.",
-    "sendError": "Échec de l'envoi au pair."
+    "sendError": "Échec de l'envoi au pair.",
+    "tabHint": "Les peers sont d'autres instances Orthanc vers lesquelles celle-ci peut envoyer des examens (HTTP, pas DICOM). Le bouton « Peer » d'un examen les utilise.",
+    "add": "Ajouter un peer",
+    "addTitle": "Ajouter un peer",
+    "editTitle": "Modifier le peer {{name}}",
+    "formHint": "Un peer est une autre instance Orthanc. Y envoyer transfère les images par HTTP ; le système récepteur doit l'accepter.",
+    "name": "Nom",
+    "nameHint": "Comment la destination apparaît dans la liste — p. ex. la maison ou le service.",
+    "nameImmutable": "Le nom ne peut pas être modifié : un renommage créerait un second peer et laisserait l'ancien.",
+    "url": "URL",
+    "urlHint": "Adresse de l'autre Orthanc, p. ex. http://pacs-kh:8042 — sans chemin.",
+    "username": "Utilisateur (facultatif)",
+    "password": "Mot de passe (facultatif)",
+    "credentialsHint": "Uniquement si l'autre instance exige une authentification. Le mot de passe est stocké dans Orthanc et n'est plus affiché.",
+    "credentials": "Identifiants",
+    "withCredentials": "avec utilisateur",
+    "withoutCredentials": "sans",
+    "actions": "Actions",
+    "edit": "Modifier",
+    "remove": "Supprimer",
+    "removeTitle": "Supprimer le peer {{name}} ?",
+    "removeHint": "Les images déjà envoyées restent où elles sont. Seule la destination disparaît de la liste.",
+    "removed": "Peer {{name}} supprimé",
+    "removeFailed": "Le peer n'a pas pu être supprimé",
+    "savedNew": "Peer {{name}} ajouté",
+    "savedExisting": "Peer {{name}} enregistré",
+    "saveFailed": "Le peer n'a pas pu être enregistré",
+    "errName": "Veuillez saisir un nom.",
+    "errUrl": "Veuillez saisir l'URL.",
+    "empty": "Pas encore de peers.",
+    "emptyHint": "Ajoutez l'Orthanc de l'autre maison ou du service pour y envoyer des examens.",
+    "buttonHint": "Envoyer par HTTP à une autre instance Orthanc (pas la cible DICOM) — destinations sous Réglages → Peers",
+    "addInSettings": "Ajoutez-en un sous Réglages → Peers."
   },
   "split": {
     "title": "Diviser l'étude",
@@ -2069,7 +2133,13 @@
     "warningCut": "Les séries sélectionnées seront retirées de cette étude et déplacées dans la nouvelle étude.",
     "confirm": "Diviser ({{count}})",
     "success": "{{count}} série(s) divisée(s) avec succès dans une nouvelle étude.",
-    "error": "Échec de la division de l'étude"
+    "error": "Échec de la division de l'étude",
+    "titleInstances": "Scinder des images vers un nouvel examen",
+    "descriptionInstances": "Extraire les images sélectionnées dans un nouvel examen avec un nouveau StudyInstanceUID.",
+    "selectedInstances": "Images sélectionnées",
+    "keepSourceInstances": "Conserver les images source (copier au lieu de couper et déplacer)",
+    "warningCutInstances": "Les images sélectionnées seront retirées de cette série et déplacées vers le nouvel examen.",
+    "successInstances": "{{count}} images scindées vers un nouvel examen."
   },
   "moveToSeries": {
     "title": "Déplacer les instances vers une autre série",
@@ -2093,5 +2163,192 @@
     "partialFailure": "{{failed}} instance(s) n'ont pas pu être déplacées — les instances sources ont été conservées.",
     "deleteWarning": "{{count}} instance(s) source(s) n'ont pas pu être supprimée(s).",
     "error": "Échec du déplacement"
+  },
+  "copyJobs": {
+    "title": "Tâches de copie",
+    "subtitle": "Ordres C-MOVE de ce poste vers l'archive — état et résultat par examen",
+    "filterAll": "Toutes",
+    "stateRunning": "en cours",
+    "stateSuccess": "livré",
+    "stateFailed": "échec",
+    "when": "Heure",
+    "source": "Source",
+    "target": "Destination",
+    "study": "Examen",
+    "state": "État",
+    "dimse": "DIMSE",
+    "duration": "Durée",
+    "empty": "Pas encore d'ordre de copie. Sources distantes → choisir une destination → « Copier ».",
+    "emptyFiltered": "Aucune tâche dans ce filtre.",
+    "loading": "Chargement des tâches…",
+    "loadFailed": "Les tâches n'ont pas pu être chargées",
+    "hint": "La liste provient de l'historique des tâches d'Orthanc : conservée en mémoire et limitée par « JobHistorySize »."
+  },
+  "help": {
+    "help_copyJobs_title": "Tâches de copie",
+    "help_copyJobs_what": [
+      "Tous les ordres de copie de ce poste : quel examen, de quelle archive, vers quelle archive de destination.",
+      "Un ordre est un C-MOVE vers l'archive source ; c'est elle qui livre l'examen à la destination."
+    ],
+    "help_copyJobs_how": [
+      "Filtrer par état (en cours, livré, échec) et lire la ligne : destination, examen, état DIMSE, durée.",
+      "DIMSE 0x0000 signifie que l'archive déclare toutes les sous-opérations livrées."
+    ],
+    "help_copyJobs_wrong": [
+      "Échec 0xA801 : l'AET de destination n'est pas connu de l'archive source.",
+      "Échec 0xC000 : l'archive n'a pas pu traiter l'examen ; vérifier l'examen et la destination.",
+      "Liste vide alors que vous avez copié ? Orthanc ne garde que les tâches récentes (JobHistorySize) ; après un redémarrage la liste est vide."
+    ],
+    "helpButton": "Qu'est-ce que c'est ?",
+    "helpIntro": "Court et clair : à quoi sert la page, comment travailler avec elle et que faire si rien n'arrive.",
+    "helpWhat": "Qu'est-ce que c'est ?",
+    "helpHow": "Comment l'utiliser ?",
+    "helpWrong": "Si quelque chose ne fonctionne pas",
+    "i18nNote": "L'interface visible est traduite ; les textes d'aide détaillés existent en allemand et en anglais (l'anglais complète le reste).",
+    "help_studies_title": "Examens — la liste",
+    "help_studies_what": [
+      "Tous les examens présents dans l'Orthanc de la maison — la liste de travail du jour.",
+      "La recherche couvre les patients, les admissions et les descriptions ; plusieurs termes séparés par des virgules sont combinés."
+    ],
+    "help_studies_how": [
+      "Saisissez un terme (plusieurs séparés par des virgules), cliquez sur une ligne pour les détails.",
+      "Affichez ou masquez des colonnes et ajustez leur largeur ; la disposition est conservée."
+    ],
+    "help_studies_wrong": [
+      "Rien trouvé ? Le filtre est généralement trop étroit — réinitialisez-le.",
+      "Un examen tout juste acquis peut mettre un instant à apparaître."
+    ],
+    "help_studyDetail_title": "Un examen en détail",
+    "help_studyDetail_what": [
+      "L'examen avec ses séries, ses images et ses tags DICOM.",
+      "Les boutons à droite agissent sur tout l'examen."
+    ],
+    "help_studyDetail_how": [
+      "Cliquez sur une série pour voir ses images ; les boutons servent à envoyer, étiqueter, modifier, anonymiser.",
+      "Le journal d'activité montre ce qui a déjà été fait avec cet examen."
+    ],
+    "help_studyDetail_wrong": [
+      "Des images manquent ? Elles sont peut-être encore en transfert — vérifiez l'état.",
+      "L'anonymisation et la suppression sont irréversibles."
+    ],
+    "help_seriesDetail_title": "Une série",
+    "help_seriesDetail_what": [
+      "Une série est une étape de l'examen dans un examen — p. ex. la phase native d'un scanner."
+    ],
+    "help_seriesDetail_how": [
+      "Cliquez sur une image pour ses détails ; les boutons au-dessus agissent sur toute la série."
+    ],
+    "help_seriesDetail_wrong": [
+      "Un aperçu vide n'est pas une erreur : certains formats ne s'affichent pas dans le navigateur.",
+      "Les métadonnées sont complètes même sans aperçu."
+    ],
+    "help_instanceDetail_title": "Une image",
+    "help_instanceDetail_what": [
+      "Une seule image avec ses tags, sa syntaxe de transfert et un aperçu."
+    ],
+    "help_instanceDetail_how": [
+      "L'aperçu pour contrôler l'image, la liste des tags pour chercher, les boutons au-dessus pour agir."
+    ],
+    "help_instanceDetail_wrong": [
+      "Pas d'aperçu pour certains formats — les métadonnées restent complètes.",
+      "Supprimer une seule image modifie l'examen ; c'est irréversible."
+    ],
+    "help_upload_title": "Téléverser",
+    "help_upload_what": [
+      "Des fichiers vers cet Orthanc : dossiers DICOM, archives ZIP ou fichiers isolés."
+    ],
+    "help_upload_how": [
+      "Déposez les fichiers ici ou sélectionnez-les ; la progression se fait par fichier.",
+      "Les examens téléversés apparaissent dans la liste des examens."
+    ],
+    "help_upload_wrong": [
+      "Un gros ZIP prend du temps — attendez la barre de progression.",
+      "Un doublon n'est pas remplacé ; Orthanc le conserve comme second objet."
+    ],
+    "help_activity_title": "Activité",
+    "help_activity_what": [
+      "Ce qui s'est passé sur cette installation : accès, téléversements, modifications.",
+      "Utile quand quelqu'un demande « qui a touché cet examen ? »."
+    ],
+    "help_activity_how": [
+      "Choisissez une période et un type, cliquez sur une ligne pour les détails.",
+      "Exportez en CSV s'il faut un fichier."
+    ],
+    "help_activity_wrong": [
+      "Rien à voir ? La période est trop courte — élargissez-la."
+    ],
+    "help_auditLogs_title": "Journal des modifications (cette installation)",
+    "help_auditLogs_what": [
+      "Qui a changé quoi, et quand : anonymiser, supprimer, envoyer.",
+      "Le pendant du journal de modifications du broker."
+    ],
+    "help_auditLogs_how": [
+      "Filtrez par action ou période, ouvrez une ligne pour les détails."
+    ],
+    "help_auditLogs_wrong": [
+      "Les entrées n'existent que depuis la mise en service de cette installation.",
+      "Une action absente n'a pas été faite via cette interface."
+    ],
+    "help_remoteSources_title": "Sources distantes",
+    "help_remoteSources_what": [
+      "Systèmes tiers que cette installation peut interroger : nœuds DICOM (Q/R) et serveurs DICOMweb."
+    ],
+    "help_remoteSources_how": [
+      "Choisissez une source, saisissez un terme, ouvrez un résultat — ou testez d'abord la connexion.",
+      "Avec « Copier vers », un examen part directement vers une autre archive de destination."
+    ],
+    "help_remoteSources_wrong": [
+      "Pas de réponse ? Vérifiez l'hôte, le port et l'autorisation côté cible ; le bouton de test indique ce qui manque.",
+      "« DICOMweb » nécessite une URL ; « DICOM Q/R » un hôte et un port."
+    ],
+    "help_settings_title": "Réglages",
+    "help_settings_what": [
+      "Tout ce qui configure cette installation : système, modalités, serveurs DICOMweb, peers, visionneuse, apparence."
+    ],
+    "help_settings_how": [
+      "Choisissez un onglet, ajoutez ou modifiez une entrée, enregistrez.",
+      "Les changements s'appliquent immédiatement, sauf mention « après redémarrage »."
+    ],
+    "help_settings_wrong": [
+      "Un appareil ne répond pas ? Testez d'abord l'echo, puis vérifiez hôte, port et AE title.",
+      "Un réglage marqué « défini par l'environnement » ne se modifie pas ici."
+    ],
+    "help_worklists_title": "Listes de travail",
+    "help_worklists_what": [
+      "Listes de travail du RIS — visibles ici uniquement si le plugin worklist est installé dans cet Orthanc."
+    ],
+    "help_worklists_how": [
+      "Choisissez une liste, cherchez un patient, ouvrez le résultat."
+    ],
+    "help_worklists_wrong": [
+      "La page indique que le plugin manque ? Il n'est pas installé ici.",
+      "Les modalités reçoivent toujours leurs listes du RIS."
+    ],
+    "help_iid_title": "Ouvrir un examen (IID)",
+    "help_iid_what": [
+      "Le point d'entrée appelé par un autre RIS/KIS pour aller directement à un examen (IHE Invoke Image Display)."
+    ],
+    "help_iid_how": [
+      "Cette page est faite pour être appelée, pas cliquée : la requête ouvre l'examen si elle correspond."
+    ],
+    "help_iid_wrong": [
+      "Une erreur signifie une requête incomplète : il faut studyUID ou accessionNumber (pas les deux) et une valeur valide."
+    ]
+  },
+  "errors": {
+    "network": "Pas de connexion au serveur. Veuillez réessayer.",
+    "http400": "La requête n'était pas valide — vérifiez les saisies.",
+    "http401": "Connexion requise — veuillez vous reconnecter.",
+    "http403": "Vous n'êtes pas autorisé à faire cela.",
+    "http404": "Introuvable — peut-être supprimé entre-temps.",
+    "http409": "Cela entre en conflit avec l'existant (p. ex. le même nom).",
+    "http413": "Le fichier est trop volumineux.",
+    "http500": "Le serveur a rencontré une erreur — veuillez réessayer.",
+    "http502": "Le système en amont ne répond pas.",
+    "http503": "Le service n'est pas disponible pour le moment — réessayez plus tard.",
+    "httpOther": "La requête a échoué ({{status}}).",
+    "unknown": "Une erreur est survenue. Veuillez réessayer.",
+    "withRef": "{{message}} (Réf. : {{ref}})",
+    "brokerNotConfigured": "Le broker MWL n'est pas configuré sur cette installation."
   }
 }

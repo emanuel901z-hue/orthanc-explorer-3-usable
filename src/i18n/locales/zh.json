@@ -10,7 +10,8 @@
     "collapse": "收起",
     "expand": "展开",
     "broker": "MWL 代理",
-    "auditLogs": "审计日志"
+    "auditLogs": "审计日志",
+    "copyJobs": "复制任务"
   },
   "settings": {
     "title": "设置",
@@ -65,7 +66,9 @@
       "traceDescription": "Full trace — logs every request and internal operation",
       "verbose": "Verbose",
       "verboseDescription": "Detailed logging — includes informational messages"
-    }
+    },
+    "peers": "对等端",
+    "saveModalityFailed": "无法保存模态"
   },
   "studies": {
     "title": "检查",
@@ -278,7 +281,8 @@
       "system": "系统"
     },
     "title": "Activity",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "actionFailed": "操作失败"
   },
   "remote": {
     "title": "远程源",
@@ -293,7 +297,22 @@
     "queryHint": "输入搜索条件并点击查询以在远程模态上查找检查。",
     "dicomwebServer": "DICOMweb服务器",
     "testConnection": "测试连接",
-    "dicomwebHint": "DICOMweb浏览器 — 从WADO-RS兼容服务器搜索和检索检查。"
+    "dicomwebHint": "DICOMweb浏览器 — 从WADO-RS兼容服务器搜索和检索检查。",
+    "actions": "操作",
+    "retrieve": "取回",
+    "retrieveAll": "全部取回",
+    "copy": "复制",
+    "copyAll": "全部复制",
+    "copyTarget": "复制到",
+    "copyTargetNone": "— 目标 —",
+    "copyTargetsEmpty": "未配置目标",
+    "copyNoTarget": "请先选择目标",
+    "copyStarted": "已向 {{target}} 发送 C-MOVE",
+    "copyFailed": "复制失败 (DIMSE {{status}})",
+    "copyFailedGeneric": "复制失败",
+    "copySending": "发送中",
+    "studyDate": "检查日期",
+    "studyDescription": "检查描述"
   },
   "actions": {
     "viewer": "查看器",
@@ -305,7 +324,9 @@
     "openInOhif": "在OHIF中打开",
     "label": "标签",
     "quarantine": "隔离",
-    "sendToPeer": "节点"
+    "sendToPeer": "节点",
+    "share": "分享链接",
+    "more": "更多"
   },
   "common": {
     "save": "保存",
@@ -588,7 +609,12 @@
     "success": "系列已成功迁移到目标研究",
     "error": "迁移失败",
     "differentPatientWarning": "警告：所选目标检查属于其他患者。迁移后该序列将归属于该患者。",
-    "partialSuccess": "已迁移序列，但有 {{failed}} 个实例失败。"
+    "partialSuccess": "已迁移序列，但有 {{failed}} 个实例失败。",
+    "titleBulk": "迁移 {{count}} 个序列",
+    "descriptionBulk": "将 {{count}} 个序列移动到目标检查。",
+    "seriesToMigrateBulk": "要迁移的序列（{{count}}）",
+    "migrateButtonBulk": "迁移（{{count}}）",
+    "bulkSuccess": "已将 {{count}} 个序列迁移到目标检查。"
   },
   "instanceMigrate": {
     "title": "迁移实例",
@@ -694,7 +720,8 @@
       "bulkSuccess": "已将 {{count}} 项检查移入隔离。",
       "partial": "{{total}} 项中已移入 {{ok}} 项 — {{failed}} 项失败。",
       "error": "隔离失败。"
-    }
+    },
+    "resetFilters": "重置筛选"
   },
   "study": {
     "modifyTitle": "修改研究标签",
@@ -1045,7 +1072,12 @@
     "showAllStudiesForPatient": "Show all studies for this patient",
     "statistics": "Statistics",
     "studyInfo": "Study Info",
-    "sortBy": "排序方式"
+    "sortBy": "排序方式",
+    "apiView": "打开 Orthanc API",
+    "moreTitle": "更多操作",
+    "moreHint": "不常用的操作 — 此处的一切都会记录在变更日志中。",
+    "deleteFailed": "无法删除检查",
+    "customButtonFailed": "自定义按钮执行失败"
   },
   "broker": {
     "title": "MWL 代理服务",
@@ -2056,7 +2088,39 @@
     "configureInOrthancJson": "可在 Orthanc 配置文件中配置节点。",
     "send": "发送",
     "sendSuccess": "已成功发送到节点 {{peer}}。",
-    "sendError": "发送到节点失败。"
+    "sendError": "发送到节点失败。",
+    "tabHint": "对等端是此 Orthanc 可向其发送检查的其他 Orthanc 实例（HTTP，非 DICOM）。检查页的“对等端”按钮会使用它们。",
+    "add": "添加对等端",
+    "addTitle": "添加对等端",
+    "editTitle": "编辑对等端 {{name}}",
+    "formHint": "对等端是另一个 Orthanc 实例。向其发送会通过 HTTP 传输图像；接收方必须允许。",
+    "name": "名称",
+    "nameHint": "目标在列表中的显示方式 — 例如院区或科室。",
+    "nameImmutable": "名称无法更改：改名会创建第二个对等端，旧的会残留。",
+    "url": "URL",
+    "urlHint": "另一台 Orthanc 的地址，例如 http://pacs-kh:8042 — 不要带路径。",
+    "username": "用户（可选）",
+    "password": "密码（可选）",
+    "credentialsHint": "仅在对方要求认证时填写。密码保存在 Orthanc 中，不会再显示。",
+    "credentials": "凭据",
+    "withCredentials": "含用户",
+    "withoutCredentials": "无",
+    "actions": "操作",
+    "edit": "编辑",
+    "remove": "删除",
+    "removeTitle": "删除对等端 {{name}}？",
+    "removeHint": "已发送的图像保持原处，只是从列表中移除该目标。",
+    "removed": "已删除对等端 {{name}}",
+    "removeFailed": "无法删除对等端",
+    "savedNew": "已添加对等端 {{name}}",
+    "savedExisting": "已保存对等端 {{name}}",
+    "saveFailed": "无法保存对等端",
+    "errName": "请输入名称。",
+    "errUrl": "请输入 URL。",
+    "empty": "还没有对等端。",
+    "emptyHint": "添加另一个院区或科室的 Orthanc，即可向其发送检查。",
+    "buttonHint": "通过 HTTP 发送到另一个 Orthanc（不是 DICOM 目标）— 目标在 设置 → 对等端",
+    "addInSettings": "请在 设置 → 对等端 中添加。"
   },
   "split": {
     "title": "拆分检查",
@@ -2069,7 +2133,13 @@
     "warningCut": "所选序列将从当前检查中移除并移动到新检查中。",
     "confirm": "拆分 ({{count}})",
     "success": "已成功将 {{count}} 个序列拆分到新检查中。",
-    "error": "拆分检查失败"
+    "error": "拆分检查失败",
+    "titleInstances": "将图像拆分到新检查",
+    "descriptionInstances": "将所选图像提取到具有新 StudyInstanceUID 的检查中。",
+    "selectedInstances": "所选图像",
+    "keepSourceInstances": "保留源图像（复制而非剪切移动）",
+    "warningCutInstances": "所选图像将从该序列中移除并移入新检查。",
+    "successInstances": "已将 {{count}} 张图像拆分到新检查。"
   },
   "moveToSeries": {
     "title": "将实例移动到其他序列",
@@ -2093,5 +2163,192 @@
     "partialFailure": "{{failed}} 个实例无法移动 — 已保留源实例。",
     "deleteWarning": "{{count}} 个源实例无法删除。",
     "error": "移动失败"
+  },
+  "copyJobs": {
+    "title": "复制任务",
+    "subtitle": "本工作站发往归档的 C-MOVE 指令 — 每个检查的状态和结果",
+    "filterAll": "全部",
+    "stateRunning": "进行中",
+    "stateSuccess": "已送达",
+    "stateFailed": "失败",
+    "when": "时间",
+    "source": "来源",
+    "target": "目标",
+    "study": "检查",
+    "state": "状态",
+    "dimse": "DIMSE",
+    "duration": "耗时",
+    "empty": "还没有复制指令。远程来源 → 选择目标 → “复制”。",
+    "emptyFiltered": "此筛选条件下没有任务。",
+    "loading": "正在加载任务…",
+    "loadFailed": "无法加载任务",
+    "hint": "列表来自 Orthanc 的任务历史 — 保存在内存中，并受 “JobHistorySize” 限制。"
+  },
+  "help": {
+    "help_copyJobs_title": "复制任务",
+    "help_copyJobs_what": [
+      "本工作站的所有复制指令：哪个检查、从哪个归档、到哪个目标归档。",
+      "指令是对源归档的 C-MOVE；由归档把检查送达目标。"
+    ],
+    "help_copyJobs_how": [
+      "按状态筛选（进行中、已送达、失败）并查看该行：目标、检查、DIMSE 状态、耗时。",
+      "DIMSE 0x0000 表示归档报告所有子操作均已送达。"
+    ],
+    "help_copyJobs_wrong": [
+      "失败 0xA801：源归档不知道目标 AET。",
+      "失败 0xC000：归档无法处理该检查 — 请检查检查和目标。",
+      "复制后列表为空？Orthanc 只保留最近的任务（JobHistorySize）；重启后列表为空。"
+    ],
+    "helpButton": "这是什么？",
+    "helpIntro": "简明扼要：页面用途、如何操作，以及没有结果时怎么办。",
+    "helpWhat": "这是什么？",
+    "helpHow": "如何使用？",
+    "helpWrong": "如果出问题",
+    "i18nNote": "界面已翻译；详细帮助文本提供德语和英语版本（其余语言以英语补齐）。",
+    "help_studies_title": "检查 — 列表",
+    "help_studies_what": [
+      "本院 Orthanc 中的所有检查 — 当天的工作列表。",
+      "搜索覆盖患者、登记号和描述；多个词用逗号分隔会组合查询。"
+    ],
+    "help_studies_how": [
+      "输入搜索词（多个用逗号分隔），点击行查看详情。",
+      "可显示或隐藏列并调整宽度，设置会被保留。"
+    ],
+    "help_studies_wrong": [
+      "找不到？通常是筛选太窄 — 请重置。",
+      "刚采集的检查可能需要一点时间才会出现。"
+    ],
+    "help_studyDetail_title": "检查详情",
+    "help_studyDetail_what": [
+      "检查及其序列、图像和 DICOM 标签。",
+      "右侧按钮作用于整个检查。"
+    ],
+    "help_studyDetail_how": [
+      "点击序列查看图像；按钮用于发送、标记、编辑和匿名化。",
+      "活动日志会显示对该检查已执行的操作。"
+    ],
+    "help_studyDetail_wrong": [
+      "缺少图像？可能仍在传输 — 请查看状态。",
+      "匿名化和删除无法撤销。"
+    ],
+    "help_seriesDetail_title": "一个序列",
+    "help_seriesDetail_what": [
+      "序列是检查中的一个步骤，例如 CT 的平扫期。"
+    ],
+    "help_seriesDetail_how": [
+      "点击图像查看详情；上方按钮作用于整个序列。"
+    ],
+    "help_seriesDetail_wrong": [
+      "预览为空并非错误：有些格式无法在浏览器中显示。",
+      "即使没有预览，元数据也是完整的。"
+    ],
+    "help_instanceDetail_title": "一张图像",
+    "help_instanceDetail_what": [
+      "单张图像及其标签、传输语法和预览。"
+    ],
+    "help_instanceDetail_how": [
+      "用预览检查图像，用标签列表查询，用上方按钮操作。"
+    ],
+    "help_instanceDetail_wrong": [
+      "某些格式没有预览 — 元数据仍然完整。",
+      "删除单张图像会改变检查；无法撤销。"
+    ],
+    "help_upload_title": "上传",
+    "help_upload_what": [
+      "向此 Orthanc 导入文件：DICOM 文件夹、ZIP 压缩包或单个文件。"
+    ],
+    "help_upload_how": [
+      "将文件拖到此处或选择文件；进度按文件显示。",
+      "上传的检查会出现在检查列表中。"
+    ],
+    "help_upload_wrong": [
+      "较大的 ZIP 需要时间 — 请等待进度条。",
+      "重复项不会被替换；Orthanc 会作为第二个对象保存。"
+    ],
+    "help_activity_title": "活动",
+    "help_activity_what": [
+      "此安装中发生的事情：访问、上传、修改。",
+      "当有人问“谁动过这个检查？”时很有用。"
+    ],
+    "help_activity_how": [
+      "选择时间段和类型，点击行查看详情。",
+      "如需存档可导出为 CSV。"
+    ],
+    "help_activity_wrong": [
+      "什么都看不到？时间段太短 — 请扩大范围。"
+    ],
+    "help_auditLogs_title": "变更日志（此安装）",
+    "help_auditLogs_what": [
+      "谁在何时改了什么：匿名化、删除、发送。",
+      "与代理自身的变更日志相对应。"
+    ],
+    "help_auditLogs_how": [
+      "按操作或时间段筛选，打开行查看详情。"
+    ],
+    "help_auditLogs_wrong": [
+      "记录仅从本安装配置完成时开始存在。",
+      "未列出的操作不是通过此界面执行的。"
+    ],
+    "help_remoteSources_title": "远程来源",
+    "help_remoteSources_what": [
+      "此安装可查询的外部系统：DICOM 节点（Q/R）和 DICOMweb 服务器。"
+    ],
+    "help_remoteSources_how": [
+      "选择来源，输入搜索词，打开结果 — 或先测试连接。",
+      "通过“复制到”可将检查直接发送到另一个目标归档。"
+    ],
+    "help_remoteSources_wrong": [
+      "无响应？请检查主机、端口和对方的授权；测试按钮会提示缺少什么。",
+      "“DICOMweb”需要 URL，“DICOM Q/R”需要主机和端口。"
+    ],
+    "help_settings_title": "设置",
+    "help_settings_what": [
+      "此安装的全部配置：系统、模态、DICOMweb 服务器、对等端、查看器、外观。"
+    ],
+    "help_settings_how": [
+      "选择标签页，添加或修改条目并保存。",
+      "除标注“重启后生效”外，修改立即生效。"
+    ],
+    "help_settings_wrong": [
+      "设备无响应？先测试 echo，再检查主机、端口和 AE 标题。",
+      "标为“由环境设置”的项无法在此修改。"
+    ],
+    "help_worklists_title": "工作表",
+    "help_worklists_what": [
+      "RIS 的工作表 — 仅当此 Orthanc 安装了工作表插件时才可见。"
+    ],
+    "help_worklists_how": [
+      "选择列表，搜索患者，打开结果。"
+    ],
+    "help_worklists_wrong": [
+      "页面提示缺少插件？说明此处未安装。",
+      "模态仍会从 RIS 获取工作表。"
+    ],
+    "help_iid_title": "打开检查 (IID)",
+    "help_iid_what": [
+      "其他 RIS/KIS 直接跳转到检查的入口（IHE Invoke Image Display）。"
+    ],
+    "help_iid_how": [
+      "此页面供调用而非点击：条件匹配时会打开检查。"
+    ],
+    "help_iid_wrong": [
+      "报错说明请求不完整：需要 studyUID 或 accessionNumber（二者取其一）以及有效值。"
+    ]
+  },
+  "errors": {
+    "network": "无法连接服务器，请重试。",
+    "http400": "请求无效，请检查输入。",
+    "http401": "需要登录，请重新登录。",
+    "http403": "您没有执行此操作的权限。",
+    "http404": "未找到，可能已被删除。",
+    "http409": "与现有内容冲突（例如同名）。",
+    "http413": "文件过大。",
+    "http500": "服务器出错，请重试。",
+    "http502": "后端系统无响应。",
+    "http503": "服务暂时不可用，请稍后再试。",
+    "httpOther": "请求失败 ({{status}})。",
+    "unknown": "出现问题，请重试。",
+    "withRef": "{{message}}（参考：{{ref}}）",
+    "brokerNotConfigured": "此安装未配置 MWL 代理。"
   }
 }

@@ -10,7 +10,8 @@
     "collapse": "折りたたむ",
     "expand": "展開",
     "broker": "MWL ブローカー",
-    "auditLogs": "監査ログ"
+    "auditLogs": "監査ログ",
+    "copyJobs": "コピージョブ"
   },
   "settings": {
     "title": "設定",
@@ -65,7 +66,9 @@
       "traceDescription": "Full trace — logs every request and internal operation",
       "verbose": "Verbose",
       "verboseDescription": "Detailed logging — includes informational messages"
-    }
+    },
+    "peers": "ピア",
+    "saveModalityFailed": "モダリティを保存できませんでした"
   },
   "studies": {
     "title": "検査",
@@ -278,7 +281,8 @@
       "system": "システム"
     },
     "title": "Activity",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "actionFailed": "操作に失敗しました"
   },
   "remote": {
     "title": "リモートソース",
@@ -293,7 +297,22 @@
     "queryHint": "検索条件を入力し、照会をクリックしてリモートモダリティの検査を検索します。",
     "dicomwebServer": "DICOMwebサーバー",
     "testConnection": "接続テスト",
-    "dicomwebHint": "DICOMwebブラウザ — WADO-RS互換サーバーから検査を検索・取得します。"
+    "dicomwebHint": "DICOMwebブラウザ — WADO-RS互換サーバーから検査を検索・取得します。",
+    "actions": "操作",
+    "retrieve": "取得",
+    "retrieveAll": "すべて取得",
+    "copy": "コピー",
+    "copyAll": "すべてコピー",
+    "copyTarget": "コピー先",
+    "copyTargetNone": "— 宛先 —",
+    "copyTargetsEmpty": "宛先が設定されていません",
+    "copyNoTarget": "先に宛先を選択してください",
+    "copyStarted": "{{target}} へ C-MOVE を送信しました",
+    "copyFailed": "コピーに失敗しました (DIMSE {{status}})",
+    "copyFailedGeneric": "コピーに失敗しました",
+    "copySending": "送信中",
+    "studyDate": "検査日",
+    "studyDescription": "検査説明"
   },
   "actions": {
     "viewer": "ビューア",
@@ -305,7 +324,9 @@
     "openInOhif": "OHIFで開く",
     "label": "ラベル",
     "quarantine": "隔離",
-    "sendToPeer": "ピア"
+    "sendToPeer": "ピア",
+    "share": "共有リンク",
+    "more": "その他"
   },
   "common": {
     "save": "保存",
@@ -588,7 +609,12 @@
     "success": "シリーズをターゲットスタディに正常に移行しました",
     "error": "移行に失敗しました",
     "differentPatientWarning": "警告: 選択した移行先検査は別の患者のものです。移行するとこのシリーズはその患者に割り当てられます。",
-    "partialSuccess": "シリーズを移行しましたが、{{failed}} 件のインスタンスが失敗しました。"
+    "partialSuccess": "シリーズを移行しましたが、{{failed}} 件のインスタンスが失敗しました。",
+    "titleBulk": "{{count}} シリーズを移行",
+    "descriptionBulk": "{{count}} シリーズを対象の検査へ移動します。",
+    "seriesToMigrateBulk": "移行するシリーズ ({{count}})",
+    "migrateButtonBulk": "移行 ({{count}})",
+    "bulkSuccess": "{{count}} シリーズを対象の検査へ移行しました。"
   },
   "instanceMigrate": {
     "title": "インスタンスを移行",
@@ -694,7 +720,8 @@
       "bulkSuccess": "{{count}} 件の検査を隔離しました。",
       "partial": "{{total}} 件中 {{ok}} 件を隔離 — {{failed}} 件失敗。",
       "error": "隔離に失敗しました。"
-    }
+    },
+    "resetFilters": "絞り込みを解除"
   },
   "study": {
     "modifyTitle": "スタディタグを変更",
@@ -1045,7 +1072,12 @@
     "showAllStudiesForPatient": "Show all studies for this patient",
     "statistics": "Statistics",
     "studyInfo": "Study Info",
-    "sortBy": "並び替え"
+    "sortBy": "並び替え",
+    "apiView": "Orthanc API を開く",
+    "moreTitle": "その他の操作",
+    "moreHint": "あまり使わない操作 — すべて変更ログに記録されます。",
+    "deleteFailed": "検査を削除できませんでした",
+    "customButtonFailed": "カスタムボタンが失敗しました"
   },
   "broker": {
     "title": "MWL ブローカー",
@@ -2056,7 +2088,39 @@
     "configureInOrthancJson": "ピアは Orthanc 設定ファイルで設定できます。",
     "send": "送信",
     "sendSuccess": "ピア {{peer}} に正常に送信されました。",
-    "sendError": "ピアへの送信に失敗しました。"
+    "sendError": "ピアへの送信に失敗しました。",
+    "tabHint": "ピアは、この Orthanc が検査を送れる別の Orthanc です（HTTP、DICOM ではありません）。検査の「ピア」ボタンがこれを使います。",
+    "add": "ピアを追加",
+    "addTitle": "ピアを追加",
+    "editTitle": "ピア {{name}} を編集",
+    "formHint": "ピアは別の Orthanc です。送信すると画像は HTTP で転送されるため、受け側が許可している必要があります。",
+    "name": "名前",
+    "nameHint": "一覧での表示名 — 例: 拠点や診療科。",
+    "nameImmutable": "名前は変更できません。変更すると 2 つ目のピアができ、古いものが残ります。",
+    "url": "URL",
+    "urlHint": "相手の Orthanc のアドレス（例: http://pacs-kh:8042）— パスは不要です。",
+    "username": "ユーザー（任意）",
+    "password": "パスワード（任意）",
+    "credentialsHint": "相手が認証を要求する場合のみ。パスワードは Orthanc に保存され、再表示されません。",
+    "credentials": "認証情報",
+    "withCredentials": "ユーザーあり",
+    "withoutCredentials": "なし",
+    "actions": "操作",
+    "edit": "編集",
+    "remove": "削除",
+    "removeTitle": "ピア {{name}} を削除しますか?",
+    "removeHint": "送信済みの画像はそのまま残ります。一覧から宛先が消えるだけです。",
+    "removed": "ピア {{name}} を削除しました",
+    "removeFailed": "ピアを削除できませんでした",
+    "savedNew": "ピア {{name}} を追加しました",
+    "savedExisting": "ピア {{name}} を保存しました",
+    "saveFailed": "ピアを保存できませんでした",
+    "errName": "名前を入力してください。",
+    "errUrl": "URL を入力してください。",
+    "empty": "まだピアはありません。",
+    "emptyHint": "別の拠点や診療科の Orthanc を追加すると、そこへ検査を送れます。",
+    "buttonHint": "別の Orthanc へ HTTP で送信（DICOM の宛先ではありません）— 宛先は 設定 → ピア",
+    "addInSettings": "設定 → ピア で追加してください。"
   },
   "split": {
     "title": "検査の分割",
@@ -2069,7 +2133,13 @@
     "warningCut": "選択したシリーズはこの検査から削除され、新しい検査に移動します。",
     "confirm": "分割 ({{count}})",
     "success": "{{count}} 件のシリーズを新しい検査に正常に分割しました。",
-    "error": "検査の分割に失敗しました"
+    "error": "検査の分割に失敗しました",
+    "titleInstances": "画像を新しい検査へ分割",
+    "descriptionInstances": "選択した画像を新しい StudyInstanceUID の検査へ抽出します。",
+    "selectedInstances": "選択した画像",
+    "keepSourceInstances": "元の画像を残す（切り取りではなくコピー）",
+    "warningCutInstances": "選択した画像はこのシリーズから削除され、新しい検査へ移動します。",
+    "successInstances": "{{count}} 枚の画像を新しい検査へ分割しました。"
   },
   "moveToSeries": {
     "title": "インスタンスを別のシリーズへ移動",
@@ -2093,5 +2163,192 @@
     "partialFailure": "{{failed}} 件のインスタンスを移動できませんでした — 元のインスタンスは保持されています。",
     "deleteWarning": "{{count}} 件の元インスタンスを削除できませんでした。",
     "error": "移動に失敗しました"
+  },
+  "copyJobs": {
+    "title": "コピージョブ",
+    "subtitle": "このワークステーションからアーカイブへの C-MOVE 指示 — 検査ごとの状態と結果",
+    "filterAll": "すべて",
+    "stateRunning": "実行中",
+    "stateSuccess": "配信済み",
+    "stateFailed": "失敗",
+    "when": "時刻",
+    "source": "ソース",
+    "target": "宛先",
+    "study": "検査",
+    "state": "状態",
+    "dimse": "DIMSE",
+    "duration": "所要時間",
+    "empty": "まだコピー指示はありません。リモートソース → 宛先を選択 → 「コピー」。",
+    "emptyFiltered": "このフィルターにジョブはありません。",
+    "loading": "ジョブを読み込み中…",
+    "loadFailed": "ジョブを読み込めませんでした",
+    "hint": "一覧は Orthanc のジョブ履歴です — メモリ上に保持され、「JobHistorySize」で制限されます。"
+  },
+  "help": {
+    "help_copyJobs_title": "コピージョブ",
+    "help_copyJobs_what": [
+      "このワークステーションのコピー指示の一覧: どの検査を、どのアーカイブから、どの宛先アーカイブへ。",
+      "指示はソースアーカイブへの C-MOVE です。検査の配信はアーカイブが行います。"
+    ],
+    "help_copyJobs_how": [
+      "状態（実行中・配信済み・失敗）で絞り込み、行を確認します: 宛先、検査、DIMSE ステータス、所要時間。",
+      "DIMSE 0x0000 は、アーカイブがすべてのサブ操作を配信済みと報告したことを意味します。"
+    ],
+    "help_copyJobs_wrong": [
+      "0xA801 で失敗: 宛先 AET がソースアーカイブに登録されていません。",
+      "0xC000 で失敗: アーカイブが検査を処理できませんでした — 検査と宛先を確認してください。",
+      "コピーしたのに一覧が空? Orthanc は最近のジョブのみ保持します（JobHistorySize）。再起動後は空です。"
+    ],
+    "helpButton": "これは何ですか?",
+    "helpIntro": "簡潔に: このページの用途、操作方法、何も届かないときの対処。",
+    "helpWhat": "これは何?",
+    "helpHow": "どう使う?",
+    "helpWrong": "うまくいかないとき",
+    "i18nNote": "画面表示は翻訳済みです。詳細なヘルプ本文はドイツ語と英語で用意しています（英語が残りを補います）。",
+    "help_studies_title": "検査 — 一覧",
+    "help_studies_what": [
+      "この拠点の Orthanc にあるすべての検査 — その日の作業一覧です。",
+      "検索は患者名・受付番号・説明を対象にします。カンマ区切りの複数語は組み合わせます。"
+    ],
+    "help_studies_how": [
+      "検索語を入力し（複数はカンマ区切り）、行をクリックすると詳細が開きます。",
+      "列の表示・非表示と幅は調整でき、設定は保持されます。"
+    ],
+    "help_studies_wrong": [
+      "見つからない? たいてい絞り込みが強すぎます — リセットしてください。",
+      "撮影直後の検査は表示まで少し時間がかかることがあります。"
+    ],
+    "help_studyDetail_title": "検査の詳細",
+    "help_studyDetail_what": [
+      "検査とそのシリーズ、画像、DICOM タグ。",
+      "右側のボタンは検査全体に作用します。"
+    ],
+    "help_studyDetail_how": [
+      "シリーズをクリックすると画像が表示されます。ボタンで送信・ラベル・編集・匿名化ができます。",
+      "アクティビティログに、この検査に対して行われた操作が残ります。"
+    ],
+    "help_studyDetail_wrong": [
+      "画像が足りない? まだ転送中の可能性があります — 状態を確認してください。",
+      "匿名化と削除は元に戻せません。"
+    ],
+    "help_seriesDetail_title": "シリーズ",
+    "help_seriesDetail_what": [
+      "シリーズは検査内の 1 ステップです（例: CT の単純撮影）。"
+    ],
+    "help_seriesDetail_how": [
+      "画像をクリックすると詳細が開きます。上のボタンはシリーズ全体に作用します。"
+    ],
+    "help_seriesDetail_wrong": [
+      "プレビューが空でもエラーではありません。ブラウザで表示できない形式もあります。",
+      "メタデータはプレビューがなくても完全です。"
+    ],
+    "help_instanceDetail_title": "画像 1 枚",
+    "help_instanceDetail_what": [
+      "1 枚の画像と、そのタグ、転送構文、プレビュー。"
+    ],
+    "help_instanceDetail_how": [
+      "プレビューで画像を確認し、タグ一覧で調べ、上のボタンで操作します。"
+    ],
+    "help_instanceDetail_wrong": [
+      "一部の形式はプレビューできませんが、メタデータは完全です。",
+      "1 枚の削除でも検査が変わります。元に戻せません。"
+    ],
+    "help_upload_title": "アップロード",
+    "help_upload_what": [
+      "この Orthanc へのファイル取り込み: DICOM フォルダー、ZIP、単一ファイル。"
+    ],
+    "help_upload_how": [
+      "ここにドロップするか選択してください。進捗はファイルごとです。",
+      "取り込んだ検査は検査一覧に表示されます。"
+    ],
+    "help_upload_wrong": [
+      "大きな ZIP は時間がかかります — 進捗バーをお待ちください。",
+      "重複は置き換えられず、2 つ目のオブジェクトとして保存されます。"
+    ],
+    "help_activity_title": "アクティビティ",
+    "help_activity_what": [
+      "この環境で起きたこと: アクセス、アップロード、変更。",
+      "「誰がこの検査を触った?」と聞かれたときに便利です。"
+    ],
+    "help_activity_how": [
+      "期間と種類を選び、行をクリックすると詳細が開きます。",
+      "ファイルが必要なら CSV で書き出せます。"
+    ],
+    "help_activity_wrong": [
+      "何も表示されない? 期間が短すぎます — 広げてください。"
+    ],
+    "help_auditLogs_title": "変更ログ（この環境）",
+    "help_auditLogs_what": [
+      "誰が何をいつ変更したか: 匿名化、削除、送信。",
+      "ブローカー自身の変更ログと対になるものです。"
+    ],
+    "help_auditLogs_how": [
+      "操作や期間で絞り込み、行を開くと詳細が表示されます。"
+    ],
+    "help_auditLogs_wrong": [
+      "記録はこの環境を設定した時点からのみ存在します。",
+      "ここにない操作は、この画面からは行われていません。"
+    ],
+    "help_remoteSources_title": "リモートソース",
+    "help_remoteSources_what": [
+      "この環境が照会できる外部システム: DICOM ノード (Q/R) と DICOMweb サーバー。"
+    ],
+    "help_remoteSources_how": [
+      "ソースを選び、検索語を入力し、結果を開きます — 先に接続テストもできます。",
+      "「コピー先」で検査を別の保存先アーカイブへ直接送れます。"
+    ],
+    "help_remoteSources_wrong": [
+      "応答なし? ホスト、ポート、相手側の許可を確認してください。テストボタンが不足を教えます。",
+      "「DICOMweb」は URL が、「DICOM Q/R」はホストとポートが必要です。"
+    ],
+    "help_settings_title": "設定",
+    "help_settings_what": [
+      "この環境の設定すべて: システム、モダリティ、DICOMweb サーバー、ピア、ビューア、外観。"
+    ],
+    "help_settings_how": [
+      "タブを選び、項目を追加・変更して保存します。",
+      "「再起動後」とある箇所を除き、変更はすぐ有効になります。"
+    ],
+    "help_settings_wrong": [
+      "機器が応答しない? まず Echo を試し、次にホスト、ポート、AE タイトルを確認してください。",
+      "「環境変数で設定」と表示された項目はここでは変更できません。"
+    ],
+    "help_worklists_title": "ワークリスト",
+    "help_worklists_what": [
+      "RIS のワークリスト — この Orthanc にワークリストプラグインが入っている場合のみ表示されます。"
+    ],
+    "help_worklists_how": [
+      "リストを選び、患者を検索して結果を開きます。"
+    ],
+    "help_worklists_wrong": [
+      "プラグインがないと表示された場合は、インストールされていません。",
+      "モダリティは引き続き RIS からワークリストを受け取ります。"
+    ],
+    "help_iid_title": "検査を開く (IID)",
+    "help_iid_what": [
+      "別の RIS/KIS が検査へ直接ジャンプするための入口です (IHE Invoke Image Display)。"
+    ],
+    "help_iid_how": [
+      "このページはクリックではなく呼び出し用です。条件が合えば検査が開きます。"
+    ],
+    "help_iid_wrong": [
+      "エラーは要求の不足を意味します。studyUID か accessionNumber（どちらか一方）と有効な値が必要です。"
+    ]
+  },
+  "errors": {
+    "network": "サーバーに接続できません。もう一度お試しください。",
+    "http400": "リクエストが不正です。入力を確認してください。",
+    "http401": "ログインが必要です。再度サインインしてください。",
+    "http403": "この操作は許可されていません。",
+    "http404": "見つかりません。すでに削除された可能性があります。",
+    "http409": "既存の内容と競合します（例: 同じ名前）。",
+    "http413": "ファイルが大きすぎます。",
+    "http500": "サーバーでエラーが発生しました。もう一度お試しください。",
+    "http502": "背後のシステムが応答しません。",
+    "http503": "サービスは現在利用できません。後でもう一度お試しください。",
+    "httpOther": "リクエストに失敗しました ({{status}})。",
+    "unknown": "問題が発生しました。もう一度お試しください。",
+    "withRef": "{{message}} (参照: {{ref}})",
+    "brokerNotConfigured": "この環境では MWL ブローカーが設定されていません。"
   }
 }
