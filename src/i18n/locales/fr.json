@@ -312,7 +312,29 @@
     "copyFailedGeneric": "Échec de la copie",
     "copySending": "envoi en cours",
     "studyDate": "Date de l'examen",
-    "studyDescription": "Description de l'examen"
+    "studyDescription": "Description de l'examen",
+    "searchPlaceholder": "Rechercher : nom, ID patient, admission, date, modalité",
+    "searchParsed": "Envoyé comme :",
+    "searchHint": "Plusieurs mots forment le nom du patient (Muster Erika → MUSTER^ERIKA*), les nombres l'ID patient, lettres+chiffres l'admission, les dates avec année filtrent par date d'examen. Les préfixes name: id: acc: date: mod: forcent un champ.",
+    "searchIgnored": "Non utilisé : {{value}} — une date nécessite une année.",
+    "searchEmpty": "Saisissez un nom, un ID patient, une admission ou une date",
+    "searchKind": {
+      "name": "Nom",
+      "patientId": "ID patient",
+      "accession": "Admission",
+      "date": "Date",
+      "modality": "Modalité"
+    },
+    "searchFoundAs": "Trouvé comme {{kind}} : {{value}}",
+    "resultsCount": "{{count}} examens trouvés",
+    "querying": "Interrogation…",
+    "querySuccess": "{{count}} examens trouvés",
+    "queryFailed": "La requête C-FIND a échoué",
+    "selectModalityFirst": "Choisissez d'abord une modalité",
+    "echoSuccess": "C-ECHO réussi",
+    "echoFailed": "C-ECHO échoué",
+    "retrieveStarted": "Récupération lancée (C-MOVE)",
+    "retrieveFailed": "La récupération a échoué"
   },
   "actions": {
     "viewer": "Visionneuse",

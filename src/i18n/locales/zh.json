@@ -312,7 +312,29 @@
     "copyFailedGeneric": "复制失败",
     "copySending": "发送中",
     "studyDate": "检查日期",
-    "studyDescription": "检查描述"
+    "studyDescription": "检查描述",
+    "searchPlaceholder": "搜索：姓名、患者 ID、登记号、日期、模态",
+    "searchParsed": "发送为：",
+    "searchHint": "多个词组成患者姓名（Muster Erika → MUSTER^ERIKA*），数字作为患者 ID，字母+数字作为登记号，带年份的日期按检查日期筛选。前缀 name: id: acc: date: mod: 可强制指定字段。",
+    "searchIgnored": "未使用：{{value}} — 日期需要年份。",
+    "searchEmpty": "请输入姓名、患者 ID、登记号或日期",
+    "searchKind": {
+      "name": "姓名",
+      "patientId": "患者 ID",
+      "accession": "登记号",
+      "date": "日期",
+      "modality": "模态"
+    },
+    "searchFoundAs": "以{{kind}}找到：{{value}}",
+    "resultsCount": "找到 {{count}} 个检查",
+    "querying": "查询中…",
+    "querySuccess": "找到 {{count}} 个检查",
+    "queryFailed": "C-FIND 查询失败",
+    "selectModalityFirst": "请先选择模态",
+    "echoSuccess": "C-ECHO 成功",
+    "echoFailed": "C-ECHO 失败",
+    "retrieveStarted": "已开始取回 (C-MOVE)",
+    "retrieveFailed": "取回失败"
   },
   "actions": {
     "viewer": "查看器",

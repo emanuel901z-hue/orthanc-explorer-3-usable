@@ -30,6 +30,7 @@ import { retrieveModalityAction } from '@/actions/retrieveModality';
 import { getConfig } from '@/config/runtime';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
 import { describeCopyJob } from '@/features/servers/lib/copy-job';
+import { buildRemoteQuery } from '@/features/servers/lib/remote-query';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { usePersistedState, useRememberedState } from '@/store/ui-state';
@@ -80,9 +81,12 @@ export default function RemoteSourcesPage() {
     [jobs],
   );
   const [selectedServer, setSelectedServer] = usePersistedState('remoteSources.server', '');
-  const [queryPatientName, setQueryPatientName] = useRememberedState('remoteSources.queryPatientName', '');
-  const [queryPatientId, setQueryPatientId] = useRememberedState('remoteSources.queryPatientId', '');
-  const [queryAccession, setQueryAccession] = useRememberedState('remoteSources.queryAccession', '');
+  const [queryText, setQueryText] = useRememberedState('remoteSources.query', '');
+  // Was die Suchzeile bedeutet — sichtbar als Chips, damit niemand raten muss,
+  // warum ein Archiv nichts findet.
+  const plan = useMemo(() => buildRemoteQuery(queryText), [queryText]);
+  // Hinweis, wenn erst die zweite Deutung der Suche getroffen hat.
+  const [searchNote, setSearchNote] = useState<string | undefined>(undefined);
   const [querying, setQuerying] = useState(false);
   const [remoteStudies, setRemoteStudies] = useState<RemoteStudy[]>([]);
   const [echoLoading, setEchoLoading] = useState(false);
@@ -124,19 +128,37 @@ export default function RemoteSourcesPage() {
       toast.error(t('remote.selectModalityFirst', { defaultValue: 'Please select a modality first' }));
       return;
     }
+    if (plan.chips.length === 0) {
+      toast.error(t('remote.searchEmpty', { defaultValue: 'Enter a name, patient ID, accession number or date' }));
+      return;
+    }
     setQuerying(true);
     setRemoteStudies([]);
+    setSearchNote(undefined);
     try {
-      const query: Record<string, string> = {};
-      if (queryPatientName) query['PatientName'] = `*${queryPatientName}*`;
-      if (queryPatientId) query['PatientID'] = `*${queryPatientId}*`;
-      if (queryAccession) query['AccessionNumber'] = `*${queryAccession}*`;
-      query['StudyInstanceUID'] = '';
-
-      const result = await queryModalityAction(selectedModality, {
+      let result = await queryModalityAction(selectedModality, {
         Level: 'Study',
-        Query: query,
+        Query: plan.query,
       });
+
+      // Nichts gefunden? Bei mehrdeutigen Teilen (ACC-1, E2E) die zweite
+      // Deutung probieren — ein Archiv kann nur ein Attribut matchen.
+      for (const alternative of plan.alternatives) {
+        if (result.answers.length > 0) break;
+        const retry = await queryModalityAction(selectedModality, {
+          Level: 'Study',
+          Query: alternative.query,
+        });
+        if (retry.answers.length > 0) {
+          result = retry;
+          const kind = t(`remote.searchKind.${alternative.chip.kind}`, { defaultValue: alternative.chip.kind });
+          setSearchNote(t('remote.searchFoundAs', {
+            kind,
+            value: alternative.chip.value,
+            defaultValue: `Found as ${kind}: ${alternative.chip.value}`,
+          }));
+        }
+      }
 
       const studies: RemoteStudy[] = result.answers.map((ans) => {
         const tags = ans.tags;
@@ -316,18 +338,57 @@ export default function RemoteSourcesPage() {
             </CardContent>
           </Card>
 
-          {/* Search form */}
+          {/* Suchzeile: freier Text wird zur C-FIND-Abfrage */}
           <Card>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <Input placeholder={t('remote.patientName')} value={queryPatientName} onChange={(e) => setQueryPatientName(e.target.value)} className="h-9" />
-                <Input placeholder={t('remote.patientId')} value={queryPatientId} onChange={(e) => setQueryPatientId(e.target.value)} className="h-9" />
-                <Input placeholder={t('remote.accessionNumber')} value={queryAccession} onChange={(e) => setQueryAccession(e.target.value)} className="h-9" />
-                <Button className="gap-1.5" onClick={handleQuery} disabled={querying || !selectedModality}>
+            <CardContent className="p-4 space-y-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    className="h-9 pl-9"
+                    data-shortcut="search"
+                    aria-label={t('remote.searchPlaceholder', { defaultValue: 'Search: name, patient ID, accession, date, modality' })}
+                    placeholder={t('remote.searchPlaceholder', { defaultValue: 'Search: name, patient ID, accession, date, modality' })}
+                    value={queryText}
+                    onChange={(e) => setQueryText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') void handleQuery();
+                    }}
+                  />
+                </div>
+                <Button className="gap-1.5 h-9" onClick={handleQuery} disabled={querying || !selectedModality}>
                   {querying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                   {t('remote.query')}
                 </Button>
               </div>
+
+              {plan.chips.length > 0 && (
+                <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                  <span className="text-muted-foreground">{t('remote.searchParsed', { defaultValue: 'Sent as:' })}</span>
+                  {plan.chips.map((chip) => (
+                    <Badge key={`${chip.kind}-${chip.value}`} variant="secondary" className="font-normal">
+                      {t(`remote.searchKind.${chip.kind}`, { defaultValue: chip.kind })}: <span className="font-mono ml-1">{chip.value}</span>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {plan.ignored.length > 0 && (
+                <p className="text-xs text-destructive">
+                  {t('remote.searchIgnored', {
+                    value: plan.ignored.join(', '),
+                    defaultValue: 'Not used: {{value}} — a date needs a year.',
+                  })}
+                </p>
+              )}
+
+              {searchNote && (
+                <p className="text-xs text-muted-foreground">{searchNote}</p>
+              )}
+
+              <p className="text-xs text-muted-foreground">{t('remote.searchHint', {
+                defaultValue: 'Several words form the patient name (Muster Erika → MUSTER^ERIKA*), numbers become the patient ID, letters+digits the accession number, dates with a year filter by study date. Prefixes name: id: acc: date: mod: force a field.',
+              })}</p>
             </CardContent>
           </Card>
 

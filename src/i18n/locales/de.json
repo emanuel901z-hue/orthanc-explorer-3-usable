@@ -460,7 +460,29 @@
     "copyFailedGeneric": "Kopieren fehlgeschlagen",
     "copySending": "wird gesendet",
     "studyDate": "Studiendatum",
-    "studyDescription": "Studienbeschreibung"
+    "studyDescription": "Studienbeschreibung",
+    "searchPlaceholder": "Suche: Name, Patienten-ID, Zugangsnummer, Datum, Modalität",
+    "searchParsed": "Gesendet als:",
+    "searchHint": "Mehrere Wörter ergeben den Patientennamen (Muster Erika → MUSTER^ERIKA*), Zahlen die Patienten-ID, Buchstaben+Zahlen die Zugangsnummer, Datumsangaben mit Jahr das Studiendatum. Präfixe name: id: acc: date: mod: erzwingen ein Feld.",
+    "searchIgnored": "Nicht verwendet: {{value}} — ein Datum braucht ein Jahr.",
+    "searchEmpty": "Name, Patienten-ID, Zugangsnummer oder Datum eingeben",
+    "searchKind": {
+      "name": "Name",
+      "patientId": "Patienten-ID",
+      "accession": "Zugangsnummer",
+      "date": "Datum",
+      "modality": "Modalität"
+    },
+    "searchFoundAs": "Gefunden als {{kind}}: {{value}}",
+    "resultsCount": "{{count}} Studien gefunden",
+    "querying": "Abfrage läuft…",
+    "querySuccess": "{{count}} Studien gefunden",
+    "queryFailed": "C-FIND-Abfrage fehlgeschlagen",
+    "selectModalityFirst": "Bitte zuerst eine Modalität wählen",
+    "echoSuccess": "C-ECHO erfolgreich",
+    "echoFailed": "C-ECHO fehlgeschlagen",
+    "retrieveStarted": "Abruf gestartet (C-MOVE)",
+    "retrieveFailed": "Abruf fehlgeschlagen"
   },
   "copyJobs": {
     "title": "Kopieraufträge",

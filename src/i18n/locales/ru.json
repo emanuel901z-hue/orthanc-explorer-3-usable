@@ -401,7 +401,29 @@
     "copyFailedGeneric": "Ошибка копирования",
     "copySending": "отправка",
     "studyDate": "Дата исследования",
-    "studyDescription": "Описание исследования"
+    "studyDescription": "Описание исследования",
+    "searchPlaceholder": "Поиск: имя, ID пациента, номер доступа, дата, модальность",
+    "searchParsed": "Отправляется как:",
+    "searchHint": "Несколько слов образуют имя пациента (Muster Erika → MUSTER^ERIKA*), числа — ID пациента, буквы+цифры — номер доступа, даты с годом фильтруют по дате исследования. Префиксы name: id: acc: date: mod: задают поле принудительно.",
+    "searchIgnored": "Не использовано: {{value}} — дате нужен год.",
+    "searchEmpty": "Введите имя, ID пациента, номер доступа или дату",
+    "searchKind": {
+      "name": "Имя",
+      "patientId": "ID пациента",
+      "accession": "Номер доступа",
+      "date": "Дата",
+      "modality": "Модальность"
+    },
+    "searchFoundAs": "Найдено как {{kind}}: {{value}}",
+    "resultsCount": "Найдено исследований: {{count}}",
+    "querying": "Запрос…",
+    "querySuccess": "Найдено исследований: {{count}}",
+    "queryFailed": "Запрос C-FIND не выполнен",
+    "selectModalityFirst": "Сначала выберите модальность",
+    "echoSuccess": "C-ECHO успешно",
+    "echoFailed": "C-ECHO не выполнен",
+    "retrieveStarted": "Получение запущено (C-MOVE)",
+    "retrieveFailed": "Получение не выполнено"
   },
   "actions": {
     "viewer": "Просмотрщик",

@@ -460,7 +460,29 @@
     "copyFailedGeneric": "Copy failed",
     "copySending": "sending",
     "studyDate": "Study Date",
-    "studyDescription": "Study Description"
+    "studyDescription": "Study Description",
+    "searchPlaceholder": "Search: name, patient ID, accession, date, modality",
+    "searchParsed": "Sent as:",
+    "searchHint": "Several words form the patient name (Muster Erika → MUSTER^ERIKA*), numbers become the patient ID, letters+digits the accession number, dates with a year filter by study date. Prefixes name: id: acc: date: mod: force a field.",
+    "searchIgnored": "Not used: {{value}} — a date needs a year.",
+    "searchEmpty": "Enter a name, patient ID, accession number or date",
+    "searchKind": {
+      "name": "Name",
+      "patientId": "Patient ID",
+      "accession": "Accession",
+      "date": "Date",
+      "modality": "Modality"
+    },
+    "searchFoundAs": "Found as {{kind}}: {{value}}",
+    "resultsCount": "{{count}} studies found",
+    "querying": "Querying…",
+    "querySuccess": "{{count}} studies found",
+    "queryFailed": "C-FIND query failed",
+    "selectModalityFirst": "Please select a modality first",
+    "echoSuccess": "C-ECHO successful",
+    "echoFailed": "C-ECHO failed",
+    "retrieveStarted": "Retrieve started (C-MOVE)",
+    "retrieveFailed": "Retrieve failed"
   },
   "copyJobs": {
     "title": "Copy jobs",

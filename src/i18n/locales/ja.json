@@ -312,7 +312,29 @@
     "copyFailedGeneric": "コピーに失敗しました",
     "copySending": "送信中",
     "studyDate": "検査日",
-    "studyDescription": "検査説明"
+    "studyDescription": "検査説明",
+    "searchPlaceholder": "検索: 氏名、患者ID、受付番号、日付、モダリティ",
+    "searchParsed": "送信内容:",
+    "searchHint": "複数の語は患者名になります（Muster Erika → MUSTER^ERIKA*）。数字は患者ID、英字+数字は受付番号、年を含む日付は検査日で絞り込みます。接頭辞 name: id: acc: date: mod: で項目を固定できます。",
+    "searchIgnored": "未使用: {{value}} — 日付には年が必要です。",
+    "searchEmpty": "氏名、患者ID、受付番号、日付のいずれかを入力してください",
+    "searchKind": {
+      "name": "氏名",
+      "patientId": "患者ID",
+      "accession": "受付番号",
+      "date": "日付",
+      "modality": "モダリティ"
+    },
+    "searchFoundAs": "{{kind}} として見つかりました: {{value}}",
+    "resultsCount": "{{count}} 件の検査",
+    "querying": "照会中…",
+    "querySuccess": "{{count}} 件の検査が見つかりました",
+    "queryFailed": "C-FIND 照会に失敗しました",
+    "selectModalityFirst": "先にモダリティを選択してください",
+    "echoSuccess": "C-ECHO 成功",
+    "echoFailed": "C-ECHO 失敗",
+    "retrieveStarted": "取得を開始しました (C-MOVE)",
+    "retrieveFailed": "取得に失敗しました"
   },
   "actions": {
     "viewer": "ビューア",

@@ -312,7 +312,29 @@
     "copyFailedGeneric": "Error al copiar",
     "copySending": "enviando",
     "studyDate": "Fecha del estudio",
-    "studyDescription": "Descripción del estudio"
+    "studyDescription": "Descripción del estudio",
+    "searchPlaceholder": "Buscar: nombre, ID de paciente, admisión, fecha, modalidad",
+    "searchParsed": "Se envía como:",
+    "searchHint": "Varias palabras forman el nombre del paciente (Muster Erika → MUSTER^ERIKA*), los números la ID de paciente, letras+números la admisión, las fechas con año filtran por fecha del estudio. Los prefijos name: id: acc: date: mod: fuerzan un campo.",
+    "searchIgnored": "No usado: {{value}} — una fecha necesita año.",
+    "searchEmpty": "Introduzca nombre, ID de paciente, admisión o fecha",
+    "searchKind": {
+      "name": "Nombre",
+      "patientId": "ID de paciente",
+      "accession": "Admisión",
+      "date": "Fecha",
+      "modality": "Modalidad"
+    },
+    "searchFoundAs": "Encontrado como {{kind}}: {{value}}",
+    "resultsCount": "{{count}} estudios encontrados",
+    "querying": "Consultando…",
+    "querySuccess": "{{count}} estudios encontrados",
+    "queryFailed": "La consulta C-FIND falló",
+    "selectModalityFirst": "Seleccione primero una modalidad",
+    "echoSuccess": "C-ECHO correcto",
+    "echoFailed": "C-ECHO fallido",
+    "retrieveStarted": "Recuperación iniciada (C-MOVE)",
+    "retrieveFailed": "La recuperación falló"
   },
   "actions": {
     "viewer": "Visor",

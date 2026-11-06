@@ -401,7 +401,29 @@
     "copyFailedGeneric": "فشل النسخ",
     "copySending": "جارٍ الإرسال",
     "studyDate": "تاريخ الفحص",
-    "studyDescription": "وصف الفحص"
+    "studyDescription": "وصف الفحص",
+    "searchPlaceholder": "بحث: الاسم، معرّف المريض، رقم الدخول، التاريخ، الوسيط",
+    "searchParsed": "يُرسل كـ:",
+    "searchHint": "عدة كلمات تكوّن اسم المريض (Muster Erika → MUSTER^ERIKA*)، والأرقام معرّف المريض، والحروف+الأرقام رقم الدخول، والتواريخ مع السنة تُصفّي حسب تاريخ الفحص. البادئات name: id: acc: date: mod: تفرض الحقل.",
+    "searchIgnored": "غير مستخدم: {{value}} — التاريخ يحتاج سنة.",
+    "searchEmpty": "أدخل اسمًا أو معرّف مريض أو رقم دخول أو تاريخًا",
+    "searchKind": {
+      "name": "الاسم",
+      "patientId": "معرّف المريض",
+      "accession": "رقم الدخول",
+      "date": "التاريخ",
+      "modality": "الوسيط"
+    },
+    "searchFoundAs": "وُجد كـ {{kind}}: {{value}}",
+    "resultsCount": "تم العثور على {{count}} فحص",
+    "querying": "جارٍ الاستعلام…",
+    "querySuccess": "تم العثور على {{count}} فحص",
+    "queryFailed": "فشل استعلام C-FIND",
+    "selectModalityFirst": "اختر وسيطًا أولاً",
+    "echoSuccess": "نجح C-ECHO",
+    "echoFailed": "فشل C-ECHO",
+    "retrieveStarted": "بدأ الاسترجاع (C-MOVE)",
+    "retrieveFailed": "فشل الاسترجاع"
   },
   "actions": {
     "viewer": "العارض",

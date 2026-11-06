@@ -109,10 +109,11 @@ function copyJob(state: 'Running' | 'Success' | 'Failure', dimse = 0) {
   };
 }
 
-/** Modality pick (Radix stand-in) + query, so the results table exists. */
-async function queryStudies() {
+/** Modality pick (Radix stand-in) + search + query, so the results table exists. */
+async function queryStudies(search = 'MUSTERMANN') {
   const modalityButton = await screen.findByRole('button', { name: /ARCHIVE/ });
   fireEvent.click(modalityButton);
+  fireEvent.change(screen.getByLabelText(/search:|suche:/i), { target: { value: search } });
   fireEvent.click(screen.getByRole('button', { name: /^Query$|^Abfragen$/ }));
   await screen.findByText('MUSTERMANN^ERIKA');
 }
@@ -223,6 +224,42 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     await queryStudies();
 
     expect(screen.getByRole('option', { name: /no targets configured|keine ziele konfiguriert/i })).toBeInTheDocument();
+  });
+
+  it('zeigt, was aus der Suchzeile wird, und schickt alle Anzeigefelder mit', async () => {
+    configure([]);
+    renderPage();
+    await queryStudies('Muster 29.08.2026');
+
+    // Chips machen die Übersetzung sichtbar
+    expect(screen.getByText('MUSTER*')).toBeInTheDocument();
+    expect(screen.getByText('20260829')).toBeInTheDocument();
+
+    const [, params] = mockQuery.mock.calls[0];
+    // Das Ziel-PACS liefert nur zurück, was angefragt wurde — also alles anfragen
+    expect(params.Query).toMatchObject({
+      PatientName: 'MUSTER*',
+      StudyDate: '20260829',
+      PatientID: '',
+      StudyDescription: '',
+      AccessionNumber: '',
+      ModalitiesInStudy: '',
+      StudyInstanceUID: '',
+    });
+  });
+
+  it('probiert bei null Treffern die zweite Deutung und sagt es', async () => {
+    configure([]);
+    mockQuery.mockReset();
+    mockQuery
+      .mockResolvedValueOnce({ queryId: 'q-empty', answers: [] })
+      .mockResolvedValueOnce({ queryId: 'q-hit', answers: ANSWERS.answers });
+    renderPage();
+    await queryStudies('E2E');
+
+    expect(await screen.findByText('MUSTERMANN^ERIKA')).toBeInTheDocument();
+    expect(mockQuery).toHaveBeenCalledTimes(2);
+    expect(screen.getByText(/found as|gefunden als/i)).toBeInTheDocument();
   });
 
   it('prüft die gewählte Modalität automatisch per C-ECHO', async () => {

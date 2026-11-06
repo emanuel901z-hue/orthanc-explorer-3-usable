@@ -401,7 +401,29 @@
     "copyFailedGeneric": "Kopyalama başarısız",
     "copySending": "gönderiliyor",
     "studyDate": "İnceleme tarihi",
-    "studyDescription": "İnceleme açıklaması"
+    "studyDescription": "İnceleme açıklaması",
+    "searchPlaceholder": "Ara: ad, hasta ID, erişim numarası, tarih, modalite",
+    "searchParsed": "Gönderilen:",
+    "searchHint": "Birden çok kelime hasta adını oluşturur (Muster Erika → MUSTER^ERIKA*), sayılar hasta ID'sini, harf+sayı erişim numarasını, yıllı tarihler inceleme tarihini filtreler. name: id: acc: date: mod: önekleri alanı zorlar.",
+    "searchIgnored": "Kullanılmadı: {{value}} — tarih için yıl gerekir.",
+    "searchEmpty": "Ad, hasta ID, erişim numarası veya tarih girin",
+    "searchKind": {
+      "name": "Ad",
+      "patientId": "Hasta ID",
+      "accession": "Erişim no",
+      "date": "Tarih",
+      "modality": "Modalite"
+    },
+    "searchFoundAs": "{{kind}} olarak bulundu: {{value}}",
+    "resultsCount": "{{count}} inceleme bulundu",
+    "querying": "Sorgulanıyor…",
+    "querySuccess": "{{count}} inceleme bulundu",
+    "queryFailed": "C-FIND sorgusu başarısız",
+    "selectModalityFirst": "Önce bir modalite seçin",
+    "echoSuccess": "C-ECHO başarılı",
+    "echoFailed": "C-ECHO başarısız",
+    "retrieveStarted": "Getirme başladı (C-MOVE)",
+    "retrieveFailed": "Getirme başarısız"
   },
   "actions": {
     "viewer": "Görüntüleyici",
