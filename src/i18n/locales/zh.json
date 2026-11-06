@@ -347,7 +347,17 @@
     "detailTagName": "名称",
     "detailTagValue": "值",
     "detailLoading": "正在加载标签…",
-    "detailNoTags": "归档未返回该检查的标签。"
+    "detailNoTags": "归档未返回该检查的标签。",
+    "seriesTitle": "序列",
+    "seriesLoading": "正在加载序列…",
+    "seriesEmpty": "归档未返回该检查的序列。",
+    "seriesNumber": "编号",
+    "seriesDescription": "描述",
+    "seriesInstances": "图像",
+    "seriesSelect": "选择序列",
+    "selectNone": "无",
+    "retrieveSeriesCount": "取回 {{count}} 个序列",
+    "copySeriesCount": "复制 {{count}} 个序列"
   },
   "actions": {
     "viewer": "查看器",

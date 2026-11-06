@@ -436,7 +436,17 @@
     "detailTagName": "Ad",
     "detailTagValue": "Değer",
     "detailLoading": "Etiketler yükleniyor…",
-    "detailNoTags": "Arşiv bu inceleme için etiket döndürmedi."
+    "detailNoTags": "Arşiv bu inceleme için etiket döndürmedi.",
+    "seriesTitle": "Seriler",
+    "seriesLoading": "Seriler yükleniyor…",
+    "seriesEmpty": "Arşiv bu inceleme için seri döndürmedi.",
+    "seriesNumber": "No",
+    "seriesDescription": "Açıklama",
+    "seriesInstances": "Görüntü",
+    "seriesSelect": "Seriyi seç",
+    "selectNone": "Hiçbiri",
+    "retrieveSeriesCount": "{{count}} seriyi getir",
+    "copySeriesCount": "{{count}} seriyi kopyala"
   },
   "actions": {
     "viewer": "Görüntüleyici",

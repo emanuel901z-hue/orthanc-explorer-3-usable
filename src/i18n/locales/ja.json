@@ -347,7 +347,17 @@
     "detailTagName": "名前",
     "detailTagValue": "値",
     "detailLoading": "タグを読み込み中…",
-    "detailNoTags": "この検査のタグは返されませんでした。"
+    "detailNoTags": "この検査のタグは返されませんでした。",
+    "seriesTitle": "シリーズ",
+    "seriesLoading": "シリーズを読み込み中…",
+    "seriesEmpty": "この検査のシリーズは返されませんでした。",
+    "seriesNumber": "番号",
+    "seriesDescription": "説明",
+    "seriesInstances": "画像",
+    "seriesSelect": "シリーズを選択",
+    "selectNone": "なし",
+    "retrieveSeriesCount": "{{count}} シリーズを取得",
+    "copySeriesCount": "{{count}} シリーズをコピー"
   },
   "actions": {
     "viewer": "ビューア",

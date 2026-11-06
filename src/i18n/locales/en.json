@@ -495,7 +495,21 @@
     "detailTagName": "Name",
     "detailTagValue": "Value",
     "detailLoading": "Loading tags…",
-    "detailNoTags": "The archive returned no tags for this study."
+    "detailNoTags": "The archive returned no tags for this study.",
+    "seriesTitle": "Series",
+    "seriesLoading": "Loading series…",
+    "seriesEmpty": "The archive returned no series for this study.",
+    "seriesNumber": "No.",
+    "seriesDescription": "Description",
+    "seriesInstances": "Images",
+    "seriesSelect": "Select series",
+    "selectNone": "None",
+    "retrieveSeriesCount": "Retrieve {{count}} series",
+    "copySeriesCount": "Copy {{count}} series",
+    "retrieveSeriesCount_one": "Retrieve {{count}} series",
+    "retrieveSeriesCount_other": "Retrieve {{count}} series",
+    "copySeriesCount_one": "Copy {{count}} series",
+    "copySeriesCount_other": "Copy {{count}} series"
   },
   "copyJobs": {
     "title": "Copy jobs",

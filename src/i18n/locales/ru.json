@@ -436,7 +436,17 @@
     "detailTagName": "Имя",
     "detailTagValue": "Значение",
     "detailLoading": "Загрузка тегов…",
-    "detailNoTags": "Архив не вернул теги для этого исследования."
+    "detailNoTags": "Архив не вернул теги для этого исследования.",
+    "seriesTitle": "Серии",
+    "seriesLoading": "Загрузка серий…",
+    "seriesEmpty": "Архив не вернул серии для этого исследования.",
+    "seriesNumber": "№",
+    "seriesDescription": "Описание",
+    "seriesInstances": "Снимки",
+    "seriesSelect": "Выбрать серию",
+    "selectNone": "Нет",
+    "retrieveSeriesCount": "Получить серий: {{count}}",
+    "copySeriesCount": "Копировать серий: {{count}}"
   },
   "actions": {
     "viewer": "Просмотрщик",

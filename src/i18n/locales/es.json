@@ -347,7 +347,17 @@
     "detailTagName": "Nombre",
     "detailTagValue": "Valor",
     "detailLoading": "Cargando etiquetas…",
-    "detailNoTags": "El archivo no devolvió etiquetas para este estudio."
+    "detailNoTags": "El archivo no devolvió etiquetas para este estudio.",
+    "seriesTitle": "Series",
+    "seriesLoading": "Cargando series…",
+    "seriesEmpty": "El archivo no devolvió series para este estudio.",
+    "seriesNumber": "N.º",
+    "seriesDescription": "Descripción",
+    "seriesInstances": "Imágenes",
+    "seriesSelect": "Seleccionar serie",
+    "selectNone": "Ninguna",
+    "retrieveSeriesCount": "Recuperar {{count}} series",
+    "copySeriesCount": "Copiar {{count}} series"
   },
   "actions": {
     "viewer": "Visor",

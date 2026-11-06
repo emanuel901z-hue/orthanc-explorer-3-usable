@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import RemoteSourcesPage from './RemoteSourcesPage';
@@ -7,9 +7,10 @@ import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
 import '@/i18n';
 
-const { mockQuery, mockRetrieve, mockToast, mockEcho, mockJobs } = vi.hoisted(() => ({
+const { mockQuery, mockRetrieve, mockMove, mockToast, mockEcho, mockJobs } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
   mockRetrieve: vi.fn(),
+  mockMove: vi.fn(),
   mockToast: { success: vi.fn(), error: vi.fn() },
   mockEcho: vi.fn(),
   mockJobs: vi.fn(),
@@ -47,6 +48,7 @@ vi.mock('@/api/queries', () => ({
   },
 }));
 vi.mock('@/actions/retrieveModality', () => ({ retrieveModalityAction: mockRetrieve }));
+vi.mock('@/actions/moveResources', () => ({ moveResourcesAction: mockMove }));
 
 // Radix Select does not open in jsdom; the page only needs a control that
 // hands a value to onValueChange, so a native stand-in is enough here.
@@ -133,7 +135,27 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     useSessionUiStore.setState({ values: {} });
     window.localStorage.clear();
     vi.clearAllMocks();
-    mockQuery.mockResolvedValue(ANSWERS);
+    // Studien-Abfrage liefert die Treffer, Serien-Abfrage (Detail-Dialog) eine Serie
+    mockQuery.mockImplementation((_modality: string, params: { Level?: string }) =>
+      Promise.resolve(
+        params?.Level === 'Series'
+          ? {
+              queryId: 'q-series',
+              answers: [{
+                index: 0,
+                tags: {
+                  SeriesInstanceUID: '1.2.3.1',
+                  SeriesDescription: 'axial',
+                  Modality: 'CT',
+                  SeriesNumber: '2',
+                  NumberOfSeriesRelatedInstances: '10',
+                },
+              }],
+            }
+          : ANSWERS,
+      ),
+    );
+    mockMove.mockResolvedValue({ ID: 'job-series' });
     mockEcho.mockResolvedValue({});
     mockJobs.mockReturnValue({ data: [], isLoading: false, isError: false });
   });
@@ -401,6 +423,47 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     // Tag-Tabelle aus der Antwort des Archivs
     expect(await screen.findByText('PatientName')).toBeInTheDocument();
     expect(screen.getByText('0010,0010')).toBeInTheDocument();
+  });
+
+  it('zeigt im Detail die Serien und kopiert nur die ausgewählten', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    renderPage();
+    await queryStudies('Muster');
+
+    fireEvent.click(screen.getAllByTestId('remote-study-row')[0]);
+
+    const dialog = await screen.findByRole('dialog');
+    expect(await within(dialog).findByText('axial')).toBeInTheDocument();
+    expect(within(dialog).getByText('10')).toBeInTheDocument();
+
+    // Ziel direkt im Dialog wählen
+    fireEvent.change(within(dialog).getByLabelText(/copy to|kopieren nach/i), { target: { value: 'hst_burn2CD' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: /Copy 1 series|1 Serien kopieren/i }));
+
+    await waitFor(() => expect(mockMove).toHaveBeenCalled());
+    expect(mockMove).toHaveBeenCalledWith(
+      'ARCHIVE',
+      'Series',
+      [{ StudyInstanceUID: '1.2.3', SeriesInstanceUID: '1.2.3.1' }],
+      { targetAet: 'hst_burn2CD', asynchronous: true },
+    );
+  });
+
+  it('überträgt bei abgewählten Serien die ganze Studie', async () => {
+    configure([]);
+    mockRetrieve.mockResolvedValue({ Description: 'ok' });
+    renderPage();
+    await queryStudies('Muster');
+
+    fireEvent.click(screen.getAllByTestId('remote-study-row')[0]);
+    const dialog = await screen.findByRole('dialog');
+    await within(dialog).findByText('axial');
+
+    fireEvent.click(within(dialog).getByRole('button', { name: /^None$|^Keine$/ }));
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Retrieve$|^Abrufen$/ }));
+
+    await waitFor(() => expect(mockRetrieve).toHaveBeenCalled());
+    expect(mockMove).not.toHaveBeenCalled();
   });
 
   it('klickt beim Abrufen in der Zeile nicht die Detailansicht auf', async () => {

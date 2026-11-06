@@ -436,7 +436,17 @@
     "detailTagName": "الاسم",
     "detailTagValue": "القيمة",
     "detailLoading": "جارٍ تحميل الوسوم…",
-    "detailNoTags": "لم يُرجع الأرشيف وسومًا لهذا الفحص."
+    "detailNoTags": "لم يُرجع الأرشيف وسومًا لهذا الفحص.",
+    "seriesTitle": "السلاسل",
+    "seriesLoading": "جارٍ تحميل السلاسل…",
+    "seriesEmpty": "لم يُرجع الأرشيف سلاسل لهذا الفحص.",
+    "seriesNumber": "رقم",
+    "seriesDescription": "الوصف",
+    "seriesInstances": "الصور",
+    "seriesSelect": "تحديد السلسلة",
+    "selectNone": "لا شيء",
+    "retrieveSeriesCount": "استرجاع {{count}} سلسلة",
+    "copySeriesCount": "نسخ {{count}} سلسلة"
   },
   "actions": {
     "viewer": "العارض",

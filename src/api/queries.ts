@@ -80,6 +80,28 @@ export const queriesApi = {
           }),
     }),
 
+  /** POST /modalities/:name/move — C-MOVE für beliebige Ressourcen (Studie oder
+   *  einzelne Serien). Ohne TargetAet holt Orthanc in sich selbst; mit
+   *  TargetAet stellt das Quellarchiv direkt an das Ziel zu.
+   *  Mehrere Serien in EINEM Auftrag → ein Job, ein Status. */
+  moveResources: (
+    modalityName: string,
+    level: 'Study' | 'Series',
+    resources: Record<string, string>[],
+    options: { targetAet?: string; asynchronous?: boolean; timeoutSeconds?: number } = {},
+  ) =>
+    orthancFetch<Record<string, unknown>>(`/modalities/${encodeURIComponent(modalityName)}/move`, {
+      method: 'POST',
+      headers: JSON_CONTENT_HEADERS,
+      body: JSON.stringify({
+        Level: level,
+        Resources: resources,
+        ...(options.targetAet ? { TargetAet: options.targetAet } : {}),
+        Timeout: options.timeoutSeconds ?? 300,
+        Asynchronous: options.asynchronous === true,
+      }),
+    }),
+
   /** DELETE /queries/:id — Removes the temporary query resource from Orthanc memory. */
   delete: (queryId: string) =>
     orthancFetch<void>(`/queries/${queryId}`, { method: 'DELETE' }),

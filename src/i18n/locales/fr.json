@@ -347,7 +347,17 @@
     "detailTagName": "Nom",
     "detailTagValue": "Valeur",
     "detailLoading": "Chargement des tags…",
-    "detailNoTags": "L'archive n'a renvoyé aucun tag pour cet examen."
+    "detailNoTags": "L'archive n'a renvoyé aucun tag pour cet examen.",
+    "seriesTitle": "Séries",
+    "seriesLoading": "Chargement des séries…",
+    "seriesEmpty": "L'archive n'a renvoyé aucune série pour cet examen.",
+    "seriesNumber": "N°",
+    "seriesDescription": "Description",
+    "seriesInstances": "Images",
+    "seriesSelect": "Sélectionner la série",
+    "selectNone": "Aucune",
+    "retrieveSeriesCount": "Récupérer {{count}} séries",
+    "copySeriesCount": "Copier {{count}} séries"
   },
   "actions": {
     "viewer": "Visionneuse",

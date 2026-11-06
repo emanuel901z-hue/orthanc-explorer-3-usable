@@ -495,7 +495,21 @@
     "detailTagName": "Name",
     "detailTagValue": "Wert",
     "detailLoading": "Lade Tags…",
-    "detailNoTags": "Das Archiv hat zu dieser Studie keine Tags geliefert."
+    "detailNoTags": "Das Archiv hat zu dieser Studie keine Tags geliefert.",
+    "seriesTitle": "Serien",
+    "seriesLoading": "Lade Serien…",
+    "seriesEmpty": "Das Archiv hat zu dieser Studie keine Serien geliefert.",
+    "seriesNumber": "Nr.",
+    "seriesDescription": "Beschreibung",
+    "seriesInstances": "Bilder",
+    "seriesSelect": "Serie auswählen",
+    "selectNone": "Keine",
+    "retrieveSeriesCount": "{{count}} Serien abrufen",
+    "copySeriesCount": "{{count}} Serien kopieren",
+    "retrieveSeriesCount_one": "{{count}} Serie abrufen",
+    "retrieveSeriesCount_other": "{{count}} Serien abrufen",
+    "copySeriesCount_one": "{{count}} Serie kopieren",
+    "copySeriesCount_other": "{{count}} Serien kopieren"
   },
   "copyJobs": {
     "title": "Kopieraufträge",

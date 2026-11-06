@@ -43,6 +43,7 @@ import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-serv
 import { modalitiesApi } from '@/api/modalities';
 import { queryModalityAction } from '@/actions/queryModality';
 import { retrieveModalityAction } from '@/actions/retrieveModality';
+import { moveResourcesAction } from '@/actions/moveResources';
 import { getConfig } from '@/config/runtime';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
 import { describeCopyJob } from '@/features/servers/lib/copy-job';
@@ -54,7 +55,7 @@ import {
   type RemoteSortKey,
   type RemoteStudy,
 } from '@/features/servers/lib/remote-study';
-import RemoteStudyDetailDialog from '@/features/servers/components/RemoteStudyDetailDialog';
+import RemoteStudyDetailDialog, { type RemoteSeries } from '@/features/servers/components/RemoteStudyDetailDialog';
 import { formatDicomDate } from '@/lib/dicom-date';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -292,6 +293,37 @@ export default function RemoteSourcesPage() {
       toast.success(t('remote.copyStarted', { target: selectedTarget, defaultValue: `C-MOVE to ${selectedTarget} sent` }));
     } catch {
       patchStudy(study, { copying: false });
+      toast.error(t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' }));
+    }
+  };
+
+  /** Serien eines Auftrags — ein C-MOVE für alle ausgewählten Serien. */
+  const handleSeriesMove = async (study: RemoteStudy, series: RemoteSeries[], targetAet?: string) => {
+    if (series.length === 0) return;
+    if (targetAet && !selectedTarget) {
+      toast.error(t('remote.copyNoTarget', { defaultValue: 'Choose a target first' }));
+      return;
+    }
+    patchStudy(study, { copying: true, copyJobId: undefined });
+    try {
+      const result = await moveResourcesAction(
+        selectedModality,
+        'Series',
+        series.map((entry) => ({
+          StudyInstanceUID: study.studyInstanceUid,
+          SeriesInstanceUID: entry.seriesInstanceUid,
+        })),
+        { targetAet, asynchronous: true },
+      );
+      const jobId = typeof result.ID === 'string' ? result.ID : undefined;
+      patchStudy(study, { copying: false, copyJobId: targetAet ? jobId : undefined, retrieved: !targetAet });
+      toast.success(
+        targetAet
+          ? t('remote.copyStarted', { target: targetAet, defaultValue: `C-MOVE to ${targetAet} sent` })
+          : t('remote.retrieveStarted', { defaultValue: 'Retrieve started (C-MOVE)' }),
+      );
+    } catch {
+      patchStudy(study, { copying: false, error: true });
       toast.error(t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' }));
     }
   };
@@ -722,12 +754,21 @@ export default function RemoteSourcesPage() {
           if (!open) setDetail(null);
         }}
         locale={locale}
+        modality={selectedModality}
+        targets={copyTargets.flatMap((target) => (target.aet ? [{ aet: target.aet, label: target.label }] : []))}
         targetAet={selectedTarget}
-        onRetrieve={(study) => {
+        onTargetChange={setSelectedTarget}
+        onRetrieveStudy={(study) => {
           void handleRetrieve(study);
         }}
-        onCopy={(study) => {
+        onCopyStudy={(study) => {
           void handleCopy(study);
+        }}
+        onRetrieveSeries={(study, series) => {
+          void handleSeriesMove(study, series);
+        }}
+        onCopySeries={(study, series) => {
+          void handleSeriesMove(study, series, selectedTarget);
         }}
       />
     </div>
