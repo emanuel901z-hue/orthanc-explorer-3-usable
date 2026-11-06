@@ -187,14 +187,22 @@ export function candidatesFor(text: string): RemoteQueryKind[] {
   return ['name'];
 }
 
-/** DICOM-Personennamen: Teile mit `^`, Präfix-Suche mit `*`. */
+/**
+ * DICOM-Personennamen: Teile mit `^`, jeder Teil als Präfix-Suche.
+ *
+ * `mumm man` → `MUMM*^MAN*` — so findet man „mummelthei^manuel“, ohne alles
+ * auszuschreiben. Ein `%` wird zu `*`: manche Häuser tippen das Prozentzeichen,
+ * DICOM kennt aber nur `*` und `?`.
+ */
 function personName(parts: string[]): string {
   const cleaned = parts
-    .map((part) => part.replace(/\s+/g, '').replace(/,+$/, ''))
+    .map((part) => part.replace(/\s+/g, '').replace(/,+$/, '').replace(/%/g, '*'))
     .filter(Boolean);
   if (cleaned.length === 0) return '';
-  const joined = cleaned.join('^').toUpperCase();
-  return /[*?]$/.test(joined) ? joined : `${joined}*`;
+  return cleaned
+    .map((part) => (/[*?]$/.test(part) ? part : `${part}*`))
+    .join('^')
+    .toUpperCase();
 }
 
 type Token = { text: string; kind?: RemoteQueryKind };
@@ -223,6 +231,8 @@ const PREFIXES: Record<string, RemoteQueryKind> = {
 };
 
 function classify(raw: string): Token {
+  // Prozentzeichen als Wildcard: manche Häuser tippen so
+  raw = raw.replace(/%/g, '*');
   const prefix = /^([A-Za-zäöü]+):(.*)$/.exec(raw);
   if (prefix) {
     const kind = PREFIXES[prefix[1].toLowerCase()];

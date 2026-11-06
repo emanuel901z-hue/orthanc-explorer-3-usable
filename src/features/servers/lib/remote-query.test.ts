@@ -66,14 +66,14 @@ describe('buildRemoteQuery — der Alltag: Nachname,Vorname,Geburtsdatum', () =>
   it('baut aus Muster,Erika,030626 die Abfrage', () => {
     const plan = buildRemoteQuery('Muster,Erika,030626');
 
-    expect(plan.query.PatientName).toBe('MUSTER^ERIKA*');
+    expect(plan.query.PatientName).toBe('MUSTER*^ERIKA*');
     expect(plan.query.PatientBirthDate).toBe('20260603');
     expect(plan.chips.map((chip) => chip.kind)).toEqual(['name', 'birthDate']);
   });
 
   it('akzeptiert auch Leerzeichen statt Kommas', () => {
     const plan = buildRemoteQuery('Muster Erika 020592');
-    expect(plan.query.PatientName).toBe('MUSTER^ERIKA*');
+    expect(plan.query.PatientName).toBe('MUSTER*^ERIKA*');
     expect(plan.query.PatientBirthDate).toBe('19920502');
   });
 
@@ -110,8 +110,8 @@ describe('buildRemoteQuery — der Alltag: Nachname,Vorname,Geburtsdatum', () =>
   });
 
   it('verbindet Vor- und Nachnamen mit ^', () => {
-    expect(buildRemoteQuery('Muster Erika').query.PatientName).toBe('MUSTER^ERIKA*');
-    expect(buildRemoteQuery('Muster, Erika').query.PatientName).toBe('MUSTER^ERIKA*');
+    expect(buildRemoteQuery('Muster Erika').query.PatientName).toBe('MUSTER*^ERIKA*');
+    expect(buildRemoteQuery('Muster, Erika').query.PatientName).toBe('MUSTER*^ERIKA*');
   });
 
   it('lässt vorhandene Platzhalter unangetastet', () => {
@@ -234,7 +234,7 @@ describe('buildRemoteQuery — Position nach dem Komma', () => {
   it('liest Müller,Paul,030847,MRT,07.08.2026 positional', () => {
     const plan = buildRemoteQuery('müller,paul,030847,mrt,07.08.2026');
 
-    expect(plan.query.PatientName).toBe('MÜLLER^PAUL*');
+    expect(plan.query.PatientName).toBe('MÜLLER*^PAUL*');
     expect(plan.query.PatientBirthDate).toBe('19470803');
     expect(plan.query.StudyDescription).toBe('*MRT*');
     expect(plan.query.StudyDate).toBe('20260807');
@@ -249,7 +249,7 @@ describe('buildRemoteQuery — Position nach dem Komma', () => {
   it('nimmt an Position 6 die Zugangsnummer und an 7 die Modalität', () => {
     const plan = buildRemoteQuery('Muster,Erika,020592,MRT Schädel,07.08.2026,ACC-17,MR');
     expect(plan.query).toMatchObject({
-      PatientName: 'MUSTER^ERIKA*',
+      PatientName: 'MUSTER*^ERIKA*',
       PatientBirthDate: '19920502',
       StudyDescription: '*MRT SCHÄDEL*',
       StudyDate: '20260807',
@@ -288,7 +288,7 @@ describe('buildRemoteQuery — leere Felder halten die Position', () => {
   it('überspringt die Beschreibung mit einem leeren Feld', () => {
     const plan = buildRemoteQuery('müller,paul,030847,,07.08.2026');
 
-    expect(plan.query.PatientName).toBe('MÜLLER^PAUL*');
+    expect(plan.query.PatientName).toBe('MÜLLER*^PAUL*');
     expect(plan.query.PatientBirthDate).toBe('19470803');
     expect(plan.query.StudyDescription).toBe('');
     expect(plan.query.StudyDate).toBe('20260807');
@@ -303,7 +303,7 @@ describe('buildRemoteQuery — leere Felder halten die Position', () => {
 
   it('ignoriert ein abschließendes Komma', () => {
     const plan = buildRemoteQuery('müller,paul,');
-    expect(plan.query.PatientName).toBe('MÜLLER^PAUL*');
+    expect(plan.query.PatientName).toBe('MÜLLER*^PAUL*');
     expect(plan.chips).toHaveLength(1);
   });
 
@@ -318,5 +318,26 @@ describe('buildRemoteQuery — leere Felder halten die Position', () => {
     const plan = buildRemoteQuery('müller,paul,030847,,,ACC-17');
     expect(plan.query.AccessionNumber).toBe('ACC-17');
     expect(plan.query.StudyDate).toBe('');
+  });
+});
+
+describe('buildRemoteQuery — unvollständige Namen', () => {
+  it('macht aus jedem Namensteil eine Präfix-Suche', () => {
+    // so findet man „mummelthei^manuel“, ohne alles auszuschreiben
+    expect(buildRemoteQuery('mumm man').query.PatientName).toBe('MUMM*^MAN*');
+  });
+
+  it('lässt mitgegebene Platzhalter stehen', () => {
+    expect(buildRemoteQuery('mumm*^man*').query.PatientName).toBe('MUMM*^MAN*');
+    expect(buildRemoteQuery('mumm* man').query.PatientName).toBe('MUMM*^MAN*');
+  });
+
+  it('versteht das Prozentzeichen als Wildcard', () => {
+    expect(buildRemoteQuery('mumm% man%').query.PatientName).toBe('MUMM*^MAN*');
+    expect(buildRemoteQuery('mumm%').query.PatientName).toBe('MUMM*');
+  });
+
+  it('ergänzt nur, wo kein Platzhalter steht', () => {
+    expect(buildRemoteQuery('mu?ler man').query.PatientName).toBe('MU?LER*^MAN*');
   });
 });

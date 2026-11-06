@@ -451,7 +451,14 @@ function ModalityMobileCard({
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={isEchoing} onClick={() => onEcho(name)}>
               {isEchoing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => onEdit(modality)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              disabled={!config}
+              title={config ? undefined : t('modality.loadingConfig', { defaultValue: 'Loading configuration…' })}
+              onClick={() => onEdit(modality)}
+            >
               <Pencil className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => onDelete(name)}>
