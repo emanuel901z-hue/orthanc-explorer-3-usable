@@ -33,7 +33,7 @@ function StatusCell({ job }: { job: CopyJobView }) {
     return (
       <Badge variant="secondary" className="gap-1">
         <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-        {t('copyJobs.stateSuccess', { defaultValue: 'delivered' })}
+        {t('copyJobs.stateSuccess', { defaultValue: 'delivered cleanly' })}
       </Badge>
     );
   }
@@ -141,7 +141,7 @@ export default function CopyJobsPage() {
                   <TableHead className="w-[140px]">{t('copyJobs.target', { defaultValue: 'Target' })}</TableHead>
                   <TableHead>{t('copyJobs.study', { defaultValue: 'Study' })}</TableHead>
                   <TableHead className="w-[150px]">{t('copyJobs.state', { defaultValue: 'Status' })}</TableHead>
-                  <TableHead className="w-[200px]">{t('copyJobs.dimse', { defaultValue: 'DIMSE' })}</TableHead>
+                  <TableHead className="w-[230px]">{t('copyJobs.dimse', { defaultValue: 'DIMSE' })}</TableHead>
                   <TableHead className="w-[90px]">{t('copyJobs.duration', { defaultValue: 'Duration' })}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -170,11 +170,10 @@ export default function CopyJobsPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell
-                      className="text-sm font-mono"
-                      title={t(`copyJobs.dimseMeaning.${job.dimseKey}`, { defaultValue: job.dimseStatus ?? '' })}
-                    >
-                      {job.dimseStatus ?? '—'}
+                    <TableCell className="text-sm">
+                      {/* Klartext zuerst — Hex-Codes kann im Alltag niemand lesen */}
+                      <div>{t(`copyJobs.dimseMeaning.${job.dimseKey}`, { defaultValue: job.dimseStatus ?? '—' })}</div>
+                      <div className="text-xs font-mono text-muted-foreground">{job.dimseStatus ?? ''}</div>
                     </TableCell>
                     <TableCell className="text-sm whitespace-nowrap">{formatDuration(job.durationSeconds)}</TableCell>
                   </TableRow>
@@ -184,6 +183,12 @@ export default function CopyJobsPage() {
           </CardContent>
         )}
       </Card>
+
+      <p className="text-xs text-muted-foreground">
+        {t('copyJobs.dimseLegend', {
+          defaultValue: 'DIMSE is the answer of the source archive: 0x0000 = all sub-operations delivered, 0xBxxx = some sub-operations failed, 0xAxxx = refused (e.g. unknown target), 0xCxxx = error, 0xFE00 = canceled.',
+        })}
+      </p>
 
       <p className="text-xs text-muted-foreground flex items-center gap-1.5">
         <Copy className="h-3.5 w-3.5" />

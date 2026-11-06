@@ -2242,7 +2242,8 @@
       "unableToProcess": "l'archive n'a pas pu traiter l'examen",
       "canceled": "annulé",
       "other": "l'archive signale un problème"
-    }
+    },
+    "dimseLegend": "DIMSE est la réponse de l'archive source : 0x0000 = toutes les sous-opérations livrées, 0xBxxx = certaines sous-opérations ont échoué (livraison partielle), 0xAxxx = refusé (p. ex. destination inconnue), 0xCxxx = erreur, 0xFE00 = annulé."
   },
   "help": {
     "help_copyJobs_title": "Tâches de copie",

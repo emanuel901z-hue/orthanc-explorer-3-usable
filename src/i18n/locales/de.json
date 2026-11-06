@@ -516,7 +516,7 @@
     "subtitle": "C-MOVE-Aufträge dieser Workstation an das Archiv — Status und Ergebnis je Studie",
     "filterAll": "Alle",
     "stateRunning": "läuft",
-    "stateSuccess": "zugestellt",
+    "stateSuccess": "sauber zugestellt",
     "stateFailed": "fehlgeschlagen",
     "when": "Zeit",
     "source": "Quelle",
@@ -535,16 +535,17 @@
     "stateWarning": "teilweise zugestellt",
     "dimse": "DIMSE",
     "dimseMeaning": {
-      "success": "alle Teiloperationen zugestellt",
-      "partial": "teilweise zugestellt — einzelne Bilder fehlgeschlagen",
-      "unknown": "kein Status gemeldet",
-      "outOfResources": "Archiv oder Ziel ohne Ressourcen",
-      "unknownDestination": "Ziel-AET im Archiv unbekannt",
-      "dataSetMismatch": "Studie passt nicht zum Ziel",
-      "unableToProcess": "Archiv konnte die Studie nicht verarbeiten",
+      "success": "alles zugestellt",
+      "partial": "teilweise zugestellt",
+      "unknown": "kein Status",
+      "outOfResources": "keine Ressourcen",
+      "unknownDestination": "Ziel im Archiv unbekannt",
+      "dataSetMismatch": "passt nicht zum Ziel",
+      "unableToProcess": "Archiv konnte nicht verarbeiten",
       "canceled": "abgebrochen",
-      "other": "das Archiv meldet ein Problem"
-    }
+      "other": "Problem gemeldet"
+    },
+    "dimseLegend": "DIMSE ist die Antwort des Quellarchivs: 0x0000 = alle Teiloperationen zugestellt, 0xBxxx = einzelne Teiloperationen fehlgeschlagen (teilweise zugestellt), 0xAxxx = abgelehnt (z. B. Ziel unbekannt), 0xCxxx = Fehler, 0xFE00 = abgebrochen."
   },
   "actions": {
     "viewer": "Viewer",

@@ -199,8 +199,9 @@ describe('CopyJobsPage', () => {
     expect(screen.getByText('Ende')).toBeInTheDocument();
     expect(screen.getByText('06.11.2026, 11:46')).toBeInTheDocument();
     expect(screen.getByText('06.11.2026, 11:47')).toBeInTheDocument();
-    // Bedeutung steht als Tooltip am Code, nicht als zweite Zeile
-    expect(screen.getByText('0x0000')).toHaveAttribute('title', 'alle Teiloperationen zugestellt');
+    // Klartext steht in der Zelle, der Code klein darunter
+    expect(screen.getByText('alles zugestellt')).toBeInTheDocument();
+    expect(screen.getByText('0x0000')).toBeInTheDocument();
   });
 
   it('zeigt einen laufenden Auftrag ohne Endzeit', async () => {
@@ -228,9 +229,11 @@ describe('CopyJobsPage', () => {
 
     // Filterknopf und Status-Badge tragen beide das Label
     expect(screen.getAllByText('teilweise zugestellt').length).toBeGreaterThan(1);
-    expect(screen.getByText('0xB000')).toHaveAttribute('title', 'teilweise zugestellt — einzelne Bilder fehlgeschlagen');
+    // „teilweise zugestellt“ steht als Badge und als Bedeutung — beide zählen
+    expect(screen.getAllByText('teilweise zugestellt').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('0xB000')).toBeInTheDocument();
     // nicht als „zugestellt“ zählen
-    expect(screen.getByRole('button', { name: /^zugestellt/i })).toHaveTextContent('(0)');
+    expect(screen.getByRole('button', { name: /^sauber zugestellt/i })).toHaveTextContent('(0)');
   });
 
   it('erklärt einen Filter ohne Treffer', () => {

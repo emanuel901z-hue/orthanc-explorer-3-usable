@@ -516,7 +516,7 @@
     "subtitle": "C-MOVE orders this workstation sent to the archive — status and result per study",
     "filterAll": "All",
     "stateRunning": "running",
-    "stateSuccess": "delivered",
+    "stateSuccess": "delivered cleanly",
     "stateFailed": "failed",
     "when": "Time",
     "source": "Source",
@@ -535,16 +535,17 @@
     "stateWarning": "partly delivered",
     "dimse": "DIMSE",
     "dimseMeaning": {
-      "success": "all sub-operations delivered",
-      "partial": "partly delivered — some images failed",
-      "unknown": "no status reported",
-      "outOfResources": "archive or target out of resources",
-      "unknownDestination": "target AET unknown at the archive",
-      "dataSetMismatch": "study does not match the destination",
-      "unableToProcess": "archive could not process the study",
+      "success": "all delivered",
+      "partial": "partly delivered",
+      "unknown": "no status",
+      "outOfResources": "out of resources",
+      "unknownDestination": "target unknown at archive",
+      "dataSetMismatch": "does not match target",
+      "unableToProcess": "archive could not process it",
       "canceled": "canceled",
-      "other": "archive reported a problem"
-    }
+      "other": "problem reported"
+    },
+    "dimseLegend": "DIMSE is the answer of the source archive: 0x0000 = all sub-operations delivered, 0xBxxx = some sub-operations failed (partly delivered), 0xAxxx = refused (e.g. unknown target), 0xCxxx = error, 0xFE00 = canceled."
   },
   "actions": {
     "viewer": "Viewer",

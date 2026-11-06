@@ -2242,7 +2242,8 @@
       "unableToProcess": "アーカイブが検査を処理できませんでした",
       "canceled": "中止",
       "other": "アーカイブが問題を報告"
-    }
+    },
+    "dimseLegend": "DIMSE はソースアーカイブの応答です: 0x0000 = すべてのサブ操作を配信、0xBxxx = 一部のサブ操作が失敗（一部配信）、0xAxxx = 拒否（例: 宛先不明）、0xCxxx = エラー、0xFE00 = 中止。"
   },
   "help": {
     "help_copyJobs_title": "コピージョブ",

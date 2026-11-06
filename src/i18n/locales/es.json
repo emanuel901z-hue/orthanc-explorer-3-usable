@@ -2242,7 +2242,8 @@
       "unableToProcess": "el archivo no pudo procesar el estudio",
       "canceled": "cancelado",
       "other": "el archivo informa un problema"
-    }
+    },
+    "dimseLegend": "DIMSE es la respuesta del archivo de origen: 0x0000 = todas las suboperaciones entregadas, 0xBxxx = algunas suboperaciones fallaron (entrega parcial), 0xAxxx = rechazado (p. ej. destino desconocido), 0xCxxx = error, 0xFE00 = cancelado."
   },
   "help": {
     "help_copyJobs_title": "Trabajos de copia",

@@ -2242,7 +2242,8 @@
       "unableToProcess": "arşiv incelemeyi işleyemedi",
       "canceled": "iptal edildi",
       "other": "arşiv bir sorun bildiriyor"
-    }
+    },
+    "dimseLegend": "DIMSE kaynak arşivin yanıtıdır: 0x0000 = tüm alt işlemler teslim edildi, 0xBxxx = bazı alt işlemler başarısız (kısmen teslim), 0xAxxx = reddedildi (ör. hedef bilinmiyor), 0xCxxx = hata, 0xFE00 = iptal edildi."
   },
   "help": {
     "help_copyJobs_title": "Kopyalama işleri",

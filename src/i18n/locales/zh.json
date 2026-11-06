@@ -2242,7 +2242,8 @@
       "unableToProcess": "归档无法处理该检查",
       "canceled": "已取消",
       "other": "归档报告了问题"
-    }
+    },
+    "dimseLegend": "DIMSE 是源归档的响应：0x0000 = 所有子操作已送达，0xBxxx = 部分子操作失败（部分送达），0xAxxx = 被拒绝（例如目标未知），0xCxxx = 错误，0xFE00 = 已取消。"
   },
   "help": {
     "help_copyJobs_title": "复制任务",
