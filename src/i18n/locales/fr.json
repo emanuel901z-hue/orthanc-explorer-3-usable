@@ -674,7 +674,7 @@
       "lastUpdate": "Dernière màj",
       "modality": "Modalité",
       "referring": "Médecin prescripteur",
-      "seriesCount": "Séries",
+      "seriesCount": "{{count}} séries",
       "status": "Statut",
       "studyInstanceUID": "UID d'étude",
       "config": "Colonnes",

@@ -674,7 +674,7 @@
       "lastUpdate": "最終更新",
       "modality": "モダリティ",
       "referring": "依頼医",
-      "seriesCount": "シリーズ数",
+      "seriesCount": "{{count}} シリーズ",
       "status": "ステータス",
       "studyInstanceUID": "スタディUID",
       "config": "列",

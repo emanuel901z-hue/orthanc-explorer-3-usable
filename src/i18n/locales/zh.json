@@ -674,7 +674,7 @@
       "lastUpdate": "最后更新",
       "modality": "检查类型",
       "referring": "申请医生",
-      "seriesCount": "系列数",
+      "seriesCount": "{{count}} 个系列",
       "status": "状态",
       "studyInstanceUID": "研究UID",
       "config": "列",

@@ -164,4 +164,13 @@ describe('CopyJobsPage', () => {
     expect(screen.getByRole('button', { name: /failed|fehlgeschlagen/i })).toHaveTextContent('(1)');
     expect(screen.getByRole('button', { name: /running|läuft/i })).toHaveTextContent('(0)');
   });
+
+  it('erklärt einen Filter ohne Treffer', () => {
+    mockJobs.mockReturnValue({ data: [job()], isLoading: false, isError: false });
+
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /failed|fehlgeschlagen/i }));
+
+    expect(screen.getByText(/no jobs in this filter|keine aufträge in diesem filter/i)).toBeInTheDocument();
+  });
 });

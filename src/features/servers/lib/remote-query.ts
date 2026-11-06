@@ -84,7 +84,6 @@ function isoDate(token: string): string | undefined {
   }
   if (!match) return undefined;
 
-  const y = Number(year);
   const m = Number(month);
   const d = Number(day);
   if (m < 1 || m > 12 || d < 1 || d > 31) return undefined;

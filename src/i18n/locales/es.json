@@ -674,7 +674,7 @@
       "lastUpdate": "Última actualización",
       "modality": "Modalidad",
       "referring": "Médico remitente",
-      "seriesCount": "Series",
+      "seriesCount": "{{count}} series",
       "status": "Estado",
       "studyInstanceUID": "UID de estudio",
       "config": "Columnas",

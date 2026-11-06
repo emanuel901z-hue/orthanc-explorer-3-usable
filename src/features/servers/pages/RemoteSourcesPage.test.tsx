@@ -115,7 +115,7 @@ async function queryStudies(search = 'MUSTERMANN') {
   fireEvent.click(modalityButton);
   fireEvent.change(screen.getByLabelText(/search:|suche:/i), { target: { value: search } });
   fireEvent.click(screen.getByRole('button', { name: /^Query$|^Abfragen$/ }));
-  await screen.findByText('MUSTERMANN^ERIKA');
+  await screen.findAllByText('MUSTERMANN^ERIKA');
 }
 
 describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
@@ -300,6 +300,28 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
 
     await waitFor(() => expect(mockToast.error).toHaveBeenCalled());
     expect(mockQuery).not.toHaveBeenCalled();
+  });
+
+  it('„Alle kopieren“ setzt je Treffer einen Auftrag ab', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    mockQuery.mockReset();
+    mockQuery.mockResolvedValue({
+      queryId: 'q-1',
+      answers: [
+        ANSWERS.answers[0],
+        { index: 1, tags: { ...ANSWERS.answers[0].tags, PatientID: 'P-101', StudyInstanceUID: '1.2.4' } },
+      ],
+    });
+    mockRetrieve.mockResolvedValue({ ID: 'job-x' });
+    renderPage();
+    await queryStudies('Muster');
+
+    fireEvent.change(screen.getByLabelText(/copy to|kopieren nach/i), { target: { value: 'hst_burn2CD' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Copy all$|^Alle kopieren$/ }));
+
+    await waitFor(() => expect(mockRetrieve).toHaveBeenCalledTimes(2));
+    expect(mockRetrieve).toHaveBeenCalledWith('ARCHIVE', 'q-1', 0, 'hst_burn2CD', { asynchronous: true });
+    expect(mockRetrieve).toHaveBeenCalledWith('ARCHIVE', 'q-1', 1, 'hst_burn2CD', { asynchronous: true });
   });
 
   it('prüft die gewählte Modalität automatisch per C-ECHO', async () => {
