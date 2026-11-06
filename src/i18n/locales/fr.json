@@ -315,7 +315,7 @@
     "studyDescription": "Description de l'examen",
     "searchPlaceholder": "Rechercher : nom, ID patient, admission, date, modalité",
     "searchParsed": "Envoyé comme :",
-    "searchHint": "La virgule sépare les données dans un ordre fixe : nom, prénom, date de naissance, description de l'examen, date de l'examen, numéro d'admission, modalité, UID de l'examen. Exemple : müller,paul,030847,mrt,07.08.2026. Les préfixes remplacent une position : name: id: acc: geb: datum: desc: uid: mod: — une valeur seule est reconnue par son contenu (ID, date, UID).",
+    "searchHint": "La virgule sépare les données dans un ordre fixe : nom, prénom, date de naissance, description de l'examen, date de l'examen, numéro d'admission, modalité, UID de l'examen. Les champs vides gardent leur position : müller,paul,030847,,07.08.2026 saute la description. Les préfixes remplacent une position : name: id: acc: geb: datum: desc: uid: mod: — une valeur seule est reconnue par son contenu.",
     "searchIgnored": "Non utilisé : {{value}} — une date nécessite une année.",
     "searchEmpty": "Saisissez un nom, un ID patient, une admission ou une date",
     "searchKind": {

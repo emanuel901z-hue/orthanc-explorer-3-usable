@@ -404,7 +404,7 @@
     "studyDescription": "İnceleme açıklaması",
     "searchPlaceholder": "Ara: ad, hasta ID, erişim numarası, tarih, modalite",
     "searchParsed": "Gönderilen:",
-    "searchHint": "Virgül verileri sabit sırayla ayırır: soyadı, ad, doğum tarihi, inceleme açıklaması, inceleme tarihi, erişim numarası, modalite, inceleme UID'si. Örnek: müller,paul,030847,mrt,07.08.2026. Önekler bir konumu geçersiz kılar: name: id: acc: geb: datum: desc: uid: mod: — tek bir değer içeriğinden tanınır (ID, tarih, UID).",
+    "searchHint": "Virgül verileri sabit sırayla ayırır: soyadı, ad, doğum tarihi, inceleme açıklaması, inceleme tarihi, erişim numarası, modalite, inceleme UID'si. Boş alanlar konumunu korur: müller,paul,030847,,07.08.2026 açıklamayı atlar. Önekler bir konumu geçersiz kılar: name: id: acc: geb: datum: desc: uid: mod: — tek bir değer içeriğinden tanınır.",
     "searchIgnored": "Kullanılmadı: {{value}} — tarih için yıl gerekir.",
     "searchEmpty": "Ad, hasta ID, erişim numarası veya tarih girin",
     "searchKind": {

@@ -362,13 +362,19 @@ function buildWithOverrides(
   const query: Record<string, string> = { ...REMOTE_RETURN_KEYS };
 
   // Komma trennt Angaben (Name, Vorname, Geburtsdatum), Leerzeichen trennt
-  // Teile derselben Angabe.
-  const segments = input.split(',').map((segment) => segment.trim()).filter(Boolean);
+  // Teile derselben Angabe. Leere Angaben bleiben stehen: sie halten ihre
+  // Position frei („müller,paul,030847,,07.08.2026“ überspringt die
+  // Beschreibung).
+  const segments = input.split(',').map((segment) => segment.trim());
+  const filled = segments.filter(Boolean);
   // Entweder rein positional („Müller,Paul,030847“) oder mit Präfixen
   // („Muster,desc:MRT“) — gemischt wäre die Position nicht mehr eindeutig.
-  const positionalMode = segments.length >= 2 && segments.every((segment) => !/^[A-Za-zäöü]+:\s*.+$/.test(segment));
+  const positionalMode = filled.length >= 2 && filled.every((segment) => !/^[A-Za-zäöü]+:\s*.+$/.test(segment));
 
   segments.forEach((segment, index) => {
+    // Leeres Feld: Position freihalten, nichts zuordnen
+    if (!segment) return;
+
     // Ein Präfix gilt für die ganze Angabe — „desc:CT Thorax“ ist eine
     // Beschreibung, nicht das Feld „desc“ mit dem Wert „CT“.
     const segmentPrefix = /^([A-Za-zäöü]+):\s*(.+)$/.exec(segment);

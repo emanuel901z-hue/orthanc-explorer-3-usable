@@ -283,3 +283,40 @@ describe('buildRemoteQuery — Position nach dem Komma', () => {
     expect(buildRemoteQuery('mod:sono').query.ModalitiesInStudy).toBe('US');
   });
 });
+
+describe('buildRemoteQuery — leere Felder halten die Position', () => {
+  it('überspringt die Beschreibung mit einem leeren Feld', () => {
+    const plan = buildRemoteQuery('müller,paul,030847,,07.08.2026');
+
+    expect(plan.query.PatientName).toBe('MÜLLER^PAUL*');
+    expect(plan.query.PatientBirthDate).toBe('19470803');
+    expect(plan.query.StudyDescription).toBe('');
+    expect(plan.query.StudyDate).toBe('20260807');
+    expect(plan.chips.map((chip) => chip.kind)).toEqual(['name', 'birthDate', 'studyDate']);
+  });
+
+  it('überspringt den Vornamen', () => {
+    const plan = buildRemoteQuery('müller,,030847');
+    expect(plan.query.PatientName).toBe('MÜLLER*');
+    expect(plan.query.PatientBirthDate).toBe('19470803');
+  });
+
+  it('ignoriert ein abschließendes Komma', () => {
+    const plan = buildRemoteQuery('müller,paul,');
+    expect(plan.query.PatientName).toBe('MÜLLER^PAUL*');
+    expect(plan.chips).toHaveLength(1);
+  });
+
+  it('fragt bei nur einem gefüllten Feld nichts Positionales ab', () => {
+    // „,,020592“ ist eine einzelne Angabe — sie wird am Inhalt erkannt
+    const plan = buildRemoteQuery(',,020592');
+    expect(plan.query.PatientBirthDate).toBe('19920502');
+    expect(plan.query.PatientName).toBe('');
+  });
+
+  it('hält die Position auch für die Zugangsnummer frei', () => {
+    const plan = buildRemoteQuery('müller,paul,030847,,,ACC-17');
+    expect(plan.query.AccessionNumber).toBe('ACC-17');
+    expect(plan.query.StudyDate).toBe('');
+  });
+});

@@ -315,7 +315,7 @@
     "studyDescription": "Descripción del estudio",
     "searchPlaceholder": "Buscar: nombre, ID de paciente, admisión, fecha, modalidad",
     "searchParsed": "Se envía como:",
-    "searchHint": "La coma separa datos en un orden fijo: apellido, nombre, fecha de nacimiento, descripción del estudio, fecha del estudio, número de admisión, modalidad, UID del estudio. Ejemplo: müller,paul,030847,mrt,07.08.2026. Los prefijos sobrescriben una posición: name: id: acc: geb: datum: desc: uid: mod: — un valor único se reconoce por su contenido (ID, fecha, UID).",
+    "searchHint": "La coma separa datos en un orden fijo: apellido, nombre, fecha de nacimiento, descripción del estudio, fecha del estudio, número de admisión, modalidad, UID del estudio. Los campos vacíos mantienen su posición: müller,paul,030847,,07.08.2026 omite la descripción. Los prefijos sobrescriben una posición: name: id: acc: geb: datum: desc: uid: mod: — un valor único se reconoce por su contenido.",
     "searchIgnored": "No usado: {{value}} — una fecha necesita año.",
     "searchEmpty": "Introduzca nombre, ID de paciente, admisión o fecha",
     "searchKind": {
