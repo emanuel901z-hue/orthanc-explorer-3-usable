@@ -513,7 +513,13 @@
     "copyDuration": "in {{seconds}} s",
     "copyTooFast": "Verdächtig schnell für {{count}} Bilder — das Archiv hat den Auftrag vermutlich nur eingereiht, noch nicht zugestellt.",
     "targetsHint": "Ziele kommen aus Einstellungen → Modalitäten (in der Datenbank, für alle Benutzer) und aus config/targets.csv (nur AET).",
-    "manageTargets": "Ziele verwalten"
+    "manageTargets": "Ziele verwalten",
+    "bulkCopyTitle": "{{count}} Studien kopieren?",
+    "bulkRetrieveTitle": "{{count}} Studien abrufen?",
+    "bulkHint": "Das setzt je Studie einen C-MOVE ab. Das Archiv muss alle zustellen — in der Regel gehören nur wenige Studien zusammen.",
+    "bulkCancel": "Abbrechen",
+    "bulkCopyConfirm": "{{count}} kopieren",
+    "bulkRetrieveConfirm": "{{count}} abrufen"
   },
   "copyJobs": {
     "title": "Kopieraufträge",

@@ -454,7 +454,13 @@
     "retrieveSeriesCount_other": "{{count}} seriyi getir",
     "copySeriesCount_one": "{{count}} seriyi kopyala",
     "copySeriesCount_other": "{{count}} seriyi kopyala",
-    "manageTargets": "Hedefleri yönet"
+    "manageTargets": "Hedefleri yönet",
+    "bulkCopyTitle": "{{count}} inceleme kopyalansın mı?",
+    "bulkRetrieveTitle": "{{count}} inceleme getirilsin mi?",
+    "bulkHint": "Her inceleme için bir C-MOVE başlatılır. Arşiv hepsini teslim etmek zorunda — genelde yalnızca birkaç inceleme birliktedir.",
+    "bulkCancel": "İptal",
+    "bulkCopyConfirm": "{{count}} kopyala",
+    "bulkRetrieveConfirm": "{{count}} getir"
   },
   "actions": {
     "viewer": "Görüntüleyici",

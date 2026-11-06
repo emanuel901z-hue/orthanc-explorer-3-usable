@@ -454,7 +454,13 @@
     "retrieveSeriesCount_other": "استرجاع {{count}} سلسلة",
     "copySeriesCount_one": "نسخ {{count}} سلسلة",
     "copySeriesCount_other": "نسخ {{count}} سلسلة",
-    "manageTargets": "إدارة الأهداف"
+    "manageTargets": "إدارة الأهداف",
+    "bulkCopyTitle": "نسخ {{count}} فحص؟",
+    "bulkRetrieveTitle": "استرجاع {{count}} فحص؟",
+    "bulkHint": "يبدأ هذا أمر C-MOVE لكل فحص. على الأرشيف تسليمها جميعًا — وعادةً تخص عدة فحوص قليلة فقط.",
+    "bulkCancel": "إلغاء",
+    "bulkCopyConfirm": "نسخ {{count}}",
+    "bulkRetrieveConfirm": "استرجاع {{count}}"
   },
   "actions": {
     "viewer": "العارض",

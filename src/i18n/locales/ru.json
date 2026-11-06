@@ -454,7 +454,13 @@
     "retrieveSeriesCount_other": "Получить серий: {{count}}",
     "copySeriesCount_one": "Копировать серий: {{count}}",
     "copySeriesCount_other": "Копировать серий: {{count}}",
-    "manageTargets": "Управлять назначениями"
+    "manageTargets": "Управлять назначениями",
+    "bulkCopyTitle": "Копировать исследования ({{count}})?",
+    "bulkRetrieveTitle": "Получить исследования ({{count}})?",
+    "bulkHint": "Это запускает по одному C-MOVE на исследование. Архив должен доставить все — обычно вместе идут лишь несколько.",
+    "bulkCancel": "Отмена",
+    "bulkCopyConfirm": "Копировать {{count}}",
+    "bulkRetrieveConfirm": "Получить {{count}}"
   },
   "actions": {
     "viewer": "Просмотрщик",

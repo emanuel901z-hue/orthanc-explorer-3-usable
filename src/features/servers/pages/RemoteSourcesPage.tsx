@@ -63,7 +63,20 @@ import RemoteStudyDetailDialog, { type RemoteSeries } from '@/features/servers/c
 import { formatDicomDate } from '@/lib/dicom-date';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { usePersistedState, useRememberedState } from '@/store/ui-state';
+
+/** Ab dieser Anzahl wird vor dem Sammelversand nachgefragt. */
+const BULK_CONFIRM_THRESHOLD = 10;
 
 const DEFAULT_SORT: RemoteSort = { id: 'studyDate', desc: true };
 
@@ -179,6 +192,8 @@ export default function RemoteSourcesPage() {
   const [sort, setSort] = usePersistedState<RemoteSort>('remoteSources.sort', DEFAULT_SORT);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [detail, setDetail] = useState<RemoteStudy | null>(null);
+  // Sammelaktion über der Schwelle erst nach Rückfrage
+  const [pending, setPending] = useState<{ action: 'copy' | 'retrieve'; studies: RemoteStudy[] } | null>(null);
 
   const sortedStudies = useMemo(() => sortRemoteStudies(remoteStudies, sort), [remoteStudies, sort]);
   const selectedStudies = useMemo(
@@ -368,6 +383,15 @@ export default function RemoteSourcesPage() {
       patchStudy(study, { copying: false, error: true });
       toast.error(t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' }));
     }
+  };
+
+  /** Sammelversand mit Rückfrage über der Schwelle (mehr als 10 Studien). */
+  const requestBulk = (action: 'copy' | 'retrieve', studies: RemoteStudy[]) => {
+    if (studies.length > BULK_CONFIRM_THRESHOLD) {
+      setPending({ action, studies });
+      return;
+    }
+    void (action === 'copy' ? handleCopyMany(studies) : handleRetrieveMany(studies));
   };
 
   const handleCopyMany = async (studies: RemoteStudy[]) => {
@@ -573,7 +597,7 @@ export default function RemoteSourcesPage() {
                     variant="outline"
                     size="sm"
                     className="h-7 gap-1.5 text-xs"
-                    onClick={() => void handleCopyMany(selectedStudies.length > 0 ? selectedStudies : remoteStudies)}
+                    onClick={() => requestBulk('copy', selectedStudies.length > 0 ? selectedStudies : remoteStudies)}
                     disabled={!selectedTarget}
                   >
                     <Copy className="h-3.5 w-3.5" />
@@ -585,7 +609,7 @@ export default function RemoteSourcesPage() {
                     variant="outline"
                     size="sm"
                     className="h-7 gap-1.5 text-xs"
-                    onClick={() => void handleRetrieveMany(selectedStudies.length > 0 ? selectedStudies : remoteStudies)}
+                    onClick={() => requestBulk('retrieve', selectedStudies.length > 0 ? selectedStudies : remoteStudies)}
                   >
                     <Download className="h-3.5 w-3.5" />
                     {selectedStudies.length > 0
@@ -820,6 +844,40 @@ export default function RemoteSourcesPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={pending !== null} onOpenChange={(open) => { if (!open) setPending(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pending?.action === 'copy'
+                ? t('remote.bulkCopyTitle', { count: pending?.studies.length ?? 0, defaultValue: 'Copy {{count}} studies?' })
+                : t('remote.bulkRetrieveTitle', { count: pending?.studies.length ?? 0, defaultValue: 'Retrieve {{count}} studies?' })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('remote.bulkHint', {
+                count: pending?.studies.length ?? 0,
+                defaultValue:
+                  'That starts one C-MOVE per study. The archive has to deliver them all — usually only a few studies belong together.',
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('remote.bulkCancel', { defaultValue: 'Cancel' })}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const action = pending;
+                setPending(null);
+                if (!action) return;
+                void (action.action === 'copy' ? handleCopyMany(action.studies) : handleRetrieveMany(action.studies));
+              }}
+            >
+              {pending?.action === 'copy'
+                ? t('remote.bulkCopyConfirm', { count: pending?.studies.length ?? 0, defaultValue: 'Copy {{count}}' })
+                : t('remote.bulkRetrieveConfirm', { count: pending?.studies.length ?? 0, defaultValue: 'Retrieve {{count}}' })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <TargetsDialog
         open={targetsOpen}

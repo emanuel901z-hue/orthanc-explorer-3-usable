@@ -365,7 +365,13 @@
     "retrieveSeriesCount_other": "{{count}} シリーズを取得",
     "copySeriesCount_one": "{{count}} シリーズをコピー",
     "copySeriesCount_other": "{{count}} シリーズをコピー",
-    "manageTargets": "宛先を管理"
+    "manageTargets": "宛先を管理",
+    "bulkCopyTitle": "{{count}} 件の検査をコピーしますか?",
+    "bulkRetrieveTitle": "{{count}} 件の検査を取得しますか?",
+    "bulkHint": "検査ごとに C-MOVE を 1 件発行します。アーカイブはすべて配信する必要があります。通常は少数の検査だけがまとまります。",
+    "bulkCancel": "キャンセル",
+    "bulkCopyConfirm": "{{count}} 件コピー",
+    "bulkRetrieveConfirm": "{{count}} 件取得"
   },
   "actions": {
     "viewer": "ビューア",

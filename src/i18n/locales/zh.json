@@ -365,7 +365,13 @@
     "retrieveSeriesCount_other": "取回 {{count}} 个序列",
     "copySeriesCount_one": "复制 {{count}} 个序列",
     "copySeriesCount_other": "复制 {{count}} 个序列",
-    "manageTargets": "管理目标"
+    "manageTargets": "管理目标",
+    "bulkCopyTitle": "复制 {{count}} 个检查？",
+    "bulkRetrieveTitle": "取回 {{count}} 个检查？",
+    "bulkHint": "这会为每个检查发起一个 C-MOVE。归档必须全部送达；通常只有少数检查属于同一批。",
+    "bulkCancel": "取消",
+    "bulkCopyConfirm": "复制 {{count}} 个",
+    "bulkRetrieveConfirm": "取回 {{count}} 个"
   },
   "actions": {
     "viewer": "查看器",

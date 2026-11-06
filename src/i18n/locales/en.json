@@ -513,7 +513,13 @@
     "copyDuration": "in {{seconds}} s",
     "copyTooFast": "Suspiciously fast for {{count}} images — the archive may only have queued the order, not delivered it yet.",
     "targetsHint": "Targets come from Settings → Modalities (stored in the database, shared by all users) and from config/targets.csv (AET only).",
-    "manageTargets": "Manage targets"
+    "manageTargets": "Manage targets",
+    "bulkCopyTitle": "Copy {{count}} studies?",
+    "bulkRetrieveTitle": "Retrieve {{count}} studies?",
+    "bulkHint": "That starts one C-MOVE per study. The archive has to deliver them all — usually only a few studies belong together.",
+    "bulkCancel": "Cancel",
+    "bulkCopyConfirm": "Copy {{count}}",
+    "bulkRetrieveConfirm": "Retrieve {{count}}"
   },
   "copyJobs": {
     "title": "Copy jobs",

@@ -365,7 +365,13 @@
     "retrieveSeriesCount_other": "Récupérer {{count}} séries",
     "copySeriesCount_one": "Copier {{count}} séries",
     "copySeriesCount_other": "Copier {{count}} séries",
-    "manageTargets": "Gérer les destinations"
+    "manageTargets": "Gérer les destinations",
+    "bulkCopyTitle": "Copier {{count}} examens ?",
+    "bulkRetrieveTitle": "Récupérer {{count}} examens ?",
+    "bulkHint": "Cela lance un C-MOVE par examen. L'archive doit tous les livrer ; en général seuls quelques examens vont ensemble.",
+    "bulkCancel": "Annuler",
+    "bulkCopyConfirm": "Copier {{count}}",
+    "bulkRetrieveConfirm": "Récupérer {{count}}"
   },
   "actions": {
     "viewer": "Visionneuse",

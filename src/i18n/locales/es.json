@@ -365,7 +365,13 @@
     "retrieveSeriesCount_other": "Recuperar {{count}} series",
     "copySeriesCount_one": "Copiar {{count}} series",
     "copySeriesCount_other": "Copiar {{count}} series",
-    "manageTargets": "Gestionar destinos"
+    "manageTargets": "Gestionar destinos",
+    "bulkCopyTitle": "¿Copiar {{count}} estudios?",
+    "bulkRetrieveTitle": "¿Recuperar {{count}} estudios?",
+    "bulkHint": "Esto inicia un C-MOVE por estudio. El archivo debe entregarlos todos; normalmente solo pocos estudios van juntos.",
+    "bulkCancel": "Cancelar",
+    "bulkCopyConfirm": "Copiar {{count}}",
+    "bulkRetrieveConfirm": "Recuperar {{count}}"
   },
   "actions": {
     "viewer": "Visor",

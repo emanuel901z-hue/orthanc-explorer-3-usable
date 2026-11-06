@@ -524,6 +524,53 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('fragt vor dem Sammelversand ab elf Studien nach', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    mockQuery.mockReset();
+    mockQuery.mockResolvedValue({
+      queryId: 'q-1',
+      answers: Array.from({ length: 11 }, (_, index) => ({
+        index,
+        tags: { ...ANSWERS.answers[0].tags, PatientID: `P-${index}`, StudyInstanceUID: `1.2.${index}` },
+      })),
+    });
+    mockRetrieve.mockResolvedValue({ ID: 'job-x' });
+    renderPage();
+    await queryStudies('Muster');
+
+    fireEvent.change(screen.getByLabelText(/copy to|kopieren nach/i), { target: { value: 'hst_burn2CD' } });
+    fireEvent.click(screen.getByRole('button', { name: /Copy all|Alle kopieren/i }));
+
+    // erst die Rückfrage, kein Auftrag
+    const dialog = await screen.findByRole('alertdialog');
+    expect(dialog).toHaveTextContent('11');
+    expect(mockRetrieve).not.toHaveBeenCalled();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: /11 kopieren|Copy 11/i }));
+    await waitFor(() => expect(mockRetrieve).toHaveBeenCalled());
+  });
+
+  it('kopiert bis zehn Studien ohne Rückfrage', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    mockQuery.mockReset();
+    mockQuery.mockResolvedValue({
+      queryId: 'q-1',
+      answers: Array.from({ length: 10 }, (_, index) => ({
+        index,
+        tags: { ...ANSWERS.answers[0].tags, PatientID: `P-${index}`, StudyInstanceUID: `1.2.${index}` },
+      })),
+    });
+    mockRetrieve.mockResolvedValue({ ID: 'job-x' });
+    renderPage();
+    await queryStudies('Muster');
+
+    fireEvent.change(screen.getByLabelText(/copy to|kopieren nach/i), { target: { value: 'hst_burn2CD' } });
+    fireEvent.click(screen.getByRole('button', { name: /Copy all|Alle kopieren/i }));
+
+    await waitFor(() => expect(mockRetrieve).toHaveBeenCalled());
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
   it('zeigt die Zielauswahl schon vor der Suche', async () => {
     configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
     renderPage();
