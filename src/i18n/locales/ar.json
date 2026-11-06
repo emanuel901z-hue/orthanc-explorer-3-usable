@@ -448,7 +448,12 @@
     "retrieveSeriesCount": "استرجاع {{count}} سلسلة",
     "copySeriesCount": "نسخ {{count}} سلسلة",
     "copyDuration": "خلال {{seconds}} ث",
-    "copyTooFast": "سريع بشكل مريب لـ {{count}} صورة — قد يكون الأرشيف وضع الطلب في قائمة الانتظار فقط."
+    "copyTooFast": "سريع بشكل مريب لـ {{count}} صورة — قد يكون الأرشيف وضع الطلب في قائمة الانتظار فقط.",
+    "targetsHint": "الأهداف هي الإدخالات في الإعدادات → الوسائط.",
+    "retrieveSeriesCount_one": "استرجاع {{count}} سلسلة",
+    "retrieveSeriesCount_other": "استرجاع {{count}} سلسلة",
+    "copySeriesCount_one": "نسخ {{count}} سلسلة",
+    "copySeriesCount_other": "نسخ {{count}} سلسلة"
   },
   "actions": {
     "viewer": "العارض",

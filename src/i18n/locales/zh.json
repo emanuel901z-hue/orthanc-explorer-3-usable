@@ -359,7 +359,12 @@
     "retrieveSeriesCount": "取回 {{count}} 个序列",
     "copySeriesCount": "复制 {{count}} 个序列",
     "copyDuration": "{{seconds}} 秒",
-    "copyTooFast": "对 {{count}} 张图像来说快得可疑 — 归档可能只是把指令排入队列。"
+    "copyTooFast": "对 {{count}} 张图像来说快得可疑 — 归档可能只是把指令排入队列。",
+    "targetsHint": "目标是“设置 → 模态”中的条目。",
+    "retrieveSeriesCount_one": "取回 {{count}} 个序列",
+    "retrieveSeriesCount_other": "取回 {{count}} 个序列",
+    "copySeriesCount_one": "复制 {{count}} 个序列",
+    "copySeriesCount_other": "复制 {{count}} 个序列"
   },
   "actions": {
     "viewer": "查看器",

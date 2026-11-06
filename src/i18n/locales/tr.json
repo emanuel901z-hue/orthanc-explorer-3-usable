@@ -448,7 +448,12 @@
     "retrieveSeriesCount": "{{count}} seriyi getir",
     "copySeriesCount": "{{count}} seriyi kopyala",
     "copyDuration": "{{seconds}} sn",
-    "copyTooFast": "{{count}} görüntü için şüpheli derecede hızlı — arşiv emri yalnızca kuyruğa almış olabilir."
+    "copyTooFast": "{{count}} görüntü için şüpheli derecede hızlı — arşiv emri yalnızca kuyruğa almış olabilir.",
+    "targetsHint": "Hedefler, Ayarlar → Modaliteler altındaki kayıtlardır.",
+    "retrieveSeriesCount_one": "{{count}} seriyi getir",
+    "retrieveSeriesCount_other": "{{count}} seriyi getir",
+    "copySeriesCount_one": "{{count}} seriyi kopyala",
+    "copySeriesCount_other": "{{count}} seriyi kopyala"
   },
   "actions": {
     "viewer": "Görüntüleyici",

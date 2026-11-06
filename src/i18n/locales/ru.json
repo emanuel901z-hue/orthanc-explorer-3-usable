@@ -448,7 +448,12 @@
     "retrieveSeriesCount": "Получить серий: {{count}}",
     "copySeriesCount": "Копировать серий: {{count}}",
     "copyDuration": "за {{seconds}} с",
-    "copyTooFast": "Подозрительно быстро для {{count}} снимков — возможно, архив только поставил задание в очередь."
+    "copyTooFast": "Подозрительно быстро для {{count}} снимков — возможно, архив только поставил задание в очередь.",
+    "targetsHint": "Назначения — это записи в разделе Настройки → Модальности.",
+    "retrieveSeriesCount_one": "Получить серий: {{count}}",
+    "retrieveSeriesCount_other": "Получить серий: {{count}}",
+    "copySeriesCount_one": "Копировать серий: {{count}}",
+    "copySeriesCount_other": "Копировать серий: {{count}}"
   },
   "actions": {
     "viewer": "Просмотрщик",

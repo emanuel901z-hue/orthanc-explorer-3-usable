@@ -114,7 +114,20 @@ export default function RemoteSourcesPage() {
   const [selectedModality, setSelectedModality] = usePersistedState('remoteSources.modality', '');
   // Copy targets come from the deployment config (AET only — the archive that
   // holds the study knows the host). Persisted: the chosen archive is not PHI.
-  const copyTargets = getConfig().cmoveTargets ?? [];
+  // Ziele = konfigurierte Liste (config/targets.csv) PLUS alle Orthanc-
+  // Modalitäten außer der gerade gewählten Quelle. So wird ein in
+  // „Einstellungen → Modalitäten“ angelegtes PACS sofort zum Kopierziel.
+  const copyTargets = useMemo(() => {
+    const configured = getConfig().cmoveTargets ?? [];
+    const seen = new Set(configured.map((target) => target.aet));
+    const fromModalities = modalityDetails
+      .filter((modality) => modality.id !== selectedModality && !seen.has(modality.aet))
+      .map((modality) => ({
+        aet: modality.aet,
+        label: modality.id === modality.aet ? undefined : modality.id,
+      }));
+    return [...configured, ...fromModalities];
+  }, [modalityDetails, selectedModality]);
   const [selectedTarget, setSelectedTarget] = usePersistedState('remoteSources.copyTarget', '');
   // The copy runs as an Orthanc job; the job list (polled every 3 s) is where
   // progress and the DIMSE status of the destination come from.
@@ -514,6 +527,11 @@ export default function RemoteSourcesPage() {
                       </option>
                     ))}
                   </select>
+                  <span className="text-xs text-muted-foreground">
+                    {t('remote.targetsHint', {
+                      defaultValue: 'Targets are the entries under Settings → Modalities.',
+                    })}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"

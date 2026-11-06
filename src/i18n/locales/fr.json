@@ -359,7 +359,12 @@
     "retrieveSeriesCount": "Récupérer {{count}} séries",
     "copySeriesCount": "Copier {{count}} séries",
     "copyDuration": "en {{seconds}} s",
-    "copyTooFast": "Suspicieusement rapide pour {{count}} images : l'archive a peut-être seulement mis l'ordre en file."
+    "copyTooFast": "Suspicieusement rapide pour {{count}} images : l'archive a peut-être seulement mis l'ordre en file.",
+    "targetsHint": "Les destinations sont les entrées sous Réglages → Modalités.",
+    "retrieveSeriesCount_one": "Récupérer {{count}} séries",
+    "retrieveSeriesCount_other": "Récupérer {{count}} séries",
+    "copySeriesCount_one": "Copier {{count}} séries",
+    "copySeriesCount_other": "Copier {{count}} séries"
   },
   "actions": {
     "viewer": "Visionneuse",

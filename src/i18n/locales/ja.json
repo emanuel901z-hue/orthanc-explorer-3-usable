@@ -359,7 +359,12 @@
     "retrieveSeriesCount": "{{count}} シリーズを取得",
     "copySeriesCount": "{{count}} シリーズをコピー",
     "copyDuration": "{{seconds}} 秒",
-    "copyTooFast": "{{count}} 枚にしては速すぎます — アーカイブは指示をキューに入れただけの可能性があります。"
+    "copyTooFast": "{{count}} 枚にしては速すぎます — アーカイブは指示をキューに入れただけの可能性があります。",
+    "targetsHint": "宛先は「設定 → モダリティ」の項目です。",
+    "retrieveSeriesCount_one": "{{count}} シリーズを取得",
+    "retrieveSeriesCount_other": "{{count}} シリーズを取得",
+    "copySeriesCount_one": "{{count}} シリーズをコピー",
+    "copySeriesCount_other": "{{count}} シリーズをコピー"
   },
   "actions": {
     "viewer": "ビューア",

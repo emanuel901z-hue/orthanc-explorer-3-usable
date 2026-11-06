@@ -359,7 +359,12 @@
     "retrieveSeriesCount": "Recuperar {{count}} series",
     "copySeriesCount": "Copiar {{count}} series",
     "copyDuration": "en {{seconds}} s",
-    "copyTooFast": "Sospechosamente rápido para {{count}} imágenes: el archivo quizá solo puso el pedido en cola."
+    "copyTooFast": "Sospechosamente rápido para {{count}} imágenes: el archivo quizá solo puso el pedido en cola.",
+    "targetsHint": "Los destinos son las entradas en Ajustes → Modalidades.",
+    "retrieveSeriesCount_one": "Recuperar {{count}} series",
+    "retrieveSeriesCount_other": "Recuperar {{count}} series",
+    "copySeriesCount_one": "Copiar {{count}} series",
+    "copySeriesCount_other": "Copiar {{count}} series"
   },
   "actions": {
     "viewer": "Visor",

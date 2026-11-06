@@ -511,7 +511,8 @@
     "copySeriesCount_one": "Copy {{count}} series",
     "copySeriesCount_other": "Copy {{count}} series",
     "copyDuration": "in {{seconds}} s",
-    "copyTooFast": "Suspiciously fast for {{count}} images — the archive may only have queued the order, not delivered it yet."
+    "copyTooFast": "Suspiciously fast for {{count}} images — the archive may only have queued the order, not delivered it yet.",
+    "targetsHint": "Targets are the entries under Settings → Modalities."
   },
   "copyJobs": {
     "title": "Copy jobs",

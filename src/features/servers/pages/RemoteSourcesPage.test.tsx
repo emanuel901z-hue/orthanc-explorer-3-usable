@@ -7,13 +7,14 @@ import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
 import '@/i18n';
 
-const { mockQuery, mockRetrieve, mockMove, mockToast, mockEcho, mockJobs } = vi.hoisted(() => ({
+const { mockQuery, mockRetrieve, mockMove, mockToast, mockEcho, mockJobs, mockModalities } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
   mockRetrieve: vi.fn(),
   mockMove: vi.fn(),
   mockToast: { success: vi.fn(), error: vi.fn() },
   mockEcho: vi.fn(),
   mockJobs: vi.fn(),
+  mockModalities: vi.fn(),
 }));
 
 vi.mock('sonner', () => ({ toast: mockToast }));
@@ -28,9 +29,7 @@ vi.mock('@/api/modalities', () => ({
 
 // Die Seite braucht Name + Adresse je Modalität (Anzeige „Host:Port“)
 vi.mock('@/features/settings/hooks/use-modality-details', () => ({
-  useModalityDetails: () => ({
-    data: [{ id: 'ARCHIVE', aet: 'ARCHIVE', host: '10.0.1.30', port: 104 }],
-  }),
+  useModalityDetails: () => ({ data: mockModalities() }),
 }));
 
 vi.mock('@/features/settings/hooks/use-dicom-web-servers', () => ({
@@ -122,7 +121,8 @@ function copyJob(state: 'Running' | 'Success' | 'Failure', dimse = 0) {
 
 /** Modality pick (Radix stand-in) + search + query, so the results table exists. */
 async function queryStudies(search = 'MUSTERMANN') {
-  const modalityButton = await screen.findByRole('button', { name: /ARCHIVE/ });
+  // exakt die Quelle, nicht FAKEARCHIVE
+  const modalityButton = await screen.findByRole('button', { name: /^ARCHIVE \(ARCHIVE\)/ });
   fireEvent.click(modalityButton);
   fireEvent.change(screen.getByLabelText(/search:|suche:/i), { target: { value: search } });
   fireEvent.click(screen.getByRole('button', { name: /^Query$|^Abfragen$/ }));
@@ -156,6 +156,10 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
       ),
     );
     mockMove.mockResolvedValue({ ID: 'job-series' });
+    mockModalities.mockReturnValue([
+      { id: 'ARCHIVE', aet: 'ARCHIVE', host: '10.0.1.30', port: 104 },
+      { id: 'FAKEARCHIVE', aet: 'FAKEARCHIVE', host: '10.9.9.9', port: 104 },
+    ]);
     mockEcho.mockResolvedValue({});
     mockJobs.mockReturnValue({ data: [], isLoading: false, isError: false });
   });
@@ -250,6 +254,7 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
   });
 
   it('zeigt einen Hinweis, wenn keine Ziele konfiguriert sind', async () => {
+    mockModalities.mockReturnValue([{ id: 'ARCHIVE', aet: 'ARCHIVE', host: '10.0.1.30', port: 104 }]);
     configure(undefined);
     renderPage();
     await queryStudies();
@@ -297,7 +302,8 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
   it('weist ein Datum ohne Jahr zurück, statt es als Namen zu suchen', async () => {
     configure([]);
     renderPage();
-    const modalityButton = await screen.findByRole('button', { name: /ARCHIVE/ });
+    // exakt die Quelle, nicht FAKEARCHIVE
+  const modalityButton = await screen.findByRole('button', { name: /^ARCHIVE \(ARCHIVE\)/ });
     fireEvent.click(modalityButton);
 
     fireEvent.change(screen.getByLabelText(/search:|suche:/i), { target: { value: '29.08.' } });
@@ -325,7 +331,8 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
   it('verlangt vor der Abfrage ein Suchkriterium', async () => {
     configure([]);
     renderPage();
-    const modalityButton = await screen.findByRole('button', { name: /ARCHIVE/ });
+    // exakt die Quelle, nicht FAKEARCHIVE
+  const modalityButton = await screen.findByRole('button', { name: /^ARCHIVE \(ARCHIVE\)/ });
     fireEvent.click(modalityButton);
 
     fireEvent.click(screen.getByRole('button', { name: /^Query$|^Abfragen$/ }));
@@ -515,6 +522,18 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Retrieve$|^Abrufen$/ }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('bietet Orthanc-Modalitäten als Kopierziele an', async () => {
+    configure([]);
+    renderPage();
+    await queryStudies('Muster');
+
+    // FAKEARCHIVE steht in /modalities und ist nicht die gewählte Quelle
+    const select = screen.getByLabelText(/copy to|kopieren nach/i);
+    expect(within(select).getByRole('option', { name: /FAKEARCHIVE/ })).toBeInTheDocument();
+    // die Quelle selbst taucht nicht als Ziel auf
+    expect(within(select).queryByRole('option', { name: /^ARCHIVE/ })).not.toBeInTheDocument();
   });
 
   it('prüft die gewählte Modalität automatisch per C-ECHO', async () => {
