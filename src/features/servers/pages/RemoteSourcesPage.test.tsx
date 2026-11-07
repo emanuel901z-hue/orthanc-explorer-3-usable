@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import RemoteSourcesPage from './RemoteSourcesPage';
 import { loadConfig, __resetConfigForTests } from '@/config/runtime';
+import { targetsApi } from '@/api/targets';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
 import '@/i18n';
 
@@ -140,18 +141,18 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
       Promise.resolve(
         params?.Level === 'Series'
           ? {
-              queryId: 'q-series',
-              answers: [{
-                index: 0,
-                tags: {
-                  SeriesInstanceUID: '1.2.3.1',
-                  SeriesDescription: 'axial',
-                  Modality: 'CT',
-                  SeriesNumber: '2',
-                  NumberOfSeriesRelatedInstances: '10',
-                },
-              }],
-            }
+            queryId: 'q-series',
+            answers: [{
+              index: 0,
+              tags: {
+                SeriesInstanceUID: '1.2.3.1',
+                SeriesDescription: 'axial',
+                Modality: 'CT',
+                SeriesNumber: '2',
+                NumberOfSeriesRelatedInstances: '10',
+              },
+            }],
+          }
           : ANSWERS,
       ),
     );
@@ -303,7 +304,7 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     configure([]);
     renderPage();
     // exakt die Quelle, nicht FAKEARCHIVE
-  const modalityButton = await screen.findByRole('button', { name: /^ARCHIVE \(ARCHIVE\)/ });
+    const modalityButton = await screen.findByRole('button', { name: /^ARCHIVE \(ARCHIVE\)/ });
     fireEvent.click(modalityButton);
 
     fireEvent.change(screen.getByLabelText(/search:|suche:/i), { target: { value: '29.08.' } });
@@ -332,7 +333,7 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     configure([]);
     renderPage();
     // exakt die Quelle, nicht FAKEARCHIVE
-  const modalityButton = await screen.findByRole('button', { name: /^ARCHIVE \(ARCHIVE\)/ });
+    const modalityButton = await screen.findByRole('button', { name: /^ARCHIVE \(ARCHIVE\)/ });
     fireEvent.click(modalityButton);
 
     fireEvent.click(screen.getByRole('button', { name: /^Query$|^Abfragen$/ }));
@@ -497,7 +498,7 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     );
   });
 
-  it('überträgt bei abgewählten Serien die ganze Studie', async () => {
+  it('überträgt bei abgewählten Serien die ganze Studie und schaltet per Kopf-Checkbox um', async () => {
     configure([]);
     mockRetrieve.mockResolvedValue({ Description: 'ok' });
     renderPage();
@@ -506,6 +507,14 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     fireEvent.click(screen.getAllByTestId('remote-study-row')[0]);
     const dialog = await screen.findByRole('dialog');
     await within(dialog).findByText('axial');
+
+    // Kopf-Checkbox in der Serien-Tabelle wählt alle ab und wieder an
+    const headerCheckbox = within(dialog).getByRole('checkbox', { name: /^Select all$|^Alle auswählen$/ });
+    expect(headerCheckbox).toBeChecked();
+    fireEvent.click(headerCheckbox);
+    expect(headerCheckbox).not.toBeChecked();
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Select all$|^Alle auswählen$/ }));
+    expect(headerCheckbox).toBeChecked();
 
     fireEvent.click(within(dialog).getByRole('button', { name: /^None$|^Keine$/ }));
     fireEvent.click(within(dialog).getByRole('button', { name: /^Retrieve$|^Abrufen$/ }));
@@ -619,6 +628,96 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     // der Fehlschlag bleibt still (kein Toast), aber der Zustand steht
     await waitFor(() => expect(mockEcho).toHaveBeenCalledWith('ARCHIVE'));
     expect(mockToast.error).not.toHaveBeenCalled();
+  });
+
+  it('übergibt dem Ziel-Dialog nur die AET-Zielliste ohne Orthanc-Modalitäten', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    renderPage();
+
+    fireEvent.click(screen.getByRole('button', { name: /manage targets|ziele verwalten/i }));
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('HST BRENNER')).toBeInTheDocument();
+    // Orthanc-Modalitäten (ARCHIVE, FAKEARCHIVE) gehören nicht in die AET-Datei
+    expect(within(dialog).queryByText('ARCHIVE')).not.toBeInTheDocument();
+    expect(within(dialog).queryByText('FAKEARCHIVE')).not.toBeInTheDocument();
+  });
+
+  it('deaktiviert Kopieren, wenn ein gespeichertes Ziel nicht mehr in der Liste existiert', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    usePersistedUiStore.setState({ values: { 'remoteSources.copyTarget': 'GELOESCHT' } });
+    renderPage();
+    await queryStudies();
+
+    const copyButton = screen.getByRole('button', { name: /^Copy$|^Kopieren$/ });
+    expect(copyButton).toBeDisabled();
+  });
+
+  it('wählt das Hauptarchiv ARCHIVE beim Start automatisch voraus', async () => {
+    configure([]);
+    renderPage();
+
+    await waitFor(() => expect(mockEcho).toHaveBeenCalledWith('ARCHIVE'));
+    expect(screen.getByText(/10\.0\.1\.30:104/)).toBeInTheDocument();
+  });
+
+  it('erlaubt nach dem Kopieren den Versand derselben Studie an ein zweites Ziel ohne neue Suche', async () => {
+    configure([
+      { aet: 'hst_burn2CD', label: 'HST BRENNER' },
+      { aet: 'JungPacs', label: 'Jung PACS' },
+    ]);
+    mockRetrieve.mockResolvedValue({ ID: 'job-1' });
+    const { rerender } = renderPage();
+    await queryStudies();
+
+    const targetSelect = screen.getByLabelText(/copy to|kopieren nach/i);
+    fireEvent.change(targetSelect, { target: { value: 'hst_burn2CD' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Copy$|^Kopieren$/ }));
+    await waitFor(() =>
+      expect(mockRetrieve).toHaveBeenCalledWith('ARCHIVE', 'q-1', 0, 'hst_burn2CD', { asynchronous: true }),
+    );
+
+    mockJobs.mockReturnValue({ data: [copyJob('Success')], isLoading: false, isError: false });
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <RemoteSourcesPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText('0x0000')).toBeInTheDocument();
+
+    // Wechsel auf ein zweites Ziel blendet den Kopieren-Knopf sofort wieder ein
+    fireEvent.change(screen.getByLabelText(/copy to|kopieren nach/i), { target: { value: 'JungPacs' } });
+    const secondCopyButton = await screen.findByRole('button', { name: /^Copy$|^Kopieren$/ });
+    expect(secondCopyButton).toBeEnabled();
+    fireEvent.click(secondCopyButton);
+    await waitFor(() =>
+      expect(mockRetrieve).toHaveBeenCalledWith('ARCHIVE', 'q-1', 0, 'JungPacs', { asynchronous: true }),
+    );
+  });
+
+  it('ändert im Ziel-Dialog die Reihenfolge und speichert sie', async () => {
+    configure([
+      { aet: 'hst_burn2CD', label: 'HST BRENNER' },
+      { aet: 'JungPacs', label: 'Jung PACS' },
+    ]);
+    const replaceSpy = vi.spyOn(targetsApi, 'replace').mockImplementation(async (next) => next);
+    renderPage();
+
+    fireEvent.click(screen.getByRole('button', { name: /manage targets|ziele verwalten/i }));
+    const dialog = await screen.findByRole('dialog');
+
+    // Zweiten Eintrag („JungPacs“) nach oben schieben
+    fireEvent.click(within(dialog).getByRole('button', { name: /Move JungPacs up|JungPacs nach oben/i }));
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Save$|^Speichern$/ }));
+
+    await waitFor(() =>
+      expect(replaceSpy).toHaveBeenCalledWith([
+        { aet: 'JungPacs', label: 'Jung PACS' },
+        { aet: 'hst_burn2CD', label: 'HST BRENNER' },
+      ]),
+    );
+    replaceSpy.mockRestore();
   });
 });
 

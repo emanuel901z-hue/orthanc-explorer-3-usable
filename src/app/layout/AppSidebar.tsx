@@ -34,6 +34,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { brokerApi } from '@/api/broker';
+import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
+import { describeCopyJob, isMoveJob } from '@/features/servers/lib/copy-job';
 import { AboutDialog } from './AboutDialog';
 import { useUiStore } from '@/store/ui-store';
 import { useFeature } from '@/config/features';
@@ -65,6 +67,20 @@ export function AppSidebar() {
       ? { count: health.warning, variant: 'secondary' as const, label: t('broker.healthWarnings', { count: health.warning }) }
       : null;
 
+  const { data: orthancJobs = [] } = useOrthancJobs();
+  const copyJobBadge = (() => {
+    const copies = orthancJobs.filter(isMoveJob).map(describeCopyJob);
+    const running = copies.filter((job) => job.state === 'running').length;
+    const failed = copies.filter((job) => job.state === 'failed').length;
+    if (running > 0) {
+      return { count: running, className: 'text-primary', label: `${running} ${t('copyJobs.stateRunning', { defaultValue: 'running' })}` };
+    }
+    if (failed > 0) {
+      return { count: failed, className: 'text-destructive', label: `${failed} ${t('copyJobs.stateFailed', { defaultValue: 'failed' })}` };
+    }
+    return null;
+  })();
+
   type NavItem = {
     title: string;
     url: string;
@@ -73,6 +89,8 @@ export function AppSidebar() {
   };
 
   const navItems: NavItem[] = [
+    { title: t('nav.remoteSources'), url: '/remote-sources', icon: Globe },
+    { title: t('nav.copyJobs', { defaultValue: 'Copy jobs' }), url: '/copy-jobs', icon: Copy },
     { title: t('nav.studies'), url: '/studies', icon: BookOpen },
     { title: t('nav.upload'), url: '/upload', icon: Upload },
     { title: t('nav.activity'), url: '/activity', icon: ActivityIcon },
@@ -99,8 +117,6 @@ export function AppSidebar() {
         ],
       }]
       : []),
-    { title: t('nav.remoteSources'), url: '/remote-sources', icon: Globe },
-    { title: t('nav.copyJobs', { defaultValue: 'Copy jobs' }), url: '/copy-jobs', icon: Copy },
     { title: t('nav.settings'), url: '/settings', icon: Settings },
   ];
 
@@ -150,6 +166,15 @@ export function AppSidebar() {
                       aria-label={healthBadge.label}
                     >
                       {healthBadge.count}
+                    </SidebarMenuBadge>
+                  )}
+                  {item.url === '/copy-jobs' && copyJobBadge && (
+                    <SidebarMenuBadge
+                      className={copyJobBadge.className}
+                      title={copyJobBadge.label}
+                      aria-label={copyJobBadge.label}
+                    >
+                      {copyJobBadge.count}
                     </SidebarMenuBadge>
                   )}
                   {item.children && (

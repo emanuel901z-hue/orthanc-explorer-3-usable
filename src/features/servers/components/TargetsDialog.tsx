@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Plus } from 'lucide-react';
+import { ArrowDown, ArrowUp, GripVertical, Trash2, Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,7 @@ export default function TargetsDialog({ open, onOpenChange, targets, onSave, sav
   const [aet, setAet] = useState('');
   const [label, setLabel] = useState('');
   const [error, setError] = useState<string | undefined>(undefined);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -66,6 +67,16 @@ export default function TargetsDialog({ open, onOpenChange, targets, onSave, sav
 
   const remove = (target: string) => setDraft(draft.filter((entry) => entry.aet !== target));
 
+  const move = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= draft.length || fromIndex === toIndex) return;
+    setDraft((prev) => {
+      const next = [...prev];
+      const [item] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, item);
+      return next;
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
@@ -79,7 +90,7 @@ export default function TargetsDialog({ open, onOpenChange, targets, onSave, sav
           </DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-y-auto space-y-3 pr-1">
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
           <div className="flex flex-col sm:flex-row gap-2">
             <Input
               className="h-9 sm:w-[200px] font-mono"
@@ -115,27 +126,71 @@ export default function TargetsDialog({ open, onOpenChange, targets, onSave, sav
                 {t('targets.empty', { defaultValue: 'No targets yet.' })}
               </li>
             )}
-            {draft.map((entry) => (
-              <li key={entry.aet} className="flex items-center justify-between gap-2 p-2 text-sm">
-                <span className="min-w-0">
-                  <span className="font-medium">{entry.label ?? entry.aet}</span>
-                  <span className="ml-2 font-mono text-xs text-muted-foreground">{entry.aet}</span>
+            {draft.map((entry, index) => (
+              <li
+                key={entry.aet}
+                draggable
+                onDragStart={() => setDragIndex(index)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (dragIndex !== null && dragIndex !== index) {
+                    move(dragIndex, index);
+                  }
+                  setDragIndex(null);
+                }}
+                onDragEnd={() => setDragIndex(null)}
+                className="flex items-center justify-between gap-2 p-2 text-sm hover:bg-muted/30"
+              >
+                <span className="flex items-center gap-2 min-w-0">
+                  <GripVertical className="h-3.5 w-3.5 text-muted-foreground shrink-0 cursor-grab" aria-hidden="true" />
+                  <span className="min-w-0 truncate">
+                    <span className="font-medium">{entry.label ?? entry.aet}</span>
+                    <span className="ml-2 font-mono text-xs text-muted-foreground">{entry.aet}</span>
+                  </span>
                 </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 text-destructive"
-                  aria-label={t('targets.remove', { defaultValue: 'Remove {{aet}}', aet: entry.aet })}
-                  onClick={() => remove(entry.aet)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <div className="flex items-center gap-0.5 shrink-0">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0"
+                    disabled={index === 0}
+                    aria-label={t('targets.moveUp', { defaultValue: 'Move {{aet}} up', aet: entry.aet })}
+                    title={t('targets.moveUp', { defaultValue: 'Move {{aet}} up', aet: entry.aet })}
+                    onClick={() => move(index, index - 1)}
+                  >
+                    <ArrowUp className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0"
+                    disabled={index === draft.length - 1}
+                    aria-label={t('targets.moveDown', { defaultValue: 'Move {{aet}} down', aet: entry.aet })}
+                    title={t('targets.moveDown', { defaultValue: 'Move {{aet}} down', aet: entry.aet })}
+                    onClick={() => move(index, index + 1)}
+                  >
+                    <ArrowDown className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0 text-destructive"
+                    aria-label={t('targets.remove', { defaultValue: 'Remove {{aet}}', aet: entry.aet })}
+                    title={t('targets.remove', { defaultValue: 'Remove {{aet}}', aet: entry.aet })}
+                    onClick={() => remove(entry.aet)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2 pt-2 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t('targets.cancel', { defaultValue: 'Cancel' })}
           </Button>

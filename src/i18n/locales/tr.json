@@ -413,6 +413,8 @@
       "accession": "Erişim no",
       "birthDate": "Doğum tarihi",
       "studyDate": "İnceleme tarihi",
+      "studyDescription": "İnceleme açıklaması",
+      "studyInstanceUid": "İnceleme UID'si",
       "modality": "Modalite"
     },
     "searchFoundAs": "{{kind}} olarak bulundu: {{value}}",
@@ -460,7 +462,8 @@
     "bulkHint": "Her inceleme için bir C-MOVE başlatılır. Arşiv hepsini teslim etmek zorunda — genelde yalnızca birkaç inceleme birliktedir.",
     "bulkCancel": "İptal",
     "bulkCopyConfirm": "{{count}} kopyala",
-    "bulkRetrieveConfirm": "{{count}} getir"
+    "bulkRetrieveConfirm": "{{count}} getir",
+    "copyAgain": "Yeniden kopyala"
   },
   "actions": {
     "viewer": "Görüntüleyici",
@@ -2257,7 +2260,13 @@
       "canceled": "iptal edildi",
       "other": "arşiv bir sorun bildiriyor"
     },
-    "dimseLegend": "DIMSE kaynak arşivin yanıtıdır: 0x0000 = tüm alt işlemler teslim edildi, 0xBxxx = bazı alt işlemler başarısız (kısmen teslim), 0xAxxx = reddedildi (ör. hedef bilinmiyor), 0xCxxx = hata, 0xFE00 = iptal edildi."
+    "dimseLegend": "DIMSE kaynak arşivin yanıtıdır: 0x0000 = tüm alt işlemler teslim edildi, 0xBxxx = bazı alt işlemler başarısız (kısmen teslim), 0xAxxx = reddedildi (ör. hedef bilinmiyor), 0xCxxx = hata, 0xFE00 = iptal edildi.",
+    "searchPlaceholder": "Hasta ID, hedef veya UID ile filtrele…",
+    "cancelJob": "İşi iptal et",
+    "retryJob": "İşi yeniden dene",
+    "retried": "Kopyalama işi yeniden başlatıldı",
+    "canceled": "Kopyalama işi iptal edildi",
+    "actionFailed": "İş işlemi başarısız oldu"
   },
   "help": {
     "help_copyJobs_title": "Kopyalama işleri",
@@ -2443,6 +2452,8 @@
     "saveFailed": "Hedefler kaydedilemedi",
     "errAet": "Lütfen bir AE başlığı girin.",
     "errAetLength": "AE başlığı en fazla 16 karakterdir.",
-    "errDuplicate": "Bu AE başlığı zaten var."
+    "errDuplicate": "Bu AE başlığı zaten var.",
+    "moveUp": "{{aet}} yukarı taşı",
+    "moveDown": "{{aet}} aşağı taşı"
   }
 }

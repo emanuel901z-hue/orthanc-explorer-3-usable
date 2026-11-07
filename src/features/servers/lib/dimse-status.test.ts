@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { DIMSE_SUCCESS, dimseSeverity, dimseStatusKey, extractDimseStatus, formatDimseStatus } from './dimse-status';
 
 describe('extractDimseStatus', () => {
-  it('liest den Status aus Details (mehrere Antworten)', () => {
-    expect(extractDimseStatus({ Details: [{ DimseErrorStatus: 0 }, { DimseErrorStatus: 0xc000 }] })).toBe(0);
+  it('liest den Status aus Details und lässt keinen Fehler hinter 0x0000 verschwinden', () => {
+    expect(extractDimseStatus({ Details: [{ DimseErrorStatus: 0 }] })).toBe(0);
+    expect(extractDimseStatus({ Details: [{ DimseErrorStatus: 0 }, { DimseErrorStatus: 0xc000 }] })).toBe(0xc000);
+    expect(extractDimseStatus({ Details: [{ DimseErrorStatus: 0 }, { DimseErrorStatus: 0xb000 }] })).toBe(0xb000);
   });
 
   it('liest den flachen Status', () => {

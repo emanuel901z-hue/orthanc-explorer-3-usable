@@ -19,7 +19,7 @@ import { DicomModality } from '@/shared/types';
 
 const modalitySchema = z.object({
   name: z.string().trim().min(1, 'required').max(100),
-  aet: z.string().trim().min(1, 'required').max(16, 'aetMax').regex(/^[A-Z0-9_]+$/i, 'aetPattern'),
+  aet: z.string().trim().min(1, 'required').max(16, 'aetMax').regex(/^[A-Z0-9_-]+$/i, 'aetPattern'),
   host: z.string().trim().min(1, 'required').max(255),
   port: z.coerce.number().int().min(1, 'portMin').max(65535, 'portMax'),
   manufacturer: z.string().trim().max(100).optional(),
@@ -34,7 +34,25 @@ interface AddModalityDialogProps {
   onSave: (values: ModalityFormValues) => void;
 }
 
-const MANUFACTURERS = ['Siemens', 'GE Healthcare', 'Philips', 'Canon', 'Fujifilm', 'Hologic', 'Other'];
+/**
+ * Orthanc akzeptiert bei PUT /modalities/:name nur die eigenen
+ * ModalityManufacturer-Werte — fremde Namen wie „Siemens“ oder „Other“
+ * quittiert Orthanc mit HTTP 400 („Unknown modality manufacturer“).
+ */
+const MANUFACTURERS = [
+  'Generic',
+  'GenericNoWildcardInDates',
+  'GenericNoUniversalWildcard',
+  'StoreScp',
+  'ClearCanvas',
+  'Dcm4Chee',
+  'Vitrea',
+  'AgfaImpax',
+  'EFilm2',
+  'SyngoVia',
+  'MedInria',
+  'GE',
+];
 
 export default function AddModalityDialog({ open, onOpenChange, editModality, onSave }: AddModalityDialogProps) {
   const { t } = useTranslation();
@@ -87,7 +105,12 @@ export default function AddModalityDialog({ open, onOpenChange, editModality, on
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="mod-name">{t('modality.name')}</Label>
-            <Input id="mod-name" placeholder={t('modality.namePlaceholder')} {...register('name')} />
+            <Input
+              id="mod-name"
+              placeholder={t('modality.namePlaceholder')}
+              disabled={Boolean(editModality)}
+              {...register('name')}
+            />
             {errors.name && <p className="text-xs text-destructive">{t('modality.validation.required')}</p>}
           </div>
 

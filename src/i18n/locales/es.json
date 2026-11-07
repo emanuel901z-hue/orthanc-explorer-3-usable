@@ -324,6 +324,8 @@
       "accession": "Admisión",
       "birthDate": "Fecha de nacimiento",
       "studyDate": "Fecha del estudio",
+      "studyDescription": "Descripción del estudio",
+      "studyInstanceUid": "UID del estudio",
       "modality": "Modalidad"
     },
     "searchFoundAs": "Encontrado como {{kind}}: {{value}}",
@@ -371,7 +373,8 @@
     "bulkHint": "Esto inicia un C-MOVE por estudio. El archivo debe entregarlos todos; normalmente solo pocos estudios van juntos.",
     "bulkCancel": "Cancelar",
     "bulkCopyConfirm": "Copiar {{count}}",
-    "bulkRetrieveConfirm": "Recuperar {{count}}"
+    "bulkRetrieveConfirm": "Recuperar {{count}}",
+    "copyAgain": "Copiar de nuevo"
   },
   "actions": {
     "viewer": "Visor",
@@ -2257,7 +2260,13 @@
       "canceled": "cancelado",
       "other": "el archivo informa un problema"
     },
-    "dimseLegend": "DIMSE es la respuesta del archivo de origen: 0x0000 = todas las suboperaciones entregadas, 0xBxxx = algunas suboperaciones fallaron (entrega parcial), 0xAxxx = rechazado (p. ej. destino desconocido), 0xCxxx = error, 0xFE00 = cancelado."
+    "dimseLegend": "DIMSE es la respuesta del archivo de origen: 0x0000 = todas las suboperaciones entregadas, 0xBxxx = algunas suboperaciones fallaron (entrega parcial), 0xAxxx = rechazado (p. ej. destino desconocido), 0xCxxx = error, 0xFE00 = cancelado.",
+    "searchPlaceholder": "Filtrar por ID de paciente, destino o UID…",
+    "cancelJob": "Cancelar trabajo",
+    "retryJob": "Reintentar trabajo",
+    "retried": "Trabajo de copia reiniciado",
+    "canceled": "Trabajo de copia cancelado",
+    "actionFailed": "La acción sobre el trabajo falló"
   },
   "help": {
     "help_copyJobs_title": "Trabajos de copia",
@@ -2443,6 +2452,8 @@
     "saveFailed": "No se pudieron guardar los destinos",
     "errAet": "Introduzca un AE title.",
     "errAetLength": "Un AE title tiene como máximo 16 caracteres.",
-    "errDuplicate": "Ese AE title ya existe."
+    "errDuplicate": "Ese AE title ya existe.",
+    "moveUp": "Subir {{aet}}",
+    "moveDown": "Bajar {{aet}}"
   }
 }

@@ -1,25 +1,41 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
 import { auditClient } from "@/lib/audit";
 import { __setLoggerSinkForTests, __resetLoggerSinkForTests } from "@/lib/logger";
+import { useAuditStore } from "@/store/audit-store";
 
 describe("auditClient", () => {
   const sink = vi.fn();
-  beforeEach(() => { sink.mockClear(); __setLoggerSinkForTests(sink); });
+  beforeEach(() => {
+    sink.mockClear();
+    useAuditStore.getState().clear();
+    __setLoggerSinkForTests(sink);
+  });
   afterAll(() => __resetLoggerSinkForTests());
 
-  it("emits audit events via the logger", () => {
+  it("emits audit events via the logger and records completed events in useAuditStore", () => {
     auditClient.emit({
-      action: "study.delete",
-      resourceType: "study",
-      resourceId: "abc-123",
+      action: "modality.retrieve",
+      resourceType: "modality",
+      resourceId: "ARCHIVE",
+      destinationId: "hst_burn2CD",
       outcome: "success",
       timestamp: "2026-04-11T00:00:00Z",
     });
     expect(sink).toHaveBeenCalledOnce();
     const event = sink.mock.calls[0][0];
     expect(event.event).toBe("audit");
-    expect(event.fields.action).toBe("study.delete");
+    expect(event.fields.action).toBe("modality.retrieve");
+    expect(event.fields.destinationId).toBe("hst_burn2CD");
     expect(event.fields.outcome).toBe("success");
+
+    const stored = useAuditStore.getState().events;
+    expect(stored).toHaveLength(1);
+    expect(stored[0]).toMatchObject({
+      action: "modality.retrieve",
+      severity: "success",
+      title: "modality.retrieve: ARCHIVE → hst_burn2CD",
+      metadata: expect.objectContaining({ destinationId: "hst_burn2CD" }),
+    });
   });
 
   it("includes resourceType and resourceId in the log fields", () => {

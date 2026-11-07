@@ -29,7 +29,18 @@ import LocalWorklistPage from "@/features/broker/pages/LocalWorklistPage";
 import StationsPage from "@/features/broker/pages/StationsPage";
 import PrefetchPage from "@/features/broker/pages/PrefetchPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
+import { getConfig } from "@/config/runtime";
 import NotFound from "./pages/NotFound";
+
+function DefaultRedirect() {
+  let isCopyWorkstation = false;
+  try {
+    isCopyWorkstation = Boolean(getConfig().cmoveTargets?.length);
+  } catch {
+    isCopyWorkstation = false;
+  }
+  return <Navigate to={isCopyWorkstation ? "/remote-sources" : "/studies"} replace />;
+}
 
 const App = () => (
   <AppProviders>
@@ -39,7 +50,7 @@ const App = () => (
         <BrowserRouter basename="/oe3">
           <Routes>
             <Route path="/" element={<AppLayout />}>
-              <Route index element={<Navigate to="/studies" replace />} />
+              <Route index element={<DefaultRedirect />} />
               <Route path="studies" element={<StudyListPage />} />
               <Route path="studies/:studyId" element={<StudyDetailPage />} />
               <Route path="studies/:studyId/series/:seriesId" element={<SeriesDetailPage />} />

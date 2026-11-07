@@ -413,6 +413,8 @@
       "accession": "رقم الدخول",
       "birthDate": "تاريخ الميلاد",
       "studyDate": "تاريخ الفحص",
+      "studyDescription": "وصف الفحص",
+      "studyInstanceUid": "معرّف الفحص",
       "modality": "الوسيط"
     },
     "searchFoundAs": "وُجد كـ {{kind}}: {{value}}",
@@ -460,7 +462,8 @@
     "bulkHint": "يبدأ هذا أمر C-MOVE لكل فحص. على الأرشيف تسليمها جميعًا — وعادةً تخص عدة فحوص قليلة فقط.",
     "bulkCancel": "إلغاء",
     "bulkCopyConfirm": "نسخ {{count}}",
-    "bulkRetrieveConfirm": "استرجاع {{count}}"
+    "bulkRetrieveConfirm": "استرجاع {{count}}",
+    "copyAgain": "نسخ مرة أخرى"
   },
   "actions": {
     "viewer": "العارض",
@@ -2257,7 +2260,13 @@
       "canceled": "أُلغي",
       "other": "الأرشيف يبلّغ عن مشكلة"
     },
-    "dimseLegend": "DIMSE هو رد الأرشيف المصدر: 0x0000 = تم تسليم كل العمليات الفرعية، 0xBxxx = فشل بعض العمليات الفرعية (تسليم جزئي)، 0xAxxx = مرفوض (مثل هدف غير معروف)، 0xCxxx = خطأ، 0xFE00 = أُلغي."
+    "dimseLegend": "DIMSE هو رد الأرشيف المصدر: 0x0000 = تم تسليم كل العمليات الفرعية، 0xBxxx = فشل بعض العمليات الفرعية (تسليم جزئي)، 0xAxxx = مرفوض (مثل هدف غير معروف)، 0xCxxx = خطأ، 0xFE00 = أُلغي.",
+    "searchPlaceholder": "تصفية حسب معرّف المريض أو الهدف أو UID…",
+    "cancelJob": "إلغاء المهمة",
+    "retryJob": "إعادة محاولة المهمة",
+    "retried": "أُعيد بدء مهمة النسخ",
+    "canceled": "أُلغيت مهمة النسخ",
+    "actionFailed": "فشل الإجراء على المهمة"
   },
   "help": {
     "help_copyJobs_title": "مهام النسخ",
@@ -2443,6 +2452,8 @@
     "saveFailed": "تعذّر حفظ الأهداف",
     "errAet": "يُرجى إدخال AE title.",
     "errAetLength": "AE title لا يزيد عن 16 حرفًا.",
-    "errDuplicate": "AE title موجود بالفعل."
+    "errDuplicate": "AE title موجود بالفعل.",
+    "moveUp": "تحريك {{aet}} لأعلى",
+    "moveDown": "تحريك {{aet}} لأسفل"
   }
 }

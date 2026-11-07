@@ -472,6 +472,8 @@
       "accession": "Accession",
       "birthDate": "Birth date",
       "studyDate": "Study date",
+      "studyDescription": "Study description",
+      "studyInstanceUid": "Study UID",
       "modality": "Modality"
     },
     "searchFoundAs": "Found as {{kind}}: {{value}}",
@@ -519,11 +521,18 @@
     "bulkHint": "That starts one C-MOVE per study. The archive has to deliver them all — usually only a few studies belong together.",
     "bulkCancel": "Cancel",
     "bulkCopyConfirm": "Copy {{count}}",
-    "bulkRetrieveConfirm": "Retrieve {{count}}"
+    "bulkRetrieveConfirm": "Retrieve {{count}}",
+    "copyAgain": "Copy again"
   },
   "copyJobs": {
     "title": "Copy jobs",
     "subtitle": "C-MOVE orders this workstation sent to the archive — status and result per study",
+    "searchPlaceholder": "Filter by patient ID, target or UID…",
+    "cancelJob": "Cancel job",
+    "retryJob": "Retry job",
+    "retried": "Copy job restarted",
+    "canceled": "Copy job canceled",
+    "actionFailed": "Job action failed",
     "filterAll": "All",
     "stateRunning": "running",
     "stateSuccess": "delivered cleanly",
@@ -983,7 +992,7 @@
     "validation": {
       "required": "This field is required",
       "aetMax": "AET must be ≤16 characters",
-      "aetPattern": "Only letters, numbers, underscores",
+      "aetPattern": "Only letters, numbers, underscores and hyphens",
       "portRange": "Port must be between 1 and 65535"
     },
     "health": "Health",
@@ -2561,6 +2570,8 @@
     "labelPlaceholder": "Label (e.g. house or department)",
     "add": "Add",
     "remove": "Remove {{aet}}",
+    "moveUp": "Move {{aet}} up",
+    "moveDown": "Move {{aet}} down",
     "empty": "No targets yet.",
     "save": "Save",
     "saving": "Saving…",

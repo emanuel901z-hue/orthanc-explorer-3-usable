@@ -77,7 +77,11 @@ function expandYear(yy: number): number {
 }
 
 function isoDate(year: number, month: number, day: number): string | undefined {
-  if (month < 1 || month > 12 || day < 1 || day > 31) return undefined;
+  if (year < 1900 || year > 2099 || month < 1 || month > 12 || day < 1 || day > 31) return undefined;
+  const utc = new Date(Date.UTC(year, month - 1, day));
+  if (utc.getUTCFullYear() !== year || utc.getUTCMonth() !== month - 1 || utc.getUTCDate() !== day) {
+    return undefined;
+  }
   return `${year}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`;
 }
 
@@ -91,9 +95,14 @@ export function parseDateToken(token: string): string | undefined {
   const dotted = /^(\d{1,4})[.\-/](\d{1,2})[.\-/](\d{1,4})$/.exec(token);
   if (dotted) {
     const [, first, second, third] = dotted;
-    if (first.length === 4) return isoDate(Number(first), Number(second), Number(third));
-    const year = third.length <= 2 ? expandYear(Number(third)) : Number(third);
-    return isoDate(year, Number(second), Number(first));
+    if (first.length === 4 && third.length <= 2) {
+      return isoDate(Number(first), Number(second), Number(third));
+    }
+    if (first.length <= 2 && (third.length <= 2 || third.length === 4)) {
+      const year = third.length <= 2 ? expandYear(Number(third)) : Number(third);
+      return isoDate(year, Number(second), Number(first));
+    }
+    return undefined;
   }
 
   if (!/^\d{4,8}$/.test(token)) return undefined;

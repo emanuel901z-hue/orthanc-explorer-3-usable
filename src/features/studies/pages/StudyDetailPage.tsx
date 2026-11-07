@@ -4,7 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  MoreHorizontal, Download, Trash2, Send, Eye, Shield, ShieldAlert, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown, Server, Scissors } from 'lucide-react';
+  MoreHorizontal, Download, Trash2, Send, Eye, Shield, ShieldAlert, Pencil, Tag, HardDrive, Layers, Image, LayoutGrid, List, AlertTriangle, Search, ArrowUp, ArrowDown, ArrowUpDown, Loader2, GitMerge, BookOpen, FolderArchive, Code, ExternalLink, Share2, Plus, Settings2, ChevronDown, Server, Scissors
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -50,7 +51,7 @@ import {
 
 import { deleteStudyAction } from '@/actions/deleteStudy';
 import { PageHelp } from '@/shared/components/PageHelp';
-import { deleteSeriesAction } from '@/actions/deleteSeries';import { downloadStudyAction } from '@/actions/downloadStudy';
+import { deleteSeriesAction } from '@/actions/deleteSeries'; import { downloadStudyAction } from '@/actions/downloadStudy';
 import { describeError } from '@/lib/errors';
 import { useFeature } from '@/config/features';
 import { getConfig } from '@/config/runtime';
@@ -420,7 +421,7 @@ export default function StudyDetailPage() {
           </Button>
           {/* External Viewers: VolView, MedDream, Weasis (configurable in Settings) */}
           {(() => {
-            const viewers = JSON.parse(localStorage.getItem('oe3-viewers') || '[]') as Array<{id: string; url: string; enabled: boolean; type: string}>;
+            const viewers = JSON.parse(localStorage.getItem('oe3-viewers') || '[]') as Array<{ id: string; url: string; enabled: boolean; type: string }>;
             return viewers
               .filter((v) => v.enabled && v.url && v.id !== 'ohif' && v.id !== 'stone')
               .map((v) => (
@@ -602,15 +603,15 @@ export default function StudyDetailPage() {
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     disabled={deleteMutation.isPending}
                     onClick={() => {
-                    audit({ action: 'delete', title: `Study deleted: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'warning', metadata: { 'Study ID': studyId!, 'Series': String(study.numberOfSeries), 'Instances': String(study.numberOfInstances) } });
-                    deleteMutation.mutate(studyId!);
-                  }}
-                >
-                  {t('studies.deletePermanently')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                      audit({ action: 'delete', title: `Study deleted: ${formatPatientName(study.patientName)}`, resource: study.studyInstanceUID, severity: 'warning', metadata: { 'Study ID': studyId!, 'Series': String(study.numberOfSeries), 'Instances': String(study.numberOfInstances) } });
+                      deleteMutation.mutate(studyId!);
+                    }}
+                  >
+                    {t('studies.deletePermanently')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </div>
@@ -739,7 +740,35 @@ export default function StudyDetailPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between gap-2 flex-col sm:flex-row">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Series ({series.length})</CardTitle>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Series ({selectedSeriesIds.size}/{series.length})
+                      </CardTitle>
+                      {filteredSortedSeries.length > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            disabled={allSelected}
+                            onClick={() => setSelectedSeriesIds(new Set(allFilteredIds))}
+                          >
+                            {t('remote.selectAll', { defaultValue: 'Select all' })}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            disabled={selectedSeriesIds.size === 0}
+                            onClick={() => setSelectedSeriesIds(new Set())}
+                          >
+                            {t('remote.selectNone', { defaultValue: 'None' })}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:flex-nowrap">
                       {seriesView === 'table' && (
                         <div className="relative flex-1 sm:w-48">
@@ -833,95 +862,105 @@ export default function StudyDetailPage() {
                       </Button>
                     </div>
                   )}
+                  {/* Bulk action bar (gilt für Tabellen- und Kachelansicht) */}
+                  {selectedSeriesIds.size > 0 && (
+                    <div className="flex items-center justify-between gap-2 mb-3 p-2 rounded-md bg-primary/5 border border-primary/20 flex-col sm:flex-row">
+                      <span className="text-sm font-medium">
+                        {selectedSeriesIds.size} series selected
+                      </span>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          disabled={bulkDownloading}
+                          onClick={handleBulkDownload}
+                        >
+                          {bulkDownloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                          Download {selectedSeriesIds.size} as ZIP
+                        </Button>
+                        {canSend && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={() => setBulkSendOpen(true)}
+                          >
+                            <Send className="h-3.5 w-3.5" /> {t('studyDetail.bulkSend', { defaultValue: 'Send' })}
+                          </Button>
+                        )}
+                        {canModify && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={() => setBulkMigrateOpen(true)}
+                          >
+                            <GitMerge className="h-3.5 w-3.5" /> {t('seriesMigrate.title', { defaultValue: 'Move to Study' })} ({selectedSeriesIds.size})
+                          </Button>
+                        )}
+                        {canModify && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={() => setSplitOpen(true)}
+                          >
+                            <Scissors className="h-3.5 w-3.5" /> {t('split.title', { defaultValue: 'Split' })} ({selectedSeriesIds.size})
+                          </Button>
+                        )}
+                        {canDelete && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-destructive"
+                            onClick={() => setBulkDeleteOpen(true)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> {t('studyDetail.bulkDelete', { defaultValue: 'Delete' })}
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedSeriesIds(new Set())}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   {seriesView === 'grid' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {filteredSortedSeries.map((s) => (
-                        <div
-                          key={s.id}
-                          className="border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer flex gap-3"
-                          onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
-                        >
-                          <SeriesThumbnail instanceId={s.firstInstanceId} />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <ModalityBadge modality={s.modality} />
-                              <span className="text-xs text-muted-foreground">#{s.seriesNumber}</span>
+                      {filteredSortedSeries.map((s) => {
+                        const isSelected = selectedSeriesIds.has(s.id);
+                        return (
+                          <div
+                            key={s.id}
+                            className={`border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer flex gap-3 ${isSelected ? 'bg-primary/5 border-primary/30' : ''}`}
+                            onClick={() => navigate(`/studies/${studyId}/series/${s.id}`)}
+                          >
+                            <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={() => toggleSelectSeries(s.id)}
+                                aria-label={`Select series ${s.seriesNumber}`}
+                              />
                             </div>
-                            <p className="text-sm font-medium truncate">{s.seriesDescription || 'No description'}</p>
-                            <p className="text-xs text-muted-foreground">{s.numberOfInstances} instances</p>
+                            <SeriesThumbnail instanceId={s.firstInstanceId} />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <ModalityBadge modality={s.modality} />
+                                <span className="text-xs text-muted-foreground">#{s.seriesNumber}</span>
+                              </div>
+                              <p className="text-sm font-medium truncate">{s.seriesDescription || 'No description'}</p>
+                              <p className="text-xs text-muted-foreground">{s.numberOfInstances} instances</p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <>
-                      {/* Bulk action bar */}
-                      {selectedSeriesIds.size > 0 && (
-                        <div className="flex items-center justify-between gap-2 mb-3 p-2 rounded-md bg-primary/5 border border-primary/20 flex-col sm:flex-row">
-                          <span className="text-sm font-medium">
-                            {selectedSeriesIds.size} series selected
-                          </span>
-                          <div className="flex gap-2 flex-wrap">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="gap-1.5"
-                              disabled={bulkDownloading}
-                              onClick={handleBulkDownload}
-                            >
-                              {bulkDownloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-                              Download {selectedSeriesIds.size} as ZIP
-                            </Button>
-                            {canSend && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5"
-                                onClick={() => setBulkSendOpen(true)}
-                              >
-                                <Send className="h-3.5 w-3.5" /> {t('studyDetail.bulkSend', { defaultValue: 'Send' })}
-                              </Button>
-                            )}
-                            {canModify && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5"
-                                onClick={() => setBulkMigrateOpen(true)}
-                              >
-                                <GitMerge className="h-3.5 w-3.5" /> {t('seriesMigrate.title', { defaultValue: 'Move to Study' })} ({selectedSeriesIds.size})
-                              </Button>
-                            )}
-                            {canModify && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5"
-                                onClick={() => setSplitOpen(true)}
-                              >
-                                <Scissors className="h-3.5 w-3.5" /> {t('split.title', { defaultValue: 'Split' })} ({selectedSeriesIds.size})
-                              </Button>
-                            )}
-                            {canDelete && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5 text-destructive"
-                                onClick={() => setBulkDeleteOpen(true)}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" /> {t('studyDetail.bulkDelete', { defaultValue: 'Delete' })}
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedSeriesIds(new Set())}
-                            >
-                              Clear
-                            </Button>
-                          </div>
-                        </div>
-                      )}
                       {isMobile ? (
                         /* ── Mobile Series Card View ── */
                         <div className="divide-y">

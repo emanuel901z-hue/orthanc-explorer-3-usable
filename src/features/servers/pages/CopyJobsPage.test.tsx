@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CopyJobsPage from './CopyJobsPage';
-import type { OrthancJob } from '@/api/jobs';
+import { jobsApi, type OrthancJob } from '@/api/jobs';
+import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
 import i18n from '@/i18n';
 
@@ -243,5 +244,64 @@ describe('CopyJobsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /failed|fehlgeschlagen/i }));
 
     expect(screen.getByText(/no jobs in this filter|keine aufträge in diesem filter/i)).toBeInTheDocument();
+  });
+
+  it('löst den Ziel-AET in seinen Klartext-Alias auf und filtert über das Suchfeld', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__OE3_CONFIG__ = {
+      orthancUrl: '',
+      authMode: 'none',
+      features: {},
+      cmoveTargets: [{ aet: 'hst_burn2CD', label: 'HST BRENNER' }],
+    };
+    __resetConfigForTests();
+    loadConfig();
+
+    mockJobs.mockReturnValue({
+      data: [
+        job(),
+        job({
+          ID: 'job-2',
+          Content: {
+            RemoteAet: 'ARCHIVE',
+            TargetAet: 'JIVEXTELE',
+            Query: [{ '0020,000d': '9.9.9', '0010,0020': 'P-999' }],
+            Details: [{ DimseErrorStatus: 0 }],
+          },
+        }),
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('HST BRENNER')).toBeInTheDocument();
+    expect(screen.getByText('hst_burn2CD')).toBeInTheDocument();
+
+    const searchInput = screen.getByLabelText(/filter by|filtern/i);
+    fireEvent.change(searchInput, { target: { value: 'HST BRENNER' } });
+
+    expect(screen.getByText('P-100')).toBeInTheDocument();
+    expect(screen.queryByText('P-999')).not.toBeInTheDocument();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).__OE3_CONFIG__;
+    __resetConfigForTests();
+  });
+
+  it('startet einen fehlgeschlagenen Auftrag per Klick neu', async () => {
+    const resubmitSpy = vi.spyOn(jobsApi, 'resubmit').mockResolvedValue({});
+    mockJobs.mockReturnValue({
+      data: [job({ ID: 'job-fail', State: 'Failure', Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xa801 }] } })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /retry job|auftrag erneut senden/i }));
+
+    await waitFor(() => expect(resubmitSpy).toHaveBeenCalledWith('job-fail'));
+    resubmitSpy.mockRestore();
   });
 });

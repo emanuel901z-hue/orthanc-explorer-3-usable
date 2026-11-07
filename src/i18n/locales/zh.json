@@ -324,6 +324,8 @@
       "accession": "登记号",
       "birthDate": "出生日期",
       "studyDate": "检查日期",
+      "studyDescription": "检查描述",
+      "studyInstanceUid": "检查 UID",
       "modality": "模态"
     },
     "searchFoundAs": "以{{kind}}找到：{{value}}",
@@ -371,7 +373,8 @@
     "bulkHint": "这会为每个检查发起一个 C-MOVE。归档必须全部送达；通常只有少数检查属于同一批。",
     "bulkCancel": "取消",
     "bulkCopyConfirm": "复制 {{count}} 个",
-    "bulkRetrieveConfirm": "取回 {{count}} 个"
+    "bulkRetrieveConfirm": "取回 {{count}} 个",
+    "copyAgain": "再次复制"
   },
   "actions": {
     "viewer": "查看器",
@@ -2257,7 +2260,13 @@
       "canceled": "已取消",
       "other": "归档报告了问题"
     },
-    "dimseLegend": "DIMSE 是源归档的响应：0x0000 = 所有子操作已送达，0xBxxx = 部分子操作失败（部分送达），0xAxxx = 被拒绝（例如目标未知），0xCxxx = 错误，0xFE00 = 已取消。"
+    "dimseLegend": "DIMSE 是源归档的响应：0x0000 = 所有子操作已送达，0xBxxx = 部分子操作失败（部分送达），0xAxxx = 被拒绝（例如目标未知），0xCxxx = 错误，0xFE00 = 已取消。",
+    "searchPlaceholder": "按患者 ID、目标或 UID 筛选…",
+    "cancelJob": "取消任务",
+    "retryJob": "重试任务",
+    "retried": "复制任务已重新启动",
+    "canceled": "复制任务已取消",
+    "actionFailed": "任务操作失败"
   },
   "help": {
     "help_copyJobs_title": "复制任务",
@@ -2443,6 +2452,8 @@
     "saveFailed": "无法保存目标",
     "errAet": "请输入 AE 标题。",
     "errAetLength": "AE 标题最多 16 个字符。",
-    "errDuplicate": "该 AE 标题已存在。"
+    "errDuplicate": "该 AE 标题已存在。",
+    "moveUp": "上移 {{aet}}",
+    "moveDown": "下移 {{aet}}"
   }
 }

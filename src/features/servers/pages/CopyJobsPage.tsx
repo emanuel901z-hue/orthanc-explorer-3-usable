@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CheckCircle2, Copy, Loader2, XCircle } from 'lucide-react';
+import { AlertTriangle, Ban, CheckCircle2, Copy, Loader2, RotateCcw, Search, XCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -14,9 +15,12 @@ import {
 } from '@/components/ui/table';
 import { PageHelp } from '@/shared/components/PageHelp';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
+import { jobsApi } from '@/api/jobs';
+import { resolveTargetLabel } from '@/api/targets';
 import { describeCopyJob, isMoveJob, type CopyJobView } from '@/features/servers/lib/copy-job';
-import { usePersistedState } from '@/store/ui-state';
+import { usePersistedState, useRememberedState } from '@/store/ui-state';
 import { formatDicomDateTime } from '@/lib/dicom-date';
+import { toast } from 'sonner';
 
 type JobFilter = 'all' | 'running' | 'failed' | 'warning' | 'success';
 
@@ -64,8 +68,10 @@ function StatusCell({ job }: { job: CopyJobView }) {
 export default function CopyJobsPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.language;
-  const { data: jobs = [], isLoading, isError } = useOrthancJobs();
+  const { data: jobs = [], isLoading, isError, refetch } = useOrthancJobs();
   const [filter, setFilter] = usePersistedState<JobFilter>('copyJobs.filter', 'all');
+  const [search, setSearch] = useRememberedState('copyJobs.search', '');
+  const [busyJobId, setBusyJobId] = useState<string | null>(null);
 
   const copies = useMemo(
     () => jobs.filter(isMoveJob).map(describeCopyJob),
@@ -78,7 +84,50 @@ export default function CopyJobsPage() {
     failed: copies.filter((job) => job.state === 'failed').length,
     warning: copies.filter((job) => job.state === 'warning').length,
   }), [copies]);
-  const visible = filter === 'all' ? copies : copies.filter((job) => job.state === filter);
+  const visible = useMemo(() => {
+    const byState = filter === 'all' ? copies : copies.filter((job) => job.state === filter);
+    const term = search.trim().toLowerCase();
+    if (!term) return byState;
+    return byState.filter((job) => {
+      const targetLabel = resolveTargetLabel(job.targetAet);
+      return [
+        job.patientId,
+        job.patientName,
+        job.studyInstanceUid,
+        job.targetAet,
+        targetLabel,
+        job.sourceAet,
+        job.dimseStatus,
+        job.error,
+      ].some((field) => field?.toLowerCase().includes(term));
+    });
+  }, [copies, filter, search]);
+
+  const handleRetry = async (jobId: string) => {
+    setBusyJobId(jobId);
+    try {
+      await jobsApi.resubmit(jobId);
+      await refetch?.();
+      toast.success(t('copyJobs.retried', { defaultValue: 'Copy job restarted' }));
+    } catch {
+      toast.error(t('copyJobs.actionFailed', { defaultValue: 'Job action failed' }));
+    } finally {
+      setBusyJobId(null);
+    }
+  };
+
+  const handleCancel = async (jobId: string) => {
+    setBusyJobId(jobId);
+    try {
+      await jobsApi.cancel(jobId);
+      await refetch?.();
+      toast.success(t('copyJobs.canceled', { defaultValue: 'Copy job canceled' }));
+    } catch {
+      toast.error(t('copyJobs.actionFailed', { defaultValue: 'Job action failed' }));
+    } finally {
+      setBusyJobId(null);
+    }
+  };
 
   const filters: { id: JobFilter; label: string; count: number }[] = [
     { id: 'all', label: t('copyJobs.filterAll', { defaultValue: 'All' }), count: counts.all },
@@ -100,19 +149,32 @@ export default function CopyJobsPage() {
         <PageHelp helpId="copyJobs" prefix="help" />
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
-        {filters.map((entry) => (
-          <Button
-            key={entry.id}
-            variant={filter === entry.id ? 'default' : 'outline'}
-            size="sm"
-            className="h-7 gap-1.5 text-xs"
-            onClick={() => setFilter(entry.id)}
-          >
-            {entry.label}
-            <span className="text-muted-foreground">({entry.count})</span>
-          </Button>
-        ))}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {filters.map((entry) => (
+            <Button
+              key={entry.id}
+              variant={filter === entry.id ? 'default' : 'outline'}
+              size="sm"
+              className="h-7 gap-1.5 text-xs"
+              onClick={() => setFilter(entry.id)}
+            >
+              {entry.label}
+              <span className={filter === entry.id ? 'opacity-80' : 'text-muted-foreground'}>({entry.count})</span>
+            </Button>
+          ))}
+        </div>
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            className="h-8 pl-8 text-xs"
+            data-shortcut="search"
+            aria-label={t('copyJobs.searchPlaceholder', { defaultValue: 'Filter by patient ID, target or UID…' })}
+            placeholder={t('copyJobs.searchPlaceholder', { defaultValue: 'Filter by patient ID, target or UID…' })}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
       <Card>
@@ -132,52 +194,87 @@ export default function CopyJobsPage() {
           </CardContent>
         ) : (
           <CardContent className="p-0 overflow-x-auto">
-            <Table className="min-w-[1050px]">
+            <Table className="min-w-[820px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[150px]">{t('copyJobs.start', { defaultValue: 'Start' })}</TableHead>
-                  <TableHead className="w-[150px]">{t('copyJobs.end', { defaultValue: 'End' })}</TableHead>
-                  <TableHead className="w-[120px]">{t('copyJobs.source', { defaultValue: 'Source' })}</TableHead>
-                  <TableHead className="w-[140px]">{t('copyJobs.target', { defaultValue: 'Target' })}</TableHead>
+                  <TableHead className="w-[125px]">{t('copyJobs.start', { defaultValue: 'Start' })}</TableHead>
+                  <TableHead className="w-[125px]">{t('copyJobs.end', { defaultValue: 'End' })}</TableHead>
+                  <TableHead className="w-[100px]">{t('copyJobs.source', { defaultValue: 'Source' })}</TableHead>
+                  <TableHead className="w-[115px]">{t('copyJobs.target', { defaultValue: 'Target' })}</TableHead>
                   <TableHead>{t('copyJobs.study', { defaultValue: 'Study' })}</TableHead>
-                  <TableHead className="w-[150px]">{t('copyJobs.state', { defaultValue: 'Status' })}</TableHead>
-                  <TableHead className="w-[230px]">{t('copyJobs.dimse', { defaultValue: 'DIMSE' })}</TableHead>
-                  <TableHead className="w-[90px]">{t('copyJobs.duration', { defaultValue: 'Duration' })}</TableHead>
+                  <TableHead className="w-[140px]">{t('copyJobs.state', { defaultValue: 'Status' })}</TableHead>
+                  <TableHead className="w-[160px]">{t('copyJobs.dimse', { defaultValue: 'DIMSE' })}</TableHead>
+                  <TableHead className="w-[75px]">{t('copyJobs.duration', { defaultValue: 'Duration' })}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visible.map((job) => (
-                  <TableRow key={job.jobId}>
-                    <TableCell className="text-sm whitespace-nowrap">{formatDicomDateTime(job.creationTime, locale)}</TableCell>
-                    <TableCell className="text-sm whitespace-nowrap">
-                      {job.state === 'running'
-                        ? t('copyJobs.stillRunning', { defaultValue: 'running…' })
-                        : formatDicomDateTime(job.completionTime, locale)}
-                    </TableCell>
-                    <TableCell className="text-sm">{job.sourceAet ?? '—'}</TableCell>
-                    <TableCell className="text-sm font-medium">{job.targetAet ?? '—'}</TableCell>
-                    <TableCell className="text-sm font-mono">
-                      <div>{job.patientId ?? '—'}</div>
-                      <div className="text-xs text-muted-foreground">{job.studyInstanceUid ?? '—'}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <StatusCell job={job} />
-                        {job.error && (
-                          <span className="text-xs text-destructive" title={job.error}>
-                            {job.error}
-                          </span>
+                {visible.map((job) => {
+                  const targetLabel = resolveTargetLabel(job.targetAet);
+                  return (
+                    <TableRow key={job.jobId}>
+                      <TableCell className="text-sm whitespace-nowrap">{formatDicomDateTime(job.creationTime, locale)}</TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {job.state === 'running'
+                          ? t('copyJobs.stillRunning', { defaultValue: 'running…' })
+                          : formatDicomDateTime(job.completionTime, locale)}
+                      </TableCell>
+                      <TableCell className="text-sm">{job.sourceAet ?? '—'}</TableCell>
+                      <TableCell className="text-sm font-medium">
+                        {targetLabel && targetLabel !== job.targetAet && (
+                          <div className="text-xs text-muted-foreground font-normal">{targetLabel}</div>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {/* Klartext zuerst — Hex-Codes kann im Alltag niemand lesen */}
-                      <div>{t(`copyJobs.dimseMeaning.${job.dimseKey}`, { defaultValue: job.dimseStatus ?? '—' })}</div>
-                      <div className="text-xs font-mono text-muted-foreground">{job.dimseStatus ?? ''}</div>
-                    </TableCell>
-                    <TableCell className="text-sm whitespace-nowrap">{formatDuration(job.durationSeconds)}</TableCell>
-                  </TableRow>
-                ))}
+                        <div>{job.targetAet ?? '—'}</div>
+                      </TableCell>
+                      <TableCell className="text-sm font-mono max-w-[220px]">
+                        {job.patientName && <div className="font-sans text-xs font-medium truncate">{job.patientName}</div>}
+                        <div className="truncate">{job.patientId ?? '—'}</div>
+                        <div className="text-xs text-muted-foreground break-all">{job.studyInstanceUid ?? '—'}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <StatusCell job={job} />
+                          {job.state === 'running' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                              disabled={busyJobId === job.jobId}
+                              aria-label={t('copyJobs.cancelJob', { defaultValue: 'Cancel job' })}
+                              title={t('copyJobs.cancelJob', { defaultValue: 'Cancel job' })}
+                              onClick={() => void handleCancel(job.jobId)}
+                            >
+                              <Ban className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                          {(job.state === 'failed' || job.state === 'warning') && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              disabled={busyJobId === job.jobId}
+                              aria-label={t('copyJobs.retryJob', { defaultValue: 'Retry job' })}
+                              title={t('copyJobs.retryJob', { defaultValue: 'Retry job' })}
+                              onClick={() => void handleRetry(job.jobId)}
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                          {job.error && (
+                            <span className="text-xs text-destructive" title={job.error}>
+                              {job.error}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {/* Klartext zuerst — Hex-Codes kann im Alltag niemand lesen */}
+                        <div>{t(`copyJobs.dimseMeaning.${job.dimseKey}`, { defaultValue: job.dimseStatus ?? '—' })}</div>
+                        <div className="text-xs font-mono text-muted-foreground">{job.dimseStatus ?? ''}</div>
+                      </TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">{formatDuration(job.durationSeconds)}</TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>

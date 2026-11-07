@@ -29,6 +29,8 @@ describe('parseDateToken — die Schreibweisen aus der Praxis', () => {
 
   it('lässt ungültige Werte fallen', () => {
     expect(parseDateToken('321399')).toBeUndefined();
+    expect(parseDateToken('310226')).toBeUndefined();
+    expect(parseDateToken('03.06.202')).toBeUndefined();
     expect(parseDateToken('123456')).toBeUndefined();
     expect(parseDateToken('Muster')).toBeUndefined();
   });

@@ -72,7 +72,7 @@ export default function AuditLogsPage() {
 
   return (
     <div className="p-3 sm:p-4 md:p-6 space-y-4 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Shield className="h-6 w-6" />
@@ -82,7 +82,7 @@ export default function AuditLogsPage() {
             {t('auditLogs.subtitle')}
           </p>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           <PageHelp helpId="auditLogs" prefix="help" />
           <Button variant="outline" size="sm" onClick={handleExport} disabled={filtered.length === 0}>
             <Download className="h-3.5 w-3.5" /> {t('auditLogs.export')}
@@ -161,8 +161,8 @@ export default function AuditLogsPage() {
                         <Badge
                           variant={
                             event.severity === 'error' ? 'destructive' :
-                            event.severity === 'warning' ? 'default' :
-                            'secondary'
+                              event.severity === 'warning' ? 'default' :
+                                'secondary'
                           }
                           className="text-xs"
                         >
@@ -187,8 +187,8 @@ export default function AuditLogsPage() {
                     <Badge
                       variant={
                         event.severity === 'error' ? 'destructive' :
-                        event.severity === 'warning' ? 'default' :
-                        'secondary'
+                          event.severity === 'warning' ? 'default' :
+                            'secondary'
                       }
                       className="text-xs"
                     >

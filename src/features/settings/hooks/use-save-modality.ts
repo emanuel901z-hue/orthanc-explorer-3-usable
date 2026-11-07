@@ -14,6 +14,7 @@ export function useSaveModality() {
     }) => saveModalityAction(name, config),
     onSuccess: (_data, { name }) => {
       queryClient.invalidateQueries({ queryKey: ["modalities"] });
+      queryClient.invalidateQueries({ queryKey: ["modalities-expanded"] });
       queryClient.invalidateQueries({ queryKey: ["modality", name] });
     },
   });

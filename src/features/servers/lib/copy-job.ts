@@ -24,6 +24,7 @@ export type CopyJobView = {
   targetAet?: string;
   studyInstanceUid?: string;
   patientId?: string;
+  patientName?: string;
   /** DIMSE-Status der Gegenstelle, z. B. "0x0000". */
   dimseStatus?: string;
   /** Übersetzungsschlüssel zur Bedeutung (`copyJobs.dimse.<key>`). */
@@ -77,6 +78,7 @@ export function describeCopyJob(job: OrthancJob): CopyJobView {
     targetAet: contentString(content, 'TargetAet'),
     studyInstanceUid: queryTag(query, 'StudyInstanceUID', '0020,000d'),
     patientId: queryTag(query, 'PatientID', '0010,0020'),
+    patientName: queryTag(query, 'PatientName', '0010,0010'),
     dimseStatus: dimse === undefined ? undefined : formatDimseStatus(dimse),
     dimseKey: dimseStatusKey(dimse),
     error: failed

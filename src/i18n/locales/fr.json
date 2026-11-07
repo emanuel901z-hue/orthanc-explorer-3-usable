@@ -324,6 +324,8 @@
       "accession": "Admission",
       "birthDate": "Date de naissance",
       "studyDate": "Date de l'examen",
+      "studyDescription": "Description de l'examen",
+      "studyInstanceUid": "UID de l'examen",
       "modality": "Modalité"
     },
     "searchFoundAs": "Trouvé comme {{kind}} : {{value}}",
@@ -371,7 +373,8 @@
     "bulkHint": "Cela lance un C-MOVE par examen. L'archive doit tous les livrer ; en général seuls quelques examens vont ensemble.",
     "bulkCancel": "Annuler",
     "bulkCopyConfirm": "Copier {{count}}",
-    "bulkRetrieveConfirm": "Récupérer {{count}}"
+    "bulkRetrieveConfirm": "Récupérer {{count}}",
+    "copyAgain": "Copier à nouveau"
   },
   "actions": {
     "viewer": "Visionneuse",
@@ -2257,7 +2260,13 @@
       "canceled": "annulé",
       "other": "l'archive signale un problème"
     },
-    "dimseLegend": "DIMSE est la réponse de l'archive source : 0x0000 = toutes les sous-opérations livrées, 0xBxxx = certaines sous-opérations ont échoué (livraison partielle), 0xAxxx = refusé (p. ex. destination inconnue), 0xCxxx = erreur, 0xFE00 = annulé."
+    "dimseLegend": "DIMSE est la réponse de l'archive source : 0x0000 = toutes les sous-opérations livrées, 0xBxxx = certaines sous-opérations ont échoué (livraison partielle), 0xAxxx = refusé (p. ex. destination inconnue), 0xCxxx = erreur, 0xFE00 = annulé.",
+    "searchPlaceholder": "Filtrer par ID patient, destination ou UID…",
+    "cancelJob": "Annuler la tâche",
+    "retryJob": "Relancer la tâche",
+    "retried": "Tâche de copie relancée",
+    "canceled": "Tâche de copie annulée",
+    "actionFailed": "L'action sur la tâche a échoué"
   },
   "help": {
     "help_copyJobs_title": "Tâches de copie",
@@ -2443,6 +2452,8 @@
     "saveFailed": "Les destinations n'ont pas pu être enregistrées",
     "errAet": "Veuillez saisir un AE title.",
     "errAetLength": "Un AE title compte au maximum 16 caractères.",
-    "errDuplicate": "Cet AE title existe déjà."
+    "errDuplicate": "Cet AE title existe déjà.",
+    "moveUp": "Monter {{aet}}",
+    "moveDown": "Descendre {{aet}}"
   }
 }

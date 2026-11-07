@@ -18,9 +18,19 @@ export function extractDimseStatus(result: RetrieveResult | undefined | null): n
 
   const details = result.Details;
   if (Array.isArray(details)) {
+    const statuses: number[] = [];
     for (const entry of details) {
       const status = (entry as { DimseErrorStatus?: unknown } | null)?.DimseErrorStatus;
-      if (typeof status === 'number') return status;
+      if (typeof status === 'number') statuses.push(status);
+    }
+    if (statuses.length > 0) {
+      // Bei mehreren Teilaufträgen (z. B. mehrere Serien) darf ein 0x0000 der
+      // ersten Antwort keinen Fehler einer folgenden Antwort verdecken.
+      const error = statuses.find((s) => dimseSeverity(s) === 'error');
+      if (error !== undefined) return error;
+      const warning = statuses.find((s) => dimseSeverity(s) === 'warning');
+      if (warning !== undefined) return warning;
+      return statuses[0];
     }
   }
 

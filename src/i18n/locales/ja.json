@@ -324,6 +324,8 @@
       "accession": "受付番号",
       "birthDate": "生年月日",
       "studyDate": "検査日",
+      "studyDescription": "検査説明",
+      "studyInstanceUid": "検査 UID",
       "modality": "モダリティ"
     },
     "searchFoundAs": "{{kind}} として見つかりました: {{value}}",
@@ -371,7 +373,8 @@
     "bulkHint": "検査ごとに C-MOVE を 1 件発行します。アーカイブはすべて配信する必要があります。通常は少数の検査だけがまとまります。",
     "bulkCancel": "キャンセル",
     "bulkCopyConfirm": "{{count}} 件コピー",
-    "bulkRetrieveConfirm": "{{count}} 件取得"
+    "bulkRetrieveConfirm": "{{count}} 件取得",
+    "copyAgain": "もう一度コピー"
   },
   "actions": {
     "viewer": "ビューア",
@@ -2257,7 +2260,13 @@
       "canceled": "中止",
       "other": "アーカイブが問題を報告"
     },
-    "dimseLegend": "DIMSE はソースアーカイブの応答です: 0x0000 = すべてのサブ操作を配信、0xBxxx = 一部のサブ操作が失敗（一部配信）、0xAxxx = 拒否（例: 宛先不明）、0xCxxx = エラー、0xFE00 = 中止。"
+    "dimseLegend": "DIMSE はソースアーカイブの応答です: 0x0000 = すべてのサブ操作を配信、0xBxxx = 一部のサブ操作が失敗（一部配信）、0xAxxx = 拒否（例: 宛先不明）、0xCxxx = エラー、0xFE00 = 中止。",
+    "searchPlaceholder": "患者ID、宛先、UIDで絞り込み…",
+    "cancelJob": "ジョブを中止",
+    "retryJob": "ジョブを再実行",
+    "retried": "コピージョブを再開しました",
+    "canceled": "コピージョブを中止しました",
+    "actionFailed": "ジョブ操作に失敗しました"
   },
   "help": {
     "help_copyJobs_title": "コピージョブ",
@@ -2443,6 +2452,8 @@
     "saveFailed": "宛先を保存できませんでした",
     "errAet": "AE タイトルを入力してください。",
     "errAetLength": "AE タイトルは最大 16 文字です。",
-    "errDuplicate": "この AE タイトルは既にあります。"
+    "errDuplicate": "この AE タイトルは既にあります。",
+    "moveUp": "{{aet}} を上へ",
+    "moveDown": "{{aet}} を下へ"
   }
 }

@@ -428,8 +428,8 @@
       "luaScript": "Lua-Skript",
       "system": "System"
     },
-    "title": "Activity",
-    "clearSearch": "Clear search",
+    "title": "Aktivität",
+    "clearSearch": "Suche löschen",
     "actionFailed": "Die Aktion ist fehlgeschlagen"
   },
   "remote": {
@@ -472,6 +472,8 @@
       "accession": "Zugangsnummer",
       "birthDate": "Geburtsdatum",
       "studyDate": "Studiendatum",
+      "studyDescription": "Studienbeschreibung",
+      "studyInstanceUid": "Study-UID",
       "modality": "Modalität"
     },
     "searchFoundAs": "Gefunden als {{kind}}: {{value}}",
@@ -519,11 +521,18 @@
     "bulkHint": "Das setzt je Studie einen C-MOVE ab. Das Archiv muss alle zustellen — in der Regel gehören nur wenige Studien zusammen.",
     "bulkCancel": "Abbrechen",
     "bulkCopyConfirm": "{{count}} kopieren",
-    "bulkRetrieveConfirm": "{{count}} abrufen"
+    "bulkRetrieveConfirm": "{{count}} abrufen",
+    "copyAgain": "Erneut kopieren"
   },
   "copyJobs": {
     "title": "Kopieraufträge",
     "subtitle": "C-MOVE-Aufträge dieser Workstation an das Archiv — Status und Ergebnis je Studie",
+    "searchPlaceholder": "Nach Patienten-ID, Ziel oder UID filtern…",
+    "cancelJob": "Auftrag abbrechen",
+    "retryJob": "Auftrag erneut senden",
+    "retried": "Kopierauftrag erneut gestartet",
+    "canceled": "Kopierauftrag abgebrochen",
+    "actionFailed": "Aktion für den Auftrag fehlgeschlagen",
     "filterAll": "Alle",
     "stateRunning": "läuft",
     "stateSuccess": "sauber zugestellt",
@@ -983,7 +992,7 @@
     "validation": {
       "required": "Dieses Feld ist erforderlich",
       "aetMax": "AET darf max. 16 Zeichen lang sein",
-      "aetPattern": "Nur Buchstaben, Zahlen, Unterstriche",
+      "aetPattern": "Nur Buchstaben, Zahlen, Unterstriche und Bindestriche",
       "portRange": "Port muss zwischen 1 und 65535 liegen"
     },
     "health": "Status",
@@ -2561,6 +2570,8 @@
     "labelPlaceholder": "Bezeichnung (z. B. Haus oder Abteilung)",
     "add": "Hinzufügen",
     "remove": "{{aet}} entfernen",
+    "moveUp": "{{aet}} nach oben",
+    "moveDown": "{{aet}} nach unten",
     "empty": "Noch keine Ziele.",
     "save": "Speichern",
     "saving": "Speichern…",

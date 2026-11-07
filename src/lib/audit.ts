@@ -9,6 +9,7 @@
  */
 
 import { logger } from "@/lib/logger";
+import { useAuditStore } from "@/store/audit-store";
 
 export type AuditResourceType =
   | "study"
@@ -53,6 +54,23 @@ export const auditClient = {
       errorCode: event.errorCode,
       destinationId: event.destinationId,
     });
+    if (event.outcome !== "started") {
+      const targetSuffix = event.destinationId ? ` → ${event.destinationId}` : "";
+      useAuditStore.getState().log({
+        category: "audit",
+        severity: event.outcome === "failure" ? "error" : "success",
+        action: event.action,
+        title: `${event.action}: ${event.resourceId}${targetSuffix}`,
+        resource: event.resourceId,
+        metadata: {
+          resourceType: event.resourceType,
+          resourceId: event.resourceId,
+          outcome: event.outcome,
+          ...(event.destinationId ? { destinationId: event.destinationId } : {}),
+          ...(event.errorCode !== undefined ? { errorCode: String(event.errorCode) } : {}),
+        },
+      });
+    }
     // Phase 5+: POST to /audit/events when ATNA plugin is installed.
   },
 };

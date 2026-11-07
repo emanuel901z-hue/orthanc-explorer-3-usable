@@ -17,6 +17,7 @@ import {
   ArrowUpDown,
   AlertTriangle,
   Settings,
+  RotateCcw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -42,6 +43,7 @@ import {
 import { useModalityDetails } from '@/features/settings/hooks/use-modality-details';
 import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
 import { modalitiesApi } from '@/api/modalities';
+import { queriesApi } from '@/api/queries';
 import { queryModalityAction } from '@/actions/queryModality';
 import { retrieveModalityAction } from '@/actions/retrieveModality';
 import { moveResourcesAction } from '@/actions/moveResources';
@@ -97,7 +99,7 @@ function SortHeader({
     <Button
       variant="ghost"
       size="sm"
-      className="gap-1 -ml-1 h-8 px-0 font-semibold w-full min-w-0 justify-start whitespace-normal text-left"
+      className="gap-1 -ml-1 h-auto py-1 px-0 font-semibold w-full min-w-0 justify-start !whitespace-normal text-left"
       onClick={() => onSort(column)}
     >
       {/* umbrechen statt abschneiden — „Studienbeschreibung“ passt nicht in 120 px */}
@@ -143,24 +145,31 @@ export default function RemoteSourcesPage() {
     staleTime: 60_000,
     retry: false,
   });
+  // Nur die gepflegte AET-Zielliste (ohne Orthanc-Modalitäten) — das ist die
+  // Liste, die im Dialog „Ziele verwalten“ bearbeitet und gespeichert wird.
+  const configuredTargets = useMemo<CopyTarget[]>(
+    () =>
+      (managedTargets ?? getConfig().cmoveTargets ?? []).flatMap((target) =>
+        target.aet ? [{ aet: target.aet, label: target.label }] : [],
+      ),
+    [managedTargets],
+  );
   const copyTargets = useMemo(() => {
-    const configured: CopyTarget[] = (managedTargets ?? getConfig().cmoveTargets ?? []).flatMap(
-      (target) => (target.aet ? [{ aet: target.aet, label: target.label }] : []),
-    );
-    const seen = new Set(configured.map((target) => target.aet));
+    const seen = new Set(configuredTargets.map((target) => target.aet));
     const fromModalities = modalityDetails
       .filter((modality) => modality.id !== selectedModality && !seen.has(modality.aet))
       .map((modality) => ({
         aet: modality.aet,
         label: modality.id === modality.aet ? undefined : modality.id,
       }));
-    return [...configured, ...fromModalities];
-  }, [managedTargets, modalityDetails, selectedModality]);
+    return [...configuredTargets, ...fromModalities];
+  }, [configuredTargets, modalityDetails, selectedModality]);
 
   const saveTargets = async (next: CopyTarget[]) => {
     setSavingTargets(true);
     try {
-      await targetsApi.replace(next);
+      const saved = await targetsApi.replace(next);
+      queryClient.setQueryData(['copy-targets'], saved);
       await queryClient.invalidateQueries({ queryKey: ['copy-targets'] });
       setTargetsOpen(false);
       toast.success(t('targets.saved', { defaultValue: 'Targets saved' }));
@@ -171,6 +180,10 @@ export default function RemoteSourcesPage() {
     }
   };
   const [selectedTarget, setSelectedTarget] = usePersistedState('remoteSources.copyTarget', '');
+  const effectiveTarget = useMemo(
+    () => (copyTargets.some((target) => target.aet === selectedTarget) ? selectedTarget : ''),
+    [copyTargets, selectedTarget],
+  );
   // The copy runs as an Orthanc job; the job list (polled every 3 s) is where
   // progress and the DIMSE status of the destination come from.
   const { data: jobs = [] } = useOrthancJobs();
@@ -192,6 +205,17 @@ export default function RemoteSourcesPage() {
   const [sort, setSort] = usePersistedState<RemoteSort>('remoteSources.sort', DEFAULT_SORT);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [detail, setDetail] = useState<RemoteStudy | null>(null);
+  // Live-Zustand für den geöffneten Detail-Dialog aus remoteStudies + copyJobs ableiten
+  const activeDetail = useMemo(
+    () =>
+      detail
+        ? remoteStudies.find(
+          (entry) => entry.queryId === detail.queryId && entry.answerIndex === detail.answerIndex,
+        ) ?? detail
+        : null,
+    [detail, remoteStudies],
+  );
+  const activeDetailJob = activeDetail?.copyJobId ? copyJobs.get(activeDetail.copyJobId) : undefined;
   // Sammelaktion über der Schwelle erst nach Rückfrage
   const [pending, setPending] = useState<{ action: 'copy' | 'retrieve'; studies: RemoteStudy[] } | null>(null);
 
@@ -247,6 +271,19 @@ export default function RemoteSourcesPage() {
     [t],
   );
 
+  // Hauptarchiv (ARCHIVE) oder einzige vorhandene Modalität automatisch
+  // vorauswählen, wenn noch keine gültige Auswahl gespeichert ist.
+  useEffect(() => {
+    if (modalityDetails.length === 0) return;
+    if (selectedModality && modalityDetails.some((m) => m.id === selectedModality)) return;
+    const preferred =
+      modalityDetails.find((m) => m.id === 'ARCHIVE' || m.aet === 'ARCHIVE') ??
+      (modalityDetails.length === 1 ? modalityDetails[0] : undefined);
+    if (preferred) {
+      setSelectedModality(preferred.id);
+    }
+  }, [modalityDetails, selectedModality, setSelectedModality]);
+
   // Wer eine Remote-Modalität auswählt, will wissen, ob sie antwortet — also
   // prüfen wir sie sofort (still, ohne Toast). Ein Fehlschlag wird nicht
   // automatisch wiederholt; dafür ist der Echo-Knopf da.
@@ -266,6 +303,8 @@ export default function RemoteSourcesPage() {
       toast.error(t('remote.searchEmpty', { defaultValue: 'Enter a name, patient ID, accession number or date' }));
       return;
     }
+    const previousQueryId = remoteStudies[0]?.queryId;
+    const previousBusy = remoteStudies.some((s) => s.copying || s.retrieving);
     setQuerying(true);
     setRemoteStudies([]);
     setSelected(new Set());
@@ -286,6 +325,7 @@ export default function RemoteSourcesPage() {
           Query: alternative.query,
         });
         if (retry.answers.length > 0) {
+          void queriesApi.delete?.(result.queryId)?.catch(() => { });
           result = retry;
           const kind = t(`remote.searchKind.${alternative.chip.kind}`, { defaultValue: alternative.chip.kind });
           setSearchNote(t('remote.searchFoundAs', {
@@ -293,7 +333,13 @@ export default function RemoteSourcesPage() {
             value: alternative.chip.value,
             defaultValue: `Found as ${kind}: ${alternative.chip.value}`,
           }));
+        } else {
+          void queriesApi.delete?.(retry.queryId)?.catch(() => { });
         }
+      }
+
+      if (previousQueryId && !previousBusy && previousQueryId !== result.queryId) {
+        void queriesApi.delete?.(previousQueryId)?.catch(() => { });
       }
 
       const studies = result.answers.map((ans) => mapRemoteAnswer(result.queryId, ans.index, ans.tags));
@@ -332,7 +378,7 @@ export default function RemoteSourcesPage() {
   // The order runs as an Orthanc job, so the row can show progress and the
   // DIMSE status the archive reported, and the job list keeps the history.
   const handleCopy = async (study: RemoteStudy) => {
-    if (!selectedTarget) {
+    if (!effectiveTarget) {
       toast.error(t('remote.copyNoTarget', { defaultValue: 'Choose a target first' }));
       return;
     }
@@ -342,12 +388,12 @@ export default function RemoteSourcesPage() {
         selectedModality,
         study.queryId,
         study.answerIndex,
-        selectedTarget,
+        effectiveTarget,
         { asynchronous: true },
       );
       const jobId = typeof result.ID === 'string' ? result.ID : undefined;
       patchStudy(study, { copying: false, copyJobId: jobId });
-      toast.success(t('remote.copyStarted', { target: selectedTarget, defaultValue: `C-MOVE to ${selectedTarget} sent` }));
+      toast.success(t('remote.copyStarted', { target: effectiveTarget, defaultValue: `C-MOVE to ${effectiveTarget} sent` }));
     } catch {
       patchStudy(study, { copying: false });
       toast.error(t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' }));
@@ -357,11 +403,15 @@ export default function RemoteSourcesPage() {
   /** Serien eines Auftrags — ein C-MOVE für alle ausgewählten Serien. */
   const handleSeriesMove = async (study: RemoteStudy, series: RemoteSeries[], targetAet?: string) => {
     if (series.length === 0) return;
-    if (targetAet && !selectedTarget) {
+    const isCopy = Boolean(targetAet);
+    if (isCopy && !effectiveTarget) {
       toast.error(t('remote.copyNoTarget', { defaultValue: 'Choose a target first' }));
       return;
     }
-    patchStudy(study, { copying: true, copyJobId: undefined });
+    patchStudy(
+      study,
+      isCopy ? { copying: true, copyJobId: undefined } : { retrieving: true, error: false },
+    );
     try {
       const result = await moveResourcesAction(
         selectedModality,
@@ -370,18 +420,28 @@ export default function RemoteSourcesPage() {
           StudyInstanceUID: study.studyInstanceUid,
           SeriesInstanceUID: entry.seriesInstanceUid,
         })),
-        { targetAet, asynchronous: true },
+        { targetAet, asynchronous: isCopy },
       );
       const jobId = typeof result.ID === 'string' ? result.ID : undefined;
-      patchStudy(study, { copying: false, copyJobId: targetAet ? jobId : undefined, retrieved: !targetAet });
+      patchStudy(
+        study,
+        isCopy ? { copying: false, copyJobId: jobId } : { retrieving: false, retrieved: true },
+      );
       toast.success(
-        targetAet
+        isCopy
           ? t('remote.copyStarted', { target: targetAet, defaultValue: `C-MOVE to ${targetAet} sent` })
           : t('remote.retrieveStarted', { defaultValue: 'Retrieve started (C-MOVE)' }),
       );
     } catch {
-      patchStudy(study, { copying: false, error: true });
-      toast.error(t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' }));
+      patchStudy(
+        study,
+        isCopy ? { copying: false } : { retrieving: false, error: true },
+      );
+      toast.error(
+        isCopy
+          ? t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' })
+          : t('remote.retrieveFailed', { defaultValue: 'Retrieve failed' }),
+      );
     }
   };
 
@@ -395,12 +455,17 @@ export default function RemoteSourcesPage() {
   };
 
   const handleCopyMany = async (studies: RemoteStudy[]) => {
-    if (!selectedTarget) {
+    if (!effectiveTarget) {
       toast.error(t('remote.copyNoTarget', { defaultValue: 'Choose a target first' }));
       return;
     }
     for (const study of studies) {
-      if (!study.copyJobId && !study.copying) {
+      const existingJob = study.copyJobId ? copyJobs.get(study.copyJobId) : undefined;
+      const alreadySentToTarget =
+        existingJob &&
+        existingJob.state !== 'failed' &&
+        (!existingJob.targetAet || existingJob.targetAet === effectiveTarget);
+      if (!study.copying && (!study.copyJobId || !alreadySentToTarget)) {
         await handleCopy(study);
       }
     }
@@ -529,7 +594,7 @@ export default function RemoteSourcesPage() {
                   id="copy-target"
                   aria-label={t('remote.copyTarget', { defaultValue: 'Copy to' })}
                   className="h-7 rounded-md border border-input bg-background px-2 text-xs"
-                  value={selectedTarget}
+                  value={effectiveTarget}
                   onChange={(e) => setSelectedTarget(e.target.value)}
                 >
                   <option value="">
@@ -598,7 +663,7 @@ export default function RemoteSourcesPage() {
                     size="sm"
                     className="h-7 gap-1.5 text-xs"
                     onClick={() => requestBulk('copy', selectedStudies.length > 0 ? selectedStudies : remoteStudies)}
-                    disabled={!selectedTarget}
+                    disabled={!effectiveTarget}
                   >
                     <Copy className="h-3.5 w-3.5" />
                     {selectedStudies.length > 0
@@ -619,12 +684,12 @@ export default function RemoteSourcesPage() {
                 </div>
               </div>
               <CardContent className="p-0 overflow-x-auto">
-                {/* sieben Spalten: auf schmalen Fenstern lieber scrollen als
-                    die Köpfe abschneiden */}
-                <Table className="min-w-[1100px]">
+                {/* auf 1280px-Desktop passt die Tabelle komplett ohne Querscrollen;
+                    auf schmalen Fenstern scrollt die Karte sauber */}
+                <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[36px]">
+                      <TableHead className="w-[32px] px-2">
                         <Checkbox
                           checked={selected.size > 0 && selected.size === remoteStudies.length}
                           onCheckedChange={(value) => {
@@ -633,22 +698,22 @@ export default function RemoteSourcesPage() {
                           aria-label={t('remote.selectAll', { defaultValue: 'Select all' })}
                         />
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="px-2">
                         <SortHeader label={t('remote.patientName')} column="patientName" sort={sort} onSort={toggleSort} />
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="px-2">
                         <SortHeader label={t('remote.patientId')} column="patientId" sort={sort} onSort={toggleSort} />
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="px-2">
                         <SortHeader label={t('remote.studyDate')} column="studyDate" sort={sort} onSort={toggleSort} />
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="px-2">
                         <SortHeader label={t('remote.studyDescription')} column="studyDescription" sort={sort} onSort={toggleSort} />
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="px-2">
                         <SortHeader label={t('remote.accessionNumber')} column="accessionNumber" sort={sort} onSort={toggleSort} />
                       </TableHead>
-                      <TableHead className="w-[90px]">
+                      <TableHead className="w-[72px] px-2">
                         <SortHeader
                           label={t('remote.searchKind.modality', { defaultValue: 'Modality' })}
                           column="modalities"
@@ -656,7 +721,7 @@ export default function RemoteSourcesPage() {
                           onSort={toggleSort}
                         />
                       </TableHead>
-                      <TableHead className="w-[190px]">{t('remote.actions', { defaultValue: 'Actions' })}</TableHead>
+                      <TableHead className="w-[165px] px-2">{t('remote.actions', { defaultValue: 'Actions' })}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -669,27 +734,27 @@ export default function RemoteSourcesPage() {
                           onClick={() => setDetail(study)}
                           data-testid="remote-study-row"
                         >
-                          <TableCell onClick={(e) => e.stopPropagation()}>
+                          <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
                             <Checkbox
                               checked={selected.has(study.answerIndex)}
                               onCheckedChange={() => toggleSelected(study.answerIndex)}
                               aria-label={t('remote.selectRow', { defaultValue: 'Select study' })}
                             />
                           </TableCell>
-                          <TableCell className="text-sm">
+                          <TableCell className="text-sm px-2">
                             <div>{study.patientName}</div>
                             {study.birthDate && (
                               <div className="text-xs text-muted-foreground">{formatDicomDate(study.birthDate, locale)}</div>
                             )}
                           </TableCell>
-                          <TableCell className="text-sm font-mono">{study.patientId}</TableCell>
-                          <TableCell className="text-sm">{formatDicomDate(study.studyDate, locale)}</TableCell>
-                          <TableCell className="text-sm">{study.studyDescription}</TableCell>
-                          <TableCell className="text-sm font-mono">{study.accessionNumber}</TableCell>
-                          <TableCell className="text-sm">
+                          <TableCell className="text-sm font-mono px-2">{study.patientId}</TableCell>
+                          <TableCell className="text-sm px-2 whitespace-nowrap">{formatDicomDate(study.studyDate, locale)}</TableCell>
+                          <TableCell className="text-sm px-2">{study.studyDescription}</TableCell>
+                          <TableCell className="text-sm font-mono px-2">{study.accessionNumber}</TableCell>
+                          <TableCell className="text-sm px-2">
                             <Badge variant="outline" className="font-mono text-xs">{study.modalities}</Badge>
                           </TableCell>
-                          <TableCell onClick={(e) => e.stopPropagation()}>
+                          <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center gap-1.5">
                               {study.retrieved ? (
                                 <CheckCircle2 className="h-4 w-4 text-success" />
@@ -699,7 +764,7 @@ export default function RemoteSourcesPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="gap-1.5 h-7"
+                                  className="gap-1 h-7 px-2 text-xs"
                                   disabled={study.retrieving}
                                   onClick={() => void handleRetrieve(study)}
                                 >
@@ -712,57 +777,81 @@ export default function RemoteSourcesPage() {
                                   <Loader2 className="h-3 w-3 animate-spin" />
                                   {t('remote.copySending', { defaultValue: 'sending' })}
                                 </span>
-                              ) : copyJob?.state === 'success' ? (
-                                <span className="flex items-center gap-1 text-xs text-success">
-                                  <CheckCircle2 className="h-4 w-4" />
-                                  {copyJob.dimseStatus}
-                                  {copyJob.durationSeconds !== undefined && (
-                                    <span className="text-muted-foreground">
-                                      {t('remote.copyDuration', {
-                                        seconds: copyJob.durationSeconds.toFixed(1),
-                                        defaultValue: 'in {{seconds}} s',
-                                      })}
-                                    </span>
-                                  )}
-                                  {looksQueuedOnly(study.instances, copyJob.durationSeconds) && (
-                                    <span
-                                      title={t('remote.copyTooFast', {
-                                        count: study.instances,
-                                        defaultValue:
-                                          'Suspiciously fast for {{count}} images — the archive may only have queued the order.',
-                                      })}
-                                    >
-                                      <AlertTriangle className="h-4 w-4 text-warning" />
-                                    </span>
-                                  )}
-                                </span>
-                              ) : copyJob?.state === 'warning' ? (
-                                <span className="flex items-center gap-1 text-xs text-warning" title={copyJob.error}>
-                                  <AlertTriangle className="h-4 w-4" />
-                                  {copyJob.dimseStatus}
-                                </span>
-                              ) : copyJob?.state === 'failed' ? (
-                                <span className="flex items-center gap-1 text-xs text-destructive" title={copyJob.error}>
-                                  <XCircle className="h-4 w-4" />
-                                  {copyJob.dimseStatus ?? t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' })}
-                                </span>
-                              ) : copyJob ? (
-                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Loader2 className="h-3 w-3 animate-spin" />
-                                  {copyJob.progress}%
-                                </span>
                               ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="gap-1.5 h-7"
-                                  disabled={!selectedTarget}
-                                  title={selectedTarget ? undefined : t('remote.copyNoTarget', { defaultValue: 'Choose a target first' })}
-                                  onClick={() => void handleCopy(study)}
-                                >
-                                  <Copy className="h-3 w-3" />
-                                  {t('remote.copy', { defaultValue: 'Copy' })}
-                                </Button>
+                                <>
+                                  {copyJob?.state === 'success' ? (
+                                    <span className="flex items-center gap-1 text-xs text-success">
+                                      <CheckCircle2 className="h-4 w-4" />
+                                      {copyJob.dimseStatus}
+                                      {copyJob.durationSeconds !== undefined && (
+                                        <span className="text-muted-foreground">
+                                          {t('remote.copyDuration', {
+                                            seconds: copyJob.durationSeconds.toFixed(1),
+                                            defaultValue: 'in {{seconds}} s',
+                                          })}
+                                        </span>
+                                      )}
+                                      {looksQueuedOnly(study.instances, copyJob.durationSeconds) && (
+                                        <span
+                                          title={t('remote.copyTooFast', {
+                                            count: study.instances,
+                                            defaultValue:
+                                              'Suspiciously fast for {{count}} images — the archive may only have queued the order.',
+                                          })}
+                                        >
+                                          <AlertTriangle className="h-4 w-4 text-warning" />
+                                        </span>
+                                      )}
+                                    </span>
+                                  ) : copyJob?.state === 'warning' ? (
+                                    <span className="flex items-center gap-1 text-xs text-warning" title={copyJob.error}>
+                                      <AlertTriangle className="h-4 w-4" />
+                                      {copyJob.dimseStatus}
+                                    </span>
+                                  ) : copyJob?.state === 'failed' ? (
+                                    <span className="flex items-center gap-1 text-xs text-destructive" title={copyJob.error}>
+                                      <XCircle className="h-4 w-4" />
+                                      {copyJob.dimseStatus ?? t('remote.copyFailedGeneric', { defaultValue: 'Copy failed' })}
+                                    </span>
+                                  ) : copyJob ? (
+                                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                      {copyJob.progress}%
+                                    </span>
+                                  ) : null}
+
+                                  {/* Kopieren-Button bleibt verfügbar, wenn noch nicht kopiert wurde
+                                      ODER wenn ein zweites Ziel gewählt wurde; bei Fehlschlag/gleichem
+                                      Ziel gibt es einen kompakten Wiederholen-Knopf. */}
+                                  {(!copyJob ||
+                                    (Boolean(effectiveTarget) &&
+                                      Boolean(copyJob.targetAet) &&
+                                      effectiveTarget !== copyJob.targetAet)) ? (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="gap-1 h-7 px-2 text-xs"
+                                      disabled={!effectiveTarget}
+                                      title={effectiveTarget ? undefined : t('remote.copyNoTarget', { defaultValue: 'Choose a target first' })}
+                                      onClick={() => void handleCopy(study)}
+                                    >
+                                      <Copy className="h-3 w-3" />
+                                      {t('remote.copy', { defaultValue: 'Copy' })}
+                                    </Button>
+                                  ) : copyJob.state !== 'running' ? (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0"
+                                      disabled={!effectiveTarget}
+                                      aria-label={t('remote.copyAgain', { defaultValue: 'Copy again' })}
+                                      title={t('remote.copyAgain', { defaultValue: 'Copy again' })}
+                                      onClick={() => void handleCopy(study)}
+                                    >
+                                      <RotateCcw className="h-3.5 w-3.5" />
+                                    </Button>
+                                  ) : null}
+                                </>
                               )}
                             </div>
                           </TableCell>
@@ -882,13 +971,14 @@ export default function RemoteSourcesPage() {
       <TargetsDialog
         open={targetsOpen}
         onOpenChange={setTargetsOpen}
-        targets={copyTargets}
+        targets={configuredTargets}
         onSave={saveTargets}
         saving={savingTargets}
       />
 
       <RemoteStudyDetailDialog
-        study={detail}
+        study={activeDetail}
+        copyJob={activeDetailJob}
         open={detail !== null}
         onOpenChange={(open) => {
           if (!open) setDetail(null);
@@ -896,7 +986,7 @@ export default function RemoteSourcesPage() {
         locale={locale}
         modality={selectedModality}
         targets={copyTargets.flatMap((target) => (target.aet ? [{ aet: target.aet, label: target.label }] : []))}
-        targetAet={selectedTarget}
+        targetAet={effectiveTarget}
         onTargetChange={setSelectedTarget}
         onRetrieveStudy={(study) => {
           void handleRetrieve(study);
@@ -908,7 +998,7 @@ export default function RemoteSourcesPage() {
           void handleSeriesMove(study, series);
         }}
         onCopySeries={(study, series) => {
-          void handleSeriesMove(study, series, selectedTarget);
+          void handleSeriesMove(study, series, effectiveTarget);
         }}
       />
     </div>
