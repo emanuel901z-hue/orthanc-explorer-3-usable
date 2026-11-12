@@ -527,7 +527,7 @@
   "copyJobs": {
     "title": "Copy jobs",
     "subtitle": "C-MOVE orders this workstation sent to the archive — status and result per study",
-    "searchPlaceholder": "Filter by patient ID, target or UID…",
+    "searchPlaceholder": "Filter by name, birth date, patient ID, target or UID…",
     "cancelJob": "Cancel job",
     "retryJob": "Retry job",
     "retried": "Copy job restarted",
@@ -547,7 +547,7 @@
     "emptyFiltered": "No jobs in this filter.",
     "loading": "Loading jobs…",
     "loadFailed": "Jobs could not be loaded",
-    "hint": "The list comes from the Orthanc job history — it is kept in memory and limited by \"JobHistorySize\".",
+    "hint": "The list comes from the Orthanc job history — it is persisted in the database (SaveJobs) and limited by \"JobsHistorySize\".",
     "start": "Start",
     "end": "End",
     "stillRunning": "running…",
@@ -564,7 +564,26 @@
       "canceled": "canceled",
       "other": "problem reported"
     },
-    "dimseLegend": "DIMSE is the answer of the source archive: 0x0000 = all sub-operations delivered, 0xBxxx = some sub-operations failed (partly delivered), 0xAxxx = refused (e.g. unknown target), 0xCxxx = error, 0xFE00 = canceled."
+    "dimseLegend": "DIMSE is the answer of the source archive: 0x0000 = all sub-operations delivered, 0xBxxx = some sub-operations failed (partly delivered), 0xAxxx = refused (e.g. unknown target), 0xCxxx = error, 0xFE00 = canceled.",
+    "selectRow": "Select copy job",
+    "selectAllVisible": "Select all visible",
+    "selectionCount": "{{count}} selected",
+    "clearSelection": "Clear selection",
+    "hideSelected": "Hide ({{count}})",
+    "showSelected": "Show ({{count}})",
+    "deleteSelected": "Delete ({{count}})",
+    "showHidden": "Show hidden ({{count}})",
+    "hideHidden": "Hide hidden",
+    "hiddenBadge": "hidden",
+    "hideHint": "Hiding only affects this list — the job stays in Orthanc as evidence. Deleting removes it from the job history for good.",
+    "deleteTitle": "Delete copy jobs?",
+    "deleteBody": "The selected copy jobs ({{count}}) will be removed from the Orthanc job history. This cannot be undone — the DIMSE result goes with them.",
+    "deleted": "Deleted: {{count}}",
+    "deletedPartial": "Deleted: {{done}}, failed: {{failed}}",
+    "hidden": "Hidden: {{count}}",
+    "shown": "Shown again: {{count}}",
+    "runningNotDeletable": "Running jobs must be canceled first",
+    "emptyHidden": "All copy jobs are hidden. Use “Show hidden”."
   },
   "actions": {
     "viewer": "Viewer",
@@ -2233,7 +2252,7 @@
     "dialogHint": "Press {key} anywhere to toggle this dialog"
   },
   "about": {
-    "description": "Modern React/TypeScript frontend for the Orthanc DICOM server — standalone SPA (Docker sidecar, Orthanc plugin or behind a JWT-authenticated backend proxy) with audited writes and a configuration a deployment can preset and lock. Study management, merge/migrate, smart search, upload, modality and DICOMweb configuration, viewer integration incl. the IHE image display entry point (RAD-106). It also ships the MWL broker: a DICOM Modality Worklist proxy that fans out to several RIS/KIS systems, merges and caches their worklists, serves the modalities, reports MPPS back to the RIS, accepts HL7 orders (ORM/OMG/OMI) and ADT patient updates (incl. PIR), and routes the stored images to the right PACS — with store spool, per-source cache, store log, TLS/mTLS, ATNA and retention. Verified against DCMTK, dcm4che and DVTk.",
+    "description": "Modern React/TypeScript frontend for the Orthanc DICOM server (v2.7.0) — built out as a DICOM Copy Workstation (direct C-MOVE from the main archive to target archives with zero local image transit, smart positional and prefix C-FIND search with chips, series-level selection with Select All/None controls, shared target registry with arrow/drag-and-drop reordering, and persistent copy jobs with plain-text DIMSE status, search filter, cancel and retry). Also includes study management, merge/migrate, upload, modality and DICOMweb configuration, viewer integration incl. the IHE image display entry point (RAD-106), and the optional MWL broker (multi-RIS worklist proxy with cache, C-STORE spool, HL7 ORM/ADT, MPPS, TLS/mTLS and ATNA).It also routes the stored images to the right PACS.",
     "systemInfo": "System Information",
     "appVersion": "App Version",
     "orthancVersion": "Orthanc Version",
@@ -2245,8 +2264,16 @@
     "storage": "Storage",
     "storageStats": "{{studies}} studies · {{series}} series · {{instances}} instances",
     "platform": "Platform",
+    "copyFeatures": "DICOM Copy Workstation",
+    "copyHint": "Search studies in the main archive via C-FIND and forward them directly to target archives via C-MOVE — with target management (incl. reordering), series selection, live DIMSE status and persistent job history.",
     "forkFeatures": "Fork Features",
     "features": {
+      "cmoveDirect": "Direct C-MOVE (archive → target)",
+      "cmoveSearch": "Positional & prefix C-FIND search",
+      "cmoveSeries": "Series selection (All/None) & live status",
+      "cmoveTargets": "Target registry & reordering",
+      "cmoveJobs": "Copy jobs with plain-text DIMSE & retry",
+      "cmoveSecondTarget": "Multi-target copy without re-querying",
       "backendProxy": "Backend-proxy auth",
       "authGate": "AuthGate (SPA-level)",
       "merge": "Study/Series merge",
@@ -2487,28 +2514,32 @@
     ],
     "help_remoteSources_title": "Remote sources",
     "help_remoteSources_what": [
-      "Other systems this one may query: DICOM nodes (Q/R) and DICOMweb servers."
+      "The copy workstation workplace: search studies in the main archive (ARCHIVE) via C-FIND and forward them directly to target archives via C-MOVE.",
+      "Images flow directly from the main archive to the target — never through this host."
     ],
     "help_remoteSources_how": [
-      "Pick a source, enter a search term, open a result — or test the connection first."
+      "Single search bar with comma positions (last name, first name, birth date, description, study date, accession, modality, study UID) or prefixes (name: id: acc: geb: datum: desc: uid: mod:). Chips show what is sent.",
+      "Pick a destination under \"Copy to\" (manage and reorder targets via \"Manage targets\") and click \"Copy\" — switch the target to send the same study to a second destination.",
+      "Click a row to open the study detail view with series selection (\"Select all\" / \"None\") and all DICOM tags."
     ],
     "help_remoteSources_wrong": [
-      "No answer? Check host, port and the release at the other end; the test button says what is missing.",
-      "\"DICOMweb\" needs a URL, \"DICOM Q/R\" needs a host and port."
+      "No answer? Check host, port and the release of our AET at the archive; the echo icon shows the connection status.",
+      "0xA801 after copying: the target AET is not registered at the source archive."
     ],
     "help_copyJobs_title": "Copy jobs",
     "help_copyJobs_what": [
-      "Every copy order this workstation sent: which study from which archive to which target archive.",
-      "An order is a C-MOVE to the source archive; the archive itself delivers the study to the target."
+      "Every copy order this workstation sent: start, end, source, target (with human-readable alias), study, DIMSE status and duration.",
+      "An order is an asynchronous C-MOVE job to the source archive; the history survives restarts thanks to SaveJobs."
     ],
     "help_copyJobs_how": [
-      "Filter by status (running, delivered, failed) and read the row: target, study, DIMSE status, duration.",
-      "DIMSE 0x0000 means the archive reports every sub-operation as delivered."
+      "Filter by status (running, failed, partly delivered, delivered cleanly) or search by name, birth date, patient ID, target or study UID.",
+      "Running jobs can be canceled directly, failed jobs can be restarted with one click.",
+      "Select rows (or the header checkbox) to hide or delete in bulk; hiding keeps the job in Orthanc, deleting removes it from the job history."
     ],
     "help_copyJobs_wrong": [
       "Failure with 0xA801: the target AET is not known at the source archive.",
       "Failure with 0xC000: the archive could not process the study — check study and target.",
-      "Empty list although you copied? Orthanc keeps only the most recent jobs in memory (JobHistorySize); after a restart the list is empty."
+      "Warning 0xBxxx: partial delivery — some images could not be delivered."
     ],
     "help_settings_title": "Settings",
     "help_settings_what": [

@@ -1077,10 +1077,18 @@
       "mwlIid": "Entrada de visualización IHE (RAD-106)",
       "mwlUps": "Subconjunto UPS-RS (lista de trabajo DICOMweb)",
       "mwlStats": "Estadísticas e informes",
-      "interop": "Verificado con DCMTK, dcm4che y DVTk"
+      "interop": "Verificado con DCMTK, dcm4che y DVTk",
+      "cmoveDirect": "C-MOVE directo (archivo → destino)",
+      "cmoveSearch": "Búsqueda C-FIND por posición y prefijo",
+      "cmoveSeries": "Selección de series (Todas/Ninguna) y estado en vivo",
+      "cmoveTargets": "Registro de destinos y cambio de orden",
+      "cmoveJobs": "Trabajos de copia con DIMSE en texto claro y reintento",
+      "cmoveSecondTarget": "Envío a segundo destino sin repetir la búsqueda"
     },
     "brokerFeatures": "Broker MWL",
-    "brokerHint": "Proxy de listas de trabajo DICOM con caché, enrutado de imágenes y monitorización — se configura en sus propias páginas."
+    "brokerHint": "Proxy de listas de trabajo DICOM con caché, enrutado de imágenes y monitorización — se configura en sus propias páginas.",
+    "copyFeatures": "Estación de copia DICOM",
+    "copyHint": "Busque estudios en el archivo principal por C-FIND y envíelos directamente a archivos de destino por C-MOVE — con gestión y orden de destinos, selección de series, estado DIMSE en vivo e historial persistente."
   },
   "quickReport": {
     "accessionNumber": "Accession Number",
@@ -2244,7 +2252,7 @@
     "emptyFiltered": "No hay trabajos en este filtro.",
     "loading": "Cargando trabajos…",
     "loadFailed": "No se pudieron cargar los trabajos",
-    "hint": "La lista proviene del historial de trabajos de Orthanc: se guarda en memoria y está limitada por «JobHistorySize».",
+    "hint": "La lista proviene del historial de trabajos de Orthanc: se guarda en la base de datos (SaveJobs) y está limitada por «JobsHistorySize».",
     "start": "Inicio",
     "end": "Fin",
     "stillRunning": "en curso…",
@@ -2261,12 +2269,31 @@
       "other": "el archivo informa un problema"
     },
     "dimseLegend": "DIMSE es la respuesta del archivo de origen: 0x0000 = todas las suboperaciones entregadas, 0xBxxx = algunas suboperaciones fallaron (entrega parcial), 0xAxxx = rechazado (p. ej. destino desconocido), 0xCxxx = error, 0xFE00 = cancelado.",
-    "searchPlaceholder": "Filtrar por ID de paciente, destino o UID…",
+    "searchPlaceholder": "Filtrar por nombre, fecha de nacimiento, ID de paciente, destino o UID…",
     "cancelJob": "Cancelar trabajo",
     "retryJob": "Reintentar trabajo",
     "retried": "Trabajo de copia reiniciado",
     "canceled": "Trabajo de copia cancelado",
-    "actionFailed": "La acción sobre el trabajo falló"
+    "actionFailed": "La acción sobre el trabajo falló",
+    "selectRow": "Seleccionar trabajo de copia",
+    "selectAllVisible": "Seleccionar todos los visibles",
+    "selectionCount": "{{count}} seleccionados",
+    "clearSelection": "Borrar selección",
+    "hideSelected": "Ocultar ({{count}})",
+    "showSelected": "Mostrar ({{count}})",
+    "deleteSelected": "Eliminar ({{count}})",
+    "showHidden": "Mostrar ocultos ({{count}})",
+    "hideHidden": "Ocultar los ocultos",
+    "hiddenBadge": "oculto",
+    "hideHint": "Ocultar solo afecta a esta lista: el trabajo permanece en Orthanc como prueba. Eliminar lo quita definitivamente del historial de trabajos.",
+    "deleteTitle": "¿Eliminar trabajos de copia?",
+    "deleteBody": "Los trabajos de copia seleccionados ({{count}}) se eliminarán del historial de Orthanc. No se puede deshacer: el resultado DIMSE desaparece con ellos.",
+    "deleted": "Eliminados: {{count}}",
+    "deletedPartial": "Eliminados: {{done}}, fallidos: {{failed}}",
+    "hidden": "Ocultos: {{count}}",
+    "shown": "Mostrados de nuevo: {{count}}",
+    "runningNotDeletable": "Los trabajos en curso deben cancelarse primero",
+    "emptyHidden": "Todos los trabajos de copia están ocultos. Use «Mostrar ocultos»."
   },
   "help": {
     "help_copyJobs_title": "Trabajos de copia",
@@ -2281,7 +2308,7 @@
     "help_copyJobs_wrong": [
       "Fallo 0xA801: el AET de destino no se conoce en el archivo de origen.",
       "Fallo 0xC000: el archivo no pudo procesar el estudio; revise el estudio y el destino.",
-      "¿Lista vacía aunque haya copiado? Orthanc solo guarda los trabajos recientes (JobHistorySize); tras un reinicio la lista está vacía."
+      "¿Lista vacía aunque haya copiado? Orthanc solo guarda los trabajos recientes (JobsHistorySize); tras un reinicio la lista está vacía."
     ],
     "helpButton": "¿Qué es esto?",
     "helpIntro": "Breve y claro: para qué sirve la página, cómo trabajar con ella y qué hacer si no llega nada.",

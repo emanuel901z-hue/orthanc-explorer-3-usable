@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BookOpen,
   Upload,
-  Globe,
   Settings,
   Activity as ActivityIcon,
   PanelLeftClose,
@@ -13,7 +12,6 @@ import {
   Shield,
   ClipboardList,
   RadioTower,
-  Copy,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -85,14 +83,22 @@ export function AppSidebar() {
     title: string;
     url: string;
     icon: typeof BookOpen;
-    children?: { title: string; url: string }[];
+    children?: { title: string; url: string; badge?: typeof copyJobBadge }[];
   };
 
   const navItems: NavItem[] = [
-    { title: t('nav.remoteSources'), url: '/remote-sources', icon: Globe },
-    { title: t('nav.copyJobs', { defaultValue: 'Copy jobs' }), url: '/copy-jobs', icon: Copy },
     { title: t('nav.studies'), url: '/studies', icon: BookOpen },
-    { title: t('nav.upload'), url: '/upload', icon: Upload },
+    // Die Kopier-Strecke hängt unter „Hochladen“ — sie ist kein eigener
+    // Hauptpunkt, sondern der Weg, eine Studie woandershin zu schicken.
+    {
+      title: t('nav.upload'),
+      url: '/upload',
+      icon: Upload,
+      children: [
+        { title: t('nav.remoteSources'), url: '/remote-sources' },
+        { title: t('nav.copyJobs', { defaultValue: 'Copy jobs' }), url: '/copy-jobs', badge: copyJobBadge },
+      ],
+    },
     { title: t('nav.activity'), url: '/activity', icon: ActivityIcon },
     { title: t('nav.auditLogs', { defaultValue: 'Audit Logs' }), url: '/audit-logs', icon: Shield },
     ...(worklistsEnabled
@@ -168,15 +174,6 @@ export function AppSidebar() {
                       {healthBadge.count}
                     </SidebarMenuBadge>
                   )}
-                  {item.url === '/copy-jobs' && copyJobBadge && (
-                    <SidebarMenuBadge
-                      className={copyJobBadge.className}
-                      title={copyJobBadge.label}
-                      aria-label={copyJobBadge.label}
-                    >
-                      {copyJobBadge.count}
-                    </SidebarMenuBadge>
-                  )}
                   {item.children && (
                     <SidebarMenuSub>
                       {item.children.map((child) => (
@@ -191,6 +188,15 @@ export function AppSidebar() {
                               }}
                             >
                               <span>{child.title}</span>
+                              {child.badge && (
+                                <span
+                                  className={`ms-auto text-[10px] tabular-nums ${child.badge.className}`}
+                                  title={child.badge.label}
+                                  aria-label={child.badge.label}
+                                >
+                                  {child.badge.count}
+                                </span>
+                              )}
                             </NavLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

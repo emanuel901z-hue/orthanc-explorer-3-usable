@@ -8,7 +8,7 @@ import { targetsApi } from '@/api/targets';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
 import '@/i18n';
 
-const { mockQuery, mockRetrieve, mockMove, mockToast, mockEcho, mockJobs, mockModalities } = vi.hoisted(() => ({
+const { mockQuery, mockRetrieve, mockMove, mockToast, mockEcho, mockJobs, mockModalities, mockJournal } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
   mockRetrieve: vi.fn(),
   mockMove: vi.fn(),
@@ -16,6 +16,7 @@ const { mockQuery, mockRetrieve, mockMove, mockToast, mockEcho, mockJobs, mockMo
   mockEcho: vi.fn(),
   mockJobs: vi.fn(),
   mockModalities: vi.fn(),
+  mockJournal: vi.fn(() => Promise.resolve({})),
 }));
 
 vi.mock('sonner', () => ({ toast: mockToast }));
@@ -49,6 +50,11 @@ vi.mock('@/api/queries', () => ({
 }));
 vi.mock('@/actions/retrieveModality', () => ({ retrieveModalityAction: mockRetrieve }));
 vi.mock('@/actions/moveResources', () => ({ moveResourcesAction: mockMove }));
+
+// Das Journal hält Name und Geburtsdatum fest — der Orthanc-Job tut es nicht.
+vi.mock('@/api/copy-journal', () => ({
+  copyJournalApi: { record: mockJournal, list: vi.fn(() => Promise.resolve([])) },
+}));
 
 // Radix Select does not open in jsdom; the page only needs a control that
 // hands a value to onValueChange, so a native stand-in is enough here.
@@ -88,6 +94,7 @@ const ANSWERS = {
       tags: {
         PatientName: 'MUSTERMANN^ERIKA',
         PatientID: 'P-100',
+        PatientBirthDate: '19470803',
         StudyDate: '20260101',
         StudyDescription: 'CT Thorax',
         AccessionNumber: 'ACC-1',
@@ -220,6 +227,31 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
       </QueryClientProvider>,
     );
     expect(await screen.findByText('0x0000')).toBeInTheDocument();
+  });
+
+  it('schreibt Name und Geburtsdatum beim Kopieren ins Journal', async () => {
+    configure([{ aet: 'hst_burn2CD', label: 'HST BRENNER' }]);
+    mockRetrieve.mockResolvedValue({ ID: 'job-1' });
+    renderPage();
+    await queryStudies();
+
+    fireEvent.change(screen.getByLabelText(/copy to|kopieren nach/i), { target: { value: 'hst_burn2CD' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Copy$|^Kopieren$/ }));
+
+    // Orthanc legt nur die Haupt-Tags in den Job — der Name muss von hier kommen
+    await waitFor(() =>
+      expect(mockJournal).toHaveBeenCalledWith(expect.objectContaining({
+        jobId: 'job-1',
+        patientName: 'MUSTERMANN^ERIKA',
+        patientId: 'P-100',
+        birthDate: '19470803',
+        studyInstanceUid: '1.2.3',
+        studyDescription: 'CT Thorax',
+        accessionNumber: 'ACC-1',
+        sourceAet: 'ARCHIVE',
+        targetAet: 'hst_burn2CD',
+      })),
+    );
   });
 
   it('zeigt einen DIMSE-Fehlstatus des Jobs als Fehlschlag', async () => {

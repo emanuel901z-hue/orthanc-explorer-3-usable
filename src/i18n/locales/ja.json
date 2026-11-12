@@ -1077,10 +1077,18 @@
       "mwlIid": "IHE 画像表示エントリ (RAD-106)",
       "mwlUps": "UPS-RS サブセット (DICOMweb ワークリスト)",
       "mwlStats": "統計とレポート",
-      "interop": "DCMTK・dcm4che・DVTk で検証済み"
+      "interop": "DCMTK・dcm4che・DVTk で検証済み",
+      "cmoveDirect": "ダイレクト C-MOVE（アーカイブ → 宛先）",
+      "cmoveSearch": "位置・プレフィックス対応 C-FIND 検索",
+      "cmoveSeries": "シリーズ選択（すべて/なし）とライブ状態",
+      "cmoveTargets": "宛先レジストリと並び替え",
+      "cmoveJobs": "DIMSE 平文表示・再実行つきコピージョブ",
+      "cmoveSecondTarget": "再検索なしの別宛先への連続コピー"
     },
     "brokerFeatures": "MWL ブローカー",
-    "brokerHint": "キャッシュ、転送ルーティング、監視を備えた DICOM ワークリスト代理 — 専用ページで設定します。"
+    "brokerHint": "キャッシュ、転送ルーティング、監視を備えた DICOM ワークリスト代理 — 専用ページで設定します。",
+    "copyFeatures": "DICOM コピーワークステーション",
+    "copyHint": "C-FIND でメインアーカイブの検査を検索し、C-MOVE で宛先アーカイブへ直接転送します — 宛先管理・並び替え、シリーズ選択、ライブ DIMSE ステータス、永続ジョブ履歴を備えています。"
   },
   "quickReport": {
     "accessionNumber": "Accession Number",
@@ -2244,7 +2252,7 @@
     "emptyFiltered": "このフィルターにジョブはありません。",
     "loading": "ジョブを読み込み中…",
     "loadFailed": "ジョブを読み込めませんでした",
-    "hint": "一覧は Orthanc のジョブ履歴です — メモリ上に保持され、「JobHistorySize」で制限されます。",
+    "hint": "一覧は Orthanc のジョブ履歴です — データベースに保存され（SaveJobs）、「JobsHistorySize」で制限されます。",
     "start": "開始",
     "end": "終了",
     "stillRunning": "実行中…",
@@ -2261,12 +2269,31 @@
       "other": "アーカイブが問題を報告"
     },
     "dimseLegend": "DIMSE はソースアーカイブの応答です: 0x0000 = すべてのサブ操作を配信、0xBxxx = 一部のサブ操作が失敗（一部配信）、0xAxxx = 拒否（例: 宛先不明）、0xCxxx = エラー、0xFE00 = 中止。",
-    "searchPlaceholder": "患者ID、宛先、UIDで絞り込み…",
+    "searchPlaceholder": "氏名、生年月日、患者ID、宛先、UIDで絞り込み…",
     "cancelJob": "ジョブを中止",
     "retryJob": "ジョブを再実行",
     "retried": "コピージョブを再開しました",
     "canceled": "コピージョブを中止しました",
-    "actionFailed": "ジョブ操作に失敗しました"
+    "actionFailed": "ジョブ操作に失敗しました",
+    "selectRow": "コピージョブを選択",
+    "selectAllVisible": "表示中をすべて選択",
+    "selectionCount": "{{count}} 件選択",
+    "clearSelection": "選択を解除",
+    "hideSelected": "非表示 ({{count}})",
+    "showSelected": "表示 ({{count}})",
+    "deleteSelected": "削除 ({{count}})",
+    "showHidden": "非表示を表示 ({{count}})",
+    "hideHidden": "非表示を隠す",
+    "hiddenBadge": "非表示",
+    "hideHint": "非表示はこの一覧だけに作用します。ジョブは証跡として Orthanc に残ります。削除するとジョブ履歴から完全に消えます。",
+    "deleteTitle": "コピージョブを削除しますか？",
+    "deleteBody": "選択したコピージョブ ({{count}}) を Orthanc のジョブ履歴から削除します。元に戻せません — DIMSE の結果も失われます。",
+    "deleted": "削除: {{count}}",
+    "deletedPartial": "削除: {{done}}、失敗: {{failed}}",
+    "hidden": "非表示: {{count}}",
+    "shown": "再表示: {{count}}",
+    "runningNotDeletable": "実行中のジョブは先にキャンセルしてください",
+    "emptyHidden": "すべてのコピージョブが非表示です。「非表示を表示」で戻せます。"
   },
   "help": {
     "help_copyJobs_title": "コピージョブ",
@@ -2281,7 +2308,7 @@
     "help_copyJobs_wrong": [
       "0xA801 で失敗: 宛先 AET がソースアーカイブに登録されていません。",
       "0xC000 で失敗: アーカイブが検査を処理できませんでした — 検査と宛先を確認してください。",
-      "コピーしたのに一覧が空? Orthanc は最近のジョブのみ保持します（JobHistorySize）。再起動後は空です。"
+      "コピーしたのに一覧が空? Orthanc は最近のジョブのみ保持します（JobsHistorySize）。再起動後は空です。"
     ],
     "helpButton": "これは何ですか?",
     "helpIntro": "簡潔に: このページの用途、操作方法、何も届かないときの対処。",

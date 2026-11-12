@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { Users, BookOpen, Layers, Image, HardDrive, Copy, Check, CircleDot } from 'lucide-react';
 import { toast } from 'sonner';
 import { getConfig } from '@/config/runtime';
+import { APP_VERSION } from '@/config/version';
 import { useSystemInfo, useStats, usePlugins } from '@/features/settings/hooks/use-system-info';
 
 type VerbosityLevel = 'default' | 'verbose' | 'trace';
@@ -120,6 +121,7 @@ export default function SystemInfoTab() {
   ];
 
   const systemInfoRows = [
+    { label: t('about.appVersion', { defaultValue: 'App Version' }), value: `v${APP_VERSION}`, copyable: false },
     { label: t('settings.orthancVersion', { defaultValue: 'Orthanc Version' }), value: system?.Version ?? '', copyable: true },
     { label: t('settings.dicomAet', { defaultValue: 'DICOM AET' }), value: system?.DicomAet ?? '', copyable: true },
     { label: t('settings.orthancName', { defaultValue: 'Orthanc Name' }), value: system?.Name ?? '', copyable: true },

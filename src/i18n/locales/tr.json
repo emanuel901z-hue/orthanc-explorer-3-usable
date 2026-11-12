@@ -1077,10 +1077,18 @@
       "mwlIid": "IHE görüntü gösterim girişi (RAD-106)",
       "mwlUps": "UPS-RS alt kümesi (DICOMweb iş listesi)",
       "mwlStats": "İstatistik ve raporlama",
-      "interop": "DCMTK, dcm4che ve DVTk ile doğrulandı"
+      "interop": "DCMTK, dcm4che ve DVTk ile doğrulandı",
+      "cmoveDirect": "Doğrudan C-MOVE (arşiv → hedef)",
+      "cmoveSearch": "Konum ve önek destekli C-FIND araması",
+      "cmoveSeries": "Seri seçimi (Tümü/Hiçbiri) ve canlı durum",
+      "cmoveTargets": "Hedef kaydı ve sıralama",
+      "cmoveJobs": "Açık DIMSE anlamı ve yeniden deneme ile kopyalama işleri",
+      "cmoveSecondTarget": "Yeni arama yapmadan ikinci hedefe gönderim"
     },
     "brokerFeatures": "MWL broker",
-    "brokerHint": "Önbellek, görüntü yönlendirme ve izleme içeren DICOM iş listesi proxy'si — kendi sayfalarından yapılandırılır."
+    "brokerHint": "Önbellek, görüntü yönlendirme ve izleme içeren DICOM iş listesi proxy'si — kendi sayfalarından yapılandırılır.",
+    "copyFeatures": "DICOM Kopyalama İstasyonu",
+    "copyHint": "Ana arşivde C-FIND ile inceleme arayın ve C-MOVE ile doğrudan hedef arşivlere iletin — hedef yönetimi ve sıralama, seri seçimi, canlı DIMSE durumu ve kalıcı iş geçmişi ile."
   },
   "quickReport": {
     "accessionNumber": "Accession Number",
@@ -2244,7 +2252,7 @@
     "emptyFiltered": "Bu filtrede iş yok.",
     "loading": "İşler yükleniyor…",
     "loadFailed": "İşler yüklenemedi",
-    "hint": "Liste Orthanc iş geçmişinden gelir — bellekte tutulur ve „JobHistorySize“ ile sınırlıdır.",
+    "hint": "Liste Orthanc iş geçmişinden gelir — veritabanında saklanır (SaveJobs) ve „JobsHistorySize“ ile sınırlıdır.",
     "start": "Başlangıç",
     "end": "Bitiş",
     "stillRunning": "çalışıyor…",
@@ -2261,12 +2269,31 @@
       "other": "arşiv bir sorun bildiriyor"
     },
     "dimseLegend": "DIMSE kaynak arşivin yanıtıdır: 0x0000 = tüm alt işlemler teslim edildi, 0xBxxx = bazı alt işlemler başarısız (kısmen teslim), 0xAxxx = reddedildi (ör. hedef bilinmiyor), 0xCxxx = hata, 0xFE00 = iptal edildi.",
-    "searchPlaceholder": "Hasta ID, hedef veya UID ile filtrele…",
+    "searchPlaceholder": "Ad, doğum tarihi, hasta ID, hedef veya UID ile filtrele…",
     "cancelJob": "İşi iptal et",
     "retryJob": "İşi yeniden dene",
     "retried": "Kopyalama işi yeniden başlatıldı",
     "canceled": "Kopyalama işi iptal edildi",
-    "actionFailed": "İş işlemi başarısız oldu"
+    "actionFailed": "İş işlemi başarısız oldu",
+    "selectRow": "Kopyalama işini seç",
+    "selectAllVisible": "Görünenlerin tümünü seç",
+    "selectionCount": "{{count}} seçili",
+    "clearSelection": "Seçimi temizle",
+    "hideSelected": "Gizle ({{count}})",
+    "showSelected": "Göster ({{count}})",
+    "deleteSelected": "Sil ({{count}})",
+    "showHidden": "Gizlenenleri göster ({{count}})",
+    "hideHidden": "Gizlenenleri gizle",
+    "hiddenBadge": "gizli",
+    "hideHint": "Gizleme yalnızca bu listeyi etkiler — iş kanıt olarak Orthanc'ta kalır. Silme, işi iş geçmişinden kalıcı olarak kaldırır.",
+    "deleteTitle": "Kopyalama işleri silinsin mi?",
+    "deleteBody": "Seçilen kopyalama işleri ({{count}}) Orthanc iş geçmişinden kaldırılacak. Bu geri alınamaz — DIMSE sonucu da onlarla birlikte kaybolur.",
+    "deleted": "Silindi: {{count}}",
+    "deletedPartial": "Silindi: {{done}}, başarısız: {{failed}}",
+    "hidden": "Gizlendi: {{count}}",
+    "shown": "Yeniden gösterildi: {{count}}",
+    "runningNotDeletable": "Çalışan işler önce iptal edilmeli",
+    "emptyHidden": "Tüm kopyalama işleri gizli. „Gizlenenleri göster“ ile geri getirin."
   },
   "help": {
     "help_copyJobs_title": "Kopyalama işleri",
@@ -2281,7 +2308,7 @@
     "help_copyJobs_wrong": [
       "0xA801 ile başarısız: hedef AET kaynak arşivde tanımlı değil.",
       "0xC000 ile başarısız: arşiv incelemeyi işleyemedi — incelemeyi ve hedefi kontrol edin.",
-      "Kopyaladınız ama liste boş mu? Orthanc yalnızca son işleri saklar (JobHistorySize); yeniden başlatmadan sonra liste boştur."
+      "Kopyaladınız ama liste boş mu? Orthanc yalnızca son işleri saklar (JobsHistorySize); yeniden başlatmadan sonra liste boştur."
     ],
     "helpButton": "Bu nedir?",
     "helpIntro": "Kısa ve açık: sayfa ne için, nasıl çalışılır ve hiçbir şey gelmezse ne yapılır.",

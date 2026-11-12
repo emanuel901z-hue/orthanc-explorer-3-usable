@@ -24,7 +24,7 @@ function baseUrl(): string {
  * sonst landet orthancUrl (/orthanc-proxy) davor und der Request geht an
  * Orthanc statt an den Ziele-Container.
  */
-async function targetsFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function targetsFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const correlationId = newCorrelationId();
   const headers = new Headers(init.headers);
   headers.set('X-Request-Id', correlationId);

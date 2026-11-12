@@ -4,6 +4,33 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## v2.7.0 — DICOM-Copy-Workstation: Direkt-C-MOVE, Kopieraufträge, Ziel-Registry & Serien-Auswahl (2026-11-07)
+
+Ausbau zur **DICOM-Copy-Workstation** für den Klinikbetrieb (Studien im Hauptarchiv per C-FIND suchen und per C-MOVE direkt an Zielarchive weiterleiten, ohne lokalen Bilddurchlauf):
+
+- **Navigation**: die Kopier-Strecke hängt als Unterpunkte unter **„Hochladen“** (`/upload`) — „Remote-Quellen“ und „Kopieraufträge“ sind keine eigenen Hauptpunkte mehr; `/oe3/` öffnet wieder die Studienliste.
+- **Remote-Quellen (`/oe3/remote-sources`)**:
+  - Automatische Vorauswahl des Hauptarchivs (`ARCHIVE`) inkl. stillem C-ECHO beim Öffnen.
+  - Intelligente Ein-Zeilen-Suche (`src/features/servers/lib/remote-query.ts`): Komma-Positionen (Nachname, Vorname, Geburtsdatum, Studienbeschreibung, Studiendatum, Zugangsnummer, Modalität, Study-UID), Präfix-Suche je Namensteil (`%` und `*`), Feld-Präfixe (`name: id: acc: geb: datum: desc: uid: mod:`), echte Kalenderprüfung, sichtbare Übersetzungs-Chips und automatische Zweitdeutung bei mehrdeutigen Eingaben. Nicht mehr benötigte `/queries/:id`-Ressourcen werden automatisch per `DELETE` aufgeräumt.
+  - **Zweitziel-Versand & Erneut kopieren** direkt in der Trefferzeile ohne neue C-FIND-Abfrage; Rückfrage beim Sammelversand ab 11 Studien.
+  - **Studien-Detaildialog (`RemoteStudyDetailDialog`)**: lädt Serien per C-FIND (`Level=Series`) nach, bietet eine Select-All-Checkbox im Tabellenkopf sowie „Alle auswählen“ / „Keine“-Buttons, Zielauswahl und Live-DIMSE-/Fortschrittsanzeige direkt im Dialog-Footer.
+- **Kopierziele verwalten (`TargetsDialog` + `/targets-api`)**:
+  - Serverseitige AET-Zielliste (`src/api/targets.ts` direkt gegen `/targets-api/targets`), kombiniert mit Orthanc-Modalitäten.
+  - Ziele anlegen, löschen und **in der Reihenfolge per Pfeil-Buttons (`↑`/`↓`) oder Drag & Drop sortieren und speichern**.
+- **Kopieraufträge (`/oe3/copy-jobs`)**:
+  - Persistente Job-Historie (`DicomMoveScu`) mit Start, Ende, Quelle, aufgelöstem **Ziel-Alias + AET**, **Patientenname und Geburtsdatum**, Study-UID, Status-Badge, DIMSE-Bedeutung in Klartext (`0x0000`, `0xBxxx` als Warnung, `0xA801`, `0xC000`, `0xFE00`), Laufzeit-Plausibilitätsprüfung (`looksQueuedOnly`), Suchfeld (Name, Geburtsdatum, Patienten-ID, Zugangsnummer, Ziel, UID) sowie direktem **Abbrechen** (`cancel`) und **Erneut senden** (`resubmit`).
+  - **Kopier-Journal** (`src/api/copy-journal.ts` → `/targets-api/copy-journal`): Orthanc legt im `DicomMoveScu`-Job nur die Haupt-Tags ab — Name und Geburtsdatum fehlen. Die Kopier-Seite schickt sie beim Auftrag mit, die Liste mischt sie per `applyCopyNote` in die Anzeige und durchsucht sie. Ein Ausfall des Journals ändert am C-MOVE nichts.
+  - **Aufräumen**: Mehrfachauswahl in der Tabelle (einzeln oder alle sichtbaren) mit **Ausblenden** (`/targets-api/copy-jobs/hidden`, reversibel, der Job bleibt in Orthanc) und **Löschen** (`DELETE /jobs/{id}`, nur abgeschlossene Aufträge, mit Rückfrage; Journal-Eintrag wird mitgelöscht). „Ausgeblendete anzeigen“ holt Ausgeblendetes zurück; das Suchfeld greift auch auf Start/Ende zu, damit sich „alles von einem Tag“ auswählen lässt.
+  - Live-Badge in der Seitenleiste bei laufenden oder fehlgeschlagenen Kopierjobs.
+- **Modalitäten & Audit-Log**:
+  - `AddModalityDialog` unterstützt Bindestriche im AET (`ORTHANC-CP-SRV`, `INCEPTO-GATEWAY`) und die gültigen Orthanc-`ModalityManufacturer`-Werte; `auditClient.emit` speist abgeschlossene Events auch in `useAuditStore` (`/oe3/audit-logs`).
+- **About-Dialog & System-Info**:
+  - Version auf `v2.7.0` angehoben; eigener Funktionsblock „DICOM-Copy-Workstation“ im Info-Modal unten links sowie App-Version in „Einstellungen → System“.
+
+Gates grün: `tsc` 0, `npm run lint` 0 Fehler, `npm run i18n:check` vollständig (alle 9 Sprachen), `npm run build` 0, **989 Vitest-Tests**, **80 pytest-Tests**, **22 Playwright-E2E-Tests**.
+
+---
+
 ## v2.6.16 — Der Alerting-Check flackert nicht mehr (2026-10-04)
 
 Nachzieher zu v2.6.15. Der Deep-Audit zählte die Alerting-Ereignisse, sobald

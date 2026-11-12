@@ -61,6 +61,15 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     t('about.features.interop'),
   ];
 
+  const copyFeatures = [
+    t('about.features.cmoveDirect', { defaultValue: 'Direct C-MOVE (archive → target)' }),
+    t('about.features.cmoveSearch', { defaultValue: 'Positional & prefix C-FIND search' }),
+    t('about.features.cmoveSeries', { defaultValue: 'Series-level selection & live status' }),
+    t('about.features.cmoveTargets', { defaultValue: 'Shared target registry & reordering' }),
+    t('about.features.cmoveJobs', { defaultValue: 'Copy jobs with plain-text DIMSE & retry' }),
+    t('about.features.cmoveSecondTarget', { defaultValue: 'Multi-target copy without re-querying' }),
+  ];
+
   // the MWL broker is the largest part of this fork — it gets its own group
   const brokerFeatures = [
     t('about.features.mwlBroker'),
@@ -113,6 +122,27 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
               </div>
             ))}
           </dl>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium">
+            {t('about.copyFeatures', { defaultValue: 'DICOM Copy Workstation' })}
+          </h4>
+          <p className="text-xs text-muted-foreground">
+            {t('about.copyHint', {
+              defaultValue:
+                'Search studies in the main archive via C-FIND and forward them directly to target archives via C-MOVE — with target management, series selection, live DIMSE status and persistent job history.',
+            })}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {copyFeatures.map((feature) => (
+              <Badge key={feature} variant="secondary" className="text-[10px] font-normal">
+                {feature}
+              </Badge>
+            ))}
+          </div>
         </div>
 
         <Separator />

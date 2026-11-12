@@ -14,7 +14,7 @@ function renderDialog() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <AboutDialog open onOpenChange={() => {}} />
+      <AboutDialog open onOpenChange={() => { }} />
     </QueryClientProvider>,
   );
 }
@@ -36,7 +36,10 @@ describe('AboutDialog', () => {
   it('still shows the system information and the fork feature list', () => {
     renderDialog();
     expect(screen.getByText('System Information')).toBeInTheDocument();
+    expect(screen.getByText('DICOM Copy Workstation')).toBeInTheDocument();
+    expect(screen.getByText('Direct C-MOVE (archive → target)')).toBeInTheDocument();
     expect(screen.getByText('Fork Features')).toBeInTheDocument();
     expect(screen.getByText('Study/Series merge')).toBeInTheDocument();
+    expect(screen.getByText('v2.7.0')).toBeInTheDocument();
   });
 });

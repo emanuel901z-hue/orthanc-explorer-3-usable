@@ -1077,10 +1077,18 @@
       "mwlIid": "Entrée d'affichage d'images IHE (RAD-106)",
       "mwlUps": "Sous-ensemble UPS-RS (liste de travail DICOMweb)",
       "mwlStats": "Statistiques et rapports",
-      "interop": "Vérifié avec DCMTK, dcm4che et DVTk"
+      "interop": "Vérifié avec DCMTK, dcm4che et DVTk",
+      "cmoveDirect": "C-MOVE direct (archive → destination)",
+      "cmoveSearch": "Recherche C-FIND par position et préfixe",
+      "cmoveSeries": "Sélection de séries (Toutes/Aucune) et état en direct",
+      "cmoveTargets": "Registre des destinations et tri",
+      "cmoveJobs": "Tâches de copie avec DIMSE en clair et relance",
+      "cmoveSecondTarget": "Envoi vers une seconde destination sans nouvelle recherche"
     },
     "brokerFeatures": "Broker MWL",
-    "brokerHint": "Proxy de listes de travail DICOM avec cache, routage des images et supervision — configuré sur ses propres pages."
+    "brokerHint": "Proxy de listes de travail DICOM avec cache, routage des images et supervision — configuré sur ses propres pages.",
+    "copyFeatures": "Poste de copie DICOM",
+    "copyHint": "Recherchez des examens dans l'archive principale par C-FIND et transférez-les directement aux archives de destination par C-MOVE — avec gestion et tri des destinations, sélection de séries, état DIMSE en direct et historique persistant."
   },
   "quickReport": {
     "accessionNumber": "Accession Number",
@@ -2244,7 +2252,7 @@
     "emptyFiltered": "Aucune tâche dans ce filtre.",
     "loading": "Chargement des tâches…",
     "loadFailed": "Les tâches n'ont pas pu être chargées",
-    "hint": "La liste provient de l'historique des tâches d'Orthanc : conservée en mémoire et limitée par « JobHistorySize ».",
+    "hint": "La liste provient de l'historique des tâches d'Orthanc : conservée dans la base de données (SaveJobs) et limitée par « JobsHistorySize ».",
     "start": "Début",
     "end": "Fin",
     "stillRunning": "en cours…",
@@ -2261,12 +2269,31 @@
       "other": "l'archive signale un problème"
     },
     "dimseLegend": "DIMSE est la réponse de l'archive source : 0x0000 = toutes les sous-opérations livrées, 0xBxxx = certaines sous-opérations ont échoué (livraison partielle), 0xAxxx = refusé (p. ex. destination inconnue), 0xCxxx = erreur, 0xFE00 = annulé.",
-    "searchPlaceholder": "Filtrer par ID patient, destination ou UID…",
+    "searchPlaceholder": "Filtrer par nom, date de naissance, ID patient, destination ou UID…",
     "cancelJob": "Annuler la tâche",
     "retryJob": "Relancer la tâche",
     "retried": "Tâche de copie relancée",
     "canceled": "Tâche de copie annulée",
-    "actionFailed": "L'action sur la tâche a échoué"
+    "actionFailed": "L'action sur la tâche a échoué",
+    "selectRow": "Sélectionner la tâche de copie",
+    "selectAllVisible": "Sélectionner tout ce qui est visible",
+    "selectionCount": "{{count}} sélectionné(s)",
+    "clearSelection": "Effacer la sélection",
+    "hideSelected": "Masquer ({{count}})",
+    "showSelected": "Afficher ({{count}})",
+    "deleteSelected": "Supprimer ({{count}})",
+    "showHidden": "Afficher les masquées ({{count}})",
+    "hideHidden": "Masquer les masquées",
+    "hiddenBadge": "masquée",
+    "hideHint": "Masquer ne concerne que cette liste — la tâche reste dans Orthanc comme preuve. Supprimer l'enlève définitivement de l'historique des tâches.",
+    "deleteTitle": "Supprimer les tâches de copie ?",
+    "deleteBody": "Les tâches de copie sélectionnées ({{count}}) seront retirées de l'historique des tâches d'Orthanc. C'est irréversible — le résultat DIMSE disparaît avec elles.",
+    "deleted": "Supprimées : {{count}}",
+    "deletedPartial": "Supprimées : {{done}}, échecs : {{failed}}",
+    "hidden": "Masquées : {{count}}",
+    "shown": "Réaffichées : {{count}}",
+    "runningNotDeletable": "Les tâches en cours doivent d'abord être annulées",
+    "emptyHidden": "Toutes les tâches de copie sont masquées. Utilisez « Afficher les masquées »."
   },
   "help": {
     "help_copyJobs_title": "Tâches de copie",
@@ -2281,7 +2308,7 @@
     "help_copyJobs_wrong": [
       "Échec 0xA801 : l'AET de destination n'est pas connu de l'archive source.",
       "Échec 0xC000 : l'archive n'a pas pu traiter l'examen ; vérifier l'examen et la destination.",
-      "Liste vide alors que vous avez copié ? Orthanc ne garde que les tâches récentes (JobHistorySize) ; après un redémarrage la liste est vide."
+      "Liste vide alors que vous avez copié ? Orthanc ne garde que les tâches récentes (JobsHistorySize) ; après un redémarrage la liste est vide."
     ],
     "helpButton": "Qu'est-ce que c'est ?",
     "helpIntro": "Court et clair : à quoi sert la page, comment travailler avec elle et que faire si rien n'arrive.",

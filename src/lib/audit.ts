@@ -16,6 +16,7 @@ export type AuditResourceType =
   | "series"
   | "instance"
   | "modality"
+  | "job"
   | "dicomWebServer"
   | "peer"
   | "brokerSource"

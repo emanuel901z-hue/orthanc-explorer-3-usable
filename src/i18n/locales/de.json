@@ -527,7 +527,7 @@
   "copyJobs": {
     "title": "Kopieraufträge",
     "subtitle": "C-MOVE-Aufträge dieser Workstation an das Archiv — Status und Ergebnis je Studie",
-    "searchPlaceholder": "Nach Patienten-ID, Ziel oder UID filtern…",
+    "searchPlaceholder": "Nach Name, Geburtsdatum, Patienten-ID, Ziel oder UID filtern…",
     "cancelJob": "Auftrag abbrechen",
     "retryJob": "Auftrag erneut senden",
     "retried": "Kopierauftrag erneut gestartet",
@@ -547,7 +547,7 @@
     "emptyFiltered": "Keine Aufträge in diesem Filter.",
     "loading": "Lade Aufträge…",
     "loadFailed": "Aufträge konnten nicht geladen werden",
-    "hint": "Die Liste kommt aus der Job-Historie von Orthanc — sie liegt im Speicher und ist durch „JobHistorySize“ begrenzt.",
+    "hint": "Die Liste kommt aus der Job-Historie von Orthanc — sie wird in der Datenbank gespeichert (SaveJobs) und ist durch „JobsHistorySize“ begrenzt.",
     "start": "Start",
     "end": "Ende",
     "stillRunning": "läuft…",
@@ -564,7 +564,26 @@
       "canceled": "abgebrochen",
       "other": "Problem gemeldet"
     },
-    "dimseLegend": "DIMSE ist die Antwort des Quellarchivs: 0x0000 = alle Teiloperationen zugestellt, 0xBxxx = einzelne Teiloperationen fehlgeschlagen (teilweise zugestellt), 0xAxxx = abgelehnt (z. B. Ziel unbekannt), 0xCxxx = Fehler, 0xFE00 = abgebrochen."
+    "dimseLegend": "DIMSE ist die Antwort des Quellarchivs: 0x0000 = alle Teiloperationen zugestellt, 0xBxxx = einzelne Teiloperationen fehlgeschlagen (teilweise zugestellt), 0xAxxx = abgelehnt (z. B. Ziel unbekannt), 0xCxxx = Fehler, 0xFE00 = abgebrochen.",
+    "selectRow": "Kopierauftrag auswählen",
+    "selectAllVisible": "Alle sichtbaren auswählen",
+    "selectionCount": "{{count}} ausgewählt",
+    "clearSelection": "Auswahl aufheben",
+    "hideSelected": "Ausblenden ({{count}})",
+    "showSelected": "Einblenden ({{count}})",
+    "deleteSelected": "Löschen ({{count}})",
+    "showHidden": "Ausgeblendete anzeigen ({{count}})",
+    "hideHidden": "Ausgeblendete verbergen",
+    "hiddenBadge": "ausgeblendet",
+    "hideHint": "Ausblenden betrifft nur diese Liste — der Auftrag bleibt in Orthanc als Nachweis. Löschen entfernt ihn endgültig aus der Job-Historie.",
+    "deleteTitle": "Kopieraufträge löschen?",
+    "deleteBody": "Die ausgewählten Kopieraufträge ({{count}}) werden aus der Job-Historie von Orthanc entfernt. Das lässt sich nicht rückgängig machen — auch der DIMSE-Status ist dann weg.",
+    "deleted": "Gelöscht: {{count}}",
+    "deletedPartial": "Gelöscht: {{done}}, fehlgeschlagen: {{failed}}",
+    "hidden": "Ausgeblendet: {{count}}",
+    "shown": "Wieder eingeblendet: {{count}}",
+    "runningNotDeletable": "Laufende Aufträge müssen vorher abgebrochen werden",
+    "emptyHidden": "Alle Kopieraufträge sind ausgeblendet. Über „Ausgeblendete anzeigen“ zurückholen."
   },
   "actions": {
     "viewer": "Viewer",
@@ -2233,7 +2252,7 @@
     "dialogHint": "{key} überall drücken um diesen Dialog zu öffnen"
   },
   "about": {
-    "description": "Modernes React/TypeScript-Frontend für den Orthanc DICOM-Server — Standalone-SPA (Docker-Sidecar, Orthanc-Plugin oder hinter einem JWT-authentifizierten Backend-Proxy) mit auditierten Schreibaktionen und einer Konfiguration, die eine Installation vorbelegen und sperren kann. Studienverwaltung, Merge/Migrate, intelligente Suche, Upload, Modalitäts- und DICOMweb-Konfiguration, Viewer-Integration inkl. des IHE-Bildaufrufs (RAD-106). Zusätzlich enthält es den MWL-Broker: einen DICOM-Modality-Worklist-Proxy, der mehrere RIS/KIS-Systeme abfragt, deren Arbeitslisten zusammenführt und zwischenspeichert, sie den Modalitäten liefert, MPPS an das RIS zurückmeldet, HL7-Aufträge (ORM/OMG/OMI) und ADT-Patientenänderungen (inkl. PIR) annimmt und die Bilder an das passende PACS weiterleitet — mit C-STORE-Spool, Cache je Quelle, Store-Log, TLS/mTLS, ATNA und Aufbewahrung. Geprüft gegen DCMTK, dcm4che und DVTk.",
+    "description": "Modernes React/TypeScript-Frontend für den Orthanc DICOM-Server (v2.7.0) — ausgebaut als DICOM-Copy-Workstation (Direkt-C-MOVE vom Hauptarchiv an Zielarchive ohne lokalen Bilddurchlauf, intelligente Positions- und Präfix-Suche mit Chips, Serien-Einzelauswahl mit Alle/Keine-Umschaltung, gemeinsame Ziel-Registry mit Sortierung per Pfeil/Drag & Drop sowie persistente Kopieraufträge mit DIMSE-Klartext, Filter, Abbruch und Neustart). Enthält zudem Studienverwaltung, Merge/Migrate, Upload, Modalitäts- und DICOMweb-Konfiguration, Viewer-Integration inkl. IHE-Bildaufruf (RAD-106) sowie den optionalen MWL-Broker (Multi-RIS-Worklist-Proxy mit Cache, C-STORE-Spool, HL7 ORM/ADT, MPPS, TLS/mTLS und ATNA).",
     "systemInfo": "Systeminformationen",
     "appVersion": "App-Version",
     "orthancVersion": "Orthanc-Version",
@@ -2245,8 +2264,16 @@
     "storage": "Speicher",
     "storageStats": "{{studies}} Studien · {{series}} Serien · {{instances}} Instanzen",
     "platform": "Plattform",
+    "copyFeatures": "DICOM-Copy-Workstation",
+    "copyHint": "Studien im Hauptarchiv per C-FIND suchen und per C-MOVE direkt an Zielarchive weiterleiten — mit Ziel-Registry (inkl. Sortierung), Serien-Auswahl, Live-DIMSE-Status und persistenter Job-Historie.",
     "forkFeatures": "Fork-Features",
     "features": {
+      "cmoveDirect": "Direkt-C-MOVE (Archiv → Ziel)",
+      "cmoveSearch": "Positions- & Präfix-Suche (C-FIND)",
+      "cmoveSeries": "Serien-Auswahl (Alle/Keine) & Live-Status",
+      "cmoveTargets": "Ziel-Registry & Reihenfolge sortieren",
+      "cmoveJobs": "Kopieraufträge mit DIMSE-Klartext & Neustart",
+      "cmoveSecondTarget": "Zweitziel-Versand ohne neue Suche",
       "backendProxy": "Backend-Proxy-Auth",
       "authGate": "AuthGate (SPA-Ebene)",
       "merge": "Studien/Serien-Merge",
@@ -2487,28 +2514,32 @@
     ],
     "help_remoteSources_title": "Remote-Quellen",
     "help_remoteSources_what": [
-      "Fremde Systeme, die diese Installation abfragen darf: DICOM-Knoten (Q/R) und DICOMweb-Server."
+      "Der Arbeitsplatz der Kopierstation: Studien im Hauptarchiv (ARCHIVE) per C-FIND suchen und per Direkt-C-MOVE an Zielarchive senden.",
+      "Die Bilder fließen direkt vom Hauptarchiv an das Ziel — nicht über diesen Host."
     ],
     "help_remoteSources_how": [
-      "Quelle wählen, Suchbegriff eingeben, Ergebnis öffnen — oder zuerst die Verbindung testen."
+      "Suchzeile mit Komma-Positionen (Nachname, Vorname, Geburtsdatum, Beschreibung, Studiendatum, Zugangsnummer, Modalität, Study-UID) oder Präfixen (name: id: acc: geb: datum: desc: uid: mod:). Chips zeigen, was gesendet wird.",
+      "Ziel unter „Kopieren nach“ wählen (Reihenfolge und Einträge über „Ziele verwalten“ pflegbar) und „Kopieren“ klicken — für ein zweites Ziel einfach das Ziel wechseln.",
+      "Klick auf eine Zeile öffnet die Detailansicht mit Serien-Auswahl („Alle auswählen“ / „Keine“) und allen DICOM-Tags."
     ],
     "help_remoteSources_wrong": [
-      "Keine Antwort? Host, Port und die Freigabe beim Ziel prüfen; der Test-Knopf sagt, was fehlt.",
-      "„DICOMweb\" braucht eine URL, „DICOM Q/R\" braucht Host und Port."
+      "Keine Antwort? Host, Port und die Freigabe unserer AET beim Archiv prüfen; das Echo-Symbol zeigt den Verbindungsstatus.",
+      "0xA801 nach dem Kopieren: der Ziel-AET ist im Quellarchiv nicht hinterlegt."
     ],
     "help_copyJobs_title": "Kopieraufträge",
     "help_copyJobs_what": [
-      "Alle Kopieraufträge dieser Workstation: welche Studie aus welchem Archiv an welches Zielarchiv gehen sollte.",
-      "Ein Auftrag ist ein C-MOVE an das Quellarchiv; das Archiv stellt die Studie selbst an das Ziel zu."
+      "Alle Kopieraufträge dieser Workstation: Start, Ende, Quelle, Ziel (mit Klartext-Alias), Studie, DIMSE-Status und Dauer.",
+      "Ein Auftrag ist ein asynchroner C-MOVE-Job an das Quellarchiv; die Historie übersteht dank SaveJobs einen Neustart."
     ],
     "help_copyJobs_how": [
-      "Nach Status filtern (läuft, zugestellt, fehlgeschlagen) und die Zeile lesen: Ziel, Studie, DIMSE-Status, Dauer.",
-      "DIMSE 0x0000 heißt: das Archiv meldet alle Teiloperationen als erfolgreich zugestellt."
+      "Nach Status filtern (läuft, fehlgeschlagen, teilweise zugestellt, sauber zugestellt) oder im Suchfeld nach Name, Geburtsdatum, Patienten-ID, Ziel oder Study-UID suchen.",
+      "Laufende Aufträge lassen sich direkt abbrechen, fehlgeschlagene per Klick erneut starten.",
+      "Zeilen (oder die Kopf-Checkbox) auswählen, um gesammelt auszublenden oder zu löschen; Ausblenden lässt den Auftrag in Orthanc, Löschen entfernt ihn aus der Job-Historie."
     ],
     "help_copyJobs_wrong": [
       "Fehlschlag mit 0xA801: das Ziel-AET ist im Quellarchiv nicht bekannt.",
       "Fehlschlag mit 0xC000: das Archiv konnte die Studie nicht verarbeiten — Studie und Ziel prüfen.",
-      "Liste leer, obwohl kopiert wurde? Orthanc hält nur die letzten Aufträge im Speicher (JobHistorySize), nach einem Neustart ist sie leer."
+      "Warnung 0xBxxx: Teilfehler — einzelne Bilder konnten nicht zugestellt werden."
     ],
     "help_settings_title": "Einstellungen",
     "help_settings_what": [

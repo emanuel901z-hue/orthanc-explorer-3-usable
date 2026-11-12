@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import CopyJobsPage from './CopyJobsPage';
 import { jobsApi, type OrthancJob } from '@/api/jobs';
@@ -7,10 +8,35 @@ import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
 import i18n from '@/i18n';
 
-const { mockJobs } = vi.hoisted(() => ({ mockJobs: vi.fn() }));
+const { mockJobs, mockJournal, mockHidden, mockHide, mockShow, mockDeleteJob } = vi.hoisted(() => ({
+  mockJobs: vi.fn(),
+  mockJournal: vi.fn(() => Promise.resolve([])),
+  mockHidden: vi.fn(() => Promise.resolve([])),
+  mockHide: vi.fn(() => Promise.resolve([])),
+  mockShow: vi.fn(() => Promise.resolve([])),
+  mockDeleteJob: vi.fn(() => Promise.resolve()),
+}));
 
 vi.mock('@/features/activity/hooks/useOrthancJobs', () => ({
   useOrthancJobs: () => mockJobs(),
+}));
+
+vi.mock('@/api/copy-journal', () => ({
+  copyJournalApi: {
+    list: mockJournal,
+    record: vi.fn(() => Promise.resolve({})),
+    remove: vi.fn(() => Promise.resolve(true)),
+  },
+}));
+
+vi.mock('@/api/hidden-jobs', () => ({
+  hiddenJobsApi: { list: mockHidden, hide: mockHide, show: mockShow },
+}));
+
+vi.mock('@/actions/deleteJob', () => ({ deleteJobAction: mockDeleteJob }));
+vi.mock('@/actions/hideCopyJobs', () => ({
+  hideCopyJobsAction: mockHide,
+  showCopyJobsAction: mockShow,
 }));
 
 function job(overrides: Partial<OrthancJob> = {}): OrthancJob {
@@ -33,16 +59,21 @@ function job(overrides: Partial<OrthancJob> = {}): OrthancJob {
 }
 
 function renderPage() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
-      <CopyJobsPage />
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <CopyJobsPage />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 
 describe('CopyJobsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockJournal.mockResolvedValue([]);
+    mockHidden.mockResolvedValue([]);
     // der Statusfilter wird persistiert — sonst trägt ihn der nächste Test weiter
     usePersistedUiStore.setState({ values: {} });
     useSessionUiStore.setState({ values: {} });
@@ -303,5 +334,210 @@ describe('CopyJobsPage', () => {
 
     await waitFor(() => expect(resubmitSpy).toHaveBeenCalledWith('job-fail'));
     resubmitSpy.mockRestore();
+  });
+
+  it('zeigt Patientenname und Geburtsdatum aus dem Kopier-Journal', async () => {
+    await i18n.changeLanguage('de');
+    mockJournal.mockResolvedValue([
+      {
+        jobId: 'job-1',
+        patientName: 'MUSTERMANN^ERIKA',
+        patientId: 'P-100',
+        birthDate: '19470803',
+        studyInstanceUid: '1.2.3',
+      },
+    ]);
+    mockJobs.mockReturnValue({ data: [job()], isLoading: false, isError: false });
+
+    renderPage();
+
+    // Der Job selbst kennt nur die Haupt-Tags — Name und Datum kommen aus dem Journal
+    expect(await screen.findByText('MUSTERMANN^ERIKA')).toBeInTheDocument();
+    expect(screen.getByText('P-100 · 03.08.1947')).toBeInTheDocument();
+    expect(screen.getByText('1.2.3')).toBeInTheDocument();
+  });
+
+  it('findet einen Auftrag über den Patientennamen', async () => {
+    await i18n.changeLanguage('de');
+    mockJournal.mockResolvedValue([
+      { jobId: 'job-1', patientName: 'MUSTERMANN^ERIKA', patientId: 'P-100', birthDate: '19470803' },
+      { jobId: 'job-2', patientName: 'BEISPIEL^PAUL', patientId: 'P-999', birthDate: '19800202' },
+    ]);
+    mockJobs.mockReturnValue({
+      data: [job(), job({ ID: 'job-2', Content: { TargetAet: 'JungPacs', Details: [{ DimseErrorStatus: 0 }] } })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+    await screen.findByText('MUSTERMANN^ERIKA');
+
+    fireEvent.change(screen.getByLabelText(/filtern|filter by/i), { target: { value: 'beispiel' } });
+
+    expect(screen.getByText('BEISPIEL^PAUL')).toBeInTheDocument();
+    expect(screen.queryByText('MUSTERMANN^ERIKA')).not.toBeInTheDocument();
+  });
+
+  it('findet einen Auftrag über das Geburtsdatum — roh und in der Anzeigeschreibweise', async () => {
+    await i18n.changeLanguage('de');
+    mockJournal.mockResolvedValue([
+      { jobId: 'job-1', patientName: 'MUSTERMANN^ERIKA', patientId: 'P-100', birthDate: '19470803' },
+      { jobId: 'job-2', patientName: 'BEISPIEL^PAUL', patientId: 'P-999', birthDate: '19800202' },
+    ]);
+    mockJobs.mockReturnValue({
+      data: [job(), job({ ID: 'job-2', Content: { TargetAet: 'JungPacs', Details: [{ DimseErrorStatus: 0 }] } })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+    await screen.findByText('MUSTERMANN^ERIKA');
+    const search = screen.getByLabelText(/filtern|filter by/i);
+
+    fireEvent.change(search, { target: { value: '03.08.1947' } });
+    expect(screen.getByText('MUSTERMANN^ERIKA')).toBeInTheDocument();
+    expect(screen.queryByText('BEISPIEL^PAUL')).not.toBeInTheDocument();
+
+    fireEvent.change(search, { target: { value: '19800202' } });
+    expect(screen.getByText('BEISPIEL^PAUL')).toBeInTheDocument();
+    expect(screen.queryByText('MUSTERMANN^ERIKA')).not.toBeInTheDocument();
+  });
+});
+
+describe('CopyJobsPage — Aufräumen', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockJournal.mockResolvedValue([]);
+    mockHidden.mockResolvedValue([]);
+    mockHide.mockResolvedValue([]);
+    mockShow.mockResolvedValue([]);
+    mockDeleteJob.mockResolvedValue(undefined);
+    usePersistedUiStore.setState({ values: {} });
+    useSessionUiStore.setState({ values: {} });
+    window.localStorage.clear();
+  });
+
+  function twoJobs() {
+    mockJobs.mockReturnValue({
+      data: [
+        job(),
+        job({
+          ID: 'job-2',
+          Content: {
+            TargetAet: 'JungPacs',
+            Query: [{ '0020,000d': '9.9.9', '0010,0020': 'P-999' }],
+            Details: [{ DimseErrorStatus: 0 }],
+          },
+        }),
+      ],
+      isLoading: false,
+      isError: false,
+    });
+  }
+
+  it('blendet die ausgewählten Aufträge aus', async () => {
+    await i18n.changeLanguage('de');
+    twoJobs();
+    renderPage();
+
+    const checkboxes = await screen.findAllByRole('checkbox');
+    // [0] ist die Kopf-Checkbox
+    fireEvent.click(checkboxes[1]);
+    fireEvent.click(checkboxes[2]);
+
+    fireEvent.click(screen.getByRole('button', { name: /^ausblenden \(2\)/i }));
+
+    await waitFor(() => expect(mockHide).toHaveBeenCalledWith(['job-1', 'job-2']));
+  });
+
+  it('wählt über die Kopf-Checkbox alle sichtbaren aus', async () => {
+    await i18n.changeLanguage('de');
+    twoJobs();
+    renderPage();
+
+    const [master] = await screen.findAllByRole('checkbox');
+    fireEvent.click(master);
+
+    expect(screen.getByText(/2 ausgewählt/i)).toBeInTheDocument();
+  });
+
+  it('zeigt ausgeblendete Aufträge erst auf Wunsch', async () => {
+    await i18n.changeLanguage('de');
+    twoJobs();
+    mockHidden.mockResolvedValue(['job-2']);
+    renderPage();
+
+    expect(await screen.findByText('P-100')).toBeInTheDocument();
+    // die Ausblend-Liste kommt aus einem eigenen Request
+    await waitFor(() => expect(screen.queryByText('P-999')).not.toBeInTheDocument());
+    // ausgeblendet heißt nicht gelöscht — der Schalter holt sie zurück
+    fireEvent.click(screen.getByRole('button', { name: /ausgeblendete anzeigen \(1\)/i }));
+
+    expect(await screen.findByText('P-999')).toBeInTheDocument();
+    expect(screen.getByText('ausgeblendet')).toBeInTheDocument();
+  });
+
+  it('blendet ausgeblendete Aufträge wieder ein', async () => {
+    await i18n.changeLanguage('de');
+    twoJobs();
+    mockHidden.mockResolvedValue(['job-2']);
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('button', { name: /ausgeblendete anzeigen \(1\)/i }));
+    const checkboxes = await screen.findAllByRole('checkbox');
+    fireEvent.click(checkboxes[2]);
+    fireEvent.click(screen.getByRole('button', { name: /^einblenden \(1\)/i }));
+
+    await waitFor(() => expect(mockShow).toHaveBeenCalledWith(['job-2']));
+  });
+
+  it('löscht erst nach Rückfrage', async () => {
+    await i18n.changeLanguage('de');
+    twoJobs();
+    renderPage();
+
+    const checkboxes = await screen.findAllByRole('checkbox');
+    fireEvent.click(checkboxes[1]);
+    fireEvent.click(screen.getByRole('button', { name: /^löschen \(1\)/i }));
+
+    // noch nichts gelöscht — die Rückfrage steht
+    expect(screen.getByText(/kopieraufträge löschen\?/i)).toBeInTheDocument();
+    expect(mockDeleteJob).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /^löschen$/i }));
+
+    await waitFor(() => expect(mockDeleteJob).toHaveBeenCalledWith('job-1'));
+    expect(mockDeleteJob).toHaveBeenCalledTimes(1);
+  });
+
+  it('bietet für laufende Aufträge kein Löschen an', async () => {
+    await i18n.changeLanguage('de');
+    mockJobs.mockReturnValue({
+      data: [job({ State: 'Running', Progress: 10, CompletionTime: undefined })],
+      isLoading: false,
+      isError: false,
+    });
+    renderPage();
+
+    const checkboxes = await screen.findAllByRole('checkbox');
+    fireEvent.click(checkboxes[1]);
+
+    expect(screen.getByRole('button', { name: /^löschen \(0\)/i })).toBeDisabled();
+  });
+
+  it('findet Aufträge über das Startdatum', async () => {
+    await i18n.changeLanguage('de');
+    twoJobs();
+    renderPage();
+    await screen.findByText('P-100');
+
+    fireEvent.change(screen.getByLabelText(/filtern|filter by/i), { target: { value: '06.11.2026' } });
+
+    // beide Jobs starteten am 06.11.2026
+    expect(screen.getByText('P-100')).toBeInTheDocument();
+    expect(screen.getByText('P-999')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/filtern|filter by/i), { target: { value: '07.11.2026' } });
+    expect(screen.queryByText('P-100')).not.toBeInTheDocument();
   });
 });

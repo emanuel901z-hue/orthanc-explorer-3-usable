@@ -28,7 +28,7 @@ npm run preview
 ### Testing
 
 ```bash
-# Run all unit tests (single pass, 808 tests)
+# Run all unit tests (single pass, 989 tests)
 npm run test
 
 # Watch mode
@@ -102,7 +102,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (808 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (989 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -198,7 +198,13 @@ features: {
 | `src/actions/migrateSeries.ts` | Audit-seam wrapper for migrating a series into a study — emits `series.migrate` |
 | `src/actions/migrateInstance.ts` | Audit-seam wrapper for migrating an instance into a study — emits `instance.migrate` |
 | `src/actions/queryModality.ts` | Audit-seam wrapper for DICOM C-FIND against a remote modality — emits `modality.query` |
-| `src/actions/retrieveModality.ts` | Audit-seam wrapper for DICOM C-MOVE retrieve into Orthanc — emits `modality.retrieve` |
+| `src/actions/retrieveModality.ts` | Audit-seam wrapper for DICOM C-MOVE retrieve into Orthanc or direct C-MOVE to a `targetAet` — emits `modality.retrieve` |
+| `src/actions/moveResources.ts` | Audit-seam wrapper for study/series-level DICOM C-MOVE (`/modalities/:name/move`) — emits `modality.retrieve` |
+| `src/api/targets.ts` | Typed client for the shared copy-targets service (`/targets-api/targets`) + `resolveTargetLabel` |
+| `src/api/copy-journal.ts` | Copy journal (`/targets-api/copy-journal`): name and birth date per C-MOVE job — Orthanc's `DicomMoveScu` job only carries the main tags |
+| `src/api/hidden-jobs.ts` | Hidden copy jobs (`/targets-api/copy-jobs/hidden`): hides rows without deleting the Orthanc job; shared server-side |
+| `src/features/servers/pages/RemoteSourcesPage.tsx` | DICOM Copy Workstation workplace: auto-selected main archive with C-ECHO, positional/prefix C-FIND search with chips, target registry dialog (`TargetsDialog`) with reordering, study detail dialog (`RemoteStudyDetailDialog`) with series Select-All/None, multi-target copy & bulk confirmation |
+| `src/features/servers/pages/CopyJobsPage.tsx` | Persistent C-MOVE copy job history (`DicomMoveScu`) with start/end timestamps, resolved target alias, patient name + birth date from the copy journal, plain-text DIMSE status, search filter, cancel and retry; multi-select to hide (reversible) or delete (`DELETE /jobs/:id`, completed jobs only) |
 | `src/actions/sendToPeer.ts` | Audit-seam wrapper for sending resources to an Orthanc peer — emits `peer.send` |
 | `src/api/queries.ts` | Typed Orthanc REST wrappers for `/queries` (C-FIND, query answers, content, C-MOVE retrieve) |
 | `src/api/backend-pacs.ts` | Typed client for a backend's PACS endpoints (`/api/v1/pacs/*`, same-origin JWT cookie, `credentials: 'include'`) — **not** Orthanc REST, and project-specific: off unless the deployment has that backend. Currently: `quarantineStudy()`. See [docs/backend-integration.md](docs/backend-integration.md) |

@@ -25,6 +25,11 @@ export type CopyJobView = {
   studyInstanceUid?: string;
   patientId?: string;
   patientName?: string;
+  /** Geburtsdatum (DICOM `YYYYMMDD`) — nur aus dem Kopier-Journal. */
+  birthDate?: string;
+  /** Nur aus dem Kopier-Journal: der Job trägt keine Beschreibung. */
+  studyDescription?: string;
+  accessionNumber?: string;
   /** DIMSE-Status der Gegenstelle, z. B. "0x0000". */
   dimseStatus?: string;
   /** Übersetzungsschlüssel zur Bedeutung (`copyJobs.dimse.<key>`). */
@@ -95,6 +100,34 @@ export function describeCopyJob(job: OrthancJob): CopyJobView {
 /** Erfolg nur, wenn der Job durch ist und die Gegenstelle 0x0000 gemeldet hat. */
 export function isCopyConfirmed(view: CopyJobView): boolean {
   return view.state === 'success' && view.dimseStatus === formatDimseStatus(DIMSE_SUCCESS);
+}
+
+/** Zusatzangaben aus dem Kopier-Journal — der Orthanc-Job kennt keinen Namen. */
+export type CopyJournalNote = {
+  patientName?: string;
+  patientId?: string;
+  birthDate?: string;
+  studyInstanceUid?: string;
+  studyDescription?: string;
+  accessionNumber?: string;
+};
+
+/**
+ * Ergänzt die Job-Sicht um Name und Geburtsdatum aus dem Journal. Orthanc
+ * reduziert den C-MOVE-Identifier auf die Haupt-Tags; ohne Journal bliebe die
+ * Studie in der Liste namenlos.
+ */
+export function applyCopyNote(view: CopyJobView, note?: CopyJournalNote): CopyJobView {
+  if (!note) return view;
+  return {
+    ...view,
+    patientName: note.patientName ?? view.patientName,
+    patientId: note.patientId ?? view.patientId,
+    studyInstanceUid: note.studyInstanceUid ?? view.studyInstanceUid,
+    birthDate: note.birthDate,
+    studyDescription: note.studyDescription,
+    accessionNumber: note.accessionNumber,
+  };
 }
 
 /**

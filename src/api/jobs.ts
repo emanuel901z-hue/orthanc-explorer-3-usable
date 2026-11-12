@@ -81,4 +81,9 @@ export const jobsApi = {
       headers: JSON_CONTENT_HEADERS,
       body: JSON.stringify({}),
     }),
+
+  /** DELETE /jobs/:id — entfernt einen **abgeschlossenen** Job aus der Historie.
+   *  Laufende Jobs lehnt Orthanc ab (erst `cancel`); die Antwort ist leer. */
+  delete: (id: string) =>
+    orthancFetch<void>(`/jobs/${id}`, { method: 'DELETE' }),
 };

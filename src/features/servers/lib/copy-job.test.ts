@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { describeCopyJob, isCopyConfirmed, isMoveJob, looksQueuedOnly } from './copy-job';
+import { applyCopyNote, describeCopyJob, isCopyConfirmed, isMoveJob, looksQueuedOnly } from './copy-job';
 import type { OrthancJob } from '@/api/jobs';
 
 function moveJob(overrides: Partial<OrthancJob> = {}): OrthancJob {
@@ -167,5 +167,38 @@ describe('looksQueuedOnly — nur eingereiht statt zugestellt?', () => {
     expect(looksQueuedOnly(undefined, 0.01)).toBe(false);
     expect(looksQueuedOnly(1200, undefined)).toBe(false);
     expect(looksQueuedOnly(0, 0.01)).toBe(false);
+  });
+});
+
+describe('applyCopyNote', () => {
+  it('ergänzt Name und Geburtsdatum aus dem Journal', () => {
+    const view = applyCopyNote(describeCopyJob(moveJob()), {
+      patientName: 'MUSTERMANN^ERIKA',
+      patientId: 'P-100',
+      birthDate: '19470803',
+      studyDescription: 'CT Thorax',
+    });
+
+    expect(view).toMatchObject({
+      patientName: 'MUSTERMANN^ERIKA',
+      patientId: 'P-100',
+      birthDate: '19470803',
+      studyDescription: 'CT Thorax',
+    });
+  });
+
+  it('lässt die Job-Sicht unverändert, wenn es keinen Eintrag gibt', () => {
+    const view = describeCopyJob(moveJob());
+
+    expect(applyCopyNote(view)).toEqual(view);
+  });
+
+  it('behält Angaben des Jobs, die das Journal nicht kennt', () => {
+    const view = applyCopyNote(describeCopyJob(moveJob()), { patientName: 'MUSTERMANN^ERIKA' });
+
+    // StudyInstanceUID und Patienten-ID stehen im Job — sie bleiben erhalten
+    expect(view.studyInstanceUid).toBe('1.2.3');
+    expect(view.patientId).toBe('P-100');
+    expect(view.birthDate).toBeUndefined();
   });
 });

@@ -1077,10 +1077,18 @@
       "mwlIid": "IHE 图像显示入口 (RAD-106)",
       "mwlUps": "UPS-RS 子集 (DICOMweb 工作列表)",
       "mwlStats": "统计与报表",
-      "interop": "已通过 DCMTK、dcm4che 和 DVTk 验证"
+      "interop": "已通过 DCMTK、dcm4che 和 DVTk 验证",
+      "cmoveDirect": "直接 C-MOVE（归档 → 目标）",
+      "cmoveSearch": "按位置与前缀的 C-FIND 搜索",
+      "cmoveSeries": "序列选择（全选/无）与实时状态",
+      "cmoveTargets": "目标注册表与顺序调整",
+      "cmoveJobs": "带明文 DIMSE 与重试的复制任务",
+      "cmoveSecondTarget": "无需重新搜索即可发送到第二目标"
     },
     "brokerFeatures": "MWL 代理服务",
-    "brokerHint": "具备缓存、影像转发与监控的 DICOM 工作列表代理 — 在专属页面中配置。"
+    "brokerHint": "具备缓存、影像转发与监控的 DICOM 工作列表代理 — 在专属页面中配置。",
+    "copyFeatures": "DICOM 复制工作站",
+    "copyHint": "通过 C-FIND 在主归档中搜索检查，并通过 C-MOVE 直接转发到目标归档 — 支持目标管理与排序、序列选择、实时 DIMSE 状态和持久化任务历史。"
   },
   "quickReport": {
     "accessionNumber": "Accession Number",
@@ -2244,7 +2252,7 @@
     "emptyFiltered": "此筛选条件下没有任务。",
     "loading": "正在加载任务…",
     "loadFailed": "无法加载任务",
-    "hint": "列表来自 Orthanc 的任务历史 — 保存在内存中，并受 “JobHistorySize” 限制。",
+    "hint": "列表来自 Orthanc 的任务历史 — 保存在数据库中（SaveJobs），并受 “JobsHistorySize” 限制。",
     "start": "开始",
     "end": "结束",
     "stillRunning": "进行中…",
@@ -2261,12 +2269,31 @@
       "other": "归档报告了问题"
     },
     "dimseLegend": "DIMSE 是源归档的响应：0x0000 = 所有子操作已送达，0xBxxx = 部分子操作失败（部分送达），0xAxxx = 被拒绝（例如目标未知），0xCxxx = 错误，0xFE00 = 已取消。",
-    "searchPlaceholder": "按患者 ID、目标或 UID 筛选…",
+    "searchPlaceholder": "按姓名、出生日期、患者 ID、目标或 UID 筛选…",
     "cancelJob": "取消任务",
     "retryJob": "重试任务",
     "retried": "复制任务已重新启动",
     "canceled": "复制任务已取消",
-    "actionFailed": "任务操作失败"
+    "actionFailed": "任务操作失败",
+    "selectRow": "选择复制任务",
+    "selectAllVisible": "全选可见项",
+    "selectionCount": "已选 {{count}} 项",
+    "clearSelection": "清除选择",
+    "hideSelected": "隐藏 ({{count}})",
+    "showSelected": "显示 ({{count}})",
+    "deleteSelected": "删除 ({{count}})",
+    "showHidden": "显示已隐藏 ({{count}})",
+    "hideHidden": "隐藏已隐藏项",
+    "hiddenBadge": "已隐藏",
+    "hideHint": "隐藏只影响此列表——任务仍留在 Orthanc 作为凭据。删除会将其从任务历史中彻底移除。",
+    "deleteTitle": "删除复制任务？",
+    "deleteBody": "所选的复制任务 ({{count}}) 将从 Orthanc 任务历史中删除。此操作无法撤销——DIMSE 结果也会一并消失。",
+    "deleted": "已删除：{{count}}",
+    "deletedPartial": "已删除：{{done}}，失败：{{failed}}",
+    "hidden": "已隐藏：{{count}}",
+    "shown": "已重新显示：{{count}}",
+    "runningNotDeletable": "运行中的任务需先取消",
+    "emptyHidden": "所有复制任务均已隐藏。使用“显示已隐藏”。"
   },
   "help": {
     "help_copyJobs_title": "复制任务",
@@ -2281,7 +2308,7 @@
     "help_copyJobs_wrong": [
       "失败 0xA801：源归档不知道目标 AET。",
       "失败 0xC000：归档无法处理该检查 — 请检查检查和目标。",
-      "复制后列表为空？Orthanc 只保留最近的任务（JobHistorySize）；重启后列表为空。"
+      "复制后列表为空？Orthanc 只保留最近的任务（JobsHistorySize）；重启后列表为空。"
     ],
     "helpButton": "这是什么？",
     "helpIntro": "简明扼要：页面用途、如何操作，以及没有结果时怎么办。",

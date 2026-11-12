@@ -51,6 +51,7 @@ import { getConfig } from '@/config/runtime';
 import { useOrthancJobs } from '@/features/activity/hooks/useOrthancJobs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { targetsApi, type CopyTarget } from '@/api/targets';
+import { copyJournalApi } from '@/api/copy-journal';
 import TargetsDialog from '@/features/servers/components/TargetsDialog';
 import { describeCopyJob, looksQueuedOnly } from '@/features/servers/lib/copy-job';
 import { buildRemoteQuery } from '@/features/servers/lib/remote-query';
@@ -377,6 +378,33 @@ export default function RemoteSourcesPage() {
   // never passes through this Orthanc — the archive delivers it directly.
   // The order runs as an Orthanc job, so the row can show progress and the
   // DIMSE status the archive reported, and the job list keeps the history.
+  //
+  // Der Job kennt nur die Haupt-Tags (Patienten-ID, Zugangsnummer, UID) —
+  // Name und Geburtsdatum schreiben wir deshalb selbst ins Journal, sonst
+  // bleibt die Studie in „Kopieraufträge“ namenlos.
+  const recordCopyNote = (study: RemoteStudy, jobId: string | undefined, targetAet: string) => {
+    if (!jobId) return;
+    const known = (text: string | undefined) => (text && text !== '—' ? text : undefined);
+    void copyJournalApi
+      .record({
+        jobId,
+        patientName: known(study.patientName),
+        patientId: known(study.patientId),
+        birthDate: known(study.birthDate),
+        studyInstanceUid: known(study.studyInstanceUid),
+        studyDescription: known(study.studyDescription),
+        accessionNumber: known(study.accessionNumber),
+        studyDate: known(study.studyDate),
+        sourceAet: selectedModality,
+        targetAet,
+        recordedAt: new Date().toISOString(),
+      })
+      .then(() => queryClient.invalidateQueries({ queryKey: ['copy-journal'] }))
+      .catch(() => {
+        // Das Journal ist eine Anzeigehilfe — ein Ausfall darf den C-MOVE nicht stören.
+      });
+  };
+
   const handleCopy = async (study: RemoteStudy) => {
     if (!effectiveTarget) {
       toast.error(t('remote.copyNoTarget', { defaultValue: 'Choose a target first' }));
@@ -393,6 +421,7 @@ export default function RemoteSourcesPage() {
       );
       const jobId = typeof result.ID === 'string' ? result.ID : undefined;
       patchStudy(study, { copying: false, copyJobId: jobId });
+      recordCopyNote(study, jobId, effectiveTarget);
       toast.success(t('remote.copyStarted', { target: effectiveTarget, defaultValue: `C-MOVE to ${effectiveTarget} sent` }));
     } catch {
       patchStudy(study, { copying: false });
@@ -427,6 +456,7 @@ export default function RemoteSourcesPage() {
         study,
         isCopy ? { copying: false, copyJobId: jobId } : { retrieving: false, retrieved: true },
       );
+      if (isCopy) recordCopyNote(study, jobId, targetAet ?? '');
       toast.success(
         isCopy
           ? t('remote.copyStarted', { target: targetAet, defaultValue: `C-MOVE to ${targetAet} sent` })

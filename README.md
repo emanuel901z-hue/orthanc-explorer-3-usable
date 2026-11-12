@@ -3,7 +3,7 @@
 > A modern React admin UI for [Orthanc](https://www.orthanc-server.com/) — the open-source DICOM server. Runs as a Docker sidecar with no backend server required.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 808](https://img.shields.io/badge/tests-808%20passed-brightgreen)](#testing)
+[![Tests: 972](https://img.shields.io/badge/tests-972%20passed-brightgreen)](#testing)
 [![Languages: 9](https://img.shields.io/badge/i18n-9%20languages-blue)](#internationalization)
 
 ---
@@ -42,7 +42,7 @@ This is a community-maintained fork of [rhavekost/orthanc-explorer-3](https://gi
 | **Viewer Configuration** | Manage external viewer integrations (OHIF, Stone, VolView, MedDream, Weasis) in settings — add/edit/remove, set default, enable/disable, with status indicators. A deployment can **preset** the list (`viewers` in `config.js`) and make it read-only (`viewersLocked: true`) — previously it lived only in each browser's `localStorage`. See [docs/oe3-standalone.md](docs/oe3-standalone.md). |
 | **DICOMweb Server Management** | Enhanced DICOMweb server config with auth type indicators (bearer/basic/oauth2/none) and external PACS QIDO/WADO configuration display. |
 | **Embedded Theming** | White-labeling card for embedded deployments — app name, primary/accent colors, font presets, border radius, compact mode, sidebar/header visibility. Persists to `localStorage`. |
-| **Remote Query/Retrieve** | C-FIND query and C-MOVE retrieve from remote modalities. C-ECHO connectivity test. Remote sources page with query/retrieve workflow. |
+| **Remote Query/Retrieve & DICOM Copy Workstation** | C-FIND query (positional comma syntax, prefix matching, chips, automatic fallback) and direct C-MOVE forwarding (`TargetAet` object) from the main archive to target archives. Includes series-level selection (Select All/None), shared target registry (`/targets-api`) with reordering (arrow buttons & drag-and-drop), multi-target copy without re-querying, and a dedicated **Copy Jobs** page (`/copy-jobs`) with plain-text DIMSE status, runtime plausibility check, search filter, cancel and retry. |
 | **Study Sharing** | Share studies via Orthanc Shares plugin or instant viewer link. Share by email, copy link, expiration date, description. |
 | **Worklists** | DICOM Modality Worklist Management — list, upload, delete worklists via dedicated page and API. **Off by default in the broker deployment**: the MWL broker serves the modalities, so Orthanc's worklists plugin REST API stays disabled (`"Worklists": {"Enable": false}`) and the page is hidden — no failing request, no console noise. Enable both (`"Worklists": {"Enable": true}` in Orthanc **and** `enableWorklists: true` in `config.js`) to use it. |
 | **MWL Broker — nine languages** | The broker chrome (page titles, table headers, buttons, dialogs, help headings) is translated into all nine OE3 languages; the detailed texts fall back to English per key — never to a raw key. Debug with `?lng=fr` and `?i18nDebug=1`, `npm run i18n:check` keeps the coverage visible and CI-enforced. |
