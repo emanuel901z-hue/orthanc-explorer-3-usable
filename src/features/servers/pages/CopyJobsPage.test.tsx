@@ -8,13 +8,15 @@ import { loadConfig, __resetConfigForTests } from '@/config/runtime';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
 import i18n from '@/i18n';
 
-const { mockJobs, mockJournal, mockHidden, mockHide, mockShow, mockDeleteJob } = vi.hoisted(() => ({
+const { mockJobs, mockJournal, mockHidden, mockHide, mockShow, mockDeleteJob, mockRecord, mockMove } = vi.hoisted(() => ({
   mockJobs: vi.fn(),
   mockJournal: vi.fn(() => Promise.resolve([])),
   mockHidden: vi.fn(() => Promise.resolve([])),
   mockHide: vi.fn(() => Promise.resolve([])),
   mockShow: vi.fn(() => Promise.resolve([])),
   mockDeleteJob: vi.fn(() => Promise.resolve()),
+  mockRecord: vi.fn(() => Promise.resolve({})),
+  mockMove: vi.fn(() => Promise.resolve({})),
 }));
 
 vi.mock('@/features/activity/hooks/useOrthancJobs', () => ({
@@ -24,7 +26,7 @@ vi.mock('@/features/activity/hooks/useOrthancJobs', () => ({
 vi.mock('@/api/copy-journal', () => ({
   copyJournalApi: {
     list: mockJournal,
-    record: vi.fn(() => Promise.resolve({})),
+    record: mockRecord,
     remove: vi.fn(() => Promise.resolve(true)),
   },
 }));
@@ -34,6 +36,7 @@ vi.mock('@/api/hidden-jobs', () => ({
 }));
 
 vi.mock('@/actions/deleteJob', () => ({ deleteJobAction: mockDeleteJob }));
+vi.mock('@/actions/moveResources', () => ({ moveResourcesAction: mockMove }));
 vi.mock('@/actions/hideCopyJobs', () => ({
   hideCopyJobsAction: mockHide,
   showCopyJobsAction: mockShow,
@@ -74,6 +77,8 @@ describe('CopyJobsPage', () => {
     vi.clearAllMocks();
     mockJournal.mockResolvedValue([]);
     mockHidden.mockResolvedValue([]);
+    mockRecord.mockResolvedValue({});
+    mockMove.mockResolvedValue({});
     // der Statusfilter wird persistiert — sonst trägt ihn der nächste Test weiter
     usePersistedUiStore.setState({ values: {} });
     useSessionUiStore.setState({ values: {} });
@@ -324,7 +329,7 @@ describe('CopyJobsPage', () => {
   it('startet einen fehlgeschlagenen Auftrag per Klick neu', async () => {
     const resubmitSpy = vi.spyOn(jobsApi, 'resubmit').mockResolvedValue({});
     mockJobs.mockReturnValue({
-      data: [job({ ID: 'job-fail', State: 'Failure', Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xa801 }] } })],
+      data: [job({ ID: 'job-fail', State: 'Failure', Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xc000 }] } })],
       isLoading: false,
       isError: false,
     });
@@ -334,6 +339,109 @@ describe('CopyJobsPage', () => {
 
     await waitFor(() => expect(resubmitSpy).toHaveBeenCalledWith('job-fail'));
     resubmitSpy.mockRestore();
+  });
+
+  it('fragt bei einem dauerhaften Fehler vor dem Wiederholen nach', async () => {
+    await i18n.changeLanguage('de');
+    const resubmitSpy = vi.spyOn(jobsApi, 'resubmit').mockResolvedValue({});
+    mockJobs.mockReturnValue({
+      data: [job({ ID: 'job-fail', State: 'Failure', Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xa801 }] } })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+    // 0xA801 bleibt ohne Änderung am Ziel ein Fehler — Hinweis statt stillem Retry
+    expect(screen.getByText(/ziel-registrierung im quellarchiv|target registration in the source archive/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /retry job|auftrag erneut senden/i }));
+
+    expect(screen.getByText(/kopierauftrag erneut senden\?/i)).toBeInTheDocument();
+    expect(resubmitSpy).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /^erneut senden$/i }));
+    await waitFor(() => expect(resubmitSpy).toHaveBeenCalledWith('job-fail'));
+    resubmitSpy.mockRestore();
+  });
+
+  it('sendet auch einen sauber zugestellten Auftrag erst nach Rückfrage erneut', async () => {
+    await i18n.changeLanguage('de');
+    const resubmitSpy = vi.spyOn(jobsApi, 'resubmit').mockResolvedValue({ ID: 'job-new' });
+    mockMove.mockResolvedValue({ ID: 'job-new' });
+    mockJobs.mockReturnValue({ data: [job()], isLoading: false, isError: false });
+
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /retry job|auftrag erneut senden/i }));
+
+    expect(screen.getByText(/kopierauftrag erneut senden\?/i)).toBeInTheDocument();
+    // Der Hinweis nennt die möglichen Duplikate im Ziel
+    expect(screen.getByText(/duplikate|duplicates/i)).toBeInTheDocument();
+    expect(mockMove).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /^erneut senden$/i }));
+
+    // Orthancs resubmit nimmt nur Fehlschläge an — ein zugestellter Auftrag
+    // wird als neuer C-MOVE mit denselben Kennungen abgesetzt.
+    await waitFor(() => expect(mockMove).toHaveBeenCalledWith(
+      'ARCHIVE',
+      'Study',
+      [{ StudyInstanceUID: '1.2.3' }],
+      { targetAet: 'hst_burn2CD', asynchronous: true },
+    ));
+    expect(resubmitSpy).not.toHaveBeenCalled();
+    // Der neue Job erbt die Mitschrift und trägt die Herkunft
+    await waitFor(() => expect(mockRecord).toHaveBeenCalledWith(expect.objectContaining({
+      jobId: 'job-new',
+      retryOf: 'job-1',
+      attempt: 2,
+    })));
+    resubmitSpy.mockRestore();
+  });
+
+  it('wiederholt mehrere ausgewählte Aufträge nach einer Rückfrage', async () => {
+    await i18n.changeLanguage('de');
+    const resubmitSpy = vi.spyOn(jobsApi, 'resubmit').mockResolvedValue({});
+    mockMove.mockResolvedValue({});
+    mockJobs.mockReturnValue({
+      data: [
+        job(),
+        job({ ID: 'job-2', State: 'Failure', Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xc000 }] } }),
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+    const checkboxes = await screen.findAllByRole('checkbox');
+    fireEvent.click(checkboxes[0]);
+    fireEvent.click(screen.getByRole('button', { name: /^erneut senden \(2\)$/i }));
+
+    // Rückfrage nennt die Mischung aus zugestellt und fehlgeschlagen
+    expect(screen.getByText(/2 kopieraufträge erneut senden\?/i)).toBeInTheDocument();
+    expect(resubmitSpy).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /^erneut senden$/i }));
+
+    await waitFor(() => expect(mockMove).toHaveBeenCalledWith(
+      'ARCHIVE',
+      'Study',
+      [{ StudyInstanceUID: '1.2.3' }],
+      { targetAet: 'hst_burn2CD', asynchronous: true },
+    ));
+    expect(resubmitSpy).toHaveBeenCalledWith('job-2');
+    resubmitSpy.mockRestore();
+  });
+
+  it('zeigt Versuch und Herkunft einer Wiederholung aus dem Journal', async () => {
+    await i18n.changeLanguage('de');
+    mockJournal.mockResolvedValue([
+      { jobId: 'job-1', patientName: 'MUSTERMANN^ERIKA', attempt: 2, retryOf: 'job-0' },
+    ]);
+    mockJobs.mockReturnValue({ data: [job()], isLoading: false, isError: false });
+
+    renderPage();
+
+    expect(await screen.findByText('Versuch 2')).toBeInTheDocument();
+    expect(screen.getByTitle('Wiederholung von job-0')).toBeInTheDocument();
   });
 
   it('zeigt Patientenname und Geburtsdatum aus dem Kopier-Journal', async () => {
@@ -412,6 +520,8 @@ describe('CopyJobsPage — Aufräumen', () => {
     mockHide.mockResolvedValue([]);
     mockShow.mockResolvedValue([]);
     mockDeleteJob.mockResolvedValue(undefined);
+    mockRecord.mockResolvedValue({});
+    mockMove.mockResolvedValue({});
     usePersistedUiStore.setState({ values: {} });
     useSessionUiStore.setState({ values: {} });
     window.localStorage.clear();

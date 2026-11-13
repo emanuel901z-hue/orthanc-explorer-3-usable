@@ -2293,7 +2293,20 @@
     "hidden": "非表示: {{count}}",
     "shown": "再表示: {{count}}",
     "runningNotDeletable": "実行中のジョブは先にキャンセルしてください",
-    "emptyHidden": "すべてのコピージョブが非表示です。「非表示を表示」で戻せます。"
+    "emptyHidden": "すべてのコピージョブが非表示です。「非表示を表示」で戻せます。",
+    "retrySelected": "再送信 ({{count}})",
+    "retryTitle": "コピージョブを再送信しますか？",
+    "retryBulkTitle": "{{count}} 件のコピージョブを再送信しますか？",
+    "retrySuccessBody": "このジョブは完全に配信済みです。再送信すると検査全体をもう一度送るため、送信先で重複が作成されたり拒否されたりする可能性があります。",
+    "retryWarningBody": "このジョブは一部のみ配信されました。再送信すると検査全体をもう一度送るため、既に届いた画像が重複する可能性があります。",
+    "retryFailedBody": "ジョブは失敗しました。再送信すると同じ C-MOVE をもう一度実行します。",
+    "retryBulkBody": "各ジョブは個別の C-MOVE です。失敗: {{failed}}、一部配信: {{warning}}、配信済み: {{success}}。配信済みのジョブでは送信先に重複ができる可能性があります。",
+    "retryConfirm": "再送信",
+    "retryPermanentHint": "繰り返しても変わりません: {{status}} — 先に送信元アーカイブの送信先登録を確認してください。",
+    "retriedCount": "{{count}} 件のコピージョブを再起動しました",
+    "retriedPartial": "再起動: {{done}}、失敗: {{failed}}",
+    "attempt": "試行 {{count}}",
+    "retryOf": "{{jobId}} の再実行"
   },
   "help": {
     "help_copyJobs_title": "コピージョブ",

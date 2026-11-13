@@ -2293,7 +2293,20 @@
     "hidden": "已隐藏：{{count}}",
     "shown": "已重新显示：{{count}}",
     "runningNotDeletable": "运行中的任务需先取消",
-    "emptyHidden": "所有复制任务均已隐藏。使用“显示已隐藏”。"
+    "emptyHidden": "所有复制任务均已隐藏。使用“显示已隐藏”。",
+    "retrySelected": "重新发送（{{count}}）",
+    "retryTitle": "重新发送复制任务？",
+    "retryBulkTitle": "重新发送 {{count}} 个复制任务？",
+    "retrySuccessBody": "此任务已完整送达。重新发送会再次发送整个检查，目标可能创建重复或拒绝接收。",
+    "retryWarningBody": "此任务仅部分送达。重新发送会再次发送整个检查；已到达的图像可能会重复。",
+    "retryFailedBody": "任务失败。重新发送会再次执行同一个 C-MOVE。",
+    "retryBulkBody": "每个任务都是独立的 C-MOVE。失败：{{failed}}，部分送达：{{warning}}，已送达：{{success}}。对已送达的任务，目标可能会创建重复。",
+    "retryConfirm": "重新发送",
+    "retryPermanentHint": "重复不会改变此问题：{{status}} — 请先检查源归档中的目标注册。",
+    "retriedCount": "已重新启动 {{count}} 个复制任务",
+    "retriedPartial": "已重新启动：{{done}}，失败：{{failed}}",
+    "attempt": "第 {{count}} 次尝试",
+    "retryOf": "重复自 {{jobId}}"
   },
   "help": {
     "help_copyJobs_title": "复制任务",

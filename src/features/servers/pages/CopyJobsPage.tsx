@@ -44,7 +44,8 @@ import { copyJournalApi } from '@/api/copy-journal';
 import { hiddenJobsApi } from '@/api/hidden-jobs';
 import { deleteJobAction } from '@/actions/deleteJob';
 import { hideCopyJobsAction, showCopyJobsAction } from '@/actions/hideCopyJobs';
-import { applyCopyNote, describeCopyJob, isMoveJob, type CopyJobView } from '@/features/servers/lib/copy-job';
+import { moveResourcesAction } from '@/actions/moveResources';
+import { applyCopyNote, describeCopyJob, isMoveJob, isPermanentCopyFailure, type CopyJobView } from '@/features/servers/lib/copy-job';
 import { usePersistedState, useRememberedState } from '@/store/ui-state';
 import { formatDicomDate, formatDicomDateTime } from '@/lib/dicom-date';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -118,6 +119,8 @@ export default function CopyJobsPage() {
   const [busyJobId, setBusyJobId] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  /** Aufträge, deren Wiederholung noch bestätigt werden muss. */
+  const [retryRequest, setRetryRequest] = useState<CopyJobView[] | null>(null);
 
   const notes = useMemo(
     () => new Map(journal.map((entry) => [entry.jobId, entry])),
@@ -165,6 +168,8 @@ export default function CopyJobsPage() {
         job.completionTime ? formatDicomDateTime(job.completionTime, locale) : undefined,
         job.dimseStatus,
         job.error,
+        job.retryOf,
+        job.attempt?.toString(),
       ].some((field) => field?.toLowerCase().includes(term));
     });
   }, [base, filter, search, locale]);
@@ -184,6 +189,18 @@ export default function CopyJobsPage() {
     () => selectedJobs.filter((job) => job.state !== 'running'),
     [selectedJobs],
   );
+  // Wiederholen geht für jeden abgeschlossenen Auftrag — auch für einen, der
+  // laut Quelle sauber zugestellt wurde (im Ziel kann trotzdem etwas fehlen).
+  const retryable = deletable;
+  const retryCounts = useMemo(() => ({
+    failed: retryRequest?.filter((job) => job.state === 'failed').length ?? 0,
+    warning: retryRequest?.filter((job) => job.state === 'warning').length ?? 0,
+    success: retryRequest?.filter((job) => job.state === 'success').length ?? 0,
+  }), [retryRequest]);
+  const retryPermanent = useMemo(
+    () => (retryRequest ?? []).filter(isPermanentCopyFailure),
+    [retryRequest],
+  );
   const allVisibleSelected = visible.length > 0 && selectedJobs.length === visible.length;
 
   const toggleJob = (jobId: string) => {
@@ -195,27 +212,93 @@ export default function CopyJobsPage() {
     });
   };
 
-  const handleRetry = async (jobId: string) => {
-    setBusyJobId(jobId);
-    try {
-      const result = await jobsApi.resubmit(jobId);
-      // Ein erneuter Auftrag ist ein neuer Job — die Mitschrift zieht mit,
-      // sonst stünde die Studie danach wieder ohne Namen da.
-      const newJobId = typeof result.ID === 'string' ? result.ID : undefined;
-      const note = notes.get(jobId);
-      if (newJobId && note) {
-        void copyJournalApi
-          .record({ ...note, jobId: newJobId, recordedAt: new Date().toISOString() })
-          .then(() => queryClient.invalidateQueries({ queryKey: ['copy-journal'] }))
-          .catch(() => { });
-      }
-      await refetch?.();
-      toast.success(t('copyJobs.retried', { defaultValue: 'Copy job restarted' }));
-    } catch {
-      toast.error(t('copyJobs.actionFailed', { defaultValue: 'Job action failed' }));
-    } finally {
-      setBusyJobId(null);
+  /**
+   * Startet den Auftrag neu. Orthancs `resubmit` nimmt nur **fehlgeschlagene**
+   * Jobs an („Resubmitting failed job“); ein zugestellter Auftrag wird deshalb
+   * als neuer C-MOVE mit denselben Kennungen abgesetzt.
+   */
+  const startRetry = async (job: CopyJobView): Promise<Record<string, unknown>> => {
+    if (job.state === 'failed') return jobsApi.resubmit(job.jobId);
+    if (!job.sourceAet || !job.targetAet || !job.studyInstanceUid) {
+      throw new Error('copy job lacks source, target or study UID');
     }
+    return moveResourcesAction(
+      job.sourceAet,
+      'Study',
+      [{ StudyInstanceUID: job.studyInstanceUid }],
+      { targetAet: job.targetAet, asynchronous: true },
+    );
+  };
+
+  /**
+   * Wiederholt einen oder mehrere Aufträge. Der neue Auftrag ist ein eigener
+   * Job; die Mitschrift zieht mit, damit Name, Geburtsdatum und die Herkunft
+   * („Versuch n, Wiederholung von …“) an der neuen Zeile stehen.
+   */
+  const runRetry = async (jobs: CopyJobView[]) => {
+    if (jobs.length === 0) return;
+    const single = jobs.length === 1;
+    if (single) setBusyJobId(jobs[0].jobId);
+    else setBulkBusy(true);
+    let done = 0;
+    let failed = 0;
+    for (const job of jobs) {
+      try {
+        const result = await startRetry(job);
+        const newJobId = typeof result.ID === 'string' ? result.ID : undefined;
+        const note = notes.get(job.jobId);
+        if (newJobId) {
+          void copyJournalApi
+            .record({
+              ...(note ?? {}),
+              jobId: newJobId,
+              retryOf: job.jobId,
+              attempt: (note?.attempt ?? job.attempt ?? 1) + 1,
+              recordedAt: new Date().toISOString(),
+            })
+            .then(() => queryClient.invalidateQueries({ queryKey: ['copy-journal'] }))
+            .catch(() => { });
+        }
+        done += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+    await refetch?.();
+    await queryClient.invalidateQueries({ queryKey: ['copy-journal'] });
+    setSelected(new Set());
+    if (single) setBusyJobId(null);
+    else setBulkBusy(false);
+    if (failed > 0) {
+      toast.error(t('copyJobs.retriedPartial', {
+        done,
+        failed,
+        defaultValue: `Restarted: ${done}, failed: ${failed}`,
+      }));
+    } else if (single) {
+      toast.success(t('copyJobs.retried', { defaultValue: 'Copy job restarted' }));
+    } else {
+      toast.success(t('copyJobs.retriedCount', {
+        count: done,
+        defaultValue: `${done} copy jobs restarted`,
+      }));
+    }
+  };
+
+  /**
+   * Ein fehlgeschlagener Auftrag startet sofort neu. Alles, was schon (teilweise)
+   * zugestellt wurde, fragt vorher nach — ein zweiter C-MOVE schickt die ganze
+   * Studie noch einmal und kann im Ziel Duplikate erzeugen.
+   */
+  const requestRetry = (job: CopyJobView) => {
+    if (job.state === 'failed' && !isPermanentCopyFailure(job)) void runRetry([job]);
+    else setRetryRequest([job]);
+  };
+
+  const confirmRetry = () => {
+    const jobs = retryRequest ?? [];
+    setRetryRequest(null);
+    void runRetry(jobs);
   };
 
   const handleCancel = async (jobId: string) => {
@@ -302,12 +385,32 @@ export default function CopyJobsPage() {
     }
   };
 
-  const filters: { id: JobFilter; label: string; count: number }[] = [
-    { id: 'all', label: t('copyJobs.filterAll', { defaultValue: 'All' }), count: counts.all },
-    { id: 'running', label: t('copyJobs.stateRunning', { defaultValue: 'running' }), count: counts.running },
-    { id: 'failed', label: t('copyJobs.stateFailed', { defaultValue: 'failed' }), count: counts.failed },
-    { id: 'warning', label: t('copyJobs.stateWarning', { defaultValue: 'partly delivered' }), count: counts.warning },
-    { id: 'success', label: t('copyJobs.stateSuccess', { defaultValue: 'delivered' }), count: counts.success },
+  const retrySingle = retryRequest?.length === 1 ? retryRequest[0] : undefined;
+  const retryBody = retrySingle
+    ? retrySingle.state === 'success'
+      ? t('copyJobs.retrySuccessBody', {
+        defaultValue: 'This job was delivered completely. Resending sends the whole study again — the target may create duplicates or reject it.',
+      })
+      : retrySingle.state === 'warning'
+        ? t('copyJobs.retryWarningBody', {
+          defaultValue: 'This job was only partly delivered. Resending sends the whole study again; images that already arrived may show up twice.',
+        })
+        : t('copyJobs.retryFailedBody', {
+          defaultValue: 'The job failed. Resending starts the same C-MOVE again.',
+        })
+    : t('copyJobs.retryBulkBody', {
+      count: retryRequest?.length ?? 0,
+      failed: retryCounts.failed,
+      warning: retryCounts.warning,
+      success: retryCounts.success,
+      defaultValue: `Each job is its own C-MOVE. Failed: ${retryCounts.failed}, partly delivered: ${retryCounts.warning}, delivered: ${retryCounts.success}. For delivered jobs the target may create duplicates.`,
+    });
+
+  const filters: { id: JobFilter; label: string; count: number }[] = [{ id: 'all', label: t('copyJobs.filterAll', { defaultValue: 'All' }), count: counts.all },
+  { id: 'running', label: t('copyJobs.stateRunning', { defaultValue: 'running' }), count: counts.running },
+  { id: 'failed', label: t('copyJobs.stateFailed', { defaultValue: 'failed' }), count: counts.failed },
+  { id: 'warning', label: t('copyJobs.stateWarning', { defaultValue: 'partly delivered' }), count: counts.warning },
+  { id: 'success', label: t('copyJobs.stateSuccess', { defaultValue: 'delivered' }), count: counts.success },
   ];
 
   return (
@@ -392,6 +495,16 @@ export default function CopyJobsPage() {
               {t('copyJobs.hideSelected', { count: selectedJobs.length, defaultValue: `Hide (${selectedJobs.length})` })}
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 gap-1.5 text-xs"
+            disabled={bulkBusy || retryable.length === 0}
+            onClick={() => setRetryRequest(retryable)}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            {t('copyJobs.retrySelected', { count: retryable.length, defaultValue: `Resend (${retryable.length})` })}
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -513,18 +626,33 @@ export default function CopyJobsPage() {
                               <Ban className="h-3.5 w-3.5" />
                             </Button>
                           )}
-                          {(job.state === 'failed' || job.state === 'warning') && (
+                          {job.state !== 'running' && (
                             <Button
                               variant="ghost"
                               size="sm"
                               className="h-6 w-6 p-0"
-                              disabled={busyJobId === job.jobId}
+                              disabled={busyJobId === job.jobId || bulkBusy}
                               aria-label={t('copyJobs.retryJob', { defaultValue: 'Retry job' })}
-                              title={t('copyJobs.retryJob', { defaultValue: 'Retry job' })}
-                              onClick={() => void handleRetry(job.jobId)}
+                              title={isPermanentCopyFailure(job)
+                                ? t('copyJobs.retryPermanentHint', {
+                                  status: job.dimseStatus,
+                                  defaultValue: 'Repeating will not change this: {{status}} — check the target registration in the source archive first.',
+                                })
+                                : t('copyJobs.retryJob', { defaultValue: 'Retry job' })}
+                              onClick={() => requestRetry(job)}
                             >
                               <RotateCcw className="h-3.5 w-3.5" />
                             </Button>
+                          )}
+                          {job.attempt !== undefined && job.attempt > 1 && (
+                            <span
+                              className="text-[10px] text-muted-foreground"
+                              title={job.retryOf
+                                ? t('copyJobs.retryOf', { jobId: job.retryOf, defaultValue: `Repeat of ${job.retryOf}` })
+                                : undefined}
+                            >
+                              {t('copyJobs.attempt', { count: job.attempt, defaultValue: `Attempt ${job.attempt}` })}
+                            </span>
                           )}
                           {job.error && (
                             <span className="text-xs text-destructive" title={job.error}>
@@ -537,6 +665,14 @@ export default function CopyJobsPage() {
                         {/* Klartext zuerst — Hex-Codes kann im Alltag niemand lesen */}
                         <div>{t(`copyJobs.dimseMeaning.${job.dimseKey}`, { defaultValue: job.dimseStatus ?? '—' })}</div>
                         <div className="text-xs font-mono text-muted-foreground">{job.dimseStatus ?? ''}</div>
+                        {isPermanentCopyFailure(job) && (
+                          <div className="text-[10px] text-warning">
+                            {t('copyJobs.retryPermanentHint', {
+                              status: job.dimseStatus,
+                              defaultValue: 'Repeating will not change this: {{status}} — check the target registration in the source archive first.',
+                            })}
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm whitespace-nowrap">{formatDuration(job.durationSeconds)}</TableCell>
                     </TableRow>
@@ -566,6 +702,38 @@ export default function CopyJobsPage() {
           defaultValue: 'The list comes from the Orthanc job history — it is persisted in the database (SaveJobs) and limited by "JobsHistorySize".',
         })}
       </p>
+
+      <AlertDialog open={retryRequest !== null} onOpenChange={(open) => !open && setRetryRequest(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {retrySingle
+                ? t('copyJobs.retryTitle', { defaultValue: 'Resend copy job?' })
+                : t('copyJobs.retryBulkTitle', {
+                  count: retryRequest?.length ?? 0,
+                  defaultValue: `Resend ${retryRequest?.length ?? 0} copy jobs?`,
+                })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {retryBody}
+              {retryPermanent.length > 0 && (
+                <span className="block mt-2 text-warning">
+                  {t('copyJobs.retryPermanentHint', {
+                    status: retryPermanent.map((job) => job.dimseStatus).filter(Boolean).join(', '),
+                    defaultValue: 'Repeating will not change this: {{status}} — check the target registration in the source archive first.',
+                  })}
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel', { defaultValue: 'Cancel' })}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRetry}>
+              {t('copyJobs.retryConfirm', { defaultValue: 'Resend' })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
         <AlertDialogContent>

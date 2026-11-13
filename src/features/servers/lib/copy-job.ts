@@ -39,6 +39,10 @@ export type CopyJobView = {
   creationTime?: string;
   completionTime?: string;
   durationSeconds?: number;
+  /** Nur aus dem Kopier-Journal: Auftrag, der hier wiederholt wurde. */
+  retryOf?: string;
+  /** Nur aus dem Kopier-Journal: 1 = erster Versuch, 2 = Wiederholung … */
+  attempt?: number;
 };
 
 const MOVE_JOB_TYPE = 'DicomMoveScu';
@@ -110,6 +114,8 @@ export type CopyJournalNote = {
   studyInstanceUid?: string;
   studyDescription?: string;
   accessionNumber?: string;
+  retryOf?: string;
+  attempt?: number;
 };
 
 /**
@@ -127,7 +133,20 @@ export function applyCopyNote(view: CopyJobView, note?: CopyJournalNote): CopyJo
     birthDate: note.birthDate,
     studyDescription: note.studyDescription,
     accessionNumber: note.accessionNumber,
+    retryOf: note.retryOf,
+    attempt: note.attempt,
   };
+}
+
+/**
+ * Fehler, die ein zweiter Versuch nicht behebt: Ziel-AET ist im Quellarchiv
+ * unbekannt bzw. die Studie passt nicht zum Ziel. Ein Retry läuft ins gleiche
+ * Ergebnis — erst die Registrierung bzw. die Daten prüfen.
+ */
+const PERMANENT_DIMSE_KEYS = new Set(['unknownDestination', 'dataSetMismatch']);
+
+export function isPermanentCopyFailure(view: CopyJobView): boolean {
+  return view.state === 'failed' && PERMANENT_DIMSE_KEYS.has(view.dimseKey);
 }
 
 /**

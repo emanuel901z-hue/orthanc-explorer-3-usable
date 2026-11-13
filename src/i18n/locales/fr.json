@@ -2293,7 +2293,20 @@
     "hidden": "Masquées : {{count}}",
     "shown": "Réaffichées : {{count}}",
     "runningNotDeletable": "Les tâches en cours doivent d'abord être annulées",
-    "emptyHidden": "Toutes les tâches de copie sont masquées. Utilisez « Afficher les masquées »."
+    "emptyHidden": "Toutes les tâches de copie sont masquées. Utilisez « Afficher les masquées ».",
+    "retrySelected": "Renvoyer ({{count}})",
+    "retryTitle": "Renvoyer la tâche de copie ?",
+    "retryBulkTitle": "Renvoyer {{count}} tâches de copie ?",
+    "retrySuccessBody": "Cette tâche a été livrée complètement. Un nouvel envoi renvoie tout l'examen — la destination peut créer des doublons ou le refuser.",
+    "retryWarningBody": "Cette tâche n'a été que partiellement livrée. Un nouvel envoi renvoie tout l'examen ; les images déjà arrivées peuvent apparaître en double.",
+    "retryFailedBody": "La tâche a échoué. Un nouvel envoi relance le même C-MOVE.",
+    "retryBulkBody": "Chaque tâche est un C-MOVE distinct. Échecs : {{failed}}, partielles : {{warning}}, livrées : {{success}}. Pour les tâches livrées, la destination peut créer des doublons.",
+    "retryConfirm": "Renvoyer",
+    "retryPermanentHint": "Répéter n'y changera rien : {{status}} — vérifiez d'abord l'enregistrement de la destination dans l'archive source.",
+    "retriedCount": "{{count}} tâches de copie relancées",
+    "retriedPartial": "Relancées : {{done}}, échecs : {{failed}}",
+    "attempt": "Tentative {{count}}",
+    "retryOf": "Répétition de {{jobId}}"
   },
   "help": {
     "help_copyJobs_title": "Tâches de copie",

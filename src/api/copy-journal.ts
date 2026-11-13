@@ -24,6 +24,10 @@ export type CopyJournalEntry = {
   targetAet?: string;
   /** Zeitpunkt der Mitschrift (ISO 8601). */
   recordedAt?: string;
+  /** Auftrag, aus dem dieser hervorgeht (Wiederholung). */
+  retryOf?: string;
+  /** 1 = erster Versuch, 2 = erste Wiederholung … */
+  attempt?: number;
 };
 
 type Payload = { entries: CopyJournalEntry[] };

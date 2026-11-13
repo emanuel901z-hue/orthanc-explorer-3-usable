@@ -2293,7 +2293,20 @@
     "hidden": "Ocultos: {{count}}",
     "shown": "Mostrados de nuevo: {{count}}",
     "runningNotDeletable": "Los trabajos en curso deben cancelarse primero",
-    "emptyHidden": "Todos los trabajos de copia están ocultos. Use «Mostrar ocultos»."
+    "emptyHidden": "Todos los trabajos de copia están ocultos. Use «Mostrar ocultos».",
+    "retrySelected": "Reenviar ({{count}})",
+    "retryTitle": "¿Reenviar el trabajo de copia?",
+    "retryBulkTitle": "¿Reenviar {{count}} trabajos de copia?",
+    "retrySuccessBody": "Este trabajo se entregó por completo. Reenviar envía todo el estudio otra vez: el destino puede crear duplicados o rechazarlo.",
+    "retryWarningBody": "Este trabajo solo se entregó parcialmente. Reenviar envía todo el estudio otra vez; las imágenes que ya llegaron pueden aparecer duplicadas.",
+    "retryFailedBody": "El trabajo falló. Reenviar inicia el mismo C-MOVE de nuevo.",
+    "retryBulkBody": "Cada trabajo es su propio C-MOVE. Fallidos: {{failed}}, parciales: {{warning}}, entregados: {{success}}. En los entregados, el destino puede crear duplicados.",
+    "retryConfirm": "Reenviar",
+    "retryPermanentHint": "Repetir no cambiará esto: {{status}} — revise primero el registro del destino en el archivo de origen.",
+    "retriedCount": "{{count}} trabajos de copia reiniciados",
+    "retriedPartial": "Reiniciados: {{done}}, fallidos: {{failed}}",
+    "attempt": "Intento {{count}}",
+    "retryOf": "Repetición de {{jobId}}"
   },
   "help": {
     "help_copyJobs_title": "Trabajos de copia",

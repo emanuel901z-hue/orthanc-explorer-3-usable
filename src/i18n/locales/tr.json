@@ -2293,7 +2293,20 @@
     "hidden": "Gizlendi: {{count}}",
     "shown": "Yeniden gösterildi: {{count}}",
     "runningNotDeletable": "Çalışan işler önce iptal edilmeli",
-    "emptyHidden": "Tüm kopyalama işleri gizli. „Gizlenenleri göster“ ile geri getirin."
+    "emptyHidden": "Tüm kopyalama işleri gizli. „Gizlenenleri göster“ ile geri getirin.",
+    "retrySelected": "Yeniden gönder ({{count}})",
+    "retryTitle": "Kopyalama işi yeniden gönderilsin mi?",
+    "retryBulkTitle": "{{count}} kopyalama işi yeniden gönderilsin mi?",
+    "retrySuccessBody": "Bu iş tamamen teslim edildi. Yeniden göndermek tüm incelemeyi bir kez daha yollar — hedef kopyalar oluşturabilir veya reddedebilir.",
+    "retryWarningBody": "Bu iş yalnızca kısmen teslim edildi. Yeniden göndermek tüm incelemeyi bir kez daha yollar; zaten ulaşan görüntüler iki kez görünebilir.",
+    "retryFailedBody": "İş başarısız oldu. Yeniden göndermek aynı C-MOVE'u tekrar başlatır.",
+    "retryBulkBody": "Her iş ayrı bir C-MOVE'dur. Başarısız: {{failed}}, kısmi: {{warning}}, teslim: {{success}}. Teslim edilen işlerde hedef kopyalar oluşturabilir.",
+    "retryConfirm": "Yeniden gönder",
+    "retryPermanentHint": "Tekrarlamak bunu değiştirmez: {{status}} — önce kaynak arşivdeki hedef kaydını kontrol edin.",
+    "retriedCount": "{{count}} kopyalama işi yeniden başlatıldı",
+    "retriedPartial": "Yeniden başlatılan: {{done}}, başarısız: {{failed}}",
+    "attempt": "Deneme {{count}}",
+    "retryOf": "{{jobId}} tekrarı"
   },
   "help": {
     "help_copyJobs_title": "Kopyalama işleri",
