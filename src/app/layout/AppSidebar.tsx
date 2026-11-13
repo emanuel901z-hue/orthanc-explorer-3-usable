@@ -11,6 +11,8 @@ import {
   Info,
   Shield,
   ClipboardList,
+  CopyCheck,
+  Network,
   RadioTower,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
@@ -83,21 +85,21 @@ export function AppSidebar() {
     title: string;
     url: string;
     icon: typeof BookOpen;
-    children?: { title: string; url: string; badge?: typeof copyJobBadge }[];
+    badge?: typeof copyJobBadge;
+    children?: { title: string; url: string }[];
   };
 
   const navItems: NavItem[] = [
     { title: t('nav.studies'), url: '/studies', icon: BookOpen },
-    // Die Kopier-Strecke hängt unter „Hochladen“ — sie ist kein eigener
-    // Hauptpunkt, sondern der Weg, eine Studie woandershin zu schicken.
+    { title: t('nav.upload'), url: '/upload', icon: Upload },
+    // Die Kopier-Strecke steht als eigene Punkte direkt unter „Hochladen“ und
+    // vor „Aktivität“ — der Weg, eine Studie woandershin zu schicken.
+    { title: t('nav.remoteSources'), url: '/remote-sources', icon: Network },
     {
-      title: t('nav.upload'),
-      url: '/upload',
-      icon: Upload,
-      children: [
-        { title: t('nav.remoteSources'), url: '/remote-sources' },
-        { title: t('nav.copyJobs', { defaultValue: 'Copy jobs' }), url: '/copy-jobs', badge: copyJobBadge },
-      ],
+      title: t('nav.copyJobs', { defaultValue: 'Copy jobs' }),
+      url: '/copy-jobs',
+      icon: CopyCheck,
+      badge: copyJobBadge,
     },
     { title: t('nav.activity'), url: '/activity', icon: ActivityIcon },
     { title: t('nav.auditLogs', { defaultValue: 'Audit Logs' }), url: '/audit-logs', icon: Shield },
@@ -165,6 +167,15 @@ export function AppSidebar() {
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
+                  {item.badge && (
+                    <SidebarMenuBadge
+                      className={item.badge.className}
+                      title={item.badge.label}
+                      aria-label={item.badge.label}
+                    >
+                      {item.badge.count}
+                    </SidebarMenuBadge>
+                  )}
                   {item.url === '/broker' && healthBadge && (
                     <SidebarMenuBadge
                       className={healthBadge.variant === 'destructive' ? 'text-destructive' : 'text-amber-600'}
@@ -188,15 +199,6 @@ export function AppSidebar() {
                               }}
                             >
                               <span>{child.title}</span>
-                              {child.badge && (
-                                <span
-                                  className={`ms-auto text-[10px] tabular-nums ${child.badge.className}`}
-                                  title={child.badge.label}
-                                  aria-label={child.badge.label}
-                                >
-                                  {child.badge.count}
-                                </span>
-                              )}
                             </NavLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -24,14 +24,6 @@ function renderSidebar() {
   );
 }
 
-/** Die Unterliste des Punktes „Hochladen“. */
-function uploadSubMenu(): HTMLElement {
-  const uploadLink = screen.getByRole('link', { name: /^(hochladen|upload)$/i });
-  const subMenu = uploadLink.closest('li')?.querySelector('[data-sidebar="menu-sub"]');
-  expect(subMenu).not.toBeNull();
-  return subMenu as HTMLElement;
-}
-
 describe('AppSidebar', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('de');
@@ -51,25 +43,32 @@ describe('AppSidebar', () => {
     __resetConfigForTests();
   });
 
-  it('hängt Remote-Quellen und Kopieraufträge unter „Hochladen“', () => {
+  it('führt Remote-Quellen und Kopieraufträge als eigene Hauptpunkte', () => {
     renderSidebar();
 
-    const subMenu = uploadSubMenu();
-    expect(within(subMenu).getByRole('link', { name: /remote-quellen/i })).toBeInTheDocument();
-    expect(within(subMenu).getByRole('link', { name: /kopieraufträge/i })).toBeInTheDocument();
-  });
-
-  it('führt die Kopier-Strecke nicht mehr als eigenen Hauptpunkt', () => {
-    renderSidebar();
-
-    // genau ein Eintrag je Ziel, und der hängt am Punkt „Hochladen“
     for (const name of [/remote-quellen/i, /kopieraufträge/i]) {
       const links = screen.getAllByRole('link', { name });
       expect(links).toHaveLength(1);
-      expect(links[0].closest('[data-sidebar="menu-sub"]')).not.toBeNull();
-      const parentItem = links[0].closest('[data-sidebar="menu-item"]');
-      expect(parentItem?.querySelector('a[href="/upload"]')).not.toBeNull();
+      // kein Unterpunkt, sondern ein Eintrag der Hauptliste
+      expect(links[0].closest('[data-sidebar="menu-sub"]')).toBeNull();
+      expect(links[0].closest('[data-sidebar="menu"]')).not.toBeNull();
     }
+  });
+
+  it('sortiert beide Punkte zwischen „Hochladen“ und „Aktivität“', () => {
+    renderSidebar();
+
+    const links = screen.getAllByRole('link');
+    const index = (name: RegExp) => links.findIndex((link) => name.test(link.textContent ?? ''));
+    const upload = index(/^hochladen$/i);
+    const remoteSources = index(/^remote-quellen$/i);
+    const copyJobs = index(/^kopieraufträge$/i);
+    const activity = index(/^aktivität$/i);
+
+    expect(upload).toBeGreaterThanOrEqual(0);
+    expect(remoteSources).toBe(upload + 1);
+    expect(copyJobs).toBe(upload + 2);
+    expect(activity).toBeGreaterThan(copyJobs);
   });
 
   it('sortiert „Hochladen“ hinter die Studienliste', () => {
