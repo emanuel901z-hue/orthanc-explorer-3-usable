@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
@@ -121,6 +121,7 @@ export default function CopyJobsPage() {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   /** Aufträge, deren Wiederholung noch bestätigt werden muss. */
   const [retryRequest, setRetryRequest] = useState<CopyJobView[] | null>(null);
+  const topRef = useRef<HTMLDivElement>(null);
 
   const notes = useMemo(
     () => new Map(journal.map((entry) => [entry.jobId, entry])),
@@ -213,21 +214,24 @@ export default function CopyJobsPage() {
   };
 
   /**
-   * Startet den Auftrag neu. Orthancs `resubmit` nimmt nur **fehlgeschlagene**
-   * Jobs an („Resubmitting failed job“); ein zugestellter Auftrag wird deshalb
-   * als neuer C-MOVE mit denselben Kennungen abgesetzt.
+   * Startet den Auftrag neu — als **neuen** C-MOVE. Orthancs `resubmit` setzt
+   * denselben Job fort (gleiche ID, gleiche `CreationTime`); die Zeile bliebe
+   * damit an ihrem alten Platz in der nach Startzeit sortierten Historie.
+   * Ein neuer Auftrag trägt eine neue Startzeit und steht oben. Nur wenn die
+   * Kennungen fehlen (Altbestand ohne Study-UID), bleibt `resubmit` als
+   * Rückfallebene für fehlgeschlagene Aufträge.
    */
   const startRetry = async (job: CopyJobView): Promise<Record<string, unknown>> => {
-    if (job.state === 'failed') return jobsApi.resubmit(job.jobId);
-    if (!job.sourceAet || !job.targetAet || !job.studyInstanceUid) {
-      throw new Error('copy job lacks source, target or study UID');
+    if (job.sourceAet && job.targetAet && job.studyInstanceUid) {
+      return moveResourcesAction(
+        job.sourceAet,
+        'Study',
+        [{ StudyInstanceUID: job.studyInstanceUid }],
+        { targetAet: job.targetAet, asynchronous: true },
+      );
     }
-    return moveResourcesAction(
-      job.sourceAet,
-      'Study',
-      [{ StudyInstanceUID: job.studyInstanceUid }],
-      { targetAet: job.targetAet, asynchronous: true },
-    );
+    if (job.state === 'failed') return jobsApi.resubmit(job.jobId);
+    throw new Error('copy job lacks source, target or study UID');
   };
 
   /**
@@ -269,6 +273,13 @@ export default function CopyJobsPage() {
     setSelected(new Set());
     if (single) setBusyJobId(null);
     else setBulkBusy(false);
+    if (done > 0) {
+      // Der neue Auftrag läuft und steht mit neuer Startzeit oben. Ein
+      // Statusfilter, der ihn ausblenden würde, fällt auf „alle“ zurück;
+      // die Liste springt an den Anfang, damit die frische Zeile sichtbar ist.
+      if (filter !== 'all' && filter !== 'running') setFilter('all');
+      topRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    }
     if (failed > 0) {
       toast.error(t('copyJobs.retriedPartial', {
         done,
@@ -414,7 +425,7 @@ export default function CopyJobsPage() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-4 animate-fade-in">
+    <div ref={topRef} className="p-4 md:p-6 space-y-4 animate-fade-in">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('copyJobs.title', { defaultValue: 'Copy jobs' })}</h1>

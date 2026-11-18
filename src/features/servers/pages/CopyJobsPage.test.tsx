@@ -326,10 +326,20 @@ describe('CopyJobsPage', () => {
     __resetConfigForTests();
   });
 
-  it('startet einen fehlgeschlagenen Auftrag per Klick neu', async () => {
+  it('startet einen fehlgeschlagenen Auftrag per Klick als neuen Auftrag neu', async () => {
     const resubmitSpy = vi.spyOn(jobsApi, 'resubmit').mockResolvedValue({});
+    mockMove.mockResolvedValue({ ID: 'job-new' });
     mockJobs.mockReturnValue({
-      data: [job({ ID: 'job-fail', State: 'Failure', Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xc000 }] } })],
+      data: [job({
+        ID: 'job-fail',
+        State: 'Failure',
+        Content: {
+          RemoteAet: 'ARCHIVE',
+          TargetAet: 'X',
+          Query: [{ '0020,000d': '1.2.3', '0010,0020': 'P-100' }],
+          Details: [{ DimseErrorStatus: 0xc000 }],
+        },
+      })],
       isLoading: false,
       isError: false,
     });
@@ -337,15 +347,81 @@ describe('CopyJobsPage', () => {
     renderPage();
     fireEvent.click(screen.getByRole('button', { name: /retry job|auftrag erneut senden/i }));
 
-    await waitFor(() => expect(resubmitSpy).toHaveBeenCalledWith('job-fail'));
+    // resubmit setzt denselben Job fort (gleiche ID und Startzeit) — die Zeile
+    // bliebe unten stehen. Der neue Auftrag bekommt eine neue Startzeit.
+    await waitFor(() => expect(mockMove).toHaveBeenCalledWith(
+      'ARCHIVE',
+      'Study',
+      [{ StudyInstanceUID: '1.2.3' }],
+      { targetAet: 'X', asynchronous: true },
+    ));
+    expect(resubmitSpy).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockRecord).toHaveBeenCalledWith(expect.objectContaining({
+      jobId: 'job-new',
+      retryOf: 'job-fail',
+      attempt: 2,
+    })));
     resubmitSpy.mockRestore();
+  });
+
+  it('fällt bei einem fehlgeschlagenen Auftrag ohne Kennungen auf resubmit zurück', async () => {
+    const resubmitSpy = vi.spyOn(jobsApi, 'resubmit').mockResolvedValue({});
+    mockJobs.mockReturnValue({
+      data: [job({ ID: 'job-old', State: 'Failure', Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xc000 }] } })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /retry job|auftrag erneut senden/i }));
+
+    await waitFor(() => expect(resubmitSpy).toHaveBeenCalledWith('job-old'));
+    expect(mockMove).not.toHaveBeenCalled();
+    resubmitSpy.mockRestore();
+  });
+
+  it('zeigt nach dem Wiederholen wieder alle Aufträge, damit der neue oben sichtbar ist', async () => {
+    await i18n.changeLanguage('de');
+    usePersistedUiStore.setState({ values: { 'copyJobs.filter': 'failed' } });
+    mockMove.mockResolvedValue({ ID: 'job-new' });
+    mockJobs.mockReturnValue({
+      data: [job({
+        ID: 'job-fail',
+        State: 'Failure',
+        Content: {
+          RemoteAet: 'ARCHIVE',
+          TargetAet: 'X',
+          Query: [{ '0020,000d': '1.2.3', '0010,0020': 'P-100' }],
+          Details: [{ DimseErrorStatus: 0xc000 }],
+        },
+      })],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /retry job|auftrag erneut senden/i }));
+
+    await waitFor(() => expect(mockMove).toHaveBeenCalled());
+    // Der neue Auftrag läuft — unter „fehlgeschlagen“ wäre er unsichtbar.
+    await waitFor(() => expect(usePersistedUiStore.getState().values['copyJobs.filter']).toBe('all'));
   });
 
   it('fragt bei einem dauerhaften Fehler vor dem Wiederholen nach', async () => {
     await i18n.changeLanguage('de');
     const resubmitSpy = vi.spyOn(jobsApi, 'resubmit').mockResolvedValue({});
+    mockMove.mockResolvedValue({ ID: 'job-new' });
     mockJobs.mockReturnValue({
-      data: [job({ ID: 'job-fail', State: 'Failure', Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xa801 }] } })],
+      data: [job({
+        ID: 'job-fail',
+        State: 'Failure',
+        Content: {
+          RemoteAet: 'ARCHIVE',
+          TargetAet: 'X',
+          Query: [{ '0020,000d': '1.2.3', '0010,0020': 'P-100' }],
+          Details: [{ DimseErrorStatus: 0xa801 }],
+        },
+      })],
       isLoading: false,
       isError: false,
     });
@@ -356,10 +432,16 @@ describe('CopyJobsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /retry job|auftrag erneut senden/i }));
 
     expect(screen.getByText(/kopierauftrag erneut senden\?/i)).toBeInTheDocument();
-    expect(resubmitSpy).not.toHaveBeenCalled();
+    expect(mockMove).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole('button', { name: /^erneut senden$/i }));
-    await waitFor(() => expect(resubmitSpy).toHaveBeenCalledWith('job-fail'));
+    await waitFor(() => expect(mockMove).toHaveBeenCalledWith(
+      'ARCHIVE',
+      'Study',
+      [{ StudyInstanceUID: '1.2.3' }],
+      { targetAet: 'X', asynchronous: true },
+    ));
+    expect(resubmitSpy).not.toHaveBeenCalled();
     resubmitSpy.mockRestore();
   });
 
@@ -404,7 +486,16 @@ describe('CopyJobsPage', () => {
     mockJobs.mockReturnValue({
       data: [
         job(),
-        job({ ID: 'job-2', State: 'Failure', Content: { TargetAet: 'X', Details: [{ DimseErrorStatus: 0xc000 }] } }),
+        job({
+          ID: 'job-2',
+          State: 'Failure',
+          Content: {
+            RemoteAet: 'ARCHIVE',
+            TargetAet: 'X',
+            Query: [{ '0020,000d': '1.2.3', '0010,0020': 'P-100' }],
+            Details: [{ DimseErrorStatus: 0xc000 }],
+          },
+        }),
       ],
       isLoading: false,
       isError: false,
@@ -421,13 +512,15 @@ describe('CopyJobsPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /^erneut senden$/i }));
 
-    await waitFor(() => expect(mockMove).toHaveBeenCalledWith(
+    // beide Aufträge laufen als eigener C-MOVE, damit jede neue Zeile oben steht
+    await waitFor(() => expect(mockMove).toHaveBeenCalledTimes(2));
+    expect(mockMove).toHaveBeenCalledWith(
       'ARCHIVE',
       'Study',
       [{ StudyInstanceUID: '1.2.3' }],
       { targetAet: 'hst_burn2CD', asynchronous: true },
-    ));
-    expect(resubmitSpy).toHaveBeenCalledWith('job-2');
+    );
+    expect(resubmitSpy).not.toHaveBeenCalled();
     resubmitSpy.mockRestore();
   });
 

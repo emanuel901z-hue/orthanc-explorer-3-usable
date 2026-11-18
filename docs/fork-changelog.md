@@ -4,6 +4,29 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## Unveröffentlicht — Wiederholen landet oben in der Historie (2026-11-18)
+
+**Aus dem Betrieb.** Nach einem fehlgeschlagenen Auftrag blieb die Zeile beim
+„Erneut senden“ an ihrer alten Stelle: Orthancs `POST /jobs/{id}/resubmit`
+setzt denselben Job fort (gleiche ID und `CreationTime`) und antwortet mit
+`{}`. Da die Liste nach Startzeit sortiert, musste man weit scrollen — und
+`attempt`/`retryOf` wurden für Fehlschläge nie ins Journal geschrieben.
+
+- Jeder Retry — auch ein fehlgeschlagener Auftrag — ist jetzt ein **neuer
+  C-MOVE** (`/modalities/{AET}/move`, asynchron) mit eigener Startzeit und
+  steht damit oben. `resubmit` bleibt nur Rückfallebene für Altbestände ohne
+  Quelle, Ziel oder Study-UID.
+- Nach dem Wiederholen springt die Liste an den Anfang; ein Statusfilter, der
+  den neuen laufenden Auftrag ausblenden würde, fällt auf „alle“ zurück.
+- Herkunft (`retryOf`) und Versuch (`attempt`) landen auch bei Fehlschlägen im
+  Kopier-Journal; die neue Zeile zeigt „Versuch n“.
+
+Gates grün: `tsc` 0, `npm run lint` 0 Fehler, `npm run i18n:check` vollständig
+(alle 9 Sprachen), `npm run build` 0, **995 Vitest-Tests**, **86 pytest-Tests**,
+**23 Playwright-E2E-Tests** (mit Positions-Assertion für den neuen Auftrag).
+
+---
+
 ## v2.7.0 — DICOM-Copy-Workstation: Direkt-C-MOVE, Kopieraufträge, Ziel-Registry & Serien-Auswahl (2026-11-07)
 
 Ausbau zur **DICOM-Copy-Workstation** für den Klinikbetrieb (Studien im Hauptarchiv per C-FIND suchen und per C-MOVE direkt an Zielarchive weiterleiten, ohne lokalen Bilddurchlauf):
