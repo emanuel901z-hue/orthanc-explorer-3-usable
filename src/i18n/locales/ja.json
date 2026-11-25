@@ -374,7 +374,10 @@
     "bulkCancel": "キャンセル",
     "bulkCopyConfirm": "{{count}} 件コピー",
     "bulkRetrieveConfirm": "{{count}} 件取得",
-    "copyAgain": "もう一度コピー"
+    "copyAgain": "もう一度コピー",
+    "viewLocal": "ローカルで表示",
+    "noStudyUid": "アーカイブが StudyInstanceUID を返さなかったため、ビューアでこの検査を開けません。",
+    "localNotFound": "検査はまだローカルアーカイブにありません。先に取得してください。"
   },
   "actions": {
     "viewer": "ビューア",

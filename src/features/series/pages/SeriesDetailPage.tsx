@@ -18,6 +18,9 @@ import {
   GitMerge,
   Scissors,
   Layers,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -158,18 +161,111 @@ function formatSlicePosition(pos?: string): string {
   return pos;
 }
 
+type InstanceSortKey =
+  | 'instanceNumber'
+  | 'sopInstanceUID'
+  | 'positionZ'
+  | 'fileSize'
+  | 'acquisitionTime';
+
+type InstanceSort = { key: InstanceSortKey; dir: 'asc' | 'desc' };
+
+/** Instanznummer aufsteigend — die natürliche Reihenfolge einer Serie. */
+const DEFAULT_INSTANCE_SORT: InstanceSort = { key: 'instanceNumber', dir: 'asc' };
+
+/** Sortierbarer Spaltenkopf wie in Studien-, Treffer- und Kopierliste. */
+function InstanceSortHead({
+  label,
+  column,
+  sort,
+  onSort,
+  className,
+}: {
+  label: string;
+  column: InstanceSortKey;
+  sort: InstanceSort;
+  onSort: (column: InstanceSortKey) => void;
+  className?: string;
+}) {
+  const active = sort.key === column;
+  return (
+    <TableHead
+      className={className}
+      aria-sort={active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        className="gap-1 -ml-1 h-8 px-0 font-semibold w-full min-w-0 justify-start overflow-hidden"
+        onClick={() => onSort(column)}
+      >
+        <span className="truncate" title={label}>{label}</span>
+        {active && sort.dir === 'asc' ? (
+          <ArrowUp className="h-3.5 w-3.5 shrink-0" />
+        ) : active && sort.dir === 'desc' ? (
+          <ArrowDown className="h-3.5 w-3.5 shrink-0" />
+        ) : (
+          <ArrowUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+        )}
+      </Button>
+    </TableHead>
+  );
+}
+
 export default function SeriesDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language;
   const { studyId, seriesId } = useParams<{ studyId: string; seriesId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: series, isLoading } = useSeries(seriesId!);
   const { data: study } = useStudy(studyId!);
   const { data: rawInstances = [], isLoading: instancesLoading } = useSeriesInstances(seriesId!);
-  const instances = useMemo(
-    () => [...rawInstances].sort((a, b) => a.instanceNumber - b.instanceNumber),
-    [rawInstances],
+  const [instanceSort, setInstanceSort] = usePersistedState<InstanceSort>(
+    'seriesDetail.instanceSort',
+    DEFAULT_INSTANCE_SORT,
   );
+  const collator = useMemo(
+    () => new Intl.Collator(locale, { sensitivity: 'base', numeric: true }),
+    [locale],
+  );
+  const toggleInstanceSort = (key: InstanceSortKey) => {
+    setInstanceSort((prev) => {
+      if (prev.key === key) return { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' };
+      // Dateigröße und Aufnahmezeit beginnen mit dem Größten/Neuesten.
+      return { key, dir: key === 'fileSize' || key === 'acquisitionTime' ? 'desc' : 'asc' };
+    });
+  };
+  const instances = useMemo(() => {
+    const list = [...rawInstances];
+    list.sort((a, b) => {
+      let cmp: number;
+      switch (instanceSort.key) {
+        case 'instanceNumber':
+          cmp = a.instanceNumber - b.instanceNumber;
+          break;
+        case 'fileSize':
+          cmp = a.fileSize - b.fileSize;
+          break;
+        case 'positionZ': {
+          const az = parseFloat(formatSlicePosition(a.imagePositionPatient));
+          const bz = parseFloat(formatSlicePosition(b.imagePositionPatient));
+          cmp = Number.isFinite(az) && Number.isFinite(bz)
+            ? az - bz
+            : collator.compare(formatSlicePosition(a.imagePositionPatient), formatSlicePosition(b.imagePositionPatient));
+          break;
+        }
+        case 'acquisitionTime':
+          cmp = collator.compare(a.acquisitionTime ?? '', b.acquisitionTime ?? '');
+          break;
+        case 'sopInstanceUID':
+          cmp = collator.compare(a.sopInstanceUID, b.sopInstanceUID);
+          break;
+      }
+      return instanceSort.dir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+  }, [rawInstances, instanceSort, collator]);
   const { data: seriesTags } = useSeriesSharedTags(seriesId!);
 
   const canDownload = useFeature('download');
@@ -736,46 +832,72 @@ export default function SeriesDetailPage() {
                                 onCheckedChange={selectAllInstances}
                               />
                             </TableHead>
-                            <TableHead className="w-12">#</TableHead>
-                            <TableHead>{t('series.sopInstanceUid')}</TableHead>
-                            <TableHead>{t('series.positionZ')}</TableHead>
-                            <TableHead>{t('series.fileSize')}</TableHead>
-                            <TableHead>{t('series.acqTime')}</TableHead>
+                            <InstanceSortHead
+                              label="#"
+                              column="instanceNumber"
+                              sort={instanceSort}
+                              onSort={toggleInstanceSort}
+                              className="w-12"
+                            />
+                            <InstanceSortHead
+                              label={t('series.sopInstanceUid')}
+                              column="sopInstanceUID"
+                              sort={instanceSort}
+                              onSort={toggleInstanceSort}
+                            />
+                            <InstanceSortHead
+                              label={t('series.positionZ')}
+                              column="positionZ"
+                              sort={instanceSort}
+                              onSort={toggleInstanceSort}
+                            />
+                            <InstanceSortHead
+                              label={t('series.fileSize')}
+                              column="fileSize"
+                              sort={instanceSort}
+                              onSort={toggleInstanceSort}
+                            />
+                            <InstanceSortHead
+                              label={t('series.acqTime')}
+                              column="acquisitionTime"
+                              sort={instanceSort}
+                              onSort={toggleInstanceSort}
+                            />
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {instancesLoading
                             ? Array.from({ length: 5 }).map((_, i) => (
-                                <TableRow key={i}>
-                                  <TableCell><Skeleton className="h-4 w-4" /></TableCell>
-                                  <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-                                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                                </TableRow>
-                              ))
+                              <TableRow key={i}>
+                                <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                              </TableRow>
+                            ))
                             : instances.map((inst) => (
-                                <TableRow
-                                  key={inst.id}
-                                  className="cursor-pointer hover:bg-muted/50 transition-colors"
-                                  onClick={() =>
-                                    navigate(`/studies/${studyId}/series/${seriesId}/instances/${inst.id}`)
-                                  }
-                                >
-                                  <TableCell className="w-10" onClick={(e) => e.stopPropagation()}>
-                                    <Checkbox
-                                      checked={selectedInstanceIds.has(inst.id)}
-                                      onCheckedChange={() => toggleInstance(inst.id)}
-                                    />
-                                  </TableCell>
-                                  <TableCell className="font-medium">{inst.instanceNumber}</TableCell>
-                                  <TableCell className="font-mono text-xs truncate max-w-[300px]">{inst.sopInstanceUID}</TableCell>
-                                  <TableCell className="font-mono text-xs text-muted-foreground">{formatSlicePosition(inst.imagePositionPatient)}</TableCell>
-                                  <TableCell className="text-sm text-muted-foreground">{formatDiskSize(inst.fileSize)}</TableCell>
-                                  <TableCell className="font-mono text-xs text-muted-foreground">{formatDicomTime(inst.acquisitionTime)}</TableCell>
-                                </TableRow>
-                              ))}
+                              <TableRow
+                                key={inst.id}
+                                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                                onClick={() =>
+                                  navigate(`/studies/${studyId}/series/${seriesId}/instances/${inst.id}`)
+                                }
+                              >
+                                <TableCell className="w-10" onClick={(e) => e.stopPropagation()}>
+                                  <Checkbox
+                                    checked={selectedInstanceIds.has(inst.id)}
+                                    onCheckedChange={() => toggleInstance(inst.id)}
+                                  />
+                                </TableCell>
+                                <TableCell className="font-medium">{inst.instanceNumber}</TableCell>
+                                <TableCell className="font-mono text-xs truncate max-w-[300px]">{inst.sopInstanceUID}</TableCell>
+                                <TableCell className="font-mono text-xs text-muted-foreground">{formatSlicePosition(inst.imagePositionPatient)}</TableCell>
+                                <TableCell className="text-sm text-muted-foreground">{formatDiskSize(inst.fileSize)}</TableCell>
+                                <TableCell className="font-mono text-xs text-muted-foreground">{formatDicomTime(inst.acquisitionTime)}</TableCell>
+                              </TableRow>
+                            ))}
                         </TableBody>
                       </Table>
                     </div>

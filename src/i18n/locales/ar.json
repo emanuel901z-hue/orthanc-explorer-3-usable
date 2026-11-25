@@ -463,7 +463,10 @@
     "bulkCancel": "إلغاء",
     "bulkCopyConfirm": "نسخ {{count}}",
     "bulkRetrieveConfirm": "استرجاع {{count}}",
-    "copyAgain": "نسخ مرة أخرى"
+    "copyAgain": "نسخ مرة أخرى",
+    "viewLocal": "عرض محلي",
+    "noStudyUid": "لم يُرجع الأرشيف StudyInstanceUID — لا يمكن للعارض فتح هذه الدراسة.",
+    "localNotFound": "الدراسة ليست في الأرشيف المحلي بعد — قم باستردادها أولاً."
   },
   "actions": {
     "viewer": "العارض",

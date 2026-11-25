@@ -463,7 +463,10 @@
     "bulkCancel": "Отмена",
     "bulkCopyConfirm": "Копировать {{count}}",
     "bulkRetrieveConfirm": "Получить {{count}}",
-    "copyAgain": "Копировать снова"
+    "copyAgain": "Копировать снова",
+    "viewLocal": "Просмотреть локально",
+    "noStudyUid": "Архив не вернул StudyInstanceUID — просмотрщик не может открыть это исследование.",
+    "localNotFound": "Исследование ещё не в локальном архиве — сначала загрузите его."
   },
   "actions": {
     "viewer": "Просмотрщик",

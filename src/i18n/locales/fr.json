@@ -374,7 +374,10 @@
     "bulkCancel": "Annuler",
     "bulkCopyConfirm": "Copier {{count}}",
     "bulkRetrieveConfirm": "Récupérer {{count}}",
-    "copyAgain": "Copier à nouveau"
+    "copyAgain": "Copier à nouveau",
+    "viewLocal": "Afficher en local",
+    "noStudyUid": "L'archive n'a pas fourni de StudyInstanceUID — le viewer ne peut pas ouvrir cette étude.",
+    "localNotFound": "L'étude n'est pas encore dans l'archive locale — récupérez-la d'abord."
   },
   "actions": {
     "viewer": "Visionneuse",

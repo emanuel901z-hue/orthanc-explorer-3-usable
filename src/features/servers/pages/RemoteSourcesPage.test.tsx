@@ -8,7 +8,7 @@ import { targetsApi } from '@/api/targets';
 import { usePersistedUiStore, useSessionUiStore } from '@/store/ui-state';
 import '@/i18n';
 
-const { mockQuery, mockRetrieve, mockMove, mockToast, mockEcho, mockJobs, mockModalities, mockJournal } = vi.hoisted(() => ({
+const { mockQuery, mockRetrieve, mockMove, mockToast, mockEcho, mockJobs, mockModalities, mockJournal, mockFind } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
   mockRetrieve: vi.fn(),
   mockMove: vi.fn(),
@@ -17,6 +17,7 @@ const { mockQuery, mockRetrieve, mockMove, mockToast, mockEcho, mockJobs, mockMo
   mockJobs: vi.fn(),
   mockModalities: vi.fn(),
   mockJournal: vi.fn(() => Promise.resolve({})),
+  mockFind: vi.fn(() => Promise.resolve([])),
 }));
 
 vi.mock('sonner', () => ({ toast: mockToast }));
@@ -48,6 +49,12 @@ vi.mock('@/api/queries', () => ({
     })),
   },
 }));
+
+// Die lokale Orthanc-ID der abgerufenen Kopie kommt aus /tools/find.
+vi.mock('@/api/studies', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/api/studies')>();
+  return { ...actual, studiesApi: { ...actual.studiesApi, find: mockFind } };
+});
 vi.mock('@/actions/retrieveModality', () => ({ retrieveModalityAction: mockRetrieve }));
 vi.mock('@/actions/moveResources', () => ({ moveResourcesAction: mockMove }));
 
@@ -170,6 +177,7 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     ]);
     mockEcho.mockResolvedValue({});
     mockJobs.mockReturnValue({ data: [], isLoading: false, isError: false });
+    mockFind.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -530,6 +538,58 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     );
   });
 
+  it('sortiert die Serienliste im Detail nach Nummer und Bildanzahl', async () => {
+    configure([]);
+    mockQuery.mockImplementation((_modality: string, params: { Level?: string }) =>
+      Promise.resolve(
+        params?.Level === 'Series'
+          ? {
+            queryId: 'q-series',
+            answers: [
+              {
+                index: 0,
+                tags: {
+                  SeriesInstanceUID: '1.2.3.1',
+                  SeriesDescription: 'axial',
+                  Modality: 'CT',
+                  SeriesNumber: '2',
+                  NumberOfSeriesRelatedInstances: '10',
+                },
+              },
+              {
+                index: 1,
+                tags: {
+                  SeriesInstanceUID: '1.2.3.2',
+                  SeriesDescription: 'lokalizer',
+                  Modality: 'CT',
+                  SeriesNumber: '1',
+                  NumberOfSeriesRelatedInstances: '2',
+                },
+              },
+            ],
+          }
+          : ANSWERS,
+      ),
+    );
+
+    renderPage();
+    await queryStudies('Muster');
+    fireEvent.click(screen.getAllByTestId('remote-study-row')[0]);
+
+    const dialog = await screen.findByRole('dialog');
+    await within(dialog).findByText('axial');
+    const seriesTable = within(dialog).getByText('axial').closest('table') as HTMLElement;
+    const rows = () => within(seriesTable).getAllByRole('row').slice(1).map((row) => row.textContent ?? '');
+
+    // Voreinstellung: Seriennummer aufsteigend → „lokalizer“ (1) zuerst
+    expect(rows()[0]).toContain('lokalizer');
+
+    // Klick auf „Bilder“ beginnt absteigend → die Serie mit 10 Bildern zuerst
+    const imagesHeader = within(seriesTable).getByRole('columnheader', { name: /images|bilder/i });
+    fireEvent.click(within(imagesHeader).getByRole('button'));
+    expect(rows()[0]).toContain('axial');
+  });
+
   it('überträgt bei abgewählten Serien die ganze Studie und schaltet per Kopf-Checkbox um', async () => {
     configure([]);
     mockRetrieve.mockResolvedValue({ Description: 'ok' });
@@ -726,6 +786,63 @@ describe('RemoteSourcesPage — C-MOVE auf ein Zielarchiv', () => {
     await waitFor(() =>
       expect(mockRetrieve).toHaveBeenCalledWith('ARCHIVE', 'q-1', 0, 'JungPacs', { asynchronous: true }),
     );
+  });
+
+  it('öffnet einen Treffer direkt im Viewer, ohne ihn abzurufen', async () => {
+    configure([]);
+    renderPage();
+    await queryStudies();
+
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(screen.getByRole('button', { name: /open in ohif|in ohif öffnen/i }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/IHEInvokeImageDisplay?requestType=STUDY&studyUID=1.2.3'),
+      '_blank',
+      'noopener,noreferrer',
+    );
+    expect(mockRetrieve).not.toHaveBeenCalled();
+    openSpy.mockRestore();
+  });
+
+  it('öffnet die Auswahl gesammelt im Viewer', async () => {
+    configure([]);
+    renderPage();
+    await queryStudies();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /select study|studie auswählen/i }));
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(screen.getByRole('button', { name: /open in ohif \(1\)|in ohif öffnen \(1\)/i }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      expect.stringContaining('studyUID=1.2.3'),
+      '_blank',
+      'noopener,noreferrer',
+    );
+    openSpy.mockRestore();
+  });
+
+  it('zeigt nach dem Abrufen den lokalen Viewer an', async () => {
+    configure([]);
+    mockRetrieve.mockResolvedValue({ ID: 'job-1' });
+    mockFind.mockResolvedValue([{ ID: 'local-1' }]);
+    renderPage();
+    await queryStudies();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Retrieve$|^Abrufen$/ }));
+    await waitFor(() =>
+      expect(mockFind).toHaveBeenCalledWith({ Level: 'Study', Query: { StudyInstanceUID: '1.2.3' } }),
+    );
+
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(await screen.findByRole('button', { name: /view locally|lokal ansehen/i }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/viewer/local-1'),
+      '_blank',
+      'noopener,noreferrer',
+    );
+    openSpy.mockRestore();
   });
 
   it('ändert im Ziel-Dialog die Reihenfolge und speichert sie', async () => {

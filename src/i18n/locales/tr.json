@@ -463,7 +463,10 @@
     "bulkCancel": "İptal",
     "bulkCopyConfirm": "{{count}} kopyala",
     "bulkRetrieveConfirm": "{{count}} getir",
-    "copyAgain": "Yeniden kopyala"
+    "copyAgain": "Yeniden kopyala",
+    "viewLocal": "Yerelde görüntüle",
+    "noStudyUid": "Arşiv StudyInstanceUID döndürmedi — görüntüleyici bu incelemeyi açamaz.",
+    "localNotFound": "İnceleme henüz yerel arşivde değil — önce indirin."
   },
   "actions": {
     "viewer": "Görüntüleyici",

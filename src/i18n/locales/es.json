@@ -374,7 +374,10 @@
     "bulkCancel": "Cancelar",
     "bulkCopyConfirm": "Copiar {{count}}",
     "bulkRetrieveConfirm": "Recuperar {{count}}",
-    "copyAgain": "Copiar de nuevo"
+    "copyAgain": "Copiar de nuevo",
+    "viewLocal": "Ver en local",
+    "noStudyUid": "El archivo no devolvió un StudyInstanceUID: el visor no puede abrir este estudio.",
+    "localNotFound": "El estudio aún no está en el archivo local; recupérelo primero."
   },
   "actions": {
     "viewer": "Visor",

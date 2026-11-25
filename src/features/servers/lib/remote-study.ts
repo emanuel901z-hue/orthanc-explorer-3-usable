@@ -19,6 +19,8 @@ export type RemoteStudy = {
   studyInstanceUid: string;
   retrieving: boolean;
   retrieved: boolean;
+  /** Orthanc-ID der lokalen Kopie — erst nach einem erfolgreichen Abruf bekannt. */
+  localStudyId?: string;
   error: boolean;
   /** C-MOVE an ein Zielarchiv läuft als Job; dessen ID steht hier. */
   copying: boolean;

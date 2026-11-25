@@ -9,6 +9,8 @@ import {
   WifiOff,
   Download,
   Copy,
+  Eye,
+  ExternalLink,
   Loader2,
   CheckCircle2,
   XCircle,
@@ -44,6 +46,8 @@ import { useModalityDetails } from '@/features/settings/hooks/use-modality-detai
 import { useDicomWebServers } from '@/features/settings/hooks/use-dicom-web-servers';
 import { modalitiesApi } from '@/api/modalities';
 import { queriesApi } from '@/api/queries';
+import { studiesApi } from '@/api/studies';
+import { buildIidUrl } from '@/features/viewer/lib/iid';
 import { queryModalityAction } from '@/actions/queryModality';
 import { retrieveModalityAction } from '@/actions/retrieveModality';
 import { moveResourcesAction } from '@/actions/moveResources';
@@ -250,6 +254,73 @@ export default function RemoteSourcesPage() {
     );
   }, []);
 
+  /** Die StudyInstanceUID aus der C-FIND-Antwort — leer oder „—“ ist nicht nutzbar. */
+  const viewerStudyUid = (study: RemoteStudy) => {
+    const uid = study.studyInstanceUid?.trim();
+    return uid && uid !== '—' ? uid : '';
+  };
+
+  /**
+   * Öffnet die gefundenen Studien direkt im konfigurierten Web-Viewer.
+   *
+   * Der Weg führt über den IHE-Bildaufruf (wie „In OHIF öffnen“ auf der
+   * Studien-Detailseite): der Viewer bekommt die StudyInstanceUID aus dem
+   * C-FIND und liest die Studie selbst aus dem Hauptarchiv. Kein C-MOVE,
+   * keine lokale Kopie — es fließen keine Bilder über diesen Host.
+   */
+  const openInViewer = (studies: RemoteStudy[]) => {
+    const uids = studies.map(viewerStudyUid).filter(Boolean);
+    if (uids.length === 0) {
+      toast.error(t('remote.noStudyUid', {
+        defaultValue: 'The archive returned no StudyInstanceUID — the viewer cannot open this study.',
+      }));
+      return;
+    }
+    const target = buildIidUrl(`${import.meta.env.BASE_URL}IHEInvokeImageDisplay`, {
+      requestType: 'STUDY',
+      studyUIDs: uids,
+    });
+    window.open(target, '_blank', 'noopener,noreferrer');
+  };
+
+  /** Orthanc-ID der lokalen Kopie zu einer StudyInstanceUID (PHI bleibt im POST-Body). */
+  const findLocalStudyId = async (studyUid: string): Promise<string | undefined> => {
+    const uid = studyUid?.trim();
+    if (!uid || uid === '—') return undefined;
+    try {
+      const found = await studiesApi.find({
+        Level: 'Study',
+        Query: { StudyInstanceUID: uid },
+      });
+      return found[0]?.ID;
+    } catch {
+      return undefined;
+    }
+  };
+
+  /**
+   * Öffnet die heruntergeladene Kopie im lokalen OE3-Viewer.
+   *
+   * Der Host-OHIF liest nur das Hauptarchiv; eine per C-MOVE geholte Kopie
+   * sieht er nicht. Die lokale ID wird nach dem Abruf mitgeführt und sonst
+   * über /tools/find nachgeschlagen.
+   */
+  const handleOpenLocal = async (study: RemoteStudy) => {
+    let localId = study.localStudyId;
+    if (!localId) {
+      localId = await findLocalStudyId(study.studyInstanceUid);
+      if (localId) patchStudy(study, { localStudyId: localId });
+    }
+    if (!localId) {
+      toast.error(t('remote.localNotFound', {
+        defaultValue: 'The study is not in the local archive yet — retrieve it first.',
+      }));
+      return;
+    }
+    // Neuer Tab, damit die Trefferliste und die Suche erhalten bleiben.
+    window.open(`${import.meta.env.BASE_URL}viewer/${localId}`, '_blank', 'noopener,noreferrer');
+  };
+
   const runEcho = useCallback(
     async (name: string, options: { silent?: boolean } = {}) => {
       if (!name) return;
@@ -358,7 +429,8 @@ export default function RemoteSourcesPage() {
     patchStudy(study, { retrieving: true, error: false });
     try {
       await retrieveModalityAction(selectedModality, study.queryId, study.answerIndex);
-      patchStudy(study, { retrieving: false, retrieved: true });
+      const localStudyId = await findLocalStudyId(study.studyInstanceUid);
+      patchStudy(study, { retrieving: false, retrieved: true, localStudyId });
       toast.success(t('remote.retrieveStarted', { defaultValue: 'Retrieve started (C-MOVE)' }));
     } catch {
       patchStudy(study, { retrieving: false, error: true });
@@ -452,11 +524,13 @@ export default function RemoteSourcesPage() {
         { targetAet, asynchronous: isCopy },
       );
       const jobId = typeof result.ID === 'string' ? result.ID : undefined;
-      patchStudy(
-        study,
-        isCopy ? { copying: false, copyJobId: jobId } : { retrieving: false, retrieved: true },
-      );
-      if (isCopy) recordCopyNote(study, jobId, targetAet ?? '');
+      if (isCopy) {
+        patchStudy(study, { copying: false, copyJobId: jobId });
+        recordCopyNote(study, jobId, targetAet ?? '');
+      } else {
+        const localStudyId = await findLocalStudyId(study.studyInstanceUid);
+        patchStudy(study, { retrieving: false, retrieved: true, localStudyId });
+      }
       toast.success(
         isCopy
           ? t('remote.copyStarted', { target: targetAet, defaultValue: `C-MOVE to ${targetAet} sent` })
@@ -711,6 +785,17 @@ export default function RemoteSourcesPage() {
                       ? t('remote.retrieveSelected', { count: selectedStudies.length, defaultValue: `Retrieve (${selectedStudies.length})` })
                       : t('remote.retrieveAll', { defaultValue: 'Retrieve all' })}
                   </Button>
+                  {selectedStudies.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 gap-1.5 text-xs"
+                      onClick={() => openInViewer(selectedStudies)}
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      {t('actions.openInOhif')} ({selectedStudies.length})
+                    </Button>
+                  )}
                 </div>
               </div>
               <CardContent className="p-0 overflow-x-auto">
@@ -751,7 +836,7 @@ export default function RemoteSourcesPage() {
                           onSort={toggleSort}
                         />
                       </TableHead>
-                      <TableHead className="w-[165px] px-2">{t('remote.actions', { defaultValue: 'Actions' })}</TableHead>
+                      <TableHead className="w-[200px] px-2">{t('remote.actions', { defaultValue: 'Actions' })}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -800,6 +885,18 @@ export default function RemoteSourcesPage() {
                                 >
                                   {study.retrieving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
                                   {t('remote.retrieve', { defaultValue: 'Retrieve' })}
+                                </Button>
+                              )}
+                              {study.retrieved && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0"
+                                  aria-label={t('remote.viewLocal', { defaultValue: 'View locally' })}
+                                  title={t('remote.viewLocal', { defaultValue: 'View locally' })}
+                                  onClick={() => void handleOpenLocal(study)}
+                                >
+                                  <Eye className="h-3.5 w-3.5" />
                                 </Button>
                               )}
                               {study.copying ? (
@@ -883,6 +980,21 @@ export default function RemoteSourcesPage() {
                                   ) : null}
                                 </>
                               )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                disabled={!viewerStudyUid(study)}
+                                aria-label={t('actions.openInOhif')}
+                                title={viewerStudyUid(study)
+                                  ? t('actions.openInOhif')
+                                  : t('remote.noStudyUid', {
+                                    defaultValue: 'The archive returned no StudyInstanceUID — the viewer cannot open this study.',
+                                  })}
+                                onClick={() => openInViewer([study])}
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -1018,6 +1130,10 @@ export default function RemoteSourcesPage() {
         targets={copyTargets.flatMap((target) => (target.aet ? [{ aet: target.aet, label: target.label }] : []))}
         targetAet={effectiveTarget}
         onTargetChange={setSelectedTarget}
+        onOpenInOhif={(study) => openInViewer([study])}
+        onViewLocal={(study) => {
+          void handleOpenLocal(study);
+        }}
         onRetrieveStudy={(study) => {
           void handleRetrieve(study);
         }}

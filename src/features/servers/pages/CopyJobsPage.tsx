@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   Ban,
   CheckCircle2,
   Copy,
@@ -52,6 +55,102 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 type JobFilter = 'all' | 'running' | 'failed' | 'warning' | 'success';
+
+type SortKey =
+  | 'creationTime'
+  | 'completionTime'
+  | 'sourceAet'
+  | 'targetAet'
+  | 'study'
+  | 'state'
+  | 'dimse'
+  | 'duration';
+
+type SortState = { key: SortKey; dir: 'asc' | 'desc' };
+
+/** Neueste zuerst — das ist die Reihenfolge, in der die Historie gelesen wird. */
+const DEFAULT_SORT: SortState = { key: 'creationTime', dir: 'desc' };
+
+/** Probleme zuerst, damit ein Klick auf „Status“ die Baustellen oben zeigt. */
+const STATE_RANK: Record<CopyJobView['state'], number> = {
+  failed: 0,
+  warning: 1,
+  running: 2,
+  success: 3,
+};
+
+/** DIMSE-Bewertung: Fehler vor Warnung vor Erfolg; ohne Status ans Ende. */
+const DIMSE_RANK: Record<string, number> = {
+  unknownDestination: 0,
+  dataSetMismatch: 1,
+  outOfResources: 2,
+  unableToProcess: 3,
+  canceled: 4,
+  other: 5,
+  partial: 6,
+  success: 7,
+  unknown: 8,
+};
+
+function sortValue(job: CopyJobView, key: SortKey): string | number | undefined {
+  switch (key) {
+    case 'creationTime':
+      return job.creationTime;
+    case 'completionTime':
+      return job.completionTime;
+    case 'sourceAet':
+      return job.sourceAet;
+    case 'targetAet':
+      return resolveTargetLabel(job.targetAet) ?? job.targetAet;
+    case 'study':
+      return job.patientName ?? job.patientId ?? job.studyInstanceUid;
+    case 'state':
+      return STATE_RANK[job.state];
+    case 'dimse':
+      return job.dimseStatus === undefined ? undefined : DIMSE_RANK[job.dimseKey] ?? 99;
+    case 'duration':
+      return job.durationSeconds;
+  }
+}
+
+/** Sortierbarer Spaltenkopf wie in der Studienliste und den Remote-Quellen. */
+function SortableHead({
+  label,
+  column,
+  sort,
+  onSort,
+  className,
+}: {
+  label: string;
+  column: SortKey;
+  sort: SortState;
+  onSort: (column: SortKey) => void;
+  className?: string;
+}) {
+  const active = sort.key === column;
+  return (
+    <TableHead
+      className={className}
+      aria-sort={active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        className="gap-1 -ml-1 h-8 px-0 font-semibold w-full min-w-0 justify-start overflow-hidden"
+        onClick={() => onSort(column)}
+      >
+        <span className="truncate" title={label}>{label}</span>
+        {active && sort.dir === 'asc' ? (
+          <ArrowUp className="h-3.5 w-3.5 shrink-0" />
+        ) : active && sort.dir === 'desc' ? (
+          <ArrowDown className="h-3.5 w-3.5 shrink-0" />
+        ) : (
+          <ArrowUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+        )}
+      </Button>
+    </TableHead>
+  );
+}
 
 function formatDuration(seconds?: number): string {
   if (seconds === undefined) return '—';
@@ -115,6 +214,9 @@ export default function CopyJobsPage() {
   const [filter, setFilter] = usePersistedState<JobFilter>('copyJobs.filter', 'all');
   const [search, setSearch] = useRememberedState('copyJobs.search', '');
   const [showHidden, setShowHidden] = usePersistedState('copyJobs.showHidden', false);
+  // Sortierung gehört zum Arbeitsplatz, nicht zur Sitzung — sie überlebt die
+  // Navigation wie in der Studienliste und den Remote-Quellen.
+  const [sort, setSort] = usePersistedState<SortState>('copyJobs.sort', DEFAULT_SORT);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busyJobId, setBusyJobId] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -174,6 +276,37 @@ export default function CopyJobsPage() {
       ].some((field) => field?.toLowerCase().includes(term));
     });
   }, [base, filter, search, locale]);
+
+  const collator = useMemo(
+    () => new Intl.Collator(locale, { sensitivity: 'base', numeric: true }),
+    [locale],
+  );
+  const toggleSort = (key: SortKey) => {
+    setSort((prev) => {
+      if (prev.key === key) return { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' };
+      // Zeit- und Dauer-Spalten beginnen mit dem Neuesten/Größten; Text und
+      // Status mit dem Kleinsten (A–Z bzw. Probleme zuerst).
+      const desc = key === 'creationTime' || key === 'completionTime' || key === 'duration';
+      return { key, dir: desc ? 'desc' : 'asc' };
+    });
+  };
+  const sorted = useMemo(() => {
+    const list = [...visible];
+    list.sort((a, b) => {
+      const av = sortValue(a, sort.key);
+      const bv = sortValue(b, sort.key);
+      // Fehlende Werte (z. B. Ende/Dauer eines laufenden Auftrags) bleiben
+      // unabhängig von der Richtung am Ende.
+      if (av === undefined && bv === undefined) return 0;
+      if (av === undefined) return 1;
+      if (bv === undefined) return -1;
+      const cmp = typeof av === 'number' && typeof bv === 'number'
+        ? av - bv
+        : collator.compare(String(av), String(bv));
+      return sort.dir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+  }, [visible, sort, collator]);
 
   // Eine Auswahl gehört zu dem, was gerade sichtbar ist — beim Umschalten von
   // Filter, Suche oder Ausblenden fängt sie neu an.
@@ -276,8 +409,10 @@ export default function CopyJobsPage() {
     if (done > 0) {
       // Der neue Auftrag läuft und steht mit neuer Startzeit oben. Ein
       // Statusfilter, der ihn ausblenden würde, fällt auf „alle“ zurück;
-      // die Liste springt an den Anfang, damit die frische Zeile sichtbar ist.
+      // die Sortierung springt auf „Start, neueste zuerst“, damit die frische
+      // Zeile sichtbar ist.
       if (filter !== 'all' && filter !== 'running') setFilter('all');
+      setSort(DEFAULT_SORT);
       topRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
     }
     if (failed > 0) {
@@ -571,18 +706,65 @@ export default function CopyJobsPage() {
                       aria-label={t('copyJobs.selectAllVisible', { defaultValue: 'Select all visible' })}
                     />
                   </TableHead>
-                  <TableHead className="w-[125px]">{t('copyJobs.start', { defaultValue: 'Start' })}</TableHead>
-                  <TableHead className="w-[125px]">{t('copyJobs.end', { defaultValue: 'End' })}</TableHead>
-                  <TableHead className="w-[100px]">{t('copyJobs.source', { defaultValue: 'Source' })}</TableHead>
-                  <TableHead className="w-[115px]">{t('copyJobs.target', { defaultValue: 'Target' })}</TableHead>
-                  <TableHead>{t('copyJobs.study', { defaultValue: 'Study' })}</TableHead>
-                  <TableHead className="w-[140px]">{t('copyJobs.state', { defaultValue: 'Status' })}</TableHead>
-                  <TableHead className="w-[160px]">{t('copyJobs.dimse', { defaultValue: 'DIMSE' })}</TableHead>
-                  <TableHead className="w-[75px]">{t('copyJobs.duration', { defaultValue: 'Duration' })}</TableHead>
+                  <SortableHead
+                    label={t('copyJobs.start', { defaultValue: 'Start' })}
+                    column="creationTime"
+                    sort={sort}
+                    onSort={toggleSort}
+                    className="w-[125px]"
+                  />
+                  <SortableHead
+                    label={t('copyJobs.end', { defaultValue: 'End' })}
+                    column="completionTime"
+                    sort={sort}
+                    onSort={toggleSort}
+                    className="w-[125px]"
+                  />
+                  <SortableHead
+                    label={t('copyJobs.source', { defaultValue: 'Source' })}
+                    column="sourceAet"
+                    sort={sort}
+                    onSort={toggleSort}
+                    className="w-[100px]"
+                  />
+                  <SortableHead
+                    label={t('copyJobs.target', { defaultValue: 'Target' })}
+                    column="targetAet"
+                    sort={sort}
+                    onSort={toggleSort}
+                    className="w-[115px]"
+                  />
+                  <SortableHead
+                    label={t('copyJobs.study', { defaultValue: 'Study' })}
+                    column="study"
+                    sort={sort}
+                    onSort={toggleSort}
+                  />
+                  <SortableHead
+                    label={t('copyJobs.state', { defaultValue: 'Status' })}
+                    column="state"
+                    sort={sort}
+                    onSort={toggleSort}
+                    className="w-[140px]"
+                  />
+                  <SortableHead
+                    label={t('copyJobs.dimse', { defaultValue: 'DIMSE' })}
+                    column="dimse"
+                    sort={sort}
+                    onSort={toggleSort}
+                    className="w-[160px]"
+                  />
+                  <SortableHead
+                    label={t('copyJobs.duration', { defaultValue: 'Duration' })}
+                    column="duration"
+                    sort={sort}
+                    onSort={toggleSort}
+                    className="w-[75px]"
+                  />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visible.map((job) => {
+                {sorted.map((job) => {
                   const targetLabel = resolveTargetLabel(job.targetAet);
                   const isHidden = hidden.has(job.jobId);
                   return (

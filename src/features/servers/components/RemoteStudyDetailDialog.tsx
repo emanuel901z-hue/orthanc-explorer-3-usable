@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, Copy, Download, Loader2, XCircle } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown, CheckCircle2, Copy, Download, ExternalLink, Eye, Loader2, XCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,7 @@ import { queryModalityAction } from '@/actions/queryModality';
 import { formatDicomDate } from '@/lib/dicom-date';
 import type { RemoteStudy } from '@/features/servers/lib/remote-study';
 import type { CopyJobView } from '@/features/servers/lib/copy-job';
+import { usePersistedState } from '@/store/ui-state';
 
 type Props = {
   study: RemoteStudy | null;
@@ -37,6 +38,10 @@ type Props = {
   targets: { aet: string; label?: string }[];
   targetAet: string;
   onTargetChange: (aet: string) => void;
+  /** Direkt im konfigurierten Web-Viewer öffnen (StudyInstanceUID aus dem C-FIND). */
+  onOpenInOhif: (study: RemoteStudy) => void;
+  /** Die heruntergeladene Kopie im lokalen OE3-Viewer öffnen. */
+  onViewLocal: (study: RemoteStudy) => void;
   onRetrieveStudy: (study: RemoteStudy) => void;
   onCopyStudy: (study: RemoteStudy) => void;
   onRetrieveSeries: (study: RemoteStudy, series: RemoteSeries[]) => void;
@@ -60,6 +65,53 @@ function tagValue(tag: FullTag | string | undefined): string {
   return tag.Value ?? '';
 }
 
+type SeriesSortKey = 'number' | 'modality' | 'description' | 'instances';
+type SeriesSort = { key: SeriesSortKey; dir: 'asc' | 'desc' };
+
+const DEFAULT_SERIES_SORT: SeriesSort = { key: 'number', dir: 'asc' };
+
+/** Sortierbarer Spaltenkopf der Serienliste (wie in Studien- und Trefferliste). */
+function SeriesSortHead({
+  label,
+  column,
+  sort,
+  onSort,
+  className,
+  align = 'start',
+}: {
+  label: string;
+  column: SeriesSortKey;
+  sort: SeriesSort;
+  onSort: (column: SeriesSortKey) => void;
+  className?: string;
+  align?: 'start' | 'end';
+}) {
+  const active = sort.key === column;
+  return (
+    <TableHead
+      className={className}
+      aria-sort={active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`gap-1 -ml-1 h-7 px-0 font-semibold w-full min-w-0 overflow-hidden ${align === 'end' ? 'justify-end' : 'justify-start'
+          }`}
+        onClick={() => onSort(column)}
+      >
+        <span className="truncate" title={label}>{label}</span>
+        {active && sort.dir === 'asc' ? (
+          <ArrowUp className="h-3 w-3 shrink-0" />
+        ) : active && sort.dir === 'desc' ? (
+          <ArrowDown className="h-3 w-3 shrink-0" />
+        ) : (
+          <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />
+        )}
+      </Button>
+    </TableHead>
+  );
+}
+
 /**
  * Detailansicht einer Studie aus dem entfernten Archiv.
  *
@@ -78,6 +130,8 @@ export default function RemoteStudyDetailDialog({
   targets,
   targetAet,
   onTargetChange,
+  onOpenInOhif,
+  onViewLocal,
   onRetrieveStudy,
   onCopyStudy,
   onRetrieveSeries,
@@ -85,6 +139,12 @@ export default function RemoteStudyDetailDialog({
 }: Props) {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  // Die Reihenfolge der Serien überlebt das Schließen des Dialogs; sie ist
+  // keine Patientendaten und gehört deshalb in den persistenten UI-Zustand.
+  const [seriesSort, setSeriesSort] = usePersistedState<SeriesSort>(
+    'remoteStudyDetail.seriesSort',
+    DEFAULT_SERIES_SORT,
+  );
 
   const { data: tags, isLoading } = useQuery({
     queryKey: ['remote-answer-content', study?.queryId, study?.answerIndex],
@@ -119,6 +179,36 @@ export default function RemoteStudyDetailDialog({
     enabled: open && !!study && !!modality && study.studyInstanceUid.length > 0,
     staleTime: 60_000,
   });
+
+  const collator = useMemo(
+    () => new Intl.Collator(locale, { sensitivity: 'base', numeric: true }),
+    [locale],
+  );
+  const toggleSeriesSort = (key: SeriesSortKey) => {
+    setSeriesSort((prev) => {
+      if (prev.key === key) return { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' };
+      // „Bilder“ beginnt mit der größten Serie; die übrigen Spalten aufsteigend.
+      return { key, dir: key === 'instances' ? 'desc' : 'asc' };
+    });
+  };
+  const sortedSeries = useMemo(() => {
+    const list = [...(series ?? [])];
+    list.sort((a, b) => {
+      let cmp: number;
+      if (seriesSort.key === 'number' || seriesSort.key === 'instances') {
+        const av = Number(a[seriesSort.key]);
+        const bv = Number(b[seriesSort.key]);
+        // Nicht-numerische Angaben („—“) alphabetisch einsortieren.
+        cmp = Number.isFinite(av) && Number.isFinite(bv)
+          ? av - bv
+          : collator.compare(a[seriesSort.key], b[seriesSort.key]);
+      } else {
+        cmp = collator.compare(a[seriesSort.key], b[seriesSort.key]);
+      }
+      return seriesSort.dir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+  }, [series, seriesSort, collator]);
 
   // Voreinstellung: alle Serien ausgewählt (der Normalfall ist „alles“)
   useEffect(() => {
@@ -248,14 +338,39 @@ export default function RemoteStudyDetailDialog({
                         aria-label={t('remote.selectAll', { defaultValue: 'Select all' })}
                       />
                     </TableHead>
-                    <TableHead className="w-[44px] px-1.5">{t('remote.seriesNumber', { defaultValue: 'No.' })}</TableHead>
-                    <TableHead className="w-[68px] px-1.5">{t('remote.searchKind.modality', { defaultValue: 'Modality' })}</TableHead>
-                    <TableHead className="px-1.5">{t('remote.seriesDescription', { defaultValue: 'Description' })}</TableHead>
-                    <TableHead className="w-[56px] px-1.5 text-right">{t('remote.seriesInstances', { defaultValue: 'Images' })}</TableHead>
+                    <SeriesSortHead
+                      label={t('remote.seriesNumber', { defaultValue: 'No.' })}
+                      column="number"
+                      sort={seriesSort}
+                      onSort={toggleSeriesSort}
+                      className="w-[44px] px-1.5"
+                    />
+                    <SeriesSortHead
+                      label={t('remote.searchKind.modality', { defaultValue: 'Modality' })}
+                      column="modality"
+                      sort={seriesSort}
+                      onSort={toggleSeriesSort}
+                      className="w-[68px] px-1.5"
+                    />
+                    <SeriesSortHead
+                      label={t('remote.seriesDescription', { defaultValue: 'Description' })}
+                      column="description"
+                      sort={seriesSort}
+                      onSort={toggleSeriesSort}
+                      className="px-1.5"
+                    />
+                    <SeriesSortHead
+                      label={t('remote.seriesInstances', { defaultValue: 'Images' })}
+                      column="instances"
+                      sort={seriesSort}
+                      onSort={toggleSeriesSort}
+                      className="w-[56px] px-1.5"
+                      align="end"
+                    />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {series.map((entry) => (
+                  {sortedSeries.map((entry) => (
                     <TableRow
                       key={entry.seriesInstanceUid}
                       className="cursor-pointer"
@@ -355,7 +470,7 @@ export default function RemoteStudyDetailDialog({
             </select>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 w-full sm:w-auto flex-wrap">
             {study.copying ? (
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground px-2">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -385,14 +500,39 @@ export default function RemoteStudyDetailDialog({
             <Button
               variant="outline"
               className="gap-1.5 w-full sm:w-auto"
-              disabled={study.retrieving}
-              onClick={() => (seriesCount > 0 ? onRetrieveSeries(study, selectedSeries) : onRetrieveStudy(study))}
+              disabled={!study.studyInstanceUid || study.studyInstanceUid === '—'}
+              title={study.studyInstanceUid && study.studyInstanceUid !== '—'
+                ? t('actions.openInOhif')
+                : t('remote.noStudyUid', {
+                  defaultValue: 'The archive returned no StudyInstanceUID — the viewer cannot open this study.',
+                })}
+              onClick={() => onOpenInOhif(study)}
             >
-              {study.retrieving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-              {seriesCount > 0
-                ? t('remote.retrieveSeriesCount', { count: seriesCount, defaultValue: `Retrieve ${seriesCount} series` })
-                : t('remote.retrieve', { defaultValue: 'Retrieve' })}
+              <ExternalLink className="h-4 w-4" />
+              {t('actions.openInOhif')}
             </Button>
+            {study.retrieved ? (
+              <Button
+                variant="outline"
+                className="gap-1.5 w-full sm:w-auto"
+                onClick={() => onViewLocal(study)}
+              >
+                <Eye className="h-4 w-4" />
+                {t('remote.viewLocal', { defaultValue: 'View locally' })}
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="gap-1.5 w-full sm:w-auto"
+                disabled={study.retrieving}
+                onClick={() => (seriesCount > 0 ? onRetrieveSeries(study, selectedSeries) : onRetrieveStudy(study))}
+              >
+                {study.retrieving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                {seriesCount > 0
+                  ? t('remote.retrieveSeriesCount', { count: seriesCount, defaultValue: `Retrieve ${seriesCount} series` })
+                  : t('remote.retrieve', { defaultValue: 'Retrieve' })}
+              </Button>
+            )}
             <Button
               className="gap-1.5 w-full sm:w-auto"
               disabled={!targetAet || study.copying}

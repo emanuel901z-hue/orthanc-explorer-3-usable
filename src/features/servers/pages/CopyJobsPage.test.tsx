@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import CopyJobsPage from './CopyJobsPage';
@@ -103,6 +103,47 @@ describe('CopyJobsPage', () => {
     expect(screen.getByText('0x0000')).toBeInTheDocument();
     // der DicomStore-Job gehört nicht in diese Liste
     expect(screen.getAllByRole('row')).toHaveLength(2); // Kopfzeile + eine Zeile
+  });
+
+  it('sortiert über die Spaltenköpfe: Start, Ziel und Dauer', () => {
+    mockJobs.mockReturnValue({
+      data: [
+        job({
+          ID: 'job-old',
+          CreationTime: '20261106T100000',
+          EffectiveRuntime: 1.5,
+          Content: { RemoteAet: 'ARCHIVE', TargetAet: 'hst_burn2CD', Query: [{ '0020,000d': '1.2.3', '0010,0020': 'P-100' }], Details: [{ DimseErrorStatus: 0 }] },
+        }),
+        job({
+          ID: 'job-new',
+          CreationTime: '20261107T100000',
+          EffectiveRuntime: 5,
+          Content: { RemoteAet: 'ARCHIVE', TargetAet: 'JungPacs', Query: [{ '0020,000d': '1.2.4', '0010,0020': 'P-200' }], Details: [{ DimseErrorStatus: 0 }] },
+        }),
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+    const rows = () => screen.getAllByRole('row').slice(1).map((row) => row.textContent ?? '');
+    const header = (name: RegExp) =>
+      within(screen.getByRole('columnheader', { name })).getByRole('button');
+
+    // Voreinstellung: Start absteigend → der neue Auftrag steht oben
+    expect(rows()[0]).toContain('JungPacs');
+
+    // Klick auf „Start“ dreht auf aufsteigend → der ältere Auftrag zuerst
+    fireEvent.click(header(/^start$/i));
+    expect(rows()[0]).toContain('hst_burn2CD');
+
+    // „Ziel“ beginnt aufsteigend (A–Z): hst_burn2CD vor JungPacs
+    fireEvent.click(header(/^target$|^ziel$/i));
+    expect(rows()[0]).toContain('hst_burn2CD');
+
+    // „Dauer“ beginnt absteigend: 5 s vor 1,5 s
+    fireEvent.click(header(/^duration$|^dauer$/i));
+    expect(rows()[0]).toContain('JungPacs');
   });
 
   it('filtert nach Fehlschlägen', () => {

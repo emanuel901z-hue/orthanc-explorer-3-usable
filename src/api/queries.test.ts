@@ -68,14 +68,16 @@ describe('queriesApi', () => {
     }));
   });
 
-  it('retrieveAnswer() ohne Ziel holt in den lokalen Orthanc (leerer Body)', async () => {
+  it('retrieveAnswer() ohne Ziel holt in den lokalen Orthanc (Objekt-Body)', async () => {
     vi.mocked(orthancFetch).mockResolvedValue({ Description: 'REST API' });
 
     await queriesApi.retrieveAnswer('query-123', 1);
 
     expect(orthancFetch).toHaveBeenCalledWith('/queries/query-123/answers/1/retrieve', expect.objectContaining({
       method: 'POST',
-      body: JSON.stringify(''),
+      // Orthanc 1.13: der leere String ("") endet in HTTP 500 — nur ein
+      // JSON-Objekt (auch ohne TargetAet) ist gültig.
+      body: JSON.stringify({ Timeout: 300, Asynchronous: false }),
     }));
   });
 });

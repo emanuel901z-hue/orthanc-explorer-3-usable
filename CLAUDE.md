@@ -28,7 +28,7 @@ npm run preview
 ### Testing
 
 ```bash
-# Run all unit tests (single pass, 995 tests)
+# Run all unit tests (single pass, 1000 tests)
 npm run test
 
 # Watch mode
@@ -71,7 +71,7 @@ GitHub Actions CI (`.github/workflows/ci.yml`) laeuft bei Pull Requests und Push
 |-----|--------|-------|
 | `typecheck` | `tsc --noEmit -p tsconfig.app.json` | ~15s |
 | `lint` | `npm run lint` (ESLint) | ~10s |
-| `test` | `npm run test` (Vitest, 995 Tests) | ~15s |
+| `test` | `npm run test` (Vitest, 1000 Tests) | ~15s |
 | `i18n:check` | `npm run i18n:check` (translation coverage) | ~1s |
 | `audit` | `npm run audit` (audit-ci, high+critical blocking) | ~10s |
 
@@ -102,7 +102,7 @@ Keine Datenbank-Abhaengigkeit — alle Tests sind reine Unit/Component-Tests mit
 - **Styling:** Tailwind CSS v3 + shadcn/ui (Radix UI primitives)
 - **Validation:** Zod (runtime config parsing and input validation)
 - **i18n:** i18next + react-i18next
-- **Testing:** Vitest + React Testing Library + jsdom (995 unit tests)
+- **Testing:** Vitest + React Testing Library + jsdom (1000 unit tests)
 - **E2E Testing:** Playwright (production viewport tests — desktop 1280×800, mobile 375×812)
 - **Backend:** Orthanc DICOM server (Docker) with PostgreSQL index + DICOMweb plugin
 - **Emulator:** Azure DICOM Service Emulator (for `authMode: "oidc"` dev testing)
@@ -183,7 +183,7 @@ features: {
 | `src/app/providers/auth-context.tsx` | AuthProvider — calls `/oe3-me` on boot, manages `isAuthenticated` state |
 | `src/features/studies/pages/StudyListPage.tsx` | Study list with custom columns, resizing, label filter, smart multi-token search |
 | `src/features/studies/pages/StudyDetailPage.tsx` | Study detail with OHIF button, RBAC-gated actions, sortable/filterable series table with multi-select bulk download, merge/migrate |
-| `src/features/series/pages/SeriesDetailPage.tsx` | Series detail with functional download/send/delete/migrate, instance grid/table view |
+| `src/features/series/pages/SeriesDetailPage.tsx` | Series detail with functional download/send/delete/migrate, instance grid/table view with sortable table columns (number, SOP UID, position Z, size, acquisition time) |
 | `src/features/studies/components/MigrateStudyDialog.tsx` | Merge source studies into target via Orthanc `/merge` — searchable source list, same-SIUID highlighting, optional source deletion |
 | `src/features/series/components/MigrateSeriesDialog.tsx` | Migrate a series to a different study via Orthanc `/merge` |
 | `src/features/studies/components/DicomTagBrowser.tsx` | DICOM tag browser with search, sortable columns, inline editing |
@@ -203,8 +203,8 @@ features: {
 | `src/api/targets.ts` | Typed client for the shared copy-targets service (`/targets-api/targets`) + `resolveTargetLabel` |
 | `src/api/copy-journal.ts` | Copy journal (`/targets-api/copy-journal`): name and birth date per C-MOVE job — Orthanc's `DicomMoveScu` job only carries the main tags; also `retryOf`/`attempt` for resends |
 | `src/api/hidden-jobs.ts` | Hidden copy jobs (`/targets-api/copy-jobs/hidden`): hides rows without deleting the Orthanc job; shared server-side |
-| `src/features/servers/pages/RemoteSourcesPage.tsx` | DICOM Copy Workstation workplace: auto-selected main archive with C-ECHO, positional/prefix C-FIND search with chips, target registry dialog (`TargetsDialog`) with reordering, study detail dialog (`RemoteStudyDetailDialog`) with series Select-All/None, multi-target copy & bulk confirmation |
-| `src/features/servers/pages/CopyJobsPage.tsx` | Persistent C-MOVE copy job history (`DicomMoveScu`) with start/end timestamps, resolved target alias, patient name + birth date from the copy journal, plain-text DIMSE status, search filter, cancel and retry; every retry (failed jobs too) starts a fresh C-MOVE (`/modalities/:aet/move`) so the new job has its own creation time and appears at the top — `POST /jobs/:id/resubmit` continues the same job in place and is only the fallback for jobs lacking source/target/study UID; delivered jobs resend only after confirmation, multi-select bulk retry, attempt/`retryOf` shown from the journal; multi-select to hide (reversible) or delete (`DELETE /jobs/:id`, completed jobs only) |
+| `src/features/servers/pages/RemoteSourcesPage.tsx` | DICOM Copy Workstation workplace: auto-selected main archive with C-ECHO, positional/prefix C-FIND search with chips, target registry dialog (`TargetsDialog`) with reordering, study detail dialog (`RemoteStudyDetailDialog`) with series Select-All/None and sortable series columns, multi-target copy & bulk confirmation; **open a hit directly in the configured viewer** via `/IHEInvokeImageDisplay` with the StudyInstanceUID from the C-FIND (single row, bulk selection and detail dialog — no C-MOVE, no local copy); after a retrieve, **View locally** opens the copy in the built-in OE3 viewer (`/oe3/viewer/<Orthanc-ID>`, ID via `/tools/find`) |
+| `src/features/servers/pages/CopyJobsPage.tsx` | Persistent C-MOVE copy job history (`DicomMoveScu`) with sortable columns (start, end, source, target, study, status, DIMSE, duration; persisted, default start descending), start/end timestamps, resolved target alias, patient name + birth date from the copy journal, plain-text DIMSE status, search filter, cancel and retry; every retry (failed jobs too) starts a fresh C-MOVE (`/modalities/:aet/move`) so the new job has its own creation time and appears at the top — `POST /jobs/:id/resubmit` continues the same job in place and is only the fallback for jobs lacking source/target/study UID; delivered jobs resend only after confirmation, multi-select bulk retry, attempt/`retryOf` shown from the journal; multi-select to hide (reversible) or delete (`DELETE /jobs/:id`, completed jobs only) |
 | `src/actions/sendToPeer.ts` | Audit-seam wrapper for sending resources to an Orthanc peer — emits `peer.send` |
 | `src/api/queries.ts` | Typed Orthanc REST wrappers for `/queries` (C-FIND, query answers, content, C-MOVE retrieve) |
 | `src/api/backend-pacs.ts` | Typed client for a backend's PACS endpoints (`/api/v1/pacs/*`, same-origin JWT cookie, `credentials: 'include'`) — **not** Orthanc REST, and project-specific: off unless the deployment has that backend. Currently: `quarantineStudy()`. See [docs/backend-integration.md](docs/backend-integration.md) |

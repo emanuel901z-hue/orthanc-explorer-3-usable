@@ -4,6 +4,44 @@ Changes in this fork (`emanuel901z-hue/orthanc-explorer-3-usable`) vs upstream (
 
 ---
 
+## Unveröffentlicht — Treffer direkt ansehen, sortierbare Instanzen (2026-11-25)
+
+**Aus dem Kopier-Alltag.** Eine gefundene Studie ließ sich nur abrufen oder
+kopieren; für einen Blick in OHIF musste sie erst in den lokalen Orthanc
+geholt werden. Außerdem waren die Instanzentabelle einer Serie und die
+Kopieraufträge nicht sortierbar.
+
+- **Remote-Quellen — „In OHIF öffnen“**: Jede Trefferzeile und der
+  Detail-Dialog öffnen den konfigurierten Web-Viewer über den IHE-Bildaufruf
+  (`/IHEInvokeImageDisplay`) mit der `StudyInstanceUID` aus dem C-FIND. Der
+  Viewer liest die Studie selbst aus dem Hauptarchiv — **kein C-MOVE, keine
+  lokale Kopie**. Sind Zeilen ausgewählt, öffnet „In OHIF öffnen (n)“ alle
+  gewählten Studien in einem Aufruf. Die Weiterleitung `/ohif/` auf den
+  Host-Viewer richtet das Haupt-Repo ein (`OHIF_PORT`, Standard 8090).
+- **Remote-Quellen — „Lokal ansehen“**: Nach einem erfolgreichen Abruf
+  erscheint in der Zeile und im Dialog „Lokal ansehen“ und öffnet die Kopie im
+  eingebauten OE3-Viewer (`/oe3/viewer/<Orthanc-ID>`). Die Orthanc-ID kommt
+  über `/tools/find` (StudyInstanceUID im POST-Body). Der Host-OHIF liest nur
+  das Hauptarchiv; für lokale Kopien ist der OE3-Viewer der Weg, bis eine
+  lokale OHIF-Instanz bereitsteht.
+- **Serien-Detailseite**: Die Instanzentabelle ist über alle Spalten
+  sortierbar (Nummer, SOP-UID, Position Z, Größe, Aufnahmezeit), mit
+  `aria-sort` und persistierter Sortierung.
+- **Kopieraufträge**: Sortierbare Spalten (Start, Ende, Quelle, Ziel, Studie,
+  Status, DIMSE, Dauer), Voreinstellung Start absteigend, Sortierung überlebt
+  die Navigation; fehlende Werte stehen am Ende.
+- **Orthanc 1.13**: `queriesApi.retrieveAnswer` schickt immer ein JSON-Objekt
+  (`Timeout`, `Asynchronous`) — auch für den Abruf in den lokalen Orthanc.
+  Der frühere leere String (`""`) endet in `HTTP 500 Internal error`.
+- **i18n**: `remote.viewLocal`, `remote.noStudyUid`, `remote.localNotFound` in
+  allen neun Sprachen ergänzt.
+
+Gates grün: `tsc` 0, `npm run lint` 0 Fehler, `npm run i18n:check` vollständig
+(alle 9 Sprachen), `npm run build` 0, **1000 Vitest-Tests**, **94 pytest-Tests**,
+**24 Playwright-E2E-Tests**.
+
+---
+
 ## Unveröffentlicht — Wiederholen landet oben in der Historie (2026-11-18)
 
 **Aus dem Betrieb.** Nach einem fehlgeschlagenen Auftrag blieb die Zeile beim

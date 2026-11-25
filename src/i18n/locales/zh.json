@@ -374,7 +374,10 @@
     "bulkCancel": "取消",
     "bulkCopyConfirm": "复制 {{count}} 个",
     "bulkRetrieveConfirm": "取回 {{count}} 个",
-    "copyAgain": "再次复制"
+    "copyAgain": "再次复制",
+    "viewLocal": "本地查看",
+    "noStudyUid": "归档未返回 StudyInstanceUID，查看器无法打开此检查。",
+    "localNotFound": "检查尚未存入本地归档，请先获取。"
   },
   "actions": {
     "viewer": "查看器",

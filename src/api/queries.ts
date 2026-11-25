@@ -52,9 +52,12 @@ export const queriesApi = {
   /** POST /queries/:id/answers/:index/retrieve — Initiates C-MOVE to retrieve the answer into Orthanc.
    *
    * Without a target AET the study comes into this Orthanc. With a target AET
-   * the queried archive delivers it straight to that destination — Orthanc
-   * only accepts that as an object payload; the legacy plain-string form ends
-   * in "Internal error" (verified against Orthanc 1.13).
+   * the queried archive delivers it straight to that destination.
+   *
+   * The body is **always** a JSON object. Orthanc 1.13 answers both the legacy
+   * plain-string form (`"AET"`) and the empty string (`""`) with
+   * `HTTP 500 Internal error`; `{}` / `{"Timeout": …}` work (verified against
+   * the fake archive and the production Orthanc).
    *
    * `asynchronous` returns a job resource (`{ ID }`) instead of blocking the
    * HTTP request until the archive has pushed every instance — that is what
@@ -68,16 +71,11 @@ export const queriesApi = {
     orthancFetch<Record<string, unknown>>(`/queries/${queryId}/answers/${answerIndex}/retrieve`, {
       method: 'POST',
       headers: JSON_CONTENT_HEADERS,
-      // Der reine Abruf in den lokalen Orthanc bleibt beim leeren String —
-      // nur ein Ziel oder ein Job braucht den Objekt-Body.
-      body:
-        !targetAet && options.asynchronous !== true
-          ? JSON.stringify('')
-          : JSON.stringify({
-            ...(targetAet ? { TargetAet: targetAet } : {}),
-            Timeout: options.timeoutSeconds ?? 300,
-            Asynchronous: options.asynchronous === true,
-          }),
+      body: JSON.stringify({
+        ...(targetAet ? { TargetAet: targetAet } : {}),
+        Timeout: options.timeoutSeconds ?? 300,
+        Asynchronous: options.asynchronous === true,
+      }),
     }),
 
   /** POST /modalities/:name/move — C-MOVE für beliebige Ressourcen (Studie oder
